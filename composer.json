@@ -1,0 +1,35 @@
+{
+    "name": "c975l/config-bundle",
+    "type": "symfony-bundle",
+    "description": "Used to get/set the config params for a Symfony app",
+    "keywords": ["symfony", "bundle", "config"],
+    "homepage": "https://github.com/975L/ConfigBundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Laurent Marquet",
+            "email": "laurent.marquet@laposte.net",
+            "homepage": "https://github.com/Laurent3170",
+            "role": "Developer"
+        },
+        {
+            "name": "975L Community",
+            "homepage": "https://github.com/975L"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.9",
+        "twig/extensions": "^1",
+        "c975l/includelibrary-bundle": "^1"
+    },
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": { "c975L\\ConfigBundle\\": ""
+        }
+    },
+    "support": {
+        "email": "contact@975l.com",
+        "source": "https://github.com/975L/ConfigBundle",
+        "issues": "https://github.com/975L/ConfigBundle/issues"
+    }
+}
