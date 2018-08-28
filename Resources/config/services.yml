@@ -1,0 +1,13 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    c975L\ConfigBundle\Form\:
+        resource: '../../Form/*'
+
+    c975L\ConfigBundle\Service\:
+        resource: '../../Service/*'
+
+    c975L\ConfigBundle\Twig\:
+        resource: '../../Twig/*'
