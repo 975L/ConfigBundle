@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" target-language="fr" datatype="plaintext" original="config.en.xlf">
+        <body>
+            <trans-unit id="1">
+                <source>text.config_updated</source>
+                <target>La configuration a bien été mise à jour</target>
+            </trans-unit>
+            <trans-unit id="2">
+                <source>text.warning_config</source>
+                <target>Mettez à jour ci-dessous les paramètres de configuration. Attention à ce que vous entrez, cela pourrait causer une erreur d'affichage !</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

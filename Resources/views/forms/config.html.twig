@@ -1,0 +1,39 @@
+{% extends "@c975LConfig/layout.html.twig" %}
+{% trans_default_domain 'config' %}
+{% set title = 'label.config'|trans({}, 'toolbar') %}
+
+{% block config_content %}
+{# Toolbar #}
+    {% if toolbar != false %}
+        {{ toolbar_display(toolbar ~ '/tools.html.twig', 'config', 'md') }}
+    {% endif %}
+    <div>
+{# Warning explanation #}
+    <p class="alert alert-warning text-center">
+        {{ 'text.warning_config'|trans }}
+    </p>
+{# Form #}
+        {{ form_start(form) }}
+            {{ form_widget(form) }}
+{# Submit#}
+            <div class="form-group">
+                <button type="submit" name="submit" title="{{ 'label.validate'|trans({}, 'toolbar') }}" class="btn btn-lg btn-warning btn-block">
+                    {{ 'label.validate'|trans({}, 'toolbar') }}
+                </button>
+            </div>
+        {{ form_end(form) }}
+{# Mandatory field #}
+        <p class="text-muted">
+            <em>
+                {{ 'label.mandatory_field'|trans({}, 'services') }}
+            </em>
+        </p>
+    </div>
+{# Cancel #}
+    <div class="row">
+        <p class="text-center">
+            <a href="#" onclick="javascript:history.back(); return false;" title="{{ 'label.cancel'|trans({}, 'toolbar') }}">
+                {{ 'label.cancel'|trans({}, 'toolbar') }}</a>
+        </p>
+    </div>
+{% endblock %}
