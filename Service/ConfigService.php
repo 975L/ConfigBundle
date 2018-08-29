@@ -157,6 +157,10 @@ class ConfigService implements ConfigServiceInterface
      */
     public function getFolder()
     {
+        if ('4' === substr(\Symfony\Component\HttpKernel\Kernel::VERSION, 0, 1)) {
+            return $this->container->getParameter('kernel.root_dir') . '/../config/packages/';
+        }
+
         return $this->container->getParameter('kernel.root_dir') . '/../app/config/';
     }
 

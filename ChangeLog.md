@@ -1,5 +1,10 @@
 # Changelog
 
+v1.2.1
+------
+- Fixed typo in `README.md` (29/08/2018)
+- Added folder for SF4 (29/08/2018)
+
 v1.2
 ----
 - Added the info field as title for label + field (29/08/2018)
