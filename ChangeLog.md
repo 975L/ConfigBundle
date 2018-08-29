@@ -1,5 +1,10 @@
 # Changelog
 
+v1.1.1
+------
+- Added test to check if the root node is already defined in the yaml file (28/08/2018)
+- Updated `README.md`` (29/08/2018)
+
 v1.1
 ----
 - Added core files (27/08/2018)
