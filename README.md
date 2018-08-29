@@ -4,7 +4,7 @@ ConfigBundle
 ConfigBundle does the following:
 
 - get/set the config parameters from a yaml file for a Symfony app,
-- Provides a Twig extension to get these parameters in a Twi template,
+- Provides a Twig extension to get these parameters in a Twig template,
 
 [ConfigBundle dedicated web page](https://975l.com/en/pages/config-bundle).
 
