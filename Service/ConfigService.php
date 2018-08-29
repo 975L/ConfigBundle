@@ -82,9 +82,11 @@ class ConfigService implements ConfigServiceInterface
         $bundleName = $this->getConfigurationName($bundle);
 
         //Updates config with data defined in yaml file
-        $yamlDefinedValues = $this->getConfigGlobal($filename)[$bundleName];
-        foreach ($yamlDefinedValues as $key => $value) {
-            $config->$key['data'] = $value;
+        $yamlDefinedValues = $this->getConfigGlobal($filename);
+        if (isset($yamlDefinedValues[$bundleName])) {
+            foreach ($yamlDefinedValues[$bundleName] as $key => $value) {
+                $config->$key['data'] = $value;
+            }
         }
 
         //Adds data used when writing file
@@ -92,7 +94,7 @@ class ConfigService implements ConfigServiceInterface
             'filename' => $filename,
             'bundle' => $bundle,
             'bundleName' => $bundleName,
-            );
+        );
 
         return $config;
     }
