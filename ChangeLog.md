@@ -1,5 +1,10 @@
 # Changelog
 
+v1.2
+----
+- Added the info field as title for label + field (29/08/2018)
+- Re-designed `ConfigType` in a cleaner way (29/08/2018)
+
 v1.1.1
 ------
 - Added test to check if the root node is already defined in the yaml file (28/08/2018)

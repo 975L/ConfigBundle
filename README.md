@@ -173,7 +173,8 @@ class YourVoter extends Voter
 
 Then call the defined Route in a web browser and set-up (or your user) the configuration parameters. Of course you can still access the file itself.
 
-Read about [Configuration values](https://symfony.com/doc/current/components/config/definition.html) to see all the available options when defining parameter and also check the following code as an example:
+Read about [Configuration values](https://symfony.com/doc/current/components/config/definition.html) to see all the available options (and particularly the info one that will give info in the form) when defining parameter and also check the following code as an example:
+
 ```php
 <?php
 //Your Configuration file
@@ -196,7 +197,7 @@ class Configuration implements ConfigurationInterface
                     ->isRequired() //Will mark the field as required
                     ->cannotBeEmpty()
                     ->defaultValue() //Will display the default value in the form and register it in the file.yaml
-                    ->info('Parameter information') //Will be displayed in field placeholder + console with config:dump-reference
+                    ->info('Parameter information') //Will be displayed in field placeholder + label and field hover + console with config:dump-reference
                 ->end()
             ->end()
         ;

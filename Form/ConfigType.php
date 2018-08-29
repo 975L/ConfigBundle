@@ -26,45 +26,34 @@ class ConfigType extends AbstractType
             if ('configDataReserved' !== $key) {
                 switch ($value['type']) {
                     case 'BooleanNode':
-                        $builder
-                            ->add($key, '\Symfony\Component\Form\Extension\Core\Type\CheckboxType', array(
-                                'label' => $key,
-                                'required' => $value['required'],
-                                'data' => $value['data'],
-                                ));
+                        $classType = 'CheckboxType';
                         break;
                     case 'IntegerNode':
-                        $builder
-                            ->add($key, '\Symfony\Component\Form\Extension\Core\Type\IntegerType', array(
-                                'label' => $key,
-                                'required' => $value['required'],
-                                'data' => $value['data'],
-                                'attr' => array(
-                                    'placeholder' => null !== $value['info'] ? $value['info'] : $key,
-                                )));
+                        $classType = 'IntegerType';
                         break;
                     case 'FloatNode':
-                        $builder
-                            ->add($key, '\Symfony\Component\Form\Extension\Core\Type\NumberType', array(
-                                'label' => $key,
-                                'required' => $value['required'],
-                                'data' => $value['data'],
-                                'attr' => array(
-                                    'placeholder' => null !== $value['info'] ? $value['info'] : $key,
-                                )));
+                        $classType = 'NumberType';
                         break;
                     case 'ScalarNode':
                     default:
-                        $builder
-                            ->add($key, '\Symfony\Component\Form\Extension\Core\Type\TextType', array(
-                                'label' => $key,
-                                'required' => $value['required'],
-                                'data' => is_array($value['data']) ? json_encode($value['data']) : $value['data'],
-                                'attr' => array(
-                                    'placeholder' => null !== $value['info'] ? $value['info'] : $key,
-                                )));
+                        $classType = 'TextType';
                         break;
                 }
+
+                //Adds field
+                $builder
+                    ->add($key, '\Symfony\Component\Form\Extension\Core\Type\\' . $classType, array(
+                        'label' => $key,
+                        'label_attr' => array(
+                            'title' => null !== $value['info'] ? $value['info'] : $key,
+                        ),
+                        'required' => $value['required'],
+                        'data' => is_array($value['data']) ? json_encode($value['data']) : $value['data'],
+                        'attr' => array(
+                            'placeholder' => null !== $value['info'] ? $value['info'] : $key,
+                            'title' => null !== $value['info'] ? $value['info'] : $key,
+                        )))
+                    ;
             }
         }
     }
