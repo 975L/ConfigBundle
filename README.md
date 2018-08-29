@@ -96,8 +96,8 @@ class YourController extends Controller
 
         /**
          * Defines form
-         * First argument is the yaml file that will store the data. You may use a separate file, not config.yaml
-         * Just remember to import it in your config.yaml by adding - { resource: your_filename.yaml } at its top
+         * First argument is the yaml file that will store the data. We advise you to use a separate file, not config.yaml
+         * Just remember to import this file in your config.yaml by adding - { resource: your_filename.yaml } at its top
          * As the configuration is now manageable directly from the web,
          * you may have to add your_filename.yaml to your .gitignore (+ .bak as a backup is made when saving)
          * Last argument is the name of your Bundle as defined in your namespace, i.e. c975L\EmailBundle

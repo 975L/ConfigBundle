@@ -1,5 +1,9 @@
 # Changelog
 
+v1.2.1.1
+--------
+- Updated `README.md` (29/08/2018)
+
 v1.2.1
 ------
 - Fixed typo in `README.md` (29/08/2018)
