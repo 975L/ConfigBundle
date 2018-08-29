@@ -1,3 +1,6 @@
+**Note: The bundle (as is) won't work on prod server as it needs the Container to be re-built. Looking for a solution that combines following official doc and allow end-user to change these parameters. Need is there, solution not yet!**
+
+
 ConfigBundle
 =================
 
