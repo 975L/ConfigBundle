@@ -64,6 +64,8 @@ How to use
 ----------
 In your Bundle, you need to create a file `/Resources/config/bundle.yaml` (description of the needed fields) + Controller (Route to access config form) [+ Voter (Checking for access rights)] and that's it! Code examples are given below.
 
+Before the first use if parameters are requested you must use the console command `php bin/console config:create-first-use vendor/bundle-name yourRoot` to create the config files from default data of the bundle. **Using this command later will reset to default the config for the specified bundle**
+
 When updating the configuration, two files are created:
 - `[app/Resources]config/config_bundles.yaml` that contains the values for defined fields, **if you wish to manage your configuration over the internet (not on localhost) you must add this file to your `.gitignore`**
 - `cache/dev|prod|test/configBundles.php` that contains an associative array of the fields `'yourRoot.yourParameter' => 'value'`.

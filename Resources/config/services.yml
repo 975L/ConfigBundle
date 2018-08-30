@@ -3,6 +3,9 @@ services:
         autowire: true
         autoconfigure: true
 
+    c975L\ConfigBundle\Command\:
+        resource: '../../Command/*'
+
     c975L\ConfigBundle\Form\:
         resource: '../../Form/*'
 

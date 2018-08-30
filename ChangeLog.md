@@ -1,6 +1,9 @@
 # Changelog
 
+v2.1
+----
 - Updated `README.md` (30/08/2018)
+- Added console Command to create the config from defaut values, to be used before first use (30/08/2018)
 
 v2.0.1
 ------

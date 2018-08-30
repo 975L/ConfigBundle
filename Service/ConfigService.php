@@ -218,7 +218,7 @@ class ConfigService implements ConfigServiceInterface
             }
         }
 
-        throw new \LogicException('Parameter "' . $parameter . '" defined using c975L/ConfigBundle is not defined!');
+        throw new \LogicException('Parameter "' . $parameter . '" defined using c975L/ConfigBundle is not defined! Try to use the config Route');
     }
 
     /**
@@ -306,6 +306,7 @@ class ConfigService implements ConfigServiceInterface
 
         $fs = new Filesystem();
         $file = $this->getConfigFolder() . self::CONFIG_FILE_YAML;
+        $fs->remove($file . '.bak');
         if ($fs->exists($file)) {
             $fs->rename($file, $file . '.bak');
         }
