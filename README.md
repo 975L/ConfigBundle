@@ -1,5 +1,4 @@
-**Note: The bundle (as is) won't work on prod server as it needs the Container to be re-built. Looking for a solution that combines following official doc and allow end-user to change these parameters. Need is there, solution not yet!**
-
+**Note: The bundle (as is) won't work on prod server as it needs the Container to be re-built.** As it seems impossible (30/08/2018), this bundle will use its own built configuration check v2.x. This branch is kept for references.
 
 ConfigBundle
 =================
