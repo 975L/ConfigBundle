@@ -1,5 +1,9 @@
 # Changelog
 
+v2.0.1
+------
+- Fixed missing returns of $parameters (30/08/2018)
+
 v2.0
 ----
 - Created branch 1.x (30/08/2018)

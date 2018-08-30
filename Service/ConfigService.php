@@ -239,6 +239,9 @@ class ConfigService implements ConfigServiceInterface
             $globalConfig = $this->getGlobalConfig();
             if (is_array($globalConfig)) {
                 $this->writePhpFile($globalConfig);
+                $parameters = $globalConfig;
+
+                return $parameters;
             //Gets data from bundle.yaml
             } elseif (null !== $bundle) {
                 $bundleDefaultConfig = $this->convertToArray($this->getBundleConfig($bundle));
