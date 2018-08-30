@@ -30,44 +30,69 @@ interface ConfigServiceInterface
      * Call ConfigFormFactory to create config form
      * @return Form
      */
-    public function createForm(string $filename, string $bundle);
+    public function createForm(string $bundle);
 
     /**
      * Returns config data for specified bundle
      */
-    public function getConfig(string $filename, string $bundle);
+    public function getConfig(string $bundle);
 
     /**
-     * Returns the Configuration class
-     * @return ConfigurationInterface
+     * Returns the configuration settings defined in the bundle.yaml
+     * @return Config|null
      */
-    public function getConfigurationClass(string $bundle);
+    public function getBundleConfig(string $bundle);
 
     /**
-     * Returns the configuration settings defined in the Configuration class
-     * @return array
+     * Returns the values defined for the configuration of the bundle
+     * @return Config|null
      */
-    public function getConfigurationData(string $bundle);
+    public function getDefinedConfig(string $root);
 
     /**
-     * Returns the name (root node) used for the bundle in configuration file
+     * Returns the global bundles definitions values
+     * @return array|null
+     */
+    public function getGlobalConfig();
+
+    /**
+     * Returns the cache folder
      * @return string
      */
-    public function getConfigurationName(string $bundle);
-
-    /**
-     * Returns config data for whole file
-     */
-    public function getConfigGlobal(string $filename);
+    public function getCacheFolder();
 
     /**
      * Returns the config folder
      * @return string
      */
-    public function getFolder();
+    public function getConfigFolder();
+
+    /**
+     * Returns the value of parameter
+     * @return mixed
+     * @throws \LogicException
+     */
+    public function getParameter(string $parameter, string $bundle = null);
+
+    /**
+     * Returns the array of bundles parameters from cache file
+     * @return array
+     * @throws \LogicException
+     */
+    public function getParametersCacheFile(string $root, string $bundle = null);
 
     /**
      * Writes config data for specified bundle to yaml file
      */
     public function setConfig(Form $form);
+
+    /**
+     * Writes configBundles.php
+     */
+    public function writePhpFile(array $globalConfig);
+
+    /**
+     * Writes config_bundles.yaml
+     */
+    public function writeYamlFile(array $globalConfig);
 }

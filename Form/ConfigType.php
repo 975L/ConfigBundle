@@ -25,16 +25,17 @@ class ConfigType extends AbstractType
         foreach ($options['data'] as $key => $value) {
             if ('configDataReserved' !== $key) {
                 switch ($value['type']) {
-                    case 'BooleanNode':
+                    case 'bool':
                         $classType = 'CheckboxType';
                         break;
-                    case 'IntegerNode':
+                    case 'int':
                         $classType = 'IntegerType';
                         break;
-                    case 'FloatNode':
+                    case 'float':
                         $classType = 'NumberType';
                         break;
-                    case 'ScalarNode':
+                    case 'array':
+                    case 'string':
                     default:
                         $classType = 'TextType';
                         break;
