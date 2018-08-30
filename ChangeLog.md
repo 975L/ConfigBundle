@@ -1,5 +1,7 @@
 # Changelog
 
+- Updated `README.md` (30/08/2018)
+
 v2.0.1
 ------
 - Fixed missing returns of $parameters (30/08/2018)

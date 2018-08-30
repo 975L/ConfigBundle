@@ -45,7 +45,7 @@ Step 3: Override templates
 --------------------------
 It is strongly recommended to use the [Override Templates from Third-Party Bundles feature](http://symfony.com/doc/current/templating/overriding.html) to integrate fully with your site.
 
-For this, simply, create the following structure `app/Resources/c975LConfigBundle/views/` in your app and then duplicate the file `layout.html.twig` in it, to override the existing Bundle file.
+For this, simply, create the following structure `[app/Resources|templates/bundles]/c975LConfigBundle/views/` in your app and then duplicate the file `layout.html.twig` in it, to override the existing Bundle file.
 
 In `layout.html.twig`, it will mainly consist to extend your layout and define specific variables, i.e. :
 ```twig
@@ -62,10 +62,10 @@ In `layout.html.twig`, it will mainly consist to extend your layout and define s
 
 How to use
 ----------
-In your Bundle, you need to create a file `Resources/config/bundle.yaml` (description of the needed fields) + Controller (Route to access config form) [+ Voter (Checking for access rights)] and that's it! Code examples are given below.
+In your Bundle, you need to create a file `/Resources/config/bundle.yaml` (description of the needed fields) + Controller (Route to access config form) [+ Voter (Checking for access rights)] and that's it! Code examples are given below.
 
 When updating the configuration, two files are created:
-- `config/config_bundles.yaml` that contains the values for defined fields
+- `[app/Resources]config/config_bundles.yaml` that contains the values for defined fields, **if you wish to manage your configuration over the internet (not on localhost) you must add this file to your `.gitignore`
 - `cache/dev|prod|test/configBundles.php` that contains an associative array of the fields `'yourRoot.yourParameter' => 'value'`.
 
 ```yml
@@ -75,8 +75,8 @@ yourRoot: #Name of your bundle without its 'Bundle' part, but including its vend
     yourParameter: #The name or your parameter i.e. roleNeeded
         type: string #|bool|int|float|array
         required: true #|false
-        default: "Your default value" #|~
-        info: "Your description to help filling this parameter" #|~
+        default: "Your default value" #|null
+        info: "Your description to help filling this parameter" #|null
 ```
 
 Then your Controller file:
