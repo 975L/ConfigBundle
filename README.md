@@ -1,12 +1,13 @@
-**Note: The bundle (as is) won't work on prod server as it needs the Container to be re-built.** As it seems impossible (30/08/2018), this bundle will use its own built configuration check v2.x. This branch is kept for references.
-
 ConfigBundle
 =================
 
+**This Bundle >= v2.0 doesn't use the `Configuration` class to build the modify form for parameters, but its own defined system of key-value. See branch 1.x for the use case with `Configuration` class.**
+
 ConfigBundle does the following:
 
-- get/set the config parameters from a yaml file for a Symfony app,
-- Provides a Twig extension to get these parameters in a Twig template,
+- Gets the config parameters definition from a yaml file for a Symfony app,
+- Build a form to allow end-user to modify these parameters (acces-rights are checked on your side),
+- Provides a Twig extension to get these parameters values in a Twig template,
 
 [ConfigBundle dedicated web page](https://975l.com/en/pages/config-bundle).
 
@@ -61,11 +62,24 @@ In `layout.html.twig`, it will mainly consist to extend your layout and define s
 
 How to use
 ----------
+In your Bundle, you need to create a file `Resources/config/bundle.yaml` (description of the needed fields) + Controller (Route to access config form) [+ Voter (Checking for access rights)] and that's it! Code examples are given below.
 
-You just need to create a Controller + Voter and that's it!
+When updating the configuration, two files are created:
+- `config/config_bundles.yaml` that contains the values for defined fields
+- `cache/dev|prod|test/configBundles.php` that contains an associative array of the fields `'yourRoot.yourParameter' => 'value'`.
 
-**Take care to read the comment above `$form` definition in the Controller example below to be warned about where the data will be stored**
+```yml
+#Your Resources/config/bundle.yaml
+#Example of definition for parameter c975LEmail.roleNeeded
+yourRoot: #Name of your bundle without its 'Bundle' part, but including its vendor one, to keep its uniqueness, i.e. c975LEmail
+    yourParameter: #The name or your parameter i.e. roleNeeded
+        type: string #|bool|int|float|array
+        required: true #|false
+        default: "Your default value" #|~
+        info: "Your description to help filling this parameter" #|~
+```
 
+Then your Controller file:
 ```php
 <?php
 //Your Controller file
@@ -89,22 +103,10 @@ class YourController extends Controller
      */
     public function config(Request $request, ConfigServiceInterface $configService)
     {
-        /**
-         * Or you can use
-         * if (null !== $this->getUser() && $this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-         * but Voter are so powerful that you should not ;)
-         */
-        $this->denyAccessUnlessGranted('config', null);
+        //Add the case to your Voter
+        $this->denyAccessUnlessGranted('config', 'yourDataIfNeeded');
 
-        /**
-         * Defines form
-         * First argument is the yaml file that will store the data. We advise you to use a separate file, not config.yaml
-         * Just remember to import this file in your config.yaml by adding - { resource: your_filename.yaml } at its top
-         * As the configuration is now manageable directly from the web,
-         * you may have to add your_filename.yaml to your .gitignore (+ .bak as a backup is made when saving)
-         * Last argument is the name of your Bundle as defined in your namespace, i.e. c975L\EmailBundle
-         */
-        $form = $configService->createForm('your_filename.yaml', 'App\Bundle');
+        $form = $configService->createForm('vendor/bundle-name');//As defined in your composer.json
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -112,108 +114,47 @@ class YourController extends Controller
             $configService->setConfig($form);
 
             //Redirects
-            return $this->redirectToRoute('email_dashboard');
+            return $this->redirectToRoute('the_route_you_want_to_redirect_to');
         }
 
         //Renders the config form
         return $this->render('@c975LConfig/forms/config.html.twig', array(
             'form' => $form->createView(),
-            'toolbar' => '@c975LEmail', //set false if you don't use c975L/ToolbarBundle
+            'toolbar' => '@c975LEmail', //set false (or remove) if you don't use c975L/ToolbarBundle
         ));
     }
 ```
 
-```php
-<?php
-//Your Voter file
+Then call the defined Route in a web browser and set-up (or your user) the configuration parameters.
 
-namespace App\Bundle\Security;
-
-use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Authorization\Voter\Voter;
-
-class YourVoter extends Voter
-{
-    private $decisionManager;
-    private $roleNeeded; //this value is bind in the services.yml file
-
-    public const CONFIG = 'config';
-
-    private const ATTRIBUTES = array(
-        self::CONFIG,
-    );
-
-    public function __construct(AccessDecisionManagerInterface $decisionManager, string $roleNeeded)
-    {
-        $this->decisionManager = $decisionManager;
-        $this->roleNeeded = $roleNeeded;
-    }
-
-    protected function supports($attribute, $subject)
-    {
-        //Tests your subject
-        if (null !== $subject) {
-            return $subject instanceof YourEntityClass && in_array($attribute, self::ATTRIBUTES);
-        }
-
-        return in_array($attribute, self::ATTRIBUTES);
-    }
-
-    protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
-    {
-        //Defines access rights
-        switch ($attribute) {
-            case self::CONFIG:
-                return $this->decisionManager->decide($token, array($this->roleNeeded));
-        }
-
-        throw new \LogicException('Invalid attribute: ' . $attribute);
-    }
-}
-```
-
-Then call the defined Route in a web browser and set-up (or your user) the configuration parameters. Of course you can still access the file itself.
-
-Read about [Configuration values](https://symfony.com/doc/current/components/config/definition.html) to see all the available options (and particularly the info one that will give info in the form) when defining parameter and also check the following code as an example:
+Get parameter inside a class
+----------------------------
+To get a parameter inside a class use the following code:
 
 ```php
 <?php
-//Your Configuration file
+namespace Your\NameSpace;
 
-namespace c975L\EmailBundle\DependencyInjection;
+use c975L\ConfigBundle\Service\ConfigServiceInterface;
 
-use Symfony\Component\Config\Definition\Builder\TreeBuilder;
-use Symfony\Component\Config\Definition\ConfigurationInterface;
-
-class Configuration implements ConfigurationInterface
+class YourClass
 {
-    public function getConfigTreeBuilder()
+    protected function yourMethod(ConfigServiceInterface $configService)
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('your_root');
-
-        $rootNode
-            ->children()
-                ->scalarNode('yourParameter')
-                    ->isRequired() //Will mark the field as required
-                    ->cannotBeEmpty()
-                    ->defaultValue() //Will display the default value in the form and register it in the file.yaml
-                    ->info('Parameter information') //Will be displayed in field placeholder + label and field hover + console with config:dump-reference
-                ->end()
-            ->end()
-        ;
-
-        return $treeBuilder;
+        $parameter = $configService->getParameter('yourRoot.yourParameter');
+        /**
+         * You can also get parameter using the bundle name as defined in your composer.json.
+         * This case is used when the files "config_bundles.yaml" and "configBundles.php" are not yet created.
+         * For example, the first time you use the config Route and your Voter needs to check with a parameter defined using ConfigBundle.
+         * Using this optional variable will make ConfigBundle creating the requested config files, based on default values in "bundle.yaml".
+         */
+        $parameter = $configService->getParameter('yourRoot.yourParameter', 'vendor/bundle-name');
     }
 }
-
 ```
-
-**Important**, when you install your Bundle for the first time, you **MUST** define manually, in your filename.yaml, your parameters that are declared as `isRequired` (even if empty, `defaultValue()` is not enough) and/or `cannotBeEmpty` (unless you provide a `defaultValue()`) as these parameters will be requested by Symfony and will throw an `InvalidConfigurationException` if not found.
 
 Twig Extension
 --------------
-If you need to acces a parameter inside a Twig template, simply use `{{ config('your_root.pyour_parameter') }}`.
+If you need to acces a parameter inside a Twig template, simply use `{{ config('yourRoot.yourParameter') }}`.
 
 **If this project help you to reduce time to develop, you can [buy me a coffee](https://www.buymeacoffee.com/LaurentMarquet) :)**

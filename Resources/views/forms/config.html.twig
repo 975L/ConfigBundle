@@ -4,7 +4,7 @@
 
 {% block config_content %}
 {# Toolbar #}
-    {% if toolbar != false %}
+    {% if toolbar is defined and toolbar != false %}
         {{ toolbar_display(toolbar ~ '/tools.html.twig', 'config', 'md') }}
     {% endif %}
     <div>
@@ -17,7 +17,7 @@
             {{ form_widget(form) }}
 {# Submit#}
             <div class="form-group">
-                <button type="submit" name="submit" title="{{ 'label.validate'|trans({}, 'toolbar') }}" class="btn btn-lg btn-warning btn-block">
+                <button type="submit" name="submit" title="{{ 'label.validate'|trans({}, 'toolbar') }}" class="btn btn-lg btn-primary btn-block">
                     {{ 'label.validate'|trans({}, 'toolbar') }}
                 </button>
             </div>

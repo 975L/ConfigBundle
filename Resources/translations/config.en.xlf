@@ -8,7 +8,7 @@
             </trans-unit>
             <trans-unit id="2">
                 <source>text.warning_config</source>
-                <target>Update the configuration settings below. Be careful what you enter, it could cause a display error!</target>
+                <target>Update the configuration settings below. Be careful what you enter, it could cause an error!</target>
             </trans-unit>
         </body>
     </file>

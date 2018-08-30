@@ -10,6 +10,7 @@
 namespace c975L\ConfigBundle\Service;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Yaml\Yaml;
 use c975L\ServicesBundle\Service\ServiceToolsInterface;
@@ -42,6 +43,18 @@ class ConfigService implements ConfigServiceInterface
      */
     private $serviceTools;
 
+    /**
+     * Used for configBundles.php
+     * @var string
+     */
+    public const CONFIG_FILE_PHP = 'configBundles.php';
+
+    /**
+     * Used for config_bundles.yaml
+     * @var string
+     */
+    public const CONFIG_FILE_YAML = 'config_bundles.yaml';
+
     public function __construct(
         ContainerInterface $container,
         ConfigFormFactoryInterface $configFormFactory,
@@ -67,95 +80,120 @@ class ConfigService implements ConfigServiceInterface
     /**
      * {@inheritdoc}
      */
-    public function createForm(string $filename, string $bundle)
+    public function createForm(string $bundle)
     {
-        return $this->configFormFactory->create($this->getConfig($filename, $bundle));
+        $config = $this->getConfig($bundle);
+
+        return $this->configFormFactory->create($config);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getConfig(string $filename, string $bundle)
+    public function getConfig(string $bundle)
     {
-        //Initializes config with data defined in Configuration class
-        $config = $this->getConfigurationData($bundle);
-        $bundleName = $this->getConfigurationName($bundle);
+        //Initializes config with data defined in bundle.yaml
+        $config = $this->getBundleConfig($bundle);
 
-        //Updates config with data defined in yaml file
-        $yamlDefinedValues = $this->getConfigGlobal($filename);
-        if (isset($yamlDefinedValues[$bundleName])) {
-            foreach ($yamlDefinedValues[$bundleName] as $key => $value) {
+        //Updates config with data defined in config_bundles.yaml
+        $definedConfig = $this->getDefinedConfig($config->configDataReserved['root']);
+        if (null !== $definedConfig) {
+            foreach ($definedConfig as $key => $value) {
                 $config->$key['data'] = $value;
             }
         }
 
-        //Adds data used when writing file
-        $config->configDataReserved = array(
-            'filename' => $filename,
-            'bundle' => $bundle,
-            'bundleName' => $bundleName,
-        );
-
         return $config;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getConfigurationClass(string $bundle)
+    public function getBundleConfig(string $bundle)
     {
-        $configuration = '\\' . $bundle . '\DependencyInjection\Configuration';
-        return new $configuration();
-    }
+        $file = $this->container->getParameter('kernel.root_dir') . '/../vendor/' . $bundle . '/Resources/config/bundle.yaml';
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getConfigurationData(string $bundle)
-    {
-        $configuration = $this->getConfigurationClass($bundle);
+        if (is_file($file)) {
+            $yamlBundleConfig = Yaml::parseFile($file);
+            if (is_array($yamlBundleConfig)) {
+                reset($yamlBundleConfig);
+                $root = key($yamlBundleConfig);
 
-        $definedValues = $configuration->getConfigTreeBuilder()
-            ->buildTree()
-            ->getChildren();
+                //Defines config
+                $config = new Config();
+                foreach ($yamlBundleConfig[$root] as $key => $value) {
+                    $config->$key = $value;
+                    $config->$key['data'] = $value['default'];
+                }
 
-        $config = new Config();
-        foreach ($definedValues as $key => $value) {
-            $config->$key = array(
-                'type' => str_replace('Symfony\Component\Config\Definition\\', '', get_class($value)),
-                'required' => $value->isRequired(),
-                'data' => $value->getDefaultValue(),
-                'info' => $value->getInfo(),
-            );
+                //Adds data used when writing file
+                $config->configDataReserved = array(
+                    'bundle' => $bundle,
+                    'root' => $root,
+                );
+
+                return $config;
+            }
         }
 
-        return $config;
+        return null;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getConfigurationName(string $bundle)
+    public function getDefinedConfig(string $root)
     {
-        $configuration = $this->getConfigurationClass($bundle);
+        static $definedConfig;
 
-        return $configuration->getConfigTreeBuilder()
-            ->buildTree()
-            ->getName();
+        if (null !== $definedConfig) {
+            return $definedConfig;
+        }
+
+        $globalConfig = $this->getGlobalConfig();
+
+        if (null !== $globalConfig && isset($globalConfig[$root])) {
+            $definedConfig = $globalConfig[$root];
+
+            return $definedConfig;
+        }
+
+        return null;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getConfigGlobal(string $filename)
+    public function getGlobalConfig()
     {
-        return Yaml::parseFile($this->getFolder() . $filename);
+        static $globalConfig;
+
+        if (null !== $globalConfig) {
+            return $globalConfig;
+        }
+
+        $file = $this->getConfigFolder() . self::CONFIG_FILE_YAML;
+        if (is_file($file)) {
+            $globalConfig = Yaml::parseFile($file);
+
+            return $globalConfig;
+        }
+
+        return null;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getFolder()
+    public function getCacheFolder()
+    {
+        return $this->container->getParameter('kernel.cache_dir') . '/';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getConfigFolder()
     {
         if ('4' === substr(\Symfony\Component\HttpKernel\Kernel::VERSION, 0, 1)) {
             return $this->container->getParameter('kernel.root_dir') . '/../config/packages/';
@@ -167,35 +205,118 @@ class ConfigService implements ConfigServiceInterface
     /**
      * {@inheritdoc}
      */
+    public function getParameter(string $parameter, string $bundle = null)
+    {
+        if (strpos($parameter, '.')) {
+            $paramArray = explode('.', $parameter);
+            $parameters = $this->getParametersCacheFile($paramArray[0], $bundle);
+
+            if (null !== $parameters) {
+                if (isset($parameters[$paramArray[0]][$paramArray[1]])) {
+                    return $parameters[$paramArray[0]][$paramArray[1]];
+                }
+            }
+        }
+
+        throw new \LogicException('Parameter "' . $parameter . '" defined using c975L/ConfigBundle is not defined!');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getParametersCacheFile(string $root, string $bundle = null)
+    {
+        static $parameters;
+
+        if (null !== $parameters) {
+            return $parameters;
+        }
+
+        //Creates cache file if not existing
+        $file = $this->getCacheFolder() . self::CONFIG_FILE_PHP;
+        if (!is_file($file)) {
+            //Gets data from config_bundles.yaml
+            $globalConfig = $this->getGlobalConfig();
+            if (is_array($globalConfig)) {
+                $this->writePhpFile($globalConfig);
+            //Gets data from bundle.yaml
+            } elseif (null !== $bundle) {
+                $bundleDefaultConfig = $this->convertToArray($this->getBundleConfig($bundle));
+
+                $defaultConfig = array();
+                foreach ($bundleDefaultConfig as $key => $value) {
+                    $defaultConfig[$key] = $value['default'];
+                }
+                $parameters = array($root => $defaultConfig);
+                $this->writeYamlFile($parameters);
+                $this->writePhpFile($parameters);
+
+                return $parameters;
+            //No bundle name provided
+            } else {
+                throw new \LogicException("The config files are not created you should use `getParameter('yourRoot.yourParameter', 'vendor/bundle-name')`");
+            }
+
+            //Wrong bundle name
+            throw new \LogicException('The file ' . $bundle . '/Resources/config/bundle.yaml could not be found!');
+        }
+
+        $parameters = include_once($file);
+
+        return $parameters;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function setConfig(Form $form)
     {
-        //Defines data
         $formData = $form->getData();
-        $filename = $formData->configDataReserved['filename'];
-        $bundle = $formData->configDataReserved['bundle'];
-        $bundleName = $formData->configDataReserved['bundleName'];
 
         //Adds new values
         $newDefinedValues = $this->convertToArray($formData);
-        $yamlDefinedValues = $this->getConfigGlobal($filename);
-        $yamlDefinedValues[$bundleName] = $newDefinedValues;
+        $globalConfig = $this->getGlobalConfig();
+        if (null !== $globalConfig) {
+            $globalConfig[$formData->configDataReserved['root']] = $newDefinedValues;
+        } else {
+            $globalConfig = $newDefinedValues;
+        }
 
-        //Defines new yaml content
-        $yamlContent = Yaml::dump($yamlDefinedValues, 2, 4, Yaml::DUMP_EXCEPTION_ON_INVALID_TYPE);
+        //Writes files
+        $this->writeYamlFile($globalConfig);
+        $this->writePhpFile($globalConfig);
+
+        //Creates flash
+        $this->serviceTools->createFlash('config', 'text.config_updated');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function writeYamlFile(array $globalConfig)
+    {
+        $yamlContent = Yaml::dump($globalConfig, 2, 4, Yaml::DUMP_EXCEPTION_ON_INVALID_TYPE);
 
         //Removes quotes around array otherwise yaml will not see it as an array
         $yamlContent = preg_replace("/'({.*})'/", '$1', $yamlContent);
         $yamlContent = preg_replace("/'(\[.*\])'/", '$1', $yamlContent);
 
-        //Backups old file and writes new file
-        $file = $folder = $this->getFolder() . $filename;
-        if (is_file($file)) {
-            rename($file, $file . '.bak');
+        $fs = new Filesystem();
+        $file = $this->getConfigFolder() . self::CONFIG_FILE_YAML;
+        if ($fs->exists($file)) {
+            $fs->rename($file, $file . '.bak');
         }
-        file_put_contents($file, $yamlContent);
+        $fs->dumpFile($file, $yamlContent);
+    }
 
-        //Creates flash
-        $this->serviceTools->createFlash('config', 'text.config_updated');
-
+    /**
+     * {@inheritdoc}
+     */
+    public function writePhpFile(array $globalConfig)
+    {
+        $fs = new Filesystem();
+        $file = $this->getCacheFolder() . self::CONFIG_FILE_PHP;
+        $phpContent = "<?php\nreturn " . var_export($globalConfig, true) . ';';
+        $fs->dumpFile($file, $phpContent);
     }
 }

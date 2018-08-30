@@ -1,5 +1,14 @@
 # Changelog
 
+v2.0
+----
+- Created branch 1.x (30/08/2018)
+- Modified files to use own sytem of key-value for config (30/08/2018)
+
+
+v1.x
+====
+
 v1.2.2
 ------
 - Updated `README.md` (30/08/2018)
