@@ -82,6 +82,12 @@ interface ConfigServiceInterface
     public function getParametersCacheFile(string $root, string $bundle = null);
 
     /**
+     * Checks if parameter is set
+     * @return bool
+     */
+    public function hasParameter(string $parameter);
+
+    /**
      * Writes config data for specified bundle to yaml file
      */
     public function setConfig(Form $form);

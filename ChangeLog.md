@@ -1,5 +1,11 @@
 # Changelog
 
+v2.1.2
+------
+- Simplified `getConfigFolder()` (31/08/2018)
+- Added `hasParameter()` method (31/08/2018)
+- Fixed `getParameter()` (31/08/2018)
+
 v2.1.1
 ------
 - Replaced `isset()` by `array_key_exists()` in `getParameter()` (31/08/2018)

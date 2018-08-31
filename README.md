@@ -131,7 +131,7 @@ Then call the defined Route in a web browser and set-up (or your user) the confi
 
 Get parameter inside a class
 ----------------------------
-To get a parameter inside a class use the following code:
+To get a parameter inside a class, use the following code:
 
 ```php
 <?php
@@ -155,8 +155,13 @@ class YourClass
 }
 ```
 
+Check if parameter is defined inside a class
+--------------------------------------------
+To check if a parameter has been defined, use `$configService->hasParameter('yourRoot.yourParameter')`.
+
+
 Twig Extension
 --------------
-If you need to acces a parameter inside a Twig template, simply use `{{ config('yourRoot.yourParameter') }}`.
+If you need to access a parameter inside a Twig template, simply use `{{ config('yourRoot.yourParameter') }}`.
 
 **If this project help you to reduce time to develop, you can [buy me a coffee](https://www.buymeacoffee.com/LaurentMarquet) :)**
