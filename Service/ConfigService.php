@@ -212,7 +212,7 @@ class ConfigService implements ConfigServiceInterface
             $parameters = $this->getParametersCacheFile($paramArray[0], $bundle);
 
             if (null !== $parameters) {
-                if (isset($parameters[$paramArray[0]][$paramArray[1]])) {
+                if (array_key_exists($paramArray[1], $parameters[$paramArray[0]])) {
                     return $parameters[$paramArray[0]][$paramArray[1]];
                 }
             }
