@@ -13,6 +13,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\HttpKernel\Kernel;
 use c975L\ServicesBundle\Service\ServiceToolsInterface;
 use c975L\ConfigBundle\Entity\Config;
 use c975L\ConfigBundle\Form\ConfigFormFactoryInterface;
@@ -195,11 +196,9 @@ class ConfigService implements ConfigServiceInterface
      */
     public function getConfigFolder()
     {
-        if ('4' === substr(\Symfony\Component\HttpKernel\Kernel::VERSION, 0, 1)) {
-            return $this->container->getParameter('kernel.root_dir') . '/../config/packages/';
-        }
+        $rootFolder = $this->container->getParameter('kernel.root_dir');
 
-        return $this->container->getParameter('kernel.root_dir') . '/../app/config/';
+        return '4' === substr(Kernel::VERSION, 0, 1) ? $rootFolder . '/../config/packages/' : $rootFolder . '/../app/config/';
     }
 
     /**
@@ -212,7 +211,7 @@ class ConfigService implements ConfigServiceInterface
             $parameters = $this->getParametersCacheFile($paramArray[0], $bundle);
 
             if (null !== $parameters) {
-                if (array_key_exists($paramArray[1], $parameters[$paramArray[0]])) {
+                if (array_key_exists($paramArray[0], $parameters) && array_key_exists($paramArray[1], $parameters[$paramArray[0]])) {
                     return $parameters[$paramArray[0]][$paramArray[1]];
                 }
             }
@@ -267,6 +266,25 @@ class ConfigService implements ConfigServiceInterface
         $parameters = include_once($file);
 
         return $parameters;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasParameter(string $parameter)
+    {
+        if (strpos($parameter, '.')) {
+            $paramArray = explode('.', $parameter);
+            $parameters = $this->getParametersCacheFile($paramArray[0]);
+
+            if (null !== $parameters) {
+                if (array_key_exists($paramArray[0], $parameters) && array_key_exists($paramArray[1], $parameters[$paramArray[0]])) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
