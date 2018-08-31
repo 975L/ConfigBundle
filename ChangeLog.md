@@ -1,5 +1,9 @@
 # Changelog
 
+v2.1.1
+------
+- Replaced `isset()` by `array_key_exists()` in `getParameter()` (31/08/2018)
+
 v2.1
 ----
 - Updated `README.md` (30/08/2018)
