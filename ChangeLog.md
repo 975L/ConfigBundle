@@ -2,6 +2,7 @@
 
 - Updated composer.json (01/09/2018)
 - Added root display in Command (01/09/2018)
+- Fixed Twig extension (01/09/2018)
 
 v2.1.2
 ------

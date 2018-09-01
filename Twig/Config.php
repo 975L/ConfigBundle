@@ -9,7 +9,7 @@
 
 namespace c975L\ConfigBundle\Twig;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use c975L\ConfigBundle\Service\ConfigServiceInterface;
 
 /**
  * Twig extension to display the Config parameter using `config('YOUR_PARAMETER_NAME')
@@ -19,14 +19,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class Config extends \Twig_Extension
 {
     /**
-     * Stores ContainerInterface
-     * @var ContainerInterface
+     * Stores ConfigServiceInterface
+     * @var ConfigServiceInterface
      */
-    private $container;
+    private $configService;
 
-    public function __construct(ContainerInterface $container)
+    public function __construct(ConfigServiceInterface $configService)
     {
-        $this->container = $container;
+        $this->configService = $configService;
     }
 
     public function getFunctions()
@@ -40,13 +40,13 @@ class Config extends \Twig_Extension
     }
 
     /**
-     * Returns the specifid parameter
+     * Returns the specified parameter
      * @return string
      */
     public function config($parameter)
     {
-        if ($this->container->hasParameter($parameter)) {
-            return is_array($this->container->getParameter($parameter)) ? json_encode($this->container->getParameter($parameter)) : $this->container->getParameter($parameter);
-        }
+        $value = $this->configService->getParameter($parameter);
+
+        return is_array($value) ? json_encode($value) : $value;
     }
 }
