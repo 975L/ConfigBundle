@@ -71,6 +71,6 @@ class ConfigFirstUseCommand extends ContainerAwareCommand
         $io = new SymfonyStyle($input, $output);
         $io->title('c975L/ConfigBundle');
         $io->text('Create config files before first use');
-        $io->success('Config files have been created!');
+        $io->success('Config files for ' . $root . ' have been created!');
     }
 }
