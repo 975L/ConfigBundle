@@ -1,5 +1,8 @@
 # Changelog
 
+- Updated composer.json (01/09/2018)
+- Added root display in Command (01/09/2018)
+
 v2.1.2
 ------
 - Simplified `getConfigFolder()` (31/08/2018)
