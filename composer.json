@@ -26,8 +26,12 @@
     },
     "minimum-stability": "dev",
     "autoload": {
-        "psr-4": { "c975L\\ConfigBundle\\": ""
+        "psr-4": {
+            "c975L\\ConfigBundle\\": ""
         }
+    },
+    "config": {
+        "sort-packages": true
     },
     "support": {
         "email": "contact@975l.com",
