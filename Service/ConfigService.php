@@ -75,6 +75,13 @@ class ConfigService implements ConfigServiceInterface
         $values = get_object_vars($formData);
         unset($values['configDataReserved']);
 
+        //Converts array data to real arrays
+        foreach ($values as $key => $value) {
+            if ('[' == substr($value, 0, 1) || '{' == substr($value, 0, 1)) {
+                $values[$key] = explode(',', trim($value, '[]{}'));
+            }
+        }
+
         return $values;
     }
 
@@ -321,6 +328,7 @@ class ConfigService implements ConfigServiceInterface
         //Removes quotes around array otherwise yaml will not see it as an array
         $yamlContent = preg_replace("/'({.*})'/", '$1', $yamlContent);
         $yamlContent = preg_replace("/'(\[.*\])'/", '$1', $yamlContent);
+        $yamlContent = str_replace(array('\'"', '"\''), "'", $yamlContent);
 
         $fs = new Filesystem();
         $file = $this->getConfigFolder() . self::CONFIG_FILE_YAML;
@@ -339,6 +347,8 @@ class ConfigService implements ConfigServiceInterface
         $fs = new Filesystem();
         $file = $this->getCacheFolder() . self::CONFIG_FILE_PHP;
         $phpContent = "<?php\nreturn " . var_export($globalConfig, true) . ';';
+        $phpContent = str_replace(array('\'"', '"\''), "'", $phpContent);
+
         $fs->dumpFile($file, $phpContent);
     }
 }
