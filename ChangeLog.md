@@ -1,5 +1,9 @@
 # Changelog
 
+v2.1.4
+------
+- Fixed exportation of arrays (01/09/2018)
+
 v2.1.3
 ------
 - Updated composer.json (01/09/2018)
