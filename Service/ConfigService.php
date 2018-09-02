@@ -77,7 +77,7 @@ class ConfigService implements ConfigServiceInterface
 
         //Converts yaml array to php array
         foreach ($values as $key => $value) {
-            if ('[' == substr($value, 0, 1) || '{' == substr($value, 0, 1)) {
+            if (is_string($value) && ('[' == substr($value, 0, 1) || '{' == substr($value, 0, 1))) {
                 $values[$key] = explode(',', trim($value, '[]{}'));
             }
         }
@@ -185,7 +185,7 @@ class ConfigService implements ConfigServiceInterface
 
         $file = $this->getConfigFolder() . self::CONFIG_FILE_YAML;
         if (is_file($file)) {
-            $globalConfig = Yaml::parseFile($file);
+            $globalConfig = Yaml::parseFile($file, Yaml::PARSE_DATETIME);
 
             return $globalConfig;
         }

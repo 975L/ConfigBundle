@@ -28,6 +28,9 @@ class ConfigType extends AbstractType
                     case 'bool':
                         $classType = 'CheckboxType';
                         break;
+                    case 'date':
+                        $classType = 'DateType';
+                        break;
                     case 'int':
                         $classType = 'IntegerType';
                         break;
@@ -41,20 +44,44 @@ class ConfigType extends AbstractType
                         break;
                 }
 
+                //Defines field options
+                $fieldOptions = array(
+                    'label' => $key,
+                    'label_attr' => array(
+                        'title' => null !== $value['info'] ? $value['info'] : $key,
+                    ),
+                    'required' => $value['required'],
+                    'data' => is_array($value['data']) ? json_encode($value['data']) : $value['data'],
+                    'attr' => array(
+                        'placeholder' => null !== $value['info'] ? $value['info'] : $key,
+                        'title' => null !== $value['info'] ? $value['info'] : $key,
+                    ));
+
+                //Defines specific data for date field
+                if ('DateType' === $classType) {
+                    $startYear = date('Y') - 5;
+                    if (isset($value['startYear'])) {
+                        if (is_int($value['startYear'])) {
+                            $startYear = $value['startYear'];
+                        } elseif ('current' === $value['startYear']) {
+                            $startYear = date('Y');
+                        }
+                    }
+
+                    $endYear = date('Y') + 5;
+                    if (isset($value['endYear'])) {
+                        if (is_int($value['endYear'])) {
+                            $endYear = $value['endYear'];
+                        } elseif ('current' === $value['endYear']) {
+                            $endYear = date('Y');
+                        }
+                    }
+
+                    $fieldOptions['years'] = range($startYear, $endYear);
+                }
+
                 //Adds field
-                $builder
-                    ->add($key, '\Symfony\Component\Form\Extension\Core\Type\\' . $classType, array(
-                        'label' => $key,
-                        'label_attr' => array(
-                            'title' => null !== $value['info'] ? $value['info'] : $key,
-                        ),
-                        'required' => $value['required'],
-                        'data' => is_array($value['data']) ? json_encode($value['data']) : $value['data'],
-                        'attr' => array(
-                            'placeholder' => null !== $value['info'] ? $value['info'] : $key,
-                            'title' => null !== $value['info'] ? $value['info'] : $key,
-                        )))
-                    ;
+                $builder->add($key, '\Symfony\Component\Form\Extension\Core\Type\\' . $classType, $fieldOptions);
             }
         }
     }
