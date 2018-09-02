@@ -1,5 +1,10 @@
 # Changelog
 
+v2.2
+----
+- Added possibility to define multiple roots in bundle.yaml (02/09/2018)
+- Fixed `ConfigFirstUseCommand` to use `setConfig()` method (02/09/2018)
+
 v2.1.4
 ------
 - Fixed exportation of arrays (01/09/2018)

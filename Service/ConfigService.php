@@ -70,12 +70,12 @@ class ConfigService implements ConfigServiceInterface
     /**
      * {@inheritdoc}
      */
-    public function convertToArray(Config $formData)
+    public function convertToArray(Config $config)
     {
-        $values = get_object_vars($formData);
+        $values = get_object_vars($config);
         unset($values['configDataReserved']);
 
-        //Converts array data to real arrays
+        //Converts yaml array to php array
         foreach ($values as $key => $value) {
             if ('[' == substr($value, 0, 1) || '{' == substr($value, 0, 1)) {
                 $values[$key] = explode(',', trim($value, '[]{}'));
@@ -104,10 +104,13 @@ class ConfigService implements ConfigServiceInterface
         $config = $this->getBundleConfig($bundle);
 
         //Updates config with data defined in config_bundles.yaml
-        $definedConfig = $this->getDefinedConfig($config->configDataReserved['root']);
-        if (null !== $definedConfig) {
-            foreach ($definedConfig as $key => $value) {
-                $config->$key['data'] = $value;
+        $roots = $config->configDataReserved['roots'];
+        foreach ($roots as $root) {
+            $definedConfig = $this->getDefinedConfig($root);
+            if (null !== $definedConfig) {
+                foreach ($definedConfig as $key => $value) {
+                    $config->$key['data'] = $value;
+                }
             }
         }
 
@@ -124,27 +127,33 @@ class ConfigService implements ConfigServiceInterface
         if (is_file($file)) {
             $yamlBundleConfig = Yaml::parseFile($file);
             if (is_array($yamlBundleConfig)) {
-                reset($yamlBundleConfig);
-                $root = key($yamlBundleConfig);
-
-                //Defines config
                 $config = new Config();
-                foreach ($yamlBundleConfig[$root] as $key => $value) {
-                    $config->$key = $value;
-                    $config->$key['data'] = $value['default'];
+                $parameters = array();
+                $roots = array();
+                //Parses the yaml content
+                foreach ($yamlBundleConfig as $rootKey => $rootValue) {
+                    foreach ($rootValue as $key => $value) {
+                        $config->$key = $value;
+                        $config->$key['data'] = $value['default'];
+                        $config->$key['root'] = $rootKey;
+
+                        $parameters[$rootKey][] = $key;
+                    }
+                    $roots[] = $rootKey;
                 }
 
                 //Adds data used when writing file
                 $config->configDataReserved = array(
                     'bundle' => $bundle,
-                    'root' => $root,
+                    'parameters' => $parameters,
+                    'roots' => $roots,
                 );
 
                 return $config;
             }
         }
 
-        return null;
+        throw new \LogicException('The bundle "' . $bundle . '" has not been defined. Check its name');
     }
 
     /**
@@ -152,12 +161,6 @@ class ConfigService implements ConfigServiceInterface
      */
     public function getDefinedConfig(string $root)
     {
-        static $definedConfig;
-
-        if (null !== $definedConfig) {
-            return $definedConfig;
-        }
-
         $globalConfig = $this->getGlobalConfig();
 
         if (null !== $globalConfig && isset($globalConfig[$root])) {
@@ -297,17 +300,24 @@ class ConfigService implements ConfigServiceInterface
     /**
      * {@inheritdoc}
      */
-    public function setConfig(Form $form)
+    public function setConfig($data)
     {
-        $formData = $form->getData();
+        if ($data instanceof Form) {
+            $data = $data->getData();
+        }
 
         //Adds new values
-        $newDefinedValues = $this->convertToArray($formData);
+        $newDefinedValues = $this->convertToArray($data);
         $globalConfig = $this->getGlobalConfig();
-        if (null !== $globalConfig) {
-            $globalConfig[$formData->configDataReserved['root']] = $newDefinedValues;
-        } else {
-            $globalConfig = $newDefinedValues;
+        $parameters = $data->configDataReserved['parameters'];
+        foreach ($parameters as $key => $value) {
+            if (is_array($value)) {
+                foreach ($value as $parameter) {
+                    if (isset($newDefinedValues[$parameter])) {
+                        $globalConfig[$key][$parameter] = $newDefinedValues[$parameter];
+                    }
+                }
+            }
         }
 
         //Writes files
