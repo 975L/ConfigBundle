@@ -79,6 +79,10 @@ yourRoot: #Name of your bundle without its 'Bundle' part, but including its vend
         required: true #|false
         default: "Your default value" #|null
         info: "Your description to help filling this parameter" #|null
+#In case you need to have common data shared, you can also add other roots with the scheme
+#yourCommonRoot
+    #yourCommonParameter
+        #...
 ```
 
 Then your Controller file:
