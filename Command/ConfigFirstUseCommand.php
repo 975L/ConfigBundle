@@ -49,23 +49,21 @@ class ConfigFirstUseCommand extends ContainerAwareCommand
         $bundle = $input->getArgument('bundle');
         $root = $input->getArgument('root');
 
-        $globalConfig = $this->configService->getGlobalConfig();
+        //Defines bundle default config
+        $bundleConfig = $this->configService->getBundleConfig($bundle);
+        $parameters = get_object_vars($bundleConfig);
+        unset($parameters['configDataReserved']);
 
-        $bundleDefaultConfig = $this->configService->convertToArray($this->configService->getBundleConfig($bundle));
-        $defaultConfig = array();
-        foreach ($bundleDefaultConfig as $key => $value) {
-            $defaultConfig[$key] = $value['default'];
+        //Assigns default value for specified root
+        foreach ($parameters as $key => $value) {
+            if ($root == $value['root']) {
+                $bundleConfig->$key = $value['default'];
+            //Removes property as not part of the called root
+            } else {
+                unset($bundleConfig->$key);
+            }
         }
-
-        if (null !== $globalConfig) {
-            $globalConfig[$root] = $defaultConfig;
-        } else {
-            $globalConfig = $defaultConfig;
-        }
-
-        //Writes files
-        $this->configService->writeYamlFile($globalConfig);
-        $this->configService->writePhpFile($globalConfig);
+        $this->configService->setConfig($bundleConfig);
 
         //Output data
         $io = new SymfonyStyle($input, $output);

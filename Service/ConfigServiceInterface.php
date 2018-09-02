@@ -24,7 +24,7 @@ interface ConfigServiceInterface
      * Converts Config to array
      * @return array
      */
-    public function convertToArray(Config $formaData);
+    public function convertToArray(Config $config);
 
     /**
      * Call ConfigFormFactory to create config form
@@ -39,7 +39,8 @@ interface ConfigServiceInterface
 
     /**
      * Returns the configuration settings defined in the bundle.yaml
-     * @return Config|null
+     * @return Config
+     * @throws \LogicException
      */
     public function getBundleConfig(string $bundle);
 
@@ -90,7 +91,7 @@ interface ConfigServiceInterface
     /**
      * Writes config data for specified bundle to yaml file
      */
-    public function setConfig(Form $form);
+    public function setConfig($data);
 
     /**
      * Writes configBundles.php
