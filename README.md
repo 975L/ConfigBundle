@@ -75,10 +75,13 @@ When updating the configuration, two files are created:
 #Example of definition for parameter c975LEmail.roleNeeded
 yourRoot: #Name of your bundle without its 'Bundle' part, but including its vendor one, to keep its uniqueness, i.e. c975LEmail
     yourParameter: #The name or your parameter i.e. roleNeeded
-        type: string #|bool|int|float|array
+        type: string #|bool|int|float|array|date
         required: true #|false
         default: "Your default value" #|null
         info: "Your description to help filling this parameter" #|null
+#The following options are specific for date type to define its range of years
+        #startYear: 2010|current|null(or not set)
+        #endYear: 2010|current|null(or not set)
 #In case you need to have common data shared, you can also add other roots with the scheme
 #yourCommonRoot
     #yourCommonParameter
