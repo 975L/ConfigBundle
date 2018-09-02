@@ -1,5 +1,7 @@
 # Changelog
 
+- Added `date` field (02/09/2018)
+
 v2.2
 ----
 - Added possibility to define multiple roots in bundle.yaml (02/09/2018)
