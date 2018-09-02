@@ -49,6 +49,8 @@ class ConfigFirstUseCommand extends ContainerAwareCommand
         $bundle = $input->getArgument('bundle');
         $root = $input->getArgument('root');
 
+        $globalConfig = $this->configService->getGlobalConfig();
+
         //Defines bundle default config
         $bundleConfig = $this->configService->getBundleConfig($bundle);
         $parameters = get_object_vars($bundleConfig);
@@ -58,9 +60,16 @@ class ConfigFirstUseCommand extends ContainerAwareCommand
         foreach ($parameters as $key => $value) {
             if ($root == $value['root']) {
                 $bundleConfig->$key = $value['default'];
-            //Removes property as not part of the called root
+            //Not part of root but defined in bundle.yaml
             } else {
-                unset($bundleConfig->$key);
+                //Removes the property as already defined
+                if (isset($globalConfig[$value['root']][$key])) {
+                    unset($bundleConfig->$key);
+
+                //Assigns the value as not present
+                } else {
+                    $bundleConfig->$key = $value['default'];
+                }
             }
         }
         $this->configService->setConfig($bundleConfig);
