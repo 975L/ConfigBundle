@@ -163,7 +163,7 @@ class ConfigService implements ConfigServiceInterface
     {
         $globalConfig = $this->getGlobalConfig();
 
-        if (null !== $globalConfig && isset($globalConfig[$root])) {
+        if (null !== $globalConfig && array_key_exists($root, $globalConfig)) {
             $definedConfig = $globalConfig[$root];
 
             return $definedConfig;
@@ -313,7 +313,7 @@ class ConfigService implements ConfigServiceInterface
         foreach ($parameters as $key => $value) {
             if (is_array($value)) {
                 foreach ($value as $parameter) {
-                    if (isset($newDefinedValues[$parameter])) {
+                    if (array_key_exists($parameter, $newDefinedValues)) {
                         $globalConfig[$key][$parameter] = $newDefinedValues[$parameter];
                     }
                 }
