@@ -1,6 +1,7 @@
 # Changelog
 
 - Added `date` field (02/09/2018)
+- Changed behaviour of `ConfigFirstUseCommand` to also define fields not linked to root and not already defined (to not erase) (02/09/2018)
 
 v2.2
 ----
