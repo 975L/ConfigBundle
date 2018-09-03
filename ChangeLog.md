@@ -1,5 +1,7 @@
 # Changelog
 
+- Fixed `getConfig()` that was setting all defined properties found instead of setting only those defined in bundle (03/09/2018)
+
 v2.2.1
 ------
 - Added `date` field (02/09/2018)

@@ -23,7 +23,7 @@ class ConfigType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         foreach ($options['data'] as $key => $value) {
-            if ('configDataReserved' !== $key) {
+            if ('configDataReserved' !== $key && is_array($value)) {
                 switch ($value['type']) {
                     case 'bool':
                         $classType = 'CheckboxType';
