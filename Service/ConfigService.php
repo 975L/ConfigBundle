@@ -109,7 +109,9 @@ class ConfigService implements ConfigServiceInterface
             $definedConfig = $this->getDefinedConfig($root);
             if (null !== $definedConfig) {
                 foreach ($definedConfig as $key => $value) {
-                    $config->$key['data'] = $value;
+                    if (property_exists($config, $key)) {
+                        $config->$key['data'] = $value;
+                    }
                 }
             }
         }
