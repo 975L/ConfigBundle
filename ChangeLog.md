@@ -1,5 +1,9 @@
 # Changelog
 
+v2.2.3
+------
+- Changed location for config folder for SF4 (18/10/2018)
+
 v2.2.2
 ------
 - Fixed `getConfig()` that was setting all defined properties found instead of setting only those defined in bundle (03/09/2018)

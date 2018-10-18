@@ -210,7 +210,7 @@ class ConfigService implements ConfigServiceInterface
     {
         $rootFolder = $this->container->getParameter('kernel.root_dir');
 
-        return '4' === substr(Kernel::VERSION, 0, 1) ? $rootFolder . '/../config/packages/' : $rootFolder . '/../app/config/';
+        return '4' === substr(Kernel::VERSION, 0, 1) ? $rootFolder . '/../config/' : $rootFolder . '/../app/config/';
     }
 
     /**
