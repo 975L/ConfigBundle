@@ -1,6 +1,9 @@
 # Changelog
 
+v2.2.4
+------
 - Added information in README.md (28/10/2018)
+- Added method `getContainerParameter()` (+Twig extension) as a shortcut to avoid injecting container when `ConfigService` is already injected (31/10/2018)
 
 v2.2.3
 ------
