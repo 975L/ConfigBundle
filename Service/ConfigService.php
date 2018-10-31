@@ -216,6 +216,14 @@ class ConfigService implements ConfigServiceInterface
     /**
      * {@inheritdoc}
      */
+    public function getContainerParameter(string $parameter)
+    {
+        return $this->container->getParameter($parameter);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getParameter(string $parameter, string $bundle = null)
     {
         if (strpos($parameter, '.')) {

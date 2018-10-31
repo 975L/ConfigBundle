@@ -69,6 +69,12 @@ interface ConfigServiceInterface
     public function getConfigFolder();
 
     /**
+     * Returns the value of container's parameter
+     * @return mixed
+     */
+    public function getContainerParameter(string $parameter);
+
+    /**
      * Returns the value of parameter
      * @return mixed
      * @throws \LogicException
