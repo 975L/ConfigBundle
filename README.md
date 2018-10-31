@@ -166,9 +166,14 @@ Check if parameter is defined inside a class
 --------------------------------------------
 To check if a parameter has been defined, use `$configService->hasParameter('yourRoot.yourParameter')`.
 
+Get Container's paramaters
+--------------------------
+You can use `$configService->getContainerParameter('parameter')` to access container's parameters and avoid injecting `Container` when `ConfigService` is already injected.
 
-Twig Extension
---------------
+Twig Extensions
+---------------
 If you need to access a parameter inside a Twig template, simply use `{{ config('yourRoot.yourParameter') }}`.
+
+If you need to access a container's parameter inside a Twig template, simply use `{{ configParam('parameter') }}`.
 
 **If this project help you to reduce time to develop, you can [buy me a coffee](https://www.buymeacoffee.com/LaurentMarquet) :)**
