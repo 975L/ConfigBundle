@@ -18,8 +18,8 @@
         }
     ],
     "require": {
-        "php": ">=5.5.9",
-        "symfony/yaml": "^4",
+        "php": "^7",
+        "symfony/yaml": "^3",
         "c975l/includelibrary-bundle": "^1",
         "c975l/toolbar-bundle": "^1",
         "c975l/services-bundle": "^1"
