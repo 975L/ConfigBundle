@@ -11,6 +11,7 @@ namespace c975L\ConfigBundle\Service;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\HttpKernel\Kernel;
@@ -98,30 +99,6 @@ class ConfigService implements ConfigServiceInterface
     /**
      * {@inheritdoc}
      */
-    public function getConfig(string $bundle)
-    {
-        //Initializes config with data defined in bundle.yaml
-        $config = $this->getBundleConfig($bundle);
-
-        //Updates config with data defined in config_bundles.yaml
-        $roots = $config->configDataReserved['roots'];
-        foreach ($roots as $root) {
-            $definedConfig = $this->getDefinedConfig($root);
-            if (null !== $definedConfig) {
-                foreach ($definedConfig as $key => $value) {
-                    if (property_exists($config, $key)) {
-                        $config->$key['data'] = $value;
-                    }
-                }
-            }
-        }
-
-        return $config;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getBundleConfig(string $bundle)
     {
         $file = $this->container->getParameter('kernel.root_dir') . '/../vendor/' . $bundle . '/Resources/config/bundle.yaml';
@@ -161,6 +138,58 @@ class ConfigService implements ConfigServiceInterface
     /**
      * {@inheritdoc}
      */
+    public function getBundles()
+    {
+        $folder = $this->container->getParameter('kernel.root_dir') . '/../vendor/*/*/Resources';
+
+        $bundlesConfigFiles = new Finder();
+        $bundlesConfigFiles
+            ->files()
+            ->name('bundle.yaml')
+            ->in($folder)
+            ->sortByName()
+        ;
+
+        //Creates the bundles array
+        $bundles = array();
+        foreach ($bundlesConfigFiles as $bundleConfigFile) {
+            $filename = $bundleConfigFile->getRealPath();
+            $bundle = substr($filename, 0, strpos($filename, '/Resources'));
+            $bundle = substr($bundle, strpos($bundle, 'vendor/') + 7);
+
+            $bundles[$bundle] = $filename;
+        }
+
+        return $bundles;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getConfig(string $bundle)
+    {
+        //Initializes config with data defined in bundle.yaml
+        $config = $this->getBundleConfig($bundle);
+
+        //Updates config with data defined in config_bundles.yaml
+        $roots = $config->configDataReserved['roots'];
+        foreach ($roots as $root) {
+            $definedConfig = $this->getDefinedConfig($root);
+            if (null !== $definedConfig) {
+                foreach ($definedConfig as $key => $value) {
+                    if (property_exists($config, $key)) {
+                        $config->$key['data'] = $value;
+                    }
+                }
+            }
+        }
+
+        return $config;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getDefinedConfig(string $root)
     {
         $globalConfig = $this->getGlobalConfig();
@@ -179,12 +208,6 @@ class ConfigService implements ConfigServiceInterface
      */
     public function getGlobalConfig()
     {
-        static $globalConfig;
-
-        if (null !== $globalConfig) {
-            return $globalConfig;
-        }
-
         $file = $this->getConfigFolder() . self::CONFIG_FILE_YAML;
         if (is_file($file)) {
             $globalConfig = Yaml::parseFile($file, Yaml::PARSE_DATETIME);
@@ -320,11 +343,11 @@ class ConfigService implements ConfigServiceInterface
         $newDefinedValues = $this->convertToArray($data);
         $globalConfig = $this->getGlobalConfig();
         $parameters = $data->configDataReserved['parameters'];
-        foreach ($parameters as $key => $value) {
-            if (is_array($value)) {
-                foreach ($value as $parameter) {
-                    if (array_key_exists($parameter, $newDefinedValues)) {
-                        $globalConfig[$key][$parameter] = $newDefinedValues[$parameter];
+        foreach ($parameters as $key => $values) {
+            if (is_array($values)) {
+                foreach ($values as $value) {
+                    if (array_key_exists($value, $newDefinedValues)) {
+                        $globalConfig[$key][$value] = $newDefinedValues[$value];
                     }
                 }
             }

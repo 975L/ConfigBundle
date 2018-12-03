@@ -1,5 +1,9 @@
 # Changelog
 
+v2.3
+----
+- Suppressed `ConfigFirstUseCommand` and replaced by `ConfigCreateCommand` (03/12/2018)
+
 v2.2.5
 ------
 - Modified versions in `composer.json` (03/12/2018)
