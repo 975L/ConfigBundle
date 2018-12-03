@@ -33,6 +33,11 @@ interface ConfigServiceInterface
     public function createForm(string $bundle);
 
     /**
+     * Gets all the bundles that have a bundle.yaml file
+     */
+    public function getBundles();
+
+    /**
      * Returns config data for specified bundle
      */
     public function getConfig(string $bundle);
