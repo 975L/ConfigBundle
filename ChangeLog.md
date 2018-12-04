@@ -1,5 +1,9 @@
 # Changelog
 
+v2.3.1
+------
+- Corrected error message when config file is not created (04/12/2018)
+
 v2.3
 ----
 - Suppressed `ConfigFirstUseCommand` and replaced by `ConfigCreateCommand` (03/12/2018)
