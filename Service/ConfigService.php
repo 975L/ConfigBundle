@@ -299,7 +299,7 @@ class ConfigService implements ConfigServiceInterface
                 return $parameters;
             //No bundle name provided
             } else {
-                throw new \LogicException("The config files are not created you should use `getParameter('yourRoot.yourParameter', 'vendor/bundle-name')`");
+                throw new \LogicException("The config files are not created you should use `php bin/console config:create`");
             }
 
             //Wrong bundle name
