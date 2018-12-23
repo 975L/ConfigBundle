@@ -1,5 +1,8 @@
 # Changelog
 
+- Added rector to composer dev part (23/12/2018)
+- Modified required versions in composer (23/12/2018)
+
 v2.3.1
 ------
 - Corrected error message when config file is not created (04/12/2018)

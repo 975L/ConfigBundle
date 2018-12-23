@@ -8,19 +8,18 @@
  */
 namespace c975L\ConfigBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Console\Input\InputArgument;
+use c975L\ConfigBundle\Service\ConfigServiceInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use c975L\ConfigBundle\Service\ConfigServiceInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * Console command to create config files, executed with 'config:create'
  * @author Laurent Marquet <laurent.marquet@laposte.net>
  * @copyright 2018 975L <contact@975l.com>
  */
-class ConfigCreateCommand extends ContainerAwareCommand
+class ConfigCreateCommand extends Command
 {
     /**
      * Stores ConfigServiceInterface

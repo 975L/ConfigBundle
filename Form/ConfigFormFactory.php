@@ -9,11 +9,8 @@
 
 namespace c975L\ConfigBundle\Form;
 
-use Symfony\Component\Form\Form;
-use Symfony\Component\Form\FormFactoryInterface;
 use c975L\ConfigBundle\Entity\Config;
-use c975L\ConfigBundle\Form\ConfigType;
-use c975L\ConfigBundle\Form\ConfigFormFactoryInterface;
+use Symfony\Component\Form\FormFactoryInterface;
 
 /**
  * ConfigFormFactoryInterface class

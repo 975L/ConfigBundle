@@ -9,8 +9,8 @@
 
 namespace c975L\ConfigBundle\Form;
 
-use Symfony\Component\Form\Form;
 use c975L\ConfigBundle\Entity\Config;
+use Symfony\Component\Form\Form;
 
 /**
  * Interface to be called for DI for ConfigFormFactoryInterface related services
