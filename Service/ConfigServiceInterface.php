@@ -9,9 +9,9 @@
 
 namespace c975L\ConfigBundle\Service;
 
-use Symfony\Component\Form\Form;
-use Symfony\Component\Config\Definition\ConfigurationInterface;
 use c975L\ConfigBundle\Entity\Config;
+use LogicException;
+use Symfony\Component\Form\Form;
 
 /**
  * Interface to be called for DI for ConfigServiceInterface related services
@@ -45,7 +45,7 @@ interface ConfigServiceInterface
     /**
      * Returns the configuration settings defined in the bundle.yaml
      * @return Config
-     * @throws \LogicException
+     * @throws LogicException
      */
     public function getBundleConfig(string $bundle);
 
@@ -82,14 +82,14 @@ interface ConfigServiceInterface
     /**
      * Returns the value of parameter
      * @return mixed
-     * @throws \LogicException
+     * @throws LogicException
      */
     public function getParameter(string $parameter, string $bundle = null);
 
     /**
      * Returns the array of bundles parameters from cache file
      * @return array
-     * @throws \LogicException
+     * @throws LogicException
      */
     public function getParametersCacheFile(string $root, string $bundle = null);
 

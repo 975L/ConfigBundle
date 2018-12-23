@@ -9,16 +9,16 @@
 
 namespace c975L\ConfigBundle\Service;
 
+use c975L\ConfigBundle\Entity\Config;
+use c975L\ConfigBundle\Form\ConfigFormFactoryInterface;
+use c975L\ServicesBundle\Service\ServiceToolsInterface;
+use LogicException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\Form;
-use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\HttpKernel\Kernel;
-use c975L\ServicesBundle\Service\ServiceToolsInterface;
-use c975L\ConfigBundle\Entity\Config;
-use c975L\ConfigBundle\Form\ConfigFormFactoryInterface;
-use c975L\ConfigBundle\Service\ConfigServiceInterface;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * ConfigService class
@@ -132,7 +132,7 @@ class ConfigService implements ConfigServiceInterface
             }
         }
 
-        throw new \LogicException('The bundle "' . $bundle . '" has not been defined. Check its name');
+        throw new LogicException('The bundle "' . $bundle . '" has not been defined. Check its name');
     }
 
     /**
@@ -260,7 +260,7 @@ class ConfigService implements ConfigServiceInterface
             }
         }
 
-        throw new \LogicException('Parameter "' . $parameter . '" defined using c975L/ConfigBundle is not defined! Try to use the config Route');
+        throw new LogicException('Parameter "' . $parameter . '" defined using c975L/ConfigBundle is not defined! Try to use the config Route');
     }
 
     /**
@@ -299,11 +299,11 @@ class ConfigService implements ConfigServiceInterface
                 return $parameters;
             //No bundle name provided
             } else {
-                throw new \LogicException("The config files are not created you should use `php bin/console config:create`");
+                throw new LogicException("The config files are not created you should use `php bin/console config:create`");
             }
 
             //Wrong bundle name
-            throw new \LogicException('The file ' . $bundle . '/Resources/config/bundle.yaml could not be found!');
+            throw new LogicException('The file ' . $bundle . '/Resources/config/bundle.yaml could not be found!');
         }
 
         $parameters = include_once($file);
