@@ -1,5 +1,7 @@
 # Changelog
 
+v2.3.2
+------
 - Added rector to composer dev part (23/12/2018)
 - Modified required versions in composer (23/12/2018)
 
