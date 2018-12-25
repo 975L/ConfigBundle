@@ -22,8 +22,8 @@
         "c975l/includelibrary-bundle": "^1",
         "c975l/services-bundle": "^1",
         "c975l/toolbar-bundle": "^1",
-        "symfony/form": "^4.2",
-        "symfony/yaml": "^3"
+        "symfony/form": "*",
+        "symfony/yaml": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^7.3@dev",
