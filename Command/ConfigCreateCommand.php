@@ -54,7 +54,7 @@ class ConfigCreateCommand extends Command
             //Assigns default value for parameter if not defined
             $globalConfig = $this->configService->getGlobalConfig();
             foreach ($parameters as $key => $value) {
-                $bundleConfig->$key =  !isset($globalConfig[$root]) || !array_key_exists($key, $globalConfig[$root]) ? $value['default'] : $globalConfig[$root][$key];
+                $bundleConfig->$key = !isset($globalConfig[$root]) || !array_key_exists($key, $globalConfig[$root]) ? $value['default'] : $globalConfig[$root][$key];
             }
             $this->configService->setConfig($bundleConfig);
         }
