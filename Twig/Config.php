@@ -11,6 +11,7 @@ namespace c975L\ConfigBundle\Twig;
 
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use Twig_Extension;
+use Twig_SimpleFunction;
 
 /**
  * Twig extension to display the Config parameter using `config('YOUR_PARAMETER_NAME')
