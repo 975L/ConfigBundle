@@ -11,6 +11,7 @@ namespace c975L\ConfigBundle\Twig;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Twig_Extension;
+use Twig_SimpleFunction;
 
 /**
  * Twig extension to display the Container's parameter using `configParam('YOUR_PARAMETER_NAME')
