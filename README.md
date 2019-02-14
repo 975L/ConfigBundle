@@ -95,20 +95,19 @@ Then your Controller file:
 
 namespace App\Bundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 
-class YourController extends Controller
+class YourController extends AbstractController
 {
     /**
      * @Route("/your_name/config",
-     *      name="your_name_config")
-     * @Method({"GET", "HEAD", "POST"})
+     *    name="your_name_config",
+     *    methods={"HEAD", "GET", "POST"})
      */
     public function config(Request $request, ConfigServiceInterface $configService)
     {
