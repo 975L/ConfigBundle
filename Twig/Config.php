@@ -10,15 +10,15 @@
 namespace c975L\ConfigBundle\Twig;
 
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
-use Twig_Extension;
-use Twig_SimpleFunction;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFunction;
 
 /**
  * Twig extension to display the Config parameter using `config('YOUR_PARAMETER_NAME')
  * @author Laurent Marquet <laurent.marquet@laposte.net>
  * @copyright 2018 975L <contact@975l.com>
  */
-class Config extends Twig_Extension
+class Config extends AbstractExtension
 {
     /**
      * Stores ConfigServiceInterface
@@ -34,7 +34,7 @@ class Config extends Twig_Extension
     public function getFunctions()
     {
         return array(
-            new Twig_SimpleFunction(
+            new TwigFunction(
                 'config',
                 array($this, 'config')
             )
