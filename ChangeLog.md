@@ -1,5 +1,10 @@
 # Changelog
 
+v2.3.6
+------
+- Made use of Twig namespace (11/03/2019)
+- Added declaration of $formFactory (11/03/2019)
+
 v2.3.5
 ------
 - Removed deprecations for @Method in `README.md` example (13/02/2019)

@@ -26,10 +26,10 @@
         "symfony/yaml": "*"
     },
     "require-dev": {
-        "phpstan/phpstan": "^0.10.7",
-        "phpunit/phpunit": "^7.3@dev",
-        "rector/rector": "^0.3",
-        "symplify/easy-coding-standard": "^5.2"
+        "phpstan/phpstan": "^0",
+        "phpunit/phpunit": "^7",
+        "rector/rector": "^0",
+        "symplify/easy-coding-standard": "^5"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,

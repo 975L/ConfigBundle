@@ -10,15 +10,15 @@
 namespace c975L\ConfigBundle\Twig;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Twig_Extension;
-use Twig_SimpleFunction;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFunction;
 
 /**
  * Twig extension to display the Container's parameter using `configParam('YOUR_PARAMETER_NAME')
  * @author Laurent Marquet <laurent.marquet@laposte.net>
  * @copyright 2018 975L <contact@975l.com>
  */
-class ConfigParam extends Twig_Extension
+class ConfigParam extends AbstractExtension
 {
     /**
      * Stores ContainerInterface
@@ -34,7 +34,7 @@ class ConfigParam extends Twig_Extension
     public function getFunctions()
     {
         return array(
-            new Twig_SimpleFunction(
+            new TwigFunction(
                 'configParam',
                 array($this, 'configParam')
             )
