@@ -1,5 +1,9 @@
 # Changelog
 
+v2.4
+----
+- Made use of apply spaceless (05/08/2019)
+
 v2.3.6.1
 --------
 - Changed Github's author reference url (08/04/2019)

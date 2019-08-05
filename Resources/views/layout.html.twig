@@ -1,6 +1,6 @@
 {% trans_default_domain 'config' %}
 
-{% spaceless %}
+{% apply spaceless %}
 <!DOCTYPE html>
 <html lang="{{ app.request.locale }}">
     <head>
@@ -24,4 +24,4 @@
         {% endblock %}
     </body>
 </html>
-{% endspaceless %}
+{% endapply %}
