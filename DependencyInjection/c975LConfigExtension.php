@@ -21,6 +21,9 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
  */
 class c975LConfigExtension extends Extension
 {
+    /**
+     * {@inheritdoc}
+     */
     public function load(array $configs, ContainerBuilder $container)
     {
         $loader = new YamlFileLoader(
