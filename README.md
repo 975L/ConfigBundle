@@ -1,7 +1,6 @@
-ConfigBundle
-=================
+# ConfigBundle
 
-**This Bundle >= v2.0 doesn't use the `Configuration` class to build the modify form for parameters, but its own defined system of key-value. See branch 1.x for the use case with `Configuration` class.**
+Please not that **this Bundle >= v2.0 doesn't use the `Configuration` class to build the modify form for parameters, but its own defined system of key-value. See branch 1.x for the use case with `Configuration` class.**
 
 ConfigBundle does the following:
 
@@ -13,18 +12,19 @@ ConfigBundle does the following:
 
 [ConfigBundle API documentation](https://975l.com/apidoc/c975L/ConfigBundle.html).
 
-Bundle installation
-===================
+## Bundle installation
 
-Step 1: Download the Bundle
----------------------------
+
+### Step 1: Download the Bundle
+
 Use [Composer](https://getcomposer.org) to install the library
+
 ```bash
     composer require c975l/config-bundle
 ```
 
-Step 2: Enable the Bundles
---------------------------
+### Step 2: Enable the Bundles
+
 Then, enable the bundle by adding it to the list of registered bundles in the `app/AppKernel.php` file of your project:
 
 ```php
@@ -41,13 +41,14 @@ class AppKernel extends Kernel
 }
 ```
 
-Step 3: Override templates
---------------------------
+### Step 3: Override templates
+
 It is strongly recommended to use the [Override Templates from Third-Party Bundles feature](http://symfony.com/doc/current/templating/overriding.html) to integrate fully with your site.
 
 For this, simply, create the following structure `[app/Resources|templates/bundles]/c975LConfigBundle/views/` in your app and then duplicate the file `layout.html.twig` in it, to override the existing Bundle file.
 
 In `layout.html.twig`, it will mainly consist to extend your layout and define specific variables, i.e. :
+
 ```twig
 {% extends 'layout.html.twig' %}
 
@@ -60,13 +61,14 @@ In `layout.html.twig`, it will mainly consist to extend your layout and define s
 {% endblock %}
 ```
 
-How to use
-----------
-In your Bundle, you need to create a file `/Resources/config/bundle.yaml` (description of the needed fields) + Controller (Route to access config form) [+ Voter (Checking for access rights)] and that's it! Code examples are given below.
+### How to use
+
+In your Bundle, you need to create a file `/Resources/config/bundle.yaml` (description of the needed fields) + Controller (Route to access config form) + Voter (Checking for access rights) and that's it! Code examples are given below.
 
 Before the first use, if parameters are requested you must use the console command `php bin/console config:create` to create the config files from default data of the bundle.
 
 When updating the configuration, two files are created:
+
 - `[app/Resources]config/config_bundles.yaml` that contains the values for defined fields, **You must add this file to your `.gitignore` to ensure not storing data, like API keys, to a public/private repository**
 - `cache/dev|prod|test/configBundles.php` that contains an associative array of the fields `'yourRoot.yourParameter' => 'value'`.
 
@@ -89,6 +91,7 @@ yourRoot: #Name of your bundle without its 'Bundle' part, but including its vend
 ```
 
 Then your Controller file:
+
 ```php
 <?php
 //Your Controller file
@@ -135,8 +138,8 @@ class YourController extends AbstractController
 
 Then call the defined Route in a web browser and set-up (or your user) the configuration parameters.
 
-Get parameter inside a class
-----------------------------
+### Get parameter inside a class
+
 To get a parameter inside a class, use the following code:
 
 ```php
@@ -161,18 +164,18 @@ class YourClass
 }
 ```
 
-Check if parameter is defined inside a class
---------------------------------------------
+### Check if parameter is defined inside a class
+
 To check if a parameter has been defined, use `$configService->hasParameter('yourRoot.yourParameter')`.
 
-Get Container's paramaters
---------------------------
+### Get Container's paramaters
+
 You can use `$configService->getContainerParameter('parameter')` to access container's parameters and avoid injecting `Container` when `ConfigService` is already injected.
 
-Twig Extensions
----------------
+### Twig Extensions
+
 If you need to access a parameter inside a Twig template, simply use `{{ config('yourRoot.yourParameter') }}`.
 
 If you need to access a container's parameter inside a Twig template, simply use `{{ configParam('parameter') }}`.
 
-**If this project help you to reduce time to develop, you can [buy me a coffee](https://www.buymeacoffee.com/LaurentMarquet) :)**
+If this project **help you to reduce time to develop**, you can sponsor me via the "Sponsor" button at the top :)
