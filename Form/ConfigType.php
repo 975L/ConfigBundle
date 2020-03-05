@@ -27,25 +27,16 @@ class ConfigType extends AbstractType
     {
         foreach ($options['data'] as $key => $value) {
             if ('configDataReserved' !== $key && is_array($value)) {
-                switch ($value['type']) {
-                    case 'bool':
-                        $classType = 'CheckboxType';
-                        break;
-                    case 'date':
-                        $classType = 'DateType';
-                        break;
-                    case 'int':
-                        $classType = 'IntegerType';
-                        break;
-                    case 'float':
-                        $classType = 'NumberType';
-                        break;
-                    case 'array':
-                    case 'string':
-                    default:
-                        $classType = 'TextType';
-                        break;
-                }
+                $classesTypes = array(
+                    'bool' => 'CheckboxType',
+                    'date' => 'DateType',
+                    'int' => 'IntegerType',
+                    'float' => 'NumberType',
+                    'array' => 'TextType',
+                    'string' => 'TextType',
+                );
+
+                $classType = isset($classesTypes[$value['type']]) ? $classesTypes[$value['type']] : 'TextType';
 
                 //Defines field options
                 $fieldOptions = array(

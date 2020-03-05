@@ -231,9 +231,9 @@ class ConfigService implements ConfigServiceInterface
      */
     public function getConfigFolder()
     {
-        $rootFolder = $this->container->getParameter('kernel.root_dir');
+        $root = $this->container->getParameter('kernel.root_dir');
 
-        return '4' === substr(Kernel::VERSION, 0, 1) ? $rootFolder . '/../config/' : $rootFolder . '/../app/config/';
+        return '3' === substr(Kernel::VERSION, 0, 1) ? $root . '/../app/config/' : $root . '/../config/';
     }
 
     /**
