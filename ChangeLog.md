@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.4.3
+
+- Corrected unneded config in DependencyInjection (04/03/2020)
+- Removed sitch function to reduce Cyclomatic complexity (05/03/2020)
+
 ## v2.4.2
 
 - Cosmetic changes dur to Codacy review (04/03/2020)
@@ -108,7 +113,6 @@
 
 - Created branch 1.x (30/08/2018)
 - Modified files to use own sytem of key-value for config (30/08/2018)
-
 
 ## v1.x
 

@@ -14,7 +14,6 @@ ConfigBundle does the following:
 
 ## Bundle installation
 
-
 ### Step 1: Download the Bundle
 
 Use [Composer](https://getcomposer.org) to install the library
