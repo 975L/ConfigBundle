@@ -1,9 +1,13 @@
 # Changelog
 
+## v2.5
+
+- Removed versions constraints in composer (03/09/2021)
+
 ## v2.4.3
 
 - Corrected unneded config in DependencyInjection (04/03/2020)
-- Removed sitch function to reduce Cyclomatic complexity (05/03/2020)
+- Removed switch function to reduce Cyclomatic complexity (05/03/2020)
 
 ## v2.4.2
 
