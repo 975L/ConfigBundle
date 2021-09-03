@@ -101,7 +101,7 @@ class ConfigService implements ConfigServiceInterface
      */
     public function getBundleConfig(string $bundle)
     {
-        $file = $this->container->getParameter('kernel.root_dir') . '/../vendor/' . $bundle . '/Resources/config/bundle.yaml';
+        $file = $this->container->getParameter('kernel.project_dir') . '/../vendor/' . $bundle . '/Resources/config/bundle.yaml';
 
         if (is_file($file)) {
             $yamlBundleConfig = Yaml::parseFile($file);
@@ -140,7 +140,7 @@ class ConfigService implements ConfigServiceInterface
      */
     public function getBundles()
     {
-        $folder = $this->container->getParameter('kernel.root_dir') . '/../vendor/*/*/Resources';
+        $folder = $this->container->getParameter('kernel.project_dir') . '/../vendor/*/*/Resources';
 
         $bundlesConfigFiles = new Finder();
         $bundlesConfigFiles
@@ -231,7 +231,7 @@ class ConfigService implements ConfigServiceInterface
      */
     public function getConfigFolder()
     {
-        $root = $this->container->getParameter('kernel.root_dir');
+        $root = $this->container->getParameter('kernel.project_dir');
 
         return '3' === substr(Kernel::VERSION, 0, 1) ? $root . '/../app/config/' : $root . '/../config/';
     }
