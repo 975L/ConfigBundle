@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.5.3
+
+- Added key `$name` (06/09/2021)
+
 ## v2.5.2
 
 - Removed `../` after  `kernel.project_dir` (06/09/2021)

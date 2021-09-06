@@ -45,7 +45,7 @@ class ConfigCreateCommand extends Command
     {
         //Defines bundles default config
         $bundles = $this->configService->getBundles();
-        foreach ($bundles as $bundle) {
+        foreach ($bundles as $bundle=> $name) {
             $bundleConfig = $this->configService->getBundleConfig($bundle);
             $parameters = get_object_vars($bundleConfig);
             $root = $parameters['configDataReserved']['roots'][0];
