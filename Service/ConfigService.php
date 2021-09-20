@@ -346,7 +346,7 @@ class ConfigService implements ConfigServiceInterface
         foreach ($parameters as $key => $values) {
             if (is_array($values)) {
                 foreach ($values as $value) {
-                    if (array_key_exists($value, $newDefinedValues)) {
+                    if (array_key_exists($value, $newDefinedValues) && null !== $newDefinedValues[$value]) {
                         $globalConfig[$key][$value] = $newDefinedValues[$value];
                     }
                 }
