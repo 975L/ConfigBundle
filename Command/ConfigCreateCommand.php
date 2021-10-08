@@ -64,5 +64,7 @@ class ConfigCreateCommand extends Command
         $io->title('c975L/ConfigBundle');
         $io->text('Creates/Updates config files');
         $io->success('Config files have been created/updated!');
+
+        return Command::SUCCESS;
     }
 }
