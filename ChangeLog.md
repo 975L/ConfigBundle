@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v2.5.5
+
+- Added return for console Command (08/10/2021)
+
 ## v2.5.4
 
 - Added condition test if newDefindeValue is NOT null (20/09/2021)
