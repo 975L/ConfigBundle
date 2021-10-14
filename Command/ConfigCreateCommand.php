@@ -13,6 +13,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * Console command to create config files, executed with 'config:create'
@@ -65,6 +66,10 @@ class ConfigCreateCommand extends Command
         $io->text('Creates/Updates config files');
         $io->success('Config files have been created/updated!');
 
-        return Command::SUCCESS;
+        if ('5' === substr(Kernel::VERSION, 0, 1)) {
+            return Command::SUCCESS;
+        }
+
+        return 0;
     }
 }
