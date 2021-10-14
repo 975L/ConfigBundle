@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v2.5.6
+
+- Corrected Command return for SF 4 (14/10/2021)
+
 ## v2.5.5
 
 - Added return for console Command (08/10/2021)
