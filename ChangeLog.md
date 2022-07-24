@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v2.6
+
+- Made use of ParameterBag instead of container (24/07/2022)
+
 ## v2.5.8.1
 
 - Suppressed (missed) use of container (24/04/2022)

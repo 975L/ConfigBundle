@@ -13,6 +13,7 @@ use c975L\ConfigBundle\Entity\Config;
 use c975L\ConfigBundle\Form\ConfigFormFactoryInterface;
 use c975L\ServicesBundle\Service\ServiceToolsInterface;
 use LogicException;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\Form;
@@ -31,6 +32,12 @@ class ConfigService implements ConfigServiceInterface
      * @var ConfigFormFactoryInterface
      */
     private $configFormFactory;
+
+    /**
+     * Stores ParameterBagInterface
+     * @var ParameterBagInterface
+     */
+    private $params;
 
     /**
      * Stores ServiceToolsInterface
@@ -52,10 +59,11 @@ class ConfigService implements ConfigServiceInterface
 
     public function __construct(
         ConfigFormFactoryInterface $configFormFactory,
+        ParameterBagInterface $params,
         ServiceToolsInterface $serviceTools
-    )
-    {
+    ) {
         $this->configFormFactory = $configFormFactory;
+        $this->params = $params;
         $this->serviceTools = $serviceTools;
     }
 
@@ -92,7 +100,7 @@ class ConfigService implements ConfigServiceInterface
      */
     public function getBundleConfig(string $bundle)
     {
-        $file = $this->container->getParameter('kernel.project_dir') . '/vendor/' . $bundle . '/Resources/config/bundle.yaml';
+        $file = $this->params->get('kernel.project_dir') . '/vendor/' . $bundle . '/Resources/config/bundle.yaml';
 
         if (is_file($file)) {
             $yamlBundleConfig = Yaml::parseFile($file);
@@ -131,7 +139,7 @@ class ConfigService implements ConfigServiceInterface
      */
     public function getBundles()
     {
-        $folder = $this->container->getParameter('kernel.project_dir') . '/vendor/*/*/Resources';
+        $folder = $this->params->get('kernel.project_dir') . '/vendor/*/*/Resources';
 
         $bundlesConfigFiles = new Finder();
         $bundlesConfigFiles
@@ -214,7 +222,7 @@ class ConfigService implements ConfigServiceInterface
      */
     public function getCacheFolder()
     {
-        return $this->container->getParameter('kernel.cache_dir') . '/';
+        return $this->params->get('kernel.cache_dir') . '/';
     }
 
     /**
@@ -222,7 +230,7 @@ class ConfigService implements ConfigServiceInterface
      */
     public function getConfigFolder()
     {
-        $root = $this->container->getParameter('kernel.project_dir');
+        $root = $this->params->get('kernel.project_dir');
 
         return '3' === substr(Kernel::VERSION, 0, 1) ? $root . '/app/config/' : $root . '/config/';
     }
@@ -232,7 +240,7 @@ class ConfigService implements ConfigServiceInterface
      */
     public function getContainerParameter(string $parameter)
     {
-        return $this->container->getParameter($parameter);
+        return $this->params->get($parameter);
     }
 
     /**
