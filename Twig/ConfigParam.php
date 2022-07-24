@@ -9,7 +9,6 @@
 
 namespace c975L\ConfigBundle\Twig;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -20,17 +19,6 @@ use Twig\TwigFunction;
  */
 class ConfigParam extends AbstractExtension
 {
-    /**
-     * Stores ContainerInterface
-     * @var ContainerInterface
-     */
-    private $container;
-
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
-    }
-
     public function getFunctions()
     {
         return array(
