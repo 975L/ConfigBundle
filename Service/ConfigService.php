@@ -13,7 +13,6 @@ use c975L\ConfigBundle\Entity\Config;
 use c975L\ConfigBundle\Form\ConfigFormFactoryInterface;
 use c975L\ServicesBundle\Service\ServiceToolsInterface;
 use LogicException;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\Form;
@@ -34,12 +33,6 @@ class ConfigService implements ConfigServiceInterface
     private $configFormFactory;
 
     /**
-     * Stores ContainerInterface
-     * @var ContainerInterface
-     */
-    private $container;
-
-    /**
      * Stores ServiceToolsInterface
      * @var ServiceToolsInterface
      */
@@ -58,13 +51,11 @@ class ConfigService implements ConfigServiceInterface
     public const CONFIG_FILE_YAML = 'config_bundles.yaml';
 
     public function __construct(
-        ContainerInterface $container,
         ConfigFormFactoryInterface $configFormFactory,
         ServiceToolsInterface $serviceTools
     )
     {
         $this->configFormFactory = $configFormFactory;
-        $this->container = $container;
         $this->serviceTools = $serviceTools;
     }
 

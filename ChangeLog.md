@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v2.5.8
+
+- Suppressed use of container (24/04/2022)
+
 ## v2.5.7
 
 - Changed composer versions constraints (24/07/2022)
