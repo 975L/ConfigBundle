@@ -9,6 +9,7 @@
 
 namespace c975L\ConfigBundle\Twig;
 
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -19,6 +20,19 @@ use Twig\TwigFunction;
  */
 class ConfigParam extends AbstractExtension
 {
+
+    /**
+     * Stores ParameterBagInterface
+     * @var ParameterBagInterface
+     */
+    private $params;
+
+    public function __construct(
+        ParameterBagInterface $params
+    ) {
+        $this->params = $params;
+    }
+
     public function getFunctions()
     {
         return array(
