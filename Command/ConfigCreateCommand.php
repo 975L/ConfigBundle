@@ -22,16 +22,12 @@ use Symfony\Component\HttpKernel\Kernel;
  */
 class ConfigCreateCommand extends Command
 {
-    /**
+    public function __construct(/**
      * Stores ConfigServiceInterface
-     * @var ConfigServiceInterface
      */
-    private $configService;
-
-    public function __construct(ConfigServiceInterface $configService)
+    private readonly ConfigServiceInterface $configService)
     {
         parent::__construct();
-        $this->configService = $configService;
     }
 
     protected function configure()
@@ -66,7 +62,7 @@ class ConfigCreateCommand extends Command
         $io->text('Creates/Updates config files');
         $io->success('Config files have been created/updated!');
 
-        if ('5' === substr(Kernel::VERSION, 0, 1)) {
+        if (str_starts_with(Kernel::VERSION, '5')) {
             return Command::SUCCESS;
         }
 

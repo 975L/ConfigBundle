@@ -21,26 +21,21 @@ use Twig\TwigFunction;
 class ConfigParam extends AbstractExtension
 {
 
-    /**
-     * Stores ParameterBagInterface
-     * @var ParameterBagInterface
-     */
-    private $params;
-
     public function __construct(
-        ParameterBagInterface $params
-    ) {
-        $this->params = $params;
+        /**
+         * Stores ParameterBagInterface
+         */
+        private readonly ParameterBagInterface $params
+    )
+    {
     }
 
     public function getFunctions()
     {
-        return array(
-            new TwigFunction(
-                'configParam',
-                array($this, 'configParam')
-            )
-        );
+        return [new TwigFunction(
+            'configParam',
+            $this->configParam(...)
+        )];
     }
 
     /**
@@ -51,6 +46,6 @@ class ConfigParam extends AbstractExtension
     {
         $value = $this->container->getParameter($parameter);
 
-        return is_array($value) ? json_encode($value) : $value;
+        return is_array($value) ? json_encode($value, JSON_THROW_ON_ERROR) : $value;
     }
 }

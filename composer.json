@@ -18,7 +18,7 @@
         }
     ],
     "require": {
-        "php": "*",
+        "php": "^8",
         "c975l/includelibrary-bundle": "*",
         "c975l/services-bundle": "*",
         "c975l/toolbar-bundle": "*",

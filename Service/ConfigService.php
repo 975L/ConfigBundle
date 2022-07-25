@@ -28,43 +28,32 @@ use Symfony\Component\Yaml\Yaml;
 class ConfigService implements ConfigServiceInterface
 {
     /**
-     * Stores ConfigFormFactoryInterface
-     * @var ConfigFormFactoryInterface
-     */
-    private $configFormFactory;
-
-    /**
-     * Stores ParameterBagInterface
-     * @var ParameterBagInterface
-     */
-    private $params;
-
-    /**
-     * Stores ServiceToolsInterface
-     * @var ServiceToolsInterface
-     */
-    private $serviceTools;
-
-    /**
      * Used for configBundles.php
      * @var string
      */
-    public const CONFIG_FILE_PHP = 'configBundles.php';
+    final public const CONFIG_FILE_PHP = 'configBundles.php';
 
     /**
      * Used for config_bundles.yaml
      * @var string
      */
-    public const CONFIG_FILE_YAML = 'config_bundles.yaml';
+    final public const CONFIG_FILE_YAML = 'config_bundles.yaml';
 
     public function __construct(
-        ConfigFormFactoryInterface $configFormFactory,
-        ParameterBagInterface $params,
-        ServiceToolsInterface $serviceTools
-    ) {
-        $this->configFormFactory = $configFormFactory;
-        $this->params = $params;
-        $this->serviceTools = $serviceTools;
+        /**
+         * Stores ConfigFormFactoryInterface
+         */
+        private readonly ConfigFormFactoryInterface $configFormFactory,
+        /**
+         * Stores ParameterBagInterface
+         */
+        private readonly ParameterBagInterface $params,
+        /**
+         * Stores ServiceToolsInterface
+         */
+        private readonly ServiceToolsInterface $serviceTools
+    )
+    {
     }
 
     /**
@@ -106,8 +95,8 @@ class ConfigService implements ConfigServiceInterface
             $yamlBundleConfig = Yaml::parseFile($file);
             if (is_array($yamlBundleConfig)) {
                 $config = new Config();
-                $parameters = array();
-                $roots = array();
+                $parameters = [];
+                $roots = [];
                 //Parses the yaml content
                 foreach ($yamlBundleConfig as $rootKey => $rootValue) {
                     foreach ($rootValue as $key => $value) {
@@ -121,11 +110,7 @@ class ConfigService implements ConfigServiceInterface
                 }
 
                 //Adds data used when writing file
-                $config->configDataReserved = array(
-                    'bundle' => $bundle,
-                    'parameters' => $parameters,
-                    'roots' => $roots,
-                );
+                $config->configDataReserved = ['bundle' => $bundle, 'parameters' => $parameters, 'roots' => $roots];
 
                 return $config;
             }
@@ -150,7 +135,7 @@ class ConfigService implements ConfigServiceInterface
         ;
 
         //Creates the bundles array
-        $bundles = array();
+        $bundles = [];
         foreach ($bundlesConfigFiles as $bundleConfigFile) {
             $filename = $bundleConfigFile->getRealPath();
             $bundle = substr($filename, 0, strpos($filename, '/Resources'));
@@ -232,7 +217,7 @@ class ConfigService implements ConfigServiceInterface
     {
         $root = $this->params->get('kernel.project_dir');
 
-        return '3' === substr(Kernel::VERSION, 0, 1) ? $root . '/app/config/' : $root . '/config/';
+        return str_starts_with(Kernel::VERSION, '3') ? $root . '/app/config/' : $root . '/config/';
     }
 
     /**
@@ -287,11 +272,11 @@ class ConfigService implements ConfigServiceInterface
             } elseif (null !== $bundle) {
                 $bundleDefaultConfig = $this->convertToArray($this->getBundleConfig($bundle));
 
-                $defaultConfig = array();
+                $defaultConfig = [];
                 foreach ($bundleDefaultConfig as $key => $value) {
                     $defaultConfig[$key] = $value['default'];
                 }
-                $parameters = array($root => $defaultConfig);
+                $parameters = [$root => $defaultConfig];
                 $this->writeYamlFile($parameters);
                 $this->writePhpFile($parameters);
 
@@ -357,7 +342,7 @@ class ConfigService implements ConfigServiceInterface
         $this->writePhpFile($globalConfig);
 
         //Creates flash
-        $this->serviceTools->createFlash('config', 'text.config_updated');
+        $this->serviceTools->createFlash('text.config_updated', 'config');
     }
 
     /**
@@ -370,7 +355,7 @@ class ConfigService implements ConfigServiceInterface
         //Removes quotes around array otherwise yaml will not see it as an array
         $yamlContent = preg_replace("/'({.*})'/", '$1', $yamlContent);
         $yamlContent = preg_replace("/'(\[.*\])'/", '$1', $yamlContent);
-        $yamlContent = str_replace(array('\'"', '"\''), "'", $yamlContent);
+        $yamlContent = str_replace(['\'"', '"\''], "'", $yamlContent);
 
         $fs = new Filesystem();
         $file = $this->getConfigFolder() . self::CONFIG_FILE_YAML;
@@ -389,7 +374,7 @@ class ConfigService implements ConfigServiceInterface
         $fs = new Filesystem();
         $file = $this->getCacheFolder() . self::CONFIG_FILE_PHP;
         $phpContent = "<?php\nreturn " . var_export($globalConfig, true) . ';';
-        $phpContent = str_replace(array('\'"', '"\''), "'", $phpContent);
+        $phpContent = str_replace(['\'"', '"\''], "'", $phpContent);
 
         $fs->dumpFile($file, $phpContent);
     }

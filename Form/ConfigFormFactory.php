@@ -19,15 +19,13 @@ use Symfony\Component\Form\FormFactoryInterface;
  */
 class ConfigFormFactory implements ConfigFormFactoryInterface
 {
-    /**
-     * Stores the FormFactory
-     * @var FormFactoryInterface
-     */
-    private $formFactory;
-
-    public function __construct(FormFactoryInterface $formFactory)
+    public function __construct(
+        /**
+         * Stores the FormFactory
+         */
+        private readonly FormFactoryInterface $formFactory
+    )
     {
-        $this->formFactory = $formFactory;
     }
 
     /**
