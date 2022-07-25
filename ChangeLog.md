@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v3.0
+
+- Changed compatibility to PHP 8 (25/07/2022)
+
 ## v2.6
 
 - Made use of ParameterBag instead of container (24/07/2022)

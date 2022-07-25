@@ -27,29 +27,12 @@ class ConfigType extends AbstractType
     {
         foreach ($options['data'] as $key => $value) {
             if ('configDataReserved' !== $key && is_array($value)) {
-                $classesTypes = array(
-                    'bool' => 'CheckboxType',
-                    'date' => 'DateType',
-                    'int' => 'IntegerType',
-                    'float' => 'NumberType',
-                    'array' => 'TextType',
-                    'string' => 'TextType',
-                );
+                $classesTypes = ['bool' => 'CheckboxType', 'date' => 'DateType', 'int' => 'IntegerType', 'float' => 'NumberType', 'array' => 'TextType', 'string' => 'TextType'];
 
-                $classType = isset($classesTypes[$value['type']]) ? $classesTypes[$value['type']] : 'TextType';
+                $classType = $classesTypes[$value['type']] ?? 'TextType';
 
                 //Defines field options
-                $fieldOptions = array(
-                    'label' => $key,
-                    'label_attr' => array(
-                        'title' => null !== $value['info'] ? $value['info'] : $key,
-                    ),
-                    'required' => $value['required'],
-                    'data' => is_array($value['data']) ? json_encode($value['data']) : $value['data'],
-                    'attr' => array(
-                        'placeholder' => null !== $value['info'] ? $value['info'] : $key,
-                        'title' => null !== $value['info'] ? $value['info'] : $key,
-                    ));
+                $fieldOptions = ['label' => $key, 'label_attr' => ['title' => $value['info'] ?? $key], 'required' => $value['required'], 'data' => is_array($value['data']) ? json_encode($value['data'], JSON_THROW_ON_ERROR) : $value['data'], 'attr' => ['placeholder' => $value['info'] ?? $key, 'title' => $value['info'] ?? $key]];
 
                 //Defines specific data for date field
                 if ('DateType' === $classType) {
@@ -82,10 +65,6 @@ class ConfigType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
-            'data_class' => 'c975L\ConfigBundle\Entity\Config',
-            'intention'  => 'configForm',
-            'translation_domain' => 'config',
-        ));
+        $resolver->setDefaults(['data_class' => \c975L\ConfigBundle\Entity\Config::class, 'intention'  => 'configForm', 'translation_domain' => 'config']);
     }
 }

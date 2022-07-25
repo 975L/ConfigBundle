@@ -20,25 +20,21 @@ use Twig\TwigFunction;
  */
 class Config extends AbstractExtension
 {
-    /**
-     * Stores ConfigServiceInterface
-     * @var ConfigServiceInterface
-     */
-    private $configService;
-
-    public function __construct(ConfigServiceInterface $configService)
+    public function __construct(
+        /**
+         * Stores ConfigServiceInterface
+         */
+        private readonly ConfigServiceInterface $configService
+    )
     {
-        $this->configService = $configService;
     }
 
     public function getFunctions()
     {
-        return array(
-            new TwigFunction(
-                'config',
-                array($this, 'config')
-            )
-        );
+        return [new TwigFunction(
+            'config',
+            $this->config(...)
+        )];
     }
 
     /**
@@ -49,6 +45,6 @@ class Config extends AbstractExtension
     {
         $value = $this->configService->getParameter($parameter);
 
-        return is_array($value) ? json_encode($value) : $value;
+        return is_array($value) ? json_encode($value, JSON_THROW_ON_ERROR) : $value;
     }
 }
