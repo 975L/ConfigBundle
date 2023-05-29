@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v3.0.2
+
+- Added TreeBuilder return type (29/05/2023)
+
 ## v3.0.1
 
 - Added missing return type (06/04/2023)
