@@ -38,7 +38,7 @@ class ConfigCreateCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         //Defines bundles default config
         $bundles = $this->configService->getBundles();
