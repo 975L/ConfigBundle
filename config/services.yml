@@ -4,13 +4,13 @@ services:
         autoconfigure: true
 
     c975L\ConfigBundle\Command\:
-        resource: '../../Command/*'
+        resource: '../src./Command/*'
 
     c975L\ConfigBundle\Form\:
-        resource: '../../Form/*'
+        resource: '../src/Form/*'
 
     c975L\ConfigBundle\Service\:
-        resource: '../../Service/*'
+        resource: '../src/Service/*'
 
     c975L\ConfigBundle\Twig\:
-        resource: '../../Twig/*'
+        resource: '../src/Twig/*'
