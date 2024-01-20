@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v4.0.1
+
+- Corrected AbstractBundle (20/01/2024)
+
 ## v4.0
 
 - Changed to new recomended bundle SF 7 structure (20/01/2024)
