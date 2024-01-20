@@ -18,7 +18,7 @@
         }
     ],
     "require": {
-        "php": "^8",
+        "php": ">=8.0",
         "c975l/includelibrary-bundle": "*",
         "c975l/services-bundle": "*",
         "c975l/toolbar-bundle": "*",
@@ -31,7 +31,7 @@
     "prefer-stable": true,
     "autoload": {
         "psr-4": {
-            "c975L\\ConfigBundle\\": ""
+            "c975L\\ConfigBundle\\": "src/"
         }
     },
     "config": {
