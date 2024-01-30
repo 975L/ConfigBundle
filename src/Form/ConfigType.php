@@ -23,7 +23,7 @@ class ConfigType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         foreach ($options['data'] as $key => $value) {
             if ('configDataReserved' !== $key && is_array($value)) {
