@@ -1,6 +1,14 @@
 # ChangeLog
 
-## v4.1
+## v4.2.1
+
+- Updated README (30/01/2024)
+
+## v4.2
+
+- Corrected calls for Resources folder (30/01/2024)
+
+## v4.1
 
 - Corrected config (30/01/2024)
 

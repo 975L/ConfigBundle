@@ -44,7 +44,7 @@ class AppKernel extends Kernel
 
 It is strongly recommended to use the [Override Templates from Third-Party Bundles feature](http://symfony.com/doc/current/templating/overriding.html) to integrate fully with your site.
 
-For this, simply, create the following structure `[app/Resources|templates/bundles]/c975LConfigBundle/views/` in your app and then duplicate the file `layout.html.twig` in it, to override the existing Bundle file.
+For this, simply, create the following structure `templates/bundles/c975LConfigBundle/views/` in your app and then duplicate the file `layout.html.twig` in it, to override the existing Bundle file.
 
 In `layout.html.twig`, it will mainly consist to extend your layout and define specific variables, i.e. :
 
@@ -62,17 +62,17 @@ In `layout.html.twig`, it will mainly consist to extend your layout and define s
 
 ### How to use
 
-In your Bundle, you need to create a file `/Resources/config/bundle.yaml` (description of the needed fields) + Controller (Route to access config form) + Voter (Checking for access rights) and that's it! Code examples are given below.
+In your Bundle, you need to create a file `/config/bundle.yaml` (description of the needed fields) + Controller (Route to access config form) + Voter (Checking for access rights) and that's it! Code examples are given below.
 
 Before the first use, if parameters are requested you must use the console command `php bin/console config:create` to create the config files from default data of the bundle.
 
 When updating the configuration, two files are created:
 
-- `[app/Resources]config/config_bundles.yaml` that contains the values for defined fields, **You must add this file to your `.gitignore` to ensure not storing data, like API keys, to a public/private repository**
+- `config/config_bundles.yaml` that contains the values for defined fields, **You must add this file to your `.gitignore` to ensure not storing data, like API keys, to a public/private repository**
 - `cache/dev|prod|test/configBundles.php` that contains an associative array of the fields `'yourRoot.yourParameter' => 'value'`.
 
 ```yml
-#Your Resources/config/bundle.yaml
+#Your config/bundle.yaml
 #Example of definition for parameter c975LEmail.roleNeeded
 yourRoot: #Name of your bundle without its 'Bundle' part, but including its vendor one, to keep its uniqueness, i.e. c975LEmail
     yourParameter: #The name or your parameter i.e. roleNeeded

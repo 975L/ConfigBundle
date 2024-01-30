@@ -89,7 +89,7 @@ class ConfigService implements ConfigServiceInterface
      */
     public function getBundleConfig(string $bundle)
     {
-        $file = $this->params->get('kernel.project_dir') . '/vendor/' . $bundle . '/Resources/config/bundle.yaml';
+        $file = $this->params->get('kernel.project_dir') . '/vendor/' . $bundle . '/config/bundle.yaml';
 
         if (is_file($file)) {
             $yamlBundleConfig = Yaml::parseFile($file);
@@ -124,7 +124,7 @@ class ConfigService implements ConfigServiceInterface
      */
     public function getBundles()
     {
-        $folder = $this->params->get('kernel.project_dir') . '/vendor/*/*/Resources';
+        $folder = $this->params->get('kernel.project_dir') . '/vendor/*/*';
 
         $bundlesConfigFiles = new Finder();
         $bundlesConfigFiles
@@ -138,7 +138,7 @@ class ConfigService implements ConfigServiceInterface
         $bundles = [];
         foreach ($bundlesConfigFiles as $bundleConfigFile) {
             $filename = $bundleConfigFile->getRealPath();
-            $bundle = substr($filename, 0, strpos($filename, '/Resources'));
+            $bundle = substr($filename, 0, strpos($filename, '/config'));
             $bundle = substr($bundle, strpos($bundle, 'vendor/') + 7);
 
             $bundles[$bundle] = $filename;
@@ -215,9 +215,7 @@ class ConfigService implements ConfigServiceInterface
      */
     public function getConfigFolder()
     {
-        $root = $this->params->get('kernel.project_dir');
-
-        return str_starts_with(Kernel::VERSION, '3') ? $root . '/app/config/' : $root . '/config/';
+        return $this->params->get('kernel.project_dir') . '/config/';
     }
 
     /**
@@ -287,7 +285,7 @@ class ConfigService implements ConfigServiceInterface
             }
 
             //Wrong bundle name
-            throw new LogicException('The file ' . $bundle . '/Resources/config/bundle.yaml could not be found!');
+            throw new LogicException('The file ' . $bundle . '/config/bundle.yaml could not be found!');
         }
 
         $parameters = include_once($file);
