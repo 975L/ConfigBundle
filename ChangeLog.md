@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v4.1
+
+- Corrected config (30/01/2024)
+
 ## v4.0.1
 
 - Corrected AbstractBundle (20/01/2024)
