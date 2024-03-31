@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v4.2.2
+
+- Updated Command file (31/03/2024)
+
 ## v4.2.1
 
 - Updated README (30/01/2024)
