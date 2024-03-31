@@ -8,18 +8,23 @@
  */
 namespace c975L\ConfigBundle\Command;
 
-use c975L\ConfigBundle\Service\ConfigServiceInterface;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\HttpKernel\Kernel;
+use c975L\ConfigBundle\Service\ConfigServiceInterface;
 
 /**
  * Console command to create config files, executed with 'config:create'
  * @author Laurent Marquet <laurent.marquet@laposte.net>
  * @copyright 2018 975L <contact@975l.com>
  */
+#[AsCommand(
+    name: 'config:create',
+    description: 'Creates the config files'
+)]
 class ConfigCreateCommand extends Command
 {
     public function __construct(/**
@@ -28,14 +33,6 @@ class ConfigCreateCommand extends Command
     private readonly ConfigServiceInterface $configService)
     {
         parent::__construct();
-    }
-
-    protected function configure(): void
-    {
-        $this
-            ->setName('config:create')
-            ->setDescription('Creates the config files')
-        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -66,6 +63,6 @@ class ConfigCreateCommand extends Command
             return Command::SUCCESS;
         }
 
-        return 0;
+        return Command::SUCCESS;
     }
 }
