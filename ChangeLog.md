@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v4.2.3
+
+- Changed DependencyInjection Extension (10/09/2024)
+
 ## v4.2.2
 
 - Updated Command file (31/03/2024)
