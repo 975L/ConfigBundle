@@ -229,7 +229,7 @@ class ConfigService implements ConfigServiceInterface
     /**
      * {@inheritdoc}
      */
-    public function getParameter(string $parameter, string $bundle = null)
+    public function getParameter(string $parameter, ?string $bundle = null)
     {
         if (strpos($parameter, '.')) {
             $paramArray = explode('.', $parameter);
@@ -248,7 +248,7 @@ class ConfigService implements ConfigServiceInterface
     /**
      * {@inheritdoc}
      */
-    public function getParametersCacheFile(string $root, string $bundle = null)
+    public function getParametersCacheFile(string $root, ?string $bundle = null)
     {
         static $parameters;
 
