@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v4.4.1
+
+- Added `c975L/SiteBundle` (09/03/2025)
+
 ## v4.4
 
 - Removed use of`c975L/ServicesBundle` (09/03/2025)
