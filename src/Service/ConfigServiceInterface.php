@@ -84,14 +84,14 @@ interface ConfigServiceInterface
      * @return mixed
      * @throws LogicException
      */
-    public function getParameter(string $parameter, string $bundle = null);
+    public function getParameter(string $parameter, ?string $bundle = null);
 
     /**
      * Returns the array of bundles parameters from cache file
      * @return array
      * @throws LogicException
      */
-    public function getParametersCacheFile(string $root, string $bundle = null);
+    public function getParametersCacheFile(string $root, ?string $bundle = null);
 
     /**
      * Checks if parameter is set
