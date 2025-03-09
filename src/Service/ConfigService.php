@@ -9,16 +9,15 @@
 
 namespace c975L\ConfigBundle\Service;
 
-use c975L\ConfigBundle\Entity\Config;
-use c975L\ConfigBundle\Form\ConfigFormFactoryInterface;
-use c975L\ServicesBundle\Service\ServiceToolsInterface;
 use LogicException;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\Form;
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Finder\Finder;
+use c975L\ConfigBundle\Entity\Config;
+use Symfony\Component\Filesystem\Filesystem;
+use c975L\SiteBundle\Service\ServiceToolsInterface;
+use c975L\ConfigBundle\Form\ConfigFormFactoryInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 /**
  * ConfigService class
