@@ -1,5 +1,10 @@
 # ChangeLog
 
+## v4.4
+
+- Removed use of`c975L/ServicesBundle` (09/03/2025)
+- Removed use of`c975L/IncludeLibraryBundle` (09/03/2025)
+
 ## v4.3.1
 
 - Added ? to avoid deprecation (09/03/2025)
