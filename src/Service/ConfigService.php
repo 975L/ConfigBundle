@@ -10,13 +10,11 @@
 namespace c975L\ConfigBundle\Service;
 
 use LogicException;
-use Symfony\Component\Form\Form;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Finder\Finder;
 use c975L\ConfigBundle\Entity\Config;
 use Symfony\Component\Filesystem\Filesystem;
 use c975L\SiteBundle\Service\ServiceToolsInterface;
-use c975L\ConfigBundle\Form\ConfigFormFactoryInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 /**
@@ -39,10 +37,6 @@ class ConfigService implements ConfigServiceInterface
     final public const CONFIG_FILE_YAML = 'config_bundles.yaml';
 
     public function __construct(
-        /**
-         * Stores ConfigFormFactoryInterface
-         */
-        private readonly ConfigFormFactoryInterface $configFormFactory,
         /**
          * Stores ParameterBagInterface
          */
@@ -71,16 +65,6 @@ class ConfigService implements ConfigServiceInterface
         }
 
         return $values;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function createForm(string $bundle)
-    {
-        $config = $this->getConfig($bundle);
-
-        return $this->configFormFactory->create($config);
     }
 
     /**
