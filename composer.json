@@ -19,7 +19,6 @@
     ],
     "require": {
         "php": ">=8.0",
-        "c975l/toolbar-bundle": "*",
         "c975l/site-bundle": "*",
         "symfony/form": "*",
         "symfony/yaml": "*"
