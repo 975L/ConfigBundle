@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v4.5.1
+
+- Corrected errors related to Form (03/11/2025)
+
 ## v4.5
 
 - Removed use of c975L/ToolbarBundle (03/11/2025)

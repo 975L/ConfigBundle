@@ -11,7 +11,6 @@ namespace c975L\ConfigBundle\Service;
 
 use c975L\ConfigBundle\Entity\Config;
 use LogicException;
-use Symfony\Component\Form\Form;
 
 /**
  * Interface to be called for DI for ConfigServiceInterface related services
@@ -25,12 +24,6 @@ interface ConfigServiceInterface
      * @return array
      */
     public function convertToArray(Config $config);
-
-    /**
-     * Call ConfigFormFactory to create config form
-     * @return Form
-     */
-    public function createForm(string $bundle);
 
     /**
      * Gets all the bundles that have a bundle.yaml file

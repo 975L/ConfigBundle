@@ -6,9 +6,6 @@ services:
     c975L\ConfigBundle\Command\:
         resource: '../src/Command/*'
 
-    c975L\ConfigBundle\Form\:
-        resource: '../src/Form/*'
-
     c975L\ConfigBundle\Service\:
         resource: '../src/Service/*'
 
