@@ -1,5 +1,10 @@
 # ChangeLog
 
+## v4.5
+
+- Removed use of c975L/ToolbarBundle (03/11/2025)
+- Removed form to allow config as done directly in .yaml files (03/11/2025)
+
 ## v4.4.1
 
 - Added `c975L/SiteBundle` (09/03/2025)

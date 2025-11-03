@@ -8,8 +8,6 @@ ConfigBundle does the following:
 - Build a form to allow end-user to modify these parameters (acces-rights are checked on your side),
 - Provides a Twig extension to get these parameters values in a Twig template,
 
-[ConfigBundle dedicated web page](https://975l.com/en/pages/config-bundle).
-
 [ConfigBundle API documentation](https://975l.com/apidoc/c975L/ConfigBundle.html).
 
 ## Bundle installation
@@ -130,7 +128,6 @@ class YourController extends AbstractController
         //Renders the config form
         return $this->render('@c975LConfig/forms/config.html.twig', array(
             'form' => $form->createView(),
-            'toolbar' => '@c975LEmail', //set false (or remove) if you don't use c975L/ToolbarBundle
         ));
     }
 ```
