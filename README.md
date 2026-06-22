@@ -14,7 +14,7 @@ ConfigBundle does the following:
 
 ## Bundle installation
 
-### Step 1: Download the Bundle
+### Download the Bundle
 
 Use [Composer](https://getcomposer.org) to install the library
 
@@ -22,25 +22,18 @@ Use [Composer](https://getcomposer.org) to install the library
     composer require c975l/config-bundle
 ```
 
-### Step 2: Enable the Bundles
+### Load config values
 
-Then, enable the bundle by adding it to the list of registered bundles in the `app/AppKernel.php` file of your project:
+The bundle stores the config values in a database. You have to load the default config values in the database before first use, using the console command `c975l:config:load` with the absolute path to the JSON file containing default config values i.e.:
 
-```php
-<?php
-class AppKernel extends Kernel
-{
-    public function registerBundles()
-    {
-        $bundles = [
-            // ...
-            new c975L\ConfigBundle\c975LConfigBundle(),
-        ];
-    }
-}
+```bash
+// php bin/console c975l:config:load 'vendor/c975l/config-bundle/config/configs.json'
+// php bin/console c975l:config:load 'vendor/c975l/site-bundle/config/configs.json'
+// php bin/console c975l:config:load 'vendor/c975l/contactform-bundle/config/configs.json'
+// php bin/console c975l:config:load 'vendor/c975l/shop-bundle/config/configs.json'
 ```
 
-### Step 3: Override templates
+### Override templates
 
 It is strongly recommended to use the [Override Templates from Third-Party Bundles feature](http://symfony.com/doc/current/templating/overriding.html) to integrate fully with your site.
 
@@ -69,7 +62,7 @@ Before the first use, if parameters are requested you must use the console comma
 When updating the configuration, two files are created:
 
 - `config/config_bundles.yaml` that contains the values for defined fields, **You must add this file to your `.gitignore` to ensure not storing data, like API keys, to a public/private repository**
-- `cache/dev|prod|test/configBundles.php` that contains an associative array of the fields `'yourRoot.yourParameter' => 'value'`.
+- `cache/dev|prod|test/configBundles.php` that contains an associative array of the fields `'yourParameter' => 'value'`.
 
 ```yml
 #Your config/bundle.yaml
@@ -150,21 +143,21 @@ class YourClass
 {
     protected function yourMethod(ConfigServiceInterface $configService)
     {
-        $parameter = $configService->getParameter('yourRoot.yourParameter');
+        $parameter = $configService->getParameter('yourParameter');
         /**
          * You can also get parameter using the bundle name as defined in your composer.json.
          * This case is used when the files "config_bundles.yaml" and "configBundles.php" are not yet created.
          * For example, the first time you use the config Route and your Voter needs to check with a parameter defined using ConfigBundle.
          * Using this optional variable will make ConfigBundle creating the requested config files, based on default values in "bundle.yaml".
          */
-        $parameter = $configService->getParameter('yourRoot.yourParameter', 'vendor/bundle-name');
+        $parameter = $configService->getParameter('yourParameter', 'vendor/bundle-name');
     }
 }
 ```
 
 ### Check if parameter is defined inside a class
 
-To check if a parameter has been defined, use `$configService->hasParameter('yourRoot.yourParameter')`.
+To check if a parameter has been defined, use `$configService->hasParameter('yourParameter')`.
 
 ### Get Container's paramaters
 
@@ -172,7 +165,7 @@ You can use `$configService->getContainerParameter('parameter')` to access conta
 
 ### Twig Extensions
 
-If you need to access a parameter inside a Twig template, simply use `{{ config('yourRoot.yourParameter') }}`.
+If you need to access a parameter inside a Twig template, simply use `{{ config('yourParameter') }}`.
 
 If you need to access a container's parameter inside a Twig template, simply use `{{ configParam('parameter') }}`.
 

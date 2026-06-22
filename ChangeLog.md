@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v5.2
+
+- Removed use of Fixtures to load default values and replaced by a Command (22/06/2026)
+
 ## v5.1
 
 - Added missing in composer.json (22/06/2026)

@@ -4,6 +4,9 @@ services:
         autoconfigure: true
         public: true
 
+    c975L\ConfigBundle\Command\:
+        resource: '../src/Command/*'
+
     c975L\ConfigBundle\Controller\:
         resource: '../src/Controller/*'
 
@@ -11,9 +14,6 @@ services:
         arguments:
             $menuProviders: !tagged_iterator c975l.management_menu_provider
         tags: ['controller.service_arguments']
-
-    c975L\ConfigBundle\DataFixtures\:
-        resource: '../src/DataFixtures/*'
 
     c975L\ConfigBundle\Listener\:
         resource: '../src/Listener/*'
