@@ -4,9 +4,14 @@
     <section class="text-center">
         <h1>{{ ('label.management'|trans({}, 'config')) }}</h1>
         <p>{{ ('label.management_interface'|trans({}, 'config')) }}</p>
-        <p>
+        <p class="flex-center">
             {% for key, menu in menus %}
                 <a href="{{ path('management_'~ key ~ '_index') }}" class="btn btn-primary"><i class="{{ menu.icon }}"></i> {{ ((menu.label)|trans({}, menu.translation_domain)) }}</a>
+            {% endfor %}
+        </p>
+        <p class="flex-center">
+            {% for key, route in routes %}
+                <a href="{{ path(route.name) }}" class="btn btn-secondary" target="_blank"><i class="{{ route.icon }}"></i> {{ ((route.label)|trans({}, route.translation_domain)) }}</a>
             {% endfor %}
         </p>
     </section>

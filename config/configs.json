@@ -10,7 +10,7 @@
     {
         "label": "Site Maintenance",
         "slug": "site-maintenance",
-        "sensitive": false,
+        "sensitive": true,
         "value": "false",
         "kind": "bool",
         "description": "Enable (true) or disable (false) maintenance mode"
@@ -18,7 +18,7 @@
     {
         "label": "Site Maintenance Hash",
         "slug": "site-maintenance-hash",
-        "sensitive": false,
+        "sensitive": true,
         "value": null,
         "kind": "text",
         "description": "Hash used to access maintenance mode (?t=Hash)"

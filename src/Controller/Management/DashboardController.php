@@ -10,6 +10,7 @@
 
 namespace c975L\ConfigBundle\Controller\Management;
 
+use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -24,19 +25,28 @@ class DashboardController extends AbstractDashboardController
 {
     public function __construct(
         private readonly iterable $menuProviders,
+        private readonly ConfigServiceInterface $configService,
     ) {}
 
     public function index(): Response
     {
         $menus = [];
         foreach ($this->menuProviders as $provider) {
-            $menus = array_merge($menus, $provider->getMenu());
+            $menus = array_merge($menus, $provider->getMenus());
+        }
+
+        $routes = [];
+        foreach ($this->menuProviders as $provider) {
+            if (method_exists($provider, 'getRoutes')) {
+                $routes = array_merge($routes, $provider->getRoutes());
+            }
         }
 
         return $this->render(
             '@c975LConfig/management/index.html.twig',
             [
                 'menus' => $menus,
+                'routes' => $routes,
             ]
         );
     }
@@ -44,15 +54,15 @@ class DashboardController extends AbstractDashboardController
     public function configureDashboard(): Dashboard
     {
         return Dashboard::new()
-            ->setTitle('<img src="/favicon.ico"> Website')
-            ->setFaviconPath('/favicon.ico')
+            ->setTitle('<img src="' . $this->configService->get('site-favicon') . '">' . $this->configService->get('site-name'))
+            ->setFaviconPath($this->configService->get('site-favicon'))
             ->setTranslationDomain('config')
         ;
     }
 
     public function configureMenuItems(): iterable
     {
-        yield MenuItem::linkToDashboard('label.dashboard', 'fa fa-home')->setPermission('ROLE_ADMIN');
+        yield MenuItem::linkToDashboard('label.dashboard', 'fa fa-home')->setPermission($this->configService->get('site-role-needed'));
 
         // Menu from bundles
         foreach ($this->menuProviders as $provider) {

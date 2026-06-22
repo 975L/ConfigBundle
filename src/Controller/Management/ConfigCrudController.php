@@ -17,6 +17,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
@@ -24,6 +25,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\SlugField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Translation\TranslatableMessage;
 
 class ConfigCrudController extends AbstractCrudController
 {
@@ -44,16 +46,22 @@ class ConfigCrudController extends AbstractCrudController
             IdField::new('id')
                 ->onlyOnIndex(),
             TextField::new('label')
-                ->setLabel('label.label')
+                ->setLabel(new TranslatableMessage('label.label', [], 'config'))
                 ->setRequired(true),
             SlugField::new('slug')
-                ->setLabel('label.slug')
+                ->setLabel(new TranslatableMessage('label.slug', [], 'config'))
                 ->setTargetFieldName('label')
                 ->setRequired(true),
 
+            // Sensitive
+            BooleanField::new('isSensitive')
+                ->setLabel(new TranslatableMessage('label.is_sensitive', [], 'config'))
+                ->setRequired(false)
+                ->setHelp(new TranslatableMessage('label.is_sensitive_help', [], 'config')),
+
             // Kind
             ChoiceField::new('kind')
-                ->setLabel('label.kind')
+                ->setLabel(new TranslatableMessage('label.kind', [], 'config'))
                 ->setRequired(true)
                 ->setChoices([
                     'Texte simple'   => Config::TYPE_TEXT,
@@ -61,24 +69,25 @@ class ConfigCrudController extends AbstractCrudController
                     'Image / Média'  => Config::TYPE_IMAGE,
                     'Code'           => Config::TYPE_CODE,
                     'Booléen'        => Config::TYPE_BOOL,
+                    'Entier'         => Config::TYPE_INT,
                 ]),
 
             // Content
             TextareaField::new('value')
-                ->setLabel('label.value')
+                ->setLabel(new TranslatableMessage('label.value', [], 'config'))
                 ->setRequired(true),
             TextareaField::new('description')
-                ->setLabel('label.description')
+                ->setLabel(new TranslatableMessage('label.description', [], 'config'))
                 ->setRequired(false)
                 ->hideOnIndex(),
 
             // Dates
             DateTimeField::new('creation')
-                ->setLabel('label.creation')
+                ->setLabel(new TranslatableMessage('label.creation', [], 'config'))
                 ->setFormTypeOption('disabled', 'disabled')
                 ->onlyOnDetail(),
             DateTimeField::new('modification')
-                ->setLabel('label.modification')
+                ->setLabel(new TranslatableMessage('label.modification', [], 'config'))
                 ->setFormTypeOption('disabled', 'disabled')
                 ->onlyOnDetail(),
         ];
@@ -88,7 +97,7 @@ class ConfigCrudController extends AbstractCrudController
     {
         return $actions
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
-            ->setPermission(Action::NEW, 'ROLE_ADMIN')
+            ->setPermission(Action::NEW, $this->configService->get('site-role-needed'))
         ;
     }
 
@@ -96,7 +105,7 @@ class ConfigCrudController extends AbstractCrudController
     {
         return $crud
             ->showEntityActionsInlined()
-            ->setEntityPermission('ROLE_ADMIN')
+            ->setEntityPermission($this->configService->get('site-role-needed'))
         ;
     }
 
