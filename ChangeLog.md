@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v5.1
+
+- Added missing in composer.json (22/06/2026)
+
 ## v5.0
 
 - Made use of database to store config parameters (20/06/2026)
