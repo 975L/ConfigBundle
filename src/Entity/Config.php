@@ -25,6 +25,7 @@ class Config
     public const TYPE_IMAGE = 'image';
     public const TYPE_CODE  = 'code';
     public const TYPE_BOOL  = 'bool';
+    public const TYPE_INT = 'int';
 
     public const TYPES = [
         self::TYPE_TEXT,
@@ -32,6 +33,7 @@ class Config
         self::TYPE_IMAGE,
         self::TYPE_CODE,
         self::TYPE_BOOL,
+        self::TYPE_INT,
     ];
 
     #[ORM\Id]

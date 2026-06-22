@@ -54,6 +54,18 @@
                 <source>label.management</source>
                 <target>Management</target>
             </trans-unit>
+            <trans-unit id="14">
+                <source>label.slug</source>
+                <target>Slug</target>
+            </trans-unit>
+            <trans-unit id="15">
+                <source>label.is_sensitive</source>
+                <target>Sensitive</target>
+            </trans-unit>
+            <trans-unit id="16">
+                <source>label.is_sensitive_help</source>
+                <target>This field should only be modified by experienced users</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

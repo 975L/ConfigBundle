@@ -1,5 +1,11 @@
 # ChangeLog
 
+## v5.2.1
+
+- Added Route possibility to Dashboard (22/06/2026)
+- Renamed methods (22/06/2026)
+- Added translated messages (22/06/2026)
+
 ## v5.2
 
 - Removed use of Fixtures to load default values and replaced by a Command (22/06/2026)

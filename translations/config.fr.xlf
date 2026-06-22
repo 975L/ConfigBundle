@@ -55,6 +55,18 @@
                 <source>label.management</source>
                 <target>Gestion</target>
             </trans-unit>
+            <trans-unit id="14">
+                <source>label.slug</source>
+                <target>Slug</target>
+            </trans-unit>
+            <trans-unit id="15">
+                <source>label.is_sensitive</source>
+                <target>Sensible</target>
+            </trans-unit>
+            <trans-unit id="16">
+                <source>label.is_sensitive_help</source>
+                <target>Si sensible est activé, cela veut dire que la valeur de ce champ ne doit être modifiée que par des utilisateurs avertis</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>
