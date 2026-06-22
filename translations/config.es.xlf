@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" target-language="es" datatype="plaintext" original="config.en.xlf">
+        <body>
+            <trans-unit id="1">
+                <source>label.config</source>
+                <target>Configuración</target>
+            </trans-unit>
+            <trans-unit id="2">
+                <source>label.management_interface</source>
+                <target>Interfaz de gestión</target>
+            </trans-unit>
+            <trans-unit id="3">
+                <source>label.maintenance</source>
+                <target>Mantenimiento</target>
+            </trans-unit>
+            <trans-unit id="4">
+                <source>label.maintenance_message</source>
+                <target>Estamos trabajando para ofrecerle una mejor experiencia. ¡Vuelva pronto!</target>
+            </trans-unit>
+            <trans-unit id="5">
+                <source>label.label</source>
+                <target>Etiqueta</target>
+            </trans-unit>
+            <trans-unit id="6">
+                <source>label.slug_exists</source>
+                <target>El slug ya existe</target>
+            </trans-unit>
+            <trans-unit id="7">
+                <source>label.kind</source>
+                <target>Tipo</target>
+            </trans-unit>
+            <trans-unit id="8">
+                <source>label.group</source>
+                <target>Grupo</target>
+            </trans-unit>
+            <trans-unit id="9">
+                <source>label.value</source>
+                <target>Valor</target>
+            </trans-unit>
+            <trans-unit id="10">
+                <source>label.dashboard</source>
+                <target>Tablero</target>
+            </trans-unit>
+            <trans-unit id="11">
+                <source>label.user</source>
+                <target>Usuario</target>
+            </trans-unit>
+            <trans-unit id="12">
+                <source>label.signout</source>
+                <target>Cerrar sesión</target>
+            </trans-unit>
+            <trans-unit id="13">
+                <source>label.management</source>
+                <target>Gestión</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

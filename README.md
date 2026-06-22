@@ -1,5 +1,7 @@
 # ConfigBundle
 
+**-- README IS NOT REALLY UP TO DATE ;( --**
+
 Please not that **this Bundle >= v2.0 doesn't use the `Configuration` class to build the modify form for parameters, but its own defined system of key-value. See branch 1.x for the use case with `Configuration` class.**
 
 ConfigBundle does the following:

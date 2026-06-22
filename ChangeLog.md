@@ -1,5 +1,11 @@
 # ChangeLog
 
+## v5.0
+
+- Made use of database to store config parameters (20/06/2026)
+- Added MaintenanceListener (22/06/2026)
+- Added EasyAdmin main dashboard for managing config params and othe dashboards bundles (22/06/2026)
+
 ## v4.5.1
 
 - Corrected errors related to Form (03/11/2025)

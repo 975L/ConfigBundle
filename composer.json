@@ -19,7 +19,9 @@
     ],
     "require": {
         "php": ">=8.0",
-        "c975l/site-bundle": "*",
+        "doctrine/orm": "*",
+        "easycorp/easyadmin-bundle": "*",
+        "sensiolabs/minify-bundle": "*",
         "symfony/form": "*",
         "symfony/yaml": "*"
     },
