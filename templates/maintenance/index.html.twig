@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ "label.maintenance"|trans({}, 'site') }}</title>
+    <style>
+        body { font-family: sans-serif; display: flex; align-items: center;
+               justify-content: center; height: 100vh; margin: 0; background: #f5f5f5; }
+        .box { text-align: center; padding: 2rem; background: white;
+               border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,.1); }
+        h1 { color: #333; }
+        p { color: #666; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>🚧 {{ "label.maintenance"|trans({}, 'site') }}</h1>
+        <p>{{ "label.maintenance_message"|trans({}, 'site') }}</p>
+    </div>
+</body>
+</html>

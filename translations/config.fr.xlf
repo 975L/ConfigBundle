@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<xliff version="1.2"
+    xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" target-language="fr" datatype="plaintext" original="config.en.xlf">
+        <body>
+            <trans-unit id="1">
+                <source>label.config</source>
+                <target>Configuration</target>
+            </trans-unit>
+            <trans-unit id="2">
+                <source>label.management_interface</source>
+                <target>Interface de gestion</target>
+            </trans-unit>
+            <trans-unit id="3">
+                <source>label.maintenance</source>
+                <target>Maintenance</target>
+            </trans-unit>
+            <trans-unit id="4">
+                <source>label.maintenance_message</source>
+                <target>Nous travaillons pour vous offrir une meilleure expérience. Revenez bientôt !</target>
+            </trans-unit>
+            <trans-unit id="5">
+                <source>label.label</source>
+                <target>Étiquette</target>
+            </trans-unit>
+            <trans-unit id="6">
+                <source>label.slug_exists</source>
+                <target>Le slug existe déjà</target>
+            </trans-unit>
+            <trans-unit id="7">
+                <source>label.kind</source>
+                <target>Type</target>
+            </trans-unit>
+            <trans-unit id="8">
+                <source>label.group</source>
+                <target>Groupe</target>
+            </trans-unit>
+            <trans-unit id="9">
+                <source>label.value</source>
+                <target>Valeur</target>
+            </trans-unit>
+            <trans-unit id="10">
+                <source>label.dashboard</source>
+                <target>Tableau de bord</target>
+            </trans-unit>
+            <trans-unit id="11">
+                <source>label.user</source>
+                <target>Utilisateur</target>
+            </trans-unit>
+            <trans-unit id="12">
+                <source>label.signout</source>
+                <target>Se déconnecter</target>
+            </trans-unit>
+            <trans-unit id="13">
+                <source>label.management</source>
+                <target>Gestion</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
