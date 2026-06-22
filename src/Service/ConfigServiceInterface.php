@@ -30,4 +30,7 @@ interface ConfigServiceInterface
 
     // Loads all configs in cache and returns them as an associative array (slug => value)
     public function loadAll(): array;
+
+    // Loads default config values in the database (if not already present)
+    public function loadDefaultConfig(string $jsonPath): void;
 }

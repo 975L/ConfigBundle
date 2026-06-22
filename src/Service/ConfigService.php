@@ -15,6 +15,7 @@ use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ConfigService implements ConfigServiceInterface
 {
@@ -25,6 +26,7 @@ class ConfigService implements ConfigServiceInterface
         private readonly ConfigRepository $configRepository,
         private readonly CacheInterface $cache,
         private readonly ParameterBagInterface $params,
+        private readonly EntityManagerInterface $manager,
     ) {}
 
     // Returns the value of a config (or null if not found)
@@ -88,5 +90,34 @@ class ConfigService implements ConfigServiceInterface
 
             return $configs;
         });
+    }
+
+    // Loads default config values in the database (if not already present)
+    public function loadDefaultConfig(string $jsonPath): void
+    {
+        $configs = json_decode(file_get_contents($jsonPath), true);
+
+        foreach ($configs as $configData) {
+            // Avoids duplicates/replacements
+            if ($this->configRepository->findOneBySlug($configData['slug'])) {
+                continue;
+            }
+
+            $config = new Config();
+            $config->setLabel($configData['label']);
+            $config->setSlug($configData['slug']);
+            $config->setIsSensitive($configData['sensitive'] ?? false);
+            $config->setValue($configData['value'] ?? null);
+            $config->setKind($configData['kind'] ?? 'text');
+            $config->setDescription($configData['description'] ?? null);
+            $config->setCreation(new \DateTime());
+            $config->setModification(new \DateTime());
+
+            $this->manager->persist($config);
+        }
+
+        $this->manager->flush();
+
+        $this->invalidateCache();
     }
 }
