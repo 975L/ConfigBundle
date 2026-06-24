@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v5.2.2
+
+- Re-added ConfigParamExtension (24/06/2026)
+
 ## v5.2.1
 
 - Added Route possibility to Dashboard (22/06/2026)

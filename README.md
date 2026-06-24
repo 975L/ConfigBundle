@@ -27,10 +27,10 @@ Use [Composer](https://getcomposer.org) to install the library
 The bundle stores the config values in a database. You have to load the default config values in the database before first use, using the console command `c975l:config:load` with the absolute path to the JSON file containing default config values i.e.:
 
 ```bash
-// php bin/console c975l:config:load 'vendor/c975l/config-bundle/config/configs.json'
-// php bin/console c975l:config:load 'vendor/c975l/site-bundle/config/configs.json'
-// php bin/console c975l:config:load 'vendor/c975l/contactform-bundle/config/configs.json'
-// php bin/console c975l:config:load 'vendor/c975l/shop-bundle/config/configs.json'
+php bin/console c975l:config:load 'vendor/c975l/config-bundle/config/configs.json';
+php bin/console c975l:config:load 'vendor/c975l/site-bundle/config/configs.json';
+php bin/console c975l:config:load 'vendor/c975l/contactform-bundle/config/configs.json';
+php bin/console c975l:config:load 'vendor/c975l/shop-bundle/config/configs.json';
 ```
 
 ### Override templates

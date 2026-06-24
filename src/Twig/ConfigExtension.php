@@ -16,7 +16,7 @@ use Twig\TwigFunction;
 class ConfigExtension extends AbstractExtension
 {
     public function __construct(
-        private readonly ConfigServiceInterface $configsService,
+        private readonly ConfigServiceInterface $configService,
     ) {}
 
     public function getFunctions(): array
@@ -28,6 +28,6 @@ class ConfigExtension extends AbstractExtension
 
     public function getConfig(string $slug): mixed
     {
-        return $this->configsService->get($slug);
+        return $this->configService->get($slug);
     }
 }
