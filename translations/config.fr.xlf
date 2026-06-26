@@ -67,6 +67,14 @@
                 <source>label.is_sensitive_help</source>
                 <target>Si sensible est activé, cela veut dire que la valeur de ce champ ne doit être modifiée que par des utilisateurs avertis</target>
             </trans-unit>
+            <trans-unit id="17">
+                <source>label.show_sensitive</source>
+                <target>Voir données sensibles</target>
+            </trans-unit>
+            <trans-unit id="18">
+                <source>label.hide_sensitive</source>
+                <target>Masquer données sensibles</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

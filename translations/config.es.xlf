@@ -66,6 +66,14 @@
                 <source>label.is_sensitive_help</source>
                 <target>Este campo solo debe ser modificado por usuarios experimentados</target>
             </trans-unit>
+            <trans-unit id="17">
+                <source>label.show_sensitive</source>
+                <target>Ver datos sensibles</target>
+            </trans-unit>
+            <trans-unit id="18">
+                <source>label.hide_sensitive</source>
+                <target>Ocultar datos sensibles</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

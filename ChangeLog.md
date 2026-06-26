@@ -1,5 +1,10 @@
 # ChangeLog
 
+## v5.3
+
+- Removed the isGranted['ROLE_ADMIN'] to use the value from ConfigBundle (26/06/2026)
+- Suppressed the command to load confgi from one bundle as all is easier (26/06/2026)
+
 ## v5.2.2
 
 - Re-added ConfigParamExtension (24/06/2026)

@@ -1,172 +1,125 @@
-# ConfigBundle
+# c975L ConfigBundle
 
-**-- README IS NOT REALLY UP TO DATE ;( --**
+A Symfony bundle that stores application configuration as key-value pairs in the database, with an EasyAdmin management interface, Twig/PHP accessors, and production deployment tooling.
 
-Please not that **this Bundle >= v2.0 doesn't use the `Configuration` class to build the modify form for parameters, but its own defined system of key-value. See branch 1.x for the use case with `Configuration` class.**
+[![GitHub](https://img.shields.io/github/license/975L/ConfigBundle)](https://github.com/975L/ConfigBundle/blob/master/LICENSE)
+[![Packagist Version](https://img.shields.io/packagist/v/c975l/config-bundle)](https://packagist.org/packages/c975l/config-bundle)
+[![PHP Version](https://img.shields.io/packagist/php-v/c975l/config-bundle)](https://packagist.org/packages/c975l/config-bundle)
 
-ConfigBundle does the following:
+## Features
 
-- Gets the config parameters definition from a yaml file for a Symfony app,
-- Build a form to allow end-user to modify these parameters (acces-rights are checked on your side),
-- Provides a Twig extension to get these parameters values in a Twig template,
+- Key-value config entries stored in the database (`site_config` table)
+- EasyAdmin CRUD interface to manage values
+- SQL export button for production deployment
+- Twig and PHP service to read values anywhere
+- 1-hour cache with automatic invalidation on change
 
-[ConfigBundle API documentation](https://975l.com/apidoc/c975L/ConfigBundle.html).
-
-## Bundle installation
-
-### Download the Bundle
-
-Use [Composer](https://getcomposer.org) to install the library
+## Installation
 
 ```bash
-    composer require c975l/config-bundle
+composer require c975l/config-bundle
 ```
 
-### Load config values
-
-The bundle stores the config values in a database. You have to load the default config values in the database before first use, using the console command `c975l:config:load` with the absolute path to the JSON file containing default config values i.e.:
+Run the database migration to create the `site_config` table:
 
 ```bash
-php bin/console c975l:config:load 'vendor/c975l/config-bundle/config/configs.json';
-php bin/console c975l:config:load 'vendor/c975l/site-bundle/config/configs.json';
-php bin/console c975l:config:load 'vendor/c975l/contactform-bundle/config/configs.json';
-php bin/console c975l:config:load 'vendor/c975l/shop-bundle/config/configs.json';
+php bin/console doctrine:migrations:diff
+php bin/console doctrine:migrations:migrate
 ```
 
-### Override templates
+## Defining config entries for your bundle
 
-It is strongly recommended to use the [Override Templates from Third-Party Bundles feature](http://symfony.com/doc/current/templating/overriding.html) to integrate fully with your site.
+Create a `config/configs.json` file in your bundle. Each entry will be inserted into the database on first load (duplicates are skipped):
 
-For this, simply, create the following structure `templates/bundles/c975LConfigBundle/views/` in your app and then duplicate the file `layout.html.twig` in it, to override the existing Bundle file.
-
-In `layout.html.twig`, it will mainly consist to extend your layout and define specific variables, i.e. :
-
-```twig
-{% extends 'layout.html.twig' %}
-
-{# Defines specific variables #}
-{% set title = 'Configuration' %}
-
-{% block content %}
-    {% block config_content %}
-    {% endblock %}
-{% endblock %}
-```
-
-### How to use
-
-In your Bundle, you need to create a file `/config/bundle.yaml` (description of the needed fields) + Controller (Route to access config form) + Voter (Checking for access rights) and that's it! Code examples are given below.
-
-Before the first use, if parameters are requested you must use the console command `php bin/console config:create` to create the config files from default data of the bundle.
-
-When updating the configuration, two files are created:
-
-- `config/config_bundles.yaml` that contains the values for defined fields, **You must add this file to your `.gitignore` to ensure not storing data, like API keys, to a public/private repository**
-- `cache/dev|prod|test/configBundles.php` that contains an associative array of the fields `'yourParameter' => 'value'`.
-
-```yml
-#Your config/bundle.yaml
-#Example of definition for parameter c975LEmail.roleNeeded
-yourRoot: #Name of your bundle without its 'Bundle' part, but including its vendor one, to keep its uniqueness, i.e. c975LEmail
-    yourParameter: #The name or your parameter i.e. roleNeeded
-        type: string #|bool|int|float|array|date
-        required: true #|false
-        default: "Your default value" #|null
-        info: "Your description to help filling this parameter" #|null
-#The following options are specific for date type to define its range of years
-        #startYear: 2010|current|null(or not set)
-        #endYear: 2010|current|null(or not set)
-#In case you need to have common data shared, you can also add other roots with the scheme
-#yourCommonRoot
-    #yourCommonParameter
-        #...
-```
-
-Then your Controller file:
-
-```php
-<?php
-//Your Controller file
-
-namespace App\Bundle\Controller;
-
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use c975L\ConfigBundle\Service\ConfigServiceInterface;
-
-class YourController extends AbstractController
-{
-    /**
-     * @Route("/your_name/config",
-     *    name="your_name_config",
-     *    methods={"HEAD", "GET", "POST"})
-     */
-    public function config(Request $request, ConfigServiceInterface $configService)
+```json
+[
     {
-        //Add the case to your Voter
-        $this->denyAccessUnlessGranted('config', 'yourDataIfNeeded');
-
-        $form = $configService->createForm('vendor/bundle-name');//As defined in your composer.json
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            //Validates config
-            $configService->setConfig($form);
-
-            //Redirects
-            return $this->redirectToRoute('the_route_you_want_to_redirect_to');
-        }
-
-        //Renders the config form
-        return $this->render('@c975LConfig/forms/config.html.twig', array(
-            'form' => $form->createView(),
-        ));
+        "label": "Site Name",
+        "slug": "site-name",
+        "sensitive": false,
+        "value": null,
+        "kind": "text",
+        "description": "Name of the website"
+    },
+    {
+        "label": "Stripe Secret Key",
+        "slug": "stripe-secret-key",
+        "sensitive": true,
+        "value": null,
+        "kind": "text",
+        "description": "Stripe secret key (sk_live_...)"
     }
+]
 ```
 
-Then call the defined Route in a web browser and set-up (or your user) the configuration parameters.
+Valid `kind` values: `text`, `html`, `image`, `code`, `bool`, `int`.
+Set `sensitive: true` for any entry that holds secrets (API keys, passwords, etc.).
 
-### Get parameter inside a class
+## Loading config entries into the database
 
-To get a parameter inside a class, use the following code:
+### All c975L bundles at once
+
+Auto-discovers every `vendor/c975l/*/config/configs.json` file and loads them in one shot:
+
+```bash
+php bin/console c975l:config:load-all
+```
+
+## EasyAdmin interface
+
+The bundle registers a management dashboard at `/management`. Navigate to **Config** to view, create, edit, or delete entries.
+
+### Deploying to production — Export SQL
+
+On the config list page, click the **Export SQL** button. The browser downloads a `site_config_YYYYMMDD_HHMMSS.sql` file — nothing is written to disk or version control.
+
+Import it on your production server:
+
+```bash
+mysql -u user -p dbname < site_config_20260626_120000.sql
+```
+
+**Behavior per entry type:**
+
+| `is_sensitive` | SQL statement | Effect on production |
+| --- | --- | --- |
+| `false` | `INSERT … ON DUPLICATE KEY UPDATE` | Creates or updates label, value, kind, description |
+| `true` | `INSERT IGNORE INTO` | Creates if missing; **preserves existing production value** |
+
+This means non-sensitive values (labels, descriptions, default content) are kept in sync, while live API keys and secrets already set on production are never overwritten.
+
+## Reading config values
+
+### In PHP
 
 ```php
-<?php
-namespace Your\NameSpace;
-
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 
-class YourClass
+class MyService
 {
-    protected function yourMethod(ConfigServiceInterface $configService)
+    public function __construct(
+        private readonly ConfigServiceInterface $configService,
+    ) {}
+
+    public function doSomething(): void
     {
-        $parameter = $configService->getParameter('yourParameter');
-        /**
-         * You can also get parameter using the bundle name as defined in your composer.json.
-         * This case is used when the files "config_bundles.yaml" and "configBundles.php" are not yet created.
-         * For example, the first time you use the config Route and your Voter needs to check with a parameter defined using ConfigBundle.
-         * Using this optional variable will make ConfigBundle creating the requested config files, based on default values in "bundle.yaml".
-         */
-        $parameter = $configService->getParameter('yourParameter', 'vendor/bundle-name');
+        $siteName  = $this->configService->get('site-name');
+        $isEnabled = $this->configService->getBool($this->configService->get('feature-enabled'));
+        $env       = $this->configService->getContainerParameter('kernel.environment');
     }
 }
 ```
 
-### Check if parameter is defined inside a class
+### In Twig
 
-To check if a parameter has been defined, use `$configService->hasParameter('yourParameter')`.
+```twig
+{# Read from database #}
+{{ config('site-name') }}
 
-### Get Container's paramaters
+{# Read from Symfony container parameters #}
+{{ configParam('kernel.environment') }}
+```
 
-You can use `$configService->getContainerParameter('parameter')` to access container's parameters and avoid injecting `Container` when `ConfigService` is already injected.
+## License
 
-### Twig Extensions
-
-If you need to access a parameter inside a Twig template, simply use `{{ config('yourParameter') }}`.
-
-If you need to access a container's parameter inside a Twig template, simply use `{{ configParam('parameter') }}`.
-
-If this project **help you to reduce time to develop**, you can sponsor me via the "Sponsor" button at the top :)
+MIT — see [LICENSE](LICENSE).
