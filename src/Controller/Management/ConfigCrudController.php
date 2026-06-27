@@ -87,13 +87,7 @@ class ConfigCrudController extends AbstractCrudController
             // Content — sensitive values are masked in list/detail, editable in form
             TextareaField::new('value')
                 ->setLabel(new TranslatableMessage('label.value', [], 'config'))
-                ->setRequired(true)
-                ->formatValue(function ($value, Config $entity) use ($pageName) {
-                    if ($entity->getIsSensitive() && in_array($pageName, [Crud::PAGE_INDEX, Crud::PAGE_DETAIL], true)) {
-                        return $value ? '••••••••' : null;
-                    }
-                    return $value;
-                }),
+                ->setRequired(true),
             TextareaField::new('description')
                 ->setLabel(new TranslatableMessage('label.description', [], 'config'))
                 ->setRequired(false)
@@ -169,10 +163,9 @@ class ConfigCrudController extends AbstractCrudController
         $qb = parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters);
 
         $request = $this->requestStack->getCurrentRequest();
-        if (!$request?->query->getBoolean('showSensitive', false)) {
-            $qb->andWhere('entity.isSensitive = :isSensitive')
-                ->setParameter('isSensitive', false);
-        }
+        $showSensitive = $request?->query->getBoolean('showSensitive', false);
+        $qb->andWhere('entity.isSensitive = :isSensitive')
+            ->setParameter('isSensitive', $showSensitive);
 
         return $qb;
     }
