@@ -12,6 +12,8 @@ namespace c975L\ConfigBundle\Controller\Management;
 
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Asset;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
@@ -57,6 +59,13 @@ class DashboardController extends AbstractDashboardController
             ->setFaviconPath($this->configService->get('site-favicon'))
             ->setTranslationDomain('config')
         ;
+    }
+
+    public function configureAssets(): Assets
+    {
+        return Assets::new()
+            ->addJsFile(Asset::fromEasyAdminAssetPackage('field-text-editor.js'))
+            ->addCssFile(Asset::fromEasyAdminAssetPackage('field-text-editor.css'));
     }
 
     public function configureMenuItems(): iterable

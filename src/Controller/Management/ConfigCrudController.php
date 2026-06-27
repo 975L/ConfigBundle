@@ -37,6 +37,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Translation\TranslatableMessage;
 
+use function Symfony\Component\Translation\t;
+
 class ConfigCrudController extends AbstractCrudController
 {
     public function __construct(
@@ -75,13 +77,10 @@ class ConfigCrudController extends AbstractCrudController
             ChoiceField::new('kind')
                 ->setLabel(new TranslatableMessage('label.kind', [], 'config'))
                 ->setRequired(true)
-                ->setChoices([
-                    'Texte simple'   => Config::TYPE_TEXT,
-                    'HTML / Éditeur' => Config::TYPE_HTML,
-                    'Image / Média'  => Config::TYPE_IMAGE,
-                    'Code'           => Config::TYPE_CODE,
-                    'Booléen'        => Config::TYPE_BOOL,
-                    'Entier'         => Config::TYPE_INT,
+                ->setTranslatableChoices([
+                    Config::TYPE_BOOL => t('label.boolean', [], 'config'),
+                    Config::TYPE_INT => t('label.int', [], 'config'),
+                    Config::TYPE_TEXT => t('label.text', [], 'config'),
                 ]),
 
             // Content — sensitive values are masked in list/detail, editable in form

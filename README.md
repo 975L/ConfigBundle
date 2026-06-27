@@ -42,6 +42,14 @@ Create a `config/configs.json` file in your bundle. Each entry will be inserted 
         "description": "Name of the website"
     },
     {
+        "label": "Maintenance Mode",
+        "slug": "site-maintenance",
+        "sensitive": true,
+        "value": "false",
+        "kind": "bool",
+        "description": "Set to true to enable maintenance mode"
+    },
+    {
         "label": "Stripe Secret Key",
         "slug": "stripe-secret-key",
         "sensitive": true,
@@ -52,12 +60,10 @@ Create a `config/configs.json` file in your bundle. Each entry will be inserted 
 ]
 ```
 
-Valid `kind` values: `text`, `html`, `image`, `code`, `bool`, `int`.
+Supported `kind` values: `text`, `int`, `bool`.
 Set `sensitive: true` for any entry that holds secrets (API keys, passwords, etc.).
 
 ## Loading config entries into the database
-
-### All c975L bundles at once
 
 Auto-discovers every `vendor/c975l/*/config/configs.json` file and loads them in one shot:
 
@@ -103,8 +109,9 @@ class MyService
 
     public function doSomething(): void
     {
-        $siteName  = $this->configService->get('site-name');
-        $isEnabled = $this->configService->getBool($this->configService->get('feature-enabled'));
+        $siteName  = $this->configService->get('site-name'); // string
+        $maxItems  = $this->configService->get('max-items'); // int (auto-cast)
+        $isEnabled = $this->configService->get('feature-enabled'); // bool (auto-cast)
         $env       = $this->configService->getContainerParameter('kernel.environment');
     }
 }

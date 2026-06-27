@@ -1,5 +1,11 @@
 # ChangeLog
 
+## v5.3.1
+
+- Suppressed unused types (27/06/2026)
+- Made int type auto cast (27/06/2026)
+- Added ManagementAuthenticationListener to redirect to login when credentials expire on management routes (27/06/2026)
+
 ## v5.3
 
 - Removed the isGranted['ROLE_ADMIN'] to use the value from ConfigBundle (26/06/2026)

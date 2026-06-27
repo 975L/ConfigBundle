@@ -11,68 +11,80 @@
                 <target>Management Interface</target>
             </trans-unit>
             <trans-unit id="3">
-                <source>label.maintenance</source>
-                <target>Maintenance</target>
-            </trans-unit>
-            <trans-unit id="4">
-                <source>label.maintenance_message</source>
-                <target>We are working to provide you with a better experience. Please check back soon!</target>
-            </trans-unit>
-            <trans-unit id="5">
                 <source>label.label</source>
                 <target>Label</target>
             </trans-unit>
-            <trans-unit id="6">
+            <trans-unit id="4">
                 <source>label.slug_exists</source>
                 <target>The slug already exists</target>
             </trans-unit>
-            <trans-unit id="7">
+            <trans-unit id="5">
                 <source>label.kind</source>
                 <target>Type</target>
             </trans-unit>
-            <trans-unit id="8">
-                <source>label.group</source>
-                <target>Group</target>
-            </trans-unit>
-            <trans-unit id="9">
+            <trans-unit id="6">
                 <source>label.value</source>
                 <target>Value</target>
             </trans-unit>
-            <trans-unit id="10">
+            <trans-unit id="7">
                 <source>label.dashboard</source>
                 <target>Dashboard</target>
             </trans-unit>
-            <trans-unit id="11">
+            <trans-unit id="8">
                 <source>label.user</source>
                 <target>User</target>
             </trans-unit>
-            <trans-unit id="12">
+            <trans-unit id="9">
                 <source>label.signout</source>
                 <target>Sign Out</target>
             </trans-unit>
-            <trans-unit id="13">
+            <trans-unit id="10">
                 <source>label.management</source>
                 <target>Management</target>
             </trans-unit>
-            <trans-unit id="14">
+            <trans-unit id="11">
                 <source>label.slug</source>
                 <target>Slug</target>
             </trans-unit>
-            <trans-unit id="15">
+            <trans-unit id="12">
                 <source>label.is_sensitive</source>
                 <target>Sensitive</target>
             </trans-unit>
-            <trans-unit id="16">
+            <trans-unit id="13">
                 <source>label.is_sensitive_help</source>
                 <target>This field should only be modified by experienced users</target>
             </trans-unit>
-            <trans-unit id="17">
+            <trans-unit id="14">
                 <source>label.show_sensitive</source>
                 <target>Show sensitive data</target>
             </trans-unit>
-            <trans-unit id="18">
+            <trans-unit id="15">
                 <source>label.hide_sensitive</source>
                 <target>Hide sensitive data</target>
+            </trans-unit>
+            <trans-unit id="16">
+                <source>label.description</source>
+                <target>Description</target>
+            </trans-unit>
+            <trans-unit id="17">
+                <source>label.int</source>
+                <target>Integer</target>
+            </trans-unit>
+            <trans-unit id="18">
+                <source>label.boolean</source>
+                <target>Boolean</target>
+            </trans-unit>
+            <trans-unit id="19">
+                <source>label.text</source>
+                <target>Text</target>
+            </trans-unit>
+            <trans-unit id="20">
+                <source>label.creation</source>
+                <target>Creation</target>
+            </trans-unit>
+            <trans-unit id="21">
+                <source>label.modification</source>
+                <target>Modification</target>
             </trans-unit>
         </body>
     </file>

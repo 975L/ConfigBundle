@@ -20,18 +20,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity(fields: ['slug'], message: 'label.slug_exists')]
 class Config
 {
-    public const TYPE_TEXT  = 'text';
-    public const TYPE_HTML  = 'html';
-    public const TYPE_IMAGE = 'image';
-    public const TYPE_CODE  = 'code';
-    public const TYPE_BOOL  = 'bool';
-    public const TYPE_INT = 'int';
+    public const TYPE_TEXT = 'text';
+    public const TYPE_BOOL = 'bool';
+    public const TYPE_INT  = 'int';
 
     public const TYPES = [
         self::TYPE_TEXT,
-        self::TYPE_HTML,
-        self::TYPE_IMAGE,
-        self::TYPE_CODE,
         self::TYPE_BOOL,
         self::TYPE_INT,
     ];

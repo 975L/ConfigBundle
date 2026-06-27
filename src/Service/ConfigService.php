@@ -82,6 +82,9 @@ class ConfigService implements ConfigServiceInterface
                     case Config::TYPE_BOOL:
                         $value = $this->getBool($configClient->getValue());
                         break;
+                    case Config::TYPE_INT:
+                        $value = (int) $configClient->getValue();
+                        break;
                     default:
                         $value = $configClient->getValue();
                 }
