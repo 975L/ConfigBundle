@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v5.3.3
+
+- Added config due to conversion to Stimulus to c975L/UiBundle blocks.js (28/06/2026)
+
 ## v5.3.2
 
 - Removed cache ttl for values as not needed (28/06/2026)

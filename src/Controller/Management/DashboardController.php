@@ -64,6 +64,7 @@ class DashboardController extends AbstractDashboardController
     public function configureAssets(): Assets
     {
         return Assets::new()
+            ->addAssetMapperEntry('app')
             ->addJsFile(Asset::fromEasyAdminAssetPackage('field-text-editor.js'))
             ->addCssFile(Asset::fromEasyAdminAssetPackage('field-text-editor.css'));
     }
