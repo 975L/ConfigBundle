@@ -20,7 +20,8 @@ use Doctrine\ORM\EntityManagerInterface;
 class ConfigService implements ConfigServiceInterface
 {
     private const CACHE_KEY = 'site_configs_all';
-    private const CACHE_TTL = 3600;
+
+    private ?array $configs = null;
 
     public function __construct(
         private readonly ConfigRepository $configRepository,
@@ -60,6 +61,7 @@ class ConfigService implements ConfigServiceInterface
     // Invalidates the configs cache (to be called after any modification).
     public function invalidateCache(): void
     {
+        $this->configs = null;
         try {
             $this->cache->delete(self::CACHE_KEY);
         } catch (InvalidArgumentException) {
@@ -70,29 +72,32 @@ class ConfigService implements ConfigServiceInterface
     // Loads all configs in cache and returns them as an associative array (slug => value)
     public function loadAll(): array
     {
-        // $this->invalidateCache(); // For debug
-        return $this->cache->get(self::CACHE_KEY, function (ItemInterface $item): array {
-            $item->expiresAfter(self::CACHE_TTL);
+        if ($this->configs !== null) {
+            return $this->configs;
+        }
 
-            // Gets configs parameters
-            $configsClient = $this->configRepository->findAll();
+        // $this->invalidateCache(); // For debug
+        $this->configs = $this->cache->get(self::CACHE_KEY, function (ItemInterface $item): array {
+            $item->expiresAfter(null);
+
             $configs = [];
-            foreach ($configsClient as $configClient) {
-                switch ($configClient->getKind()) {
-                    case Config::TYPE_BOOL:
-                        $value = $this->getBool($configClient->getValue());
-                        break;
-                    case Config::TYPE_INT:
-                        $value = (int) $configClient->getValue();
-                        break;
-                    default:
-                        $value = $configClient->getValue();
-                }
-                $configs[$configClient->getSlug()] = $value;
+            foreach ($this->configRepository->findAll() as $configClient) {
+                $configs[$configClient->getSlug()] = $this->castValue($configClient->getKind(), $configClient->getValue());
             }
 
             return $configs;
         });
+
+        return $this->configs;
+    }
+
+    private function castValue(string $kind, mixed $value): mixed
+    {
+        return match ($kind) {
+            Config::TYPE_BOOL => $this->getBool($value),
+            Config::TYPE_INT  => (int) $value,
+            default => $value,
+        };
     }
 
     // Loads default config values in the database (if not already present)

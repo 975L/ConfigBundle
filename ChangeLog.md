@@ -1,5 +1,10 @@
 # ChangeLog
 
+## v5.3.2
+
+- Removed cache ttl for values as not needed (28/06/2026)
+- Added request-scoped memoization to avoid redundant cache lookups within a single HTTP request (28/06/2026)
+
 ## v5.3.1
 
 - Suppressed unused types (27/06/2026)
