@@ -14,5 +14,6 @@ interface MenuProviderInterface
 
     public function getMenus(): array;
 
-    public function getMenuItems(): iterable;
+    // Links to routes (not EasyAdmin CRUD controllers), merged by MenuBuilder into a single "links" section; return [] if none
+    public function getLinks(): array;
 }

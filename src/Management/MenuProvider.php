@@ -9,22 +9,22 @@
 namespace c975L\ConfigBundle\Management;
 
 use c975L\ConfigBundle\Controller\Management\ConfigCrudController;
-use c975L\ConfigBundle\Management\AbstractMenuProvider;
+use c975L\ConfigBundle\Management\MenuProviderInterface;
 
 // To add a MenuProvider, you need to:
 // add the Management Folder in the src/ folder of your bundle
-// Create a MenuProvider.php file in it with a class that extends AbstractMenuProvider and implements the getMenuSection() and getMenus() methods
-// You can also add getRoutesSection() and getRoutes() methods to add links to routes in the menu
+// Create a MenuProvider.php file in it with a class that implements MenuProviderInterface, providing getMenuSection(), getMenus() and getLinks() methods
+// getLinks() can return [] if your bundle has no links to routes to expose; all bundles' links are merged into a single alphabetically-sorted section
 // add the declaration of the Management folder in the services.yaml file of your bundle
 // ConfigBundle will automatically detect the MenuProvider and add it to the menu of EasyAdmin
 
-class MenuProvider extends AbstractMenuProvider
+class MenuProvider implements MenuProviderInterface
 {
     public function getMenuSection(): array
     {
         return [
-            'label' => 'label.config',
-            'translation_domain' => 'config',
+            'label' => 'label.management',
+            'translation_domain' => 'site',
         ];
     }
 
@@ -38,5 +38,10 @@ class MenuProvider extends AbstractMenuProvider
                 'icon' => 'fa fa-cog',
             ],
         ];
+    }
+
+    public function getLinks(): array
+    {
+        return [];
     }
 }

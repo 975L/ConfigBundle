@@ -37,6 +37,7 @@ Create a `config/configs.json` file in your bundle. Each entry will be inserted 
         "label": "Site Name",
         "slug": "site-name",
         "sensitive": false,
+        "system": true,
         "value": null,
         "kind": "text",
         "description": "Name of the website"
@@ -46,6 +47,7 @@ Create a `config/configs.json` file in your bundle. Each entry will be inserted 
         "slug": "site-maintenance",
         "sensitive": true,
         "value": "false",
+        "system": true,
         "kind": "bool",
         "description": "Set to true to enable maintenance mode"
     },
@@ -53,6 +55,7 @@ Create a `config/configs.json` file in your bundle. Each entry will be inserted 
         "label": "Stripe Secret Key",
         "slug": "stripe-secret-key",
         "sensitive": true,
+        "system": true,
         "value": null,
         "kind": "text",
         "description": "Stripe secret key (sk_live_...)"
@@ -62,6 +65,7 @@ Create a `config/configs.json` file in your bundle. Each entry will be inserted 
 
 Supported `kind` values: `text`, `int`, `bool`.
 Set `sensitive: true` for any entry that holds secrets (API keys, passwords, etc.).
+Set `system: true` for any entry that is critical to the system and should not be modified or deleted.
 
 ## Loading config entries into the database
 
@@ -69,6 +73,14 @@ Auto-discovers every `vendor/c975l/*/config/configs.json` file and loads them in
 
 ```bash
 php bin/console c975l:config:load-all
+```
+
+## Encrypting sensitive values
+
+Sensitive config values can be encrypted at rest (AES-256-CBC) using a `C975L_VAULT_KEY` defined in `.env.local`. Run the following command to encrypt any sensitive value still stored in plain text — it is idempotent and safe to run multiple times, skipping empty or already-encrypted values:
+
+```bash
+php bin/console c975l:config:encrypt-sensitive
 ```
 
 ## EasyAdmin interface
@@ -91,8 +103,72 @@ mysql -u user -p dbname < site_config_20260626_120000.sql
 | --- | --- | --- |
 | `false` | `INSERT … ON DUPLICATE KEY UPDATE` | Creates or updates label, value, kind, description |
 | `true` | `INSERT IGNORE INTO` | Creates if missing; **preserves existing production value** |
-
+| `system` | `INSERT IGNORE INTO` | Creates if missing; **prevents modification or deletion** |
 This means non-sensitive values (labels, descriptions, default content) are kept in sync, while live API keys and secrets already set on production are never overwritten.
+
+## Contributing menu items from other bundles
+
+Satellite bundles add entries to the `/management` dashboard by implementing `MenuProviderInterface` — no manual service tagging needed, `MenuProviderPass` auto-detects any class implementing it.
+
+```php
+namespace c975L\MyBundle\Management;
+
+use c975L\ConfigBundle\Management\MenuProviderInterface;
+use c975L\MyBundle\Controller\Management\MyCrudController;
+
+class MenuProvider implements MenuProviderInterface
+{
+    public function getMenuSection(): array
+    {
+        return [
+            'label' => 'label.my_section',
+            'translation_domain' => 'my_bundle',
+        ];
+    }
+
+    public function getMenus(): array
+    {
+        return [
+            'my_entity' => [
+                'controller' => MyCrudController::class,
+                'label' => 'label.my_entity',
+                'translation_domain' => 'my_bundle',
+                'icon' => 'fas fa-star',
+            ],
+        ];
+    }
+
+    // Links to plain routes (not EasyAdmin CRUD controllers); return [] if none
+    public function getLinks(): array
+    {
+        return [];
+    }
+}
+```
+
+Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
+
+**Section merging:** if several bundles declare the same `getMenuSection()` (identical `label` + `translation_domain`), their menus are merged under a single section header instead of being duplicated.
+
+**Alphabetical ordering:** within a section, menu items are always sorted alphabetically by their translated label.
+
+**Links section:** `getLinks()` exposes links to plain routes (e.g. a public page), each entry shaped like:
+
+```php
+public function getLinks(): array
+{
+    return [
+        'shop' => [
+            'name' => 'shop_index',
+            'label' => 'label.shop',
+            'translation_domain' => 'shop',
+            'icon' => 'fas fa-shop',
+        ],
+    ];
+}
+```
+
+Links from every bundle are merged into a single "Links" section (opened in a new tab), sorted alphabetically.
 
 ## Reading config values
 

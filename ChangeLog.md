@@ -1,5 +1,12 @@
 # ChangeLog
 
+## v5.3.4
+
+- Added new field isSystem (01/07/2026)
+- Added encryption for sensitive values (01/07/2026)
+- Added field format specific to kind in crud (01/07/2026)
+- Added grouped menus and only one Links section (01/07/2026)
+
 ## v5.3.3
 
 - Added config due to conversion to Stimulus to c975L/UiBundle blocks.js (28/06/2026)

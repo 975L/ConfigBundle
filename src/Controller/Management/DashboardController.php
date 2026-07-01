@@ -10,6 +10,7 @@
 
 namespace c975L\ConfigBundle\Controller\Management;
 
+use c975L\ConfigBundle\Management\MenuBuilder;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Asset;
@@ -23,7 +24,7 @@ use Symfony\Component\HttpFoundation\Response;
 class DashboardController extends AbstractDashboardController
 {
     public function __construct(
-        private readonly iterable $menuProviders,
+        private readonly MenuBuilder $menuBuilder,
         private readonly ConfigServiceInterface $configService,
     ) {}
 
@@ -31,23 +32,11 @@ class DashboardController extends AbstractDashboardController
     {
         $this->denyAccessUnlessGranted($this->configService->get('site-role-needed'));
 
-        $menus = [];
-        foreach ($this->menuProviders as $provider) {
-            $menus = array_merge($menus, $provider->getMenus());
-        }
-
-        $routes = [];
-        foreach ($this->menuProviders as $provider) {
-            if (method_exists($provider, 'getRoutes')) {
-                $routes = array_merge($routes, $provider->getRoutes());
-            }
-        }
-
         return $this->render(
             '@c975LConfig/management/index.html.twig',
             [
-                'menus' => $menus,
-                'routes' => $routes,
+                'menus' => $this->menuBuilder->getMenus(),
+                'routes' => $this->menuBuilder->getLinks(),
             ]
         );
     }
@@ -73,10 +62,8 @@ class DashboardController extends AbstractDashboardController
     {
         yield MenuItem::linkToDashboard('label.dashboard', 'fa fa-home')->setPermission($this->configService->get('site-role-needed'));
 
-        // Menu from bundles
-        foreach ($this->menuProviders as $provider) {
-            yield from $provider->getMenuItems();
-        }
+        // Menu from bundles, grouped by section and sorted alphabetically
+        yield from $this->menuBuilder->getMenuItems();
 
         yield MenuItem::section('label.user');
         yield MenuItem::linkToLogout('label.signout', 'fa fa-exit');

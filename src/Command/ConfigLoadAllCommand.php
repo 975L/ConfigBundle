@@ -9,6 +9,7 @@
 namespace c975L\ConfigBundle\Command;
 
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
+use c975L\ConfigBundle\Service\VaultEncryptor;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,6 +25,7 @@ class ConfigLoadAllCommand extends Command
 {
     public function __construct(
         private readonly ConfigServiceInterface $configService,
+        private readonly VaultEncryptor $vaultEncryptor,
         #[Autowire(param: 'kernel.project_dir')]
         private readonly string $projectDir,
     ) {
@@ -42,14 +44,36 @@ class ConfigLoadAllCommand extends Command
             return Command::SUCCESS;
         }
 
+        $hasSensitiveValues = false;
+
         foreach ($files as $file) {
             $bundle = basename(dirname(dirname($file)));
+
+            // Warn if sensitive settings with values are found but no vault key is configured
+            if (!$this->vaultEncryptor->isKeyDefined()) {
+                $configs = json_decode(file_get_contents($file), true) ?? [];
+                foreach ($configs as $configData) {
+                    if (($configData['sensitive'] ?? false) && !empty($configData['value'])) {
+                        $hasSensitiveValues = true;
+                        break;
+                    }
+                }
+            }
+
             try {
                 $this->configService->loadDefaultConfig($file);
                 $io->text('  ✓ ' . $bundle);
             } catch (\Throwable $e) {
                 $io->warning('  ✗ ' . $bundle . ': ' . $e->getMessage());
             }
+        }
+
+        if ($hasSensitiveValues) {
+            $io->warning([
+                'C975L_VAULT_KEY is not defined.',
+                'Sensitive settings with values were found but could not be encrypted.',
+                'Add C975L_VAULT_KEY to your .env.local, then run: php bin/console c975l:config:encrypt-sensitive',
+            ]);
         }
 
         $io->success(sprintf('%d bundle config(s) processed.', count($files)));

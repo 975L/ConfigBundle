@@ -11,6 +11,7 @@ namespace c975L\ConfigBundle\Controller\Management;
 
 use c975L\ConfigBundle\Entity\Config;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
+use c975L\ConfigBundle\Service\VaultEncryptor;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
@@ -27,15 +28,16 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\SlugField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Translation\TranslatableMessage;
 
 use function Symfony\Component\Translation\t;
 
@@ -44,6 +46,7 @@ class ConfigCrudController extends AbstractCrudController
     public function __construct(
         private readonly Security $security,
         private readonly ConfigServiceInterface $configService,
+        private readonly VaultEncryptor $vaultEncryptor,
         private readonly Connection $connection,
         private readonly RequestStack $requestStack,
     ) {
@@ -56,49 +59,127 @@ class ConfigCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
+        $context = $this->getContext();
+        $entity = null !== $context ? $context->getEntity()->getInstance() : null;
+        $isSystem = $entity instanceof Config && true === $entity->getIsSystem();
+        $isSensitive = $entity instanceof Config && true === $entity->getIsSensitive();
+
+        // Kind is locked for system configs
+        $kindField = ChoiceField::new('kind')
+            ->setLabel(t('label.kind', [], 'config'))
+            ->setRequired(true)
+            ->setTranslatableChoices([
+                Config::TYPE_BOOL => t('label.boolean', [], 'config'),
+                Config::TYPE_INT => t('label.int', [], 'config'),
+                Config::TYPE_TEXT => t('label.text', [], 'config'),
+                Config::TYPE_DATE => t('label.date', [], 'config'),
+            ]);
+
+        if ($isSystem && Crud::PAGE_EDIT === $pageName) {
+            $kindField->setFormTypeOption('disabled', true);
+        }
+
+        $kind = $entity instanceof Config ? $entity->getKind() : Config::TYPE_TEXT;
+        $rawValue = $entity instanceof Config ? $entity->getValue() : null;
+
+        // Index lists every config in one column: kind/sensitivity vary per row and
+        // can't be resolved from the (null) top-level entity, so decide via the row's $config argument
+        if (Crud::PAGE_INDEX === $pageName) {
+            $valueField = TextareaField::new('value')
+                ->setLabel(t('label.value', [], 'config'))
+                ->formatValue(fn (?string $value, Config $config): string =>
+                    $config->getIsSensitive() ? '••••••••' : ($value ?? '')
+                );
+        } elseif ($isSensitive && in_array($pageName, [Crud::PAGE_EDIT, Crud::PAGE_NEW], true)) {
+            // Sensitive fields are pre-filled with the decrypted raw string value in edit/new
+            // (must stay the raw string, not configService->get()'s kind-cast value, otherwise a
+            // sensitive bool/int/date config like site-maintenance renders as "1"/"" instead of "true"/"false")
+            // (no need to mask with a password widget, the value is already shown in clear on the detail page)
+            $decryptedValue = null;
+            if (null !== $rawValue && '' !== $rawValue) {
+                $decryptedValue = $this->vaultEncryptor->decrypt($rawValue);
+            }
+
+            $valueField = TextField::new('value')
+                ->setLabel(t('label.value_sensitive', [], 'config'))
+                ->setFormTypeOptions([
+                    'data' => $decryptedValue,
+                ])
+                ->setRequired(true);
+        } elseif ($isSensitive) {
+            // Detail page: reveal the decrypted value
+            $valueField = TextareaField::new('value')
+                ->setLabel(t('label.value', [], 'config'))
+                ->setRequired(true)
+                ->formatValue(fn (?string $value): string =>
+                    null === $value || '' === $value ? ($value ?? '') : $this->vaultEncryptor->decrypt($value)
+                );
+        } else {
+            // Non-sensitive fields use a widget matching the config kind
+            $valueField = match ($kind) {
+                // The raw string value must be overridden with a real bool/DateTime via setValue(),
+                // since EasyAdmin's boolean/date templates and formatters read the field's raw value directly
+                Config::TYPE_BOOL => BooleanField::new('value')
+                    ->setLabel(t('label.value', [], 'config'))
+                    ->setValue($this->configService->getBool($rawValue))
+                    ->setFormTypeOptions(['data' => $this->configService->getBool($rawValue)]),
+                Config::TYPE_INT => IntegerField::new('value')
+                    ->setLabel(t('label.value', [], 'config'))
+                    ->setFormTypeOptions(['data' => null !== $rawValue ? (int) $rawValue : null])
+                    ->setRequired(true),
+                Config::TYPE_DATE => DateField::new('value')
+                    ->setLabel(t('label.value', [], 'config'))
+                    ->setValue($this->toDate($rawValue))
+                    ->setFormTypeOptions(['data' => $this->toDate($rawValue)])
+                    ->setRequired(true),
+                default => TextareaField::new('value')
+                    ->setLabel(t('label.value', [], 'config'))
+                    ->setRequired(true),
+            };
+        }
+
         return [
             IdField::new('id')
                 ->onlyOnIndex(),
             TextField::new('label')
-                ->setLabel(new TranslatableMessage('label.label', [], 'config'))
+                ->setLabel(t('label.label', [], 'config'))
                 ->setRequired(true),
             SlugField::new('slug')
-                ->setLabel(new TranslatableMessage('label.slug', [], 'config'))
+                ->setLabel(t('label.slug', [], 'config'))
                 ->setTargetFieldName('label')
                 ->setRequired(true),
 
             // Sensitive
             BooleanField::new('isSensitive')
-                ->setLabel(new TranslatableMessage('label.is_sensitive', [], 'config'))
+                ->setLabel(t('label.is_sensitive', [], 'config'))
                 ->setRequired(false)
-                ->setHelp(new TranslatableMessage('label.is_sensitive_help', [], 'config')),
+                ->setFormTypeOption('disabled', true)
+                ->setHelp(t('label.is_sensitive_help', [], 'config')),
+
+            // System
+            BooleanField::new('isSystem')
+                ->setLabel(t('label.is_system', [], 'config'))
+                ->setRequired(true)
+                ->setFormTypeOption('disabled', true)
+                ->setHelp(t('label.is_system_help', [], 'config')),
 
             // Kind
-            ChoiceField::new('kind')
-                ->setLabel(new TranslatableMessage('label.kind', [], 'config'))
-                ->setRequired(true)
-                ->setTranslatableChoices([
-                    Config::TYPE_BOOL => t('label.boolean', [], 'config'),
-                    Config::TYPE_INT => t('label.int', [], 'config'),
-                    Config::TYPE_TEXT => t('label.text', [], 'config'),
-                ]),
+            $kindField,
 
-            // Content — sensitive values are masked in list/detail, editable in form
-            TextareaField::new('value')
-                ->setLabel(new TranslatableMessage('label.value', [], 'config'))
-                ->setRequired(true),
+            // Content — widget depends on kind (bool/int/date/text); sensitive values are masked in list/detail
+            $valueField,
             TextareaField::new('description')
-                ->setLabel(new TranslatableMessage('label.description', [], 'config'))
+                ->setLabel(t('label.description', [], 'config'))
                 ->setRequired(false)
                 ->hideOnIndex(),
 
             // Dates
             DateTimeField::new('creation')
-                ->setLabel(new TranslatableMessage('label.creation', [], 'config'))
+                ->setLabel(t('label.creation', [], 'config'))
                 ->setFormTypeOption('disabled', 'disabled')
                 ->onlyOnDetail(),
             DateTimeField::new('modification')
-                ->setLabel(new TranslatableMessage('label.modification', [], 'config'))
+                ->setLabel(t('label.modification', [], 'config'))
                 ->setFormTypeOption('disabled', 'disabled')
                 ->onlyOnDetail(),
         ];
@@ -117,12 +198,12 @@ class ConfigCrudController extends AbstractCrudController
         $params = $request?->query->all() ?? [];
         if ($showSensitive) {
             unset($params['showSensitive']);
-            $sensitiveLabel = new TranslatableMessage('label.hide_sensitive', [], 'config');
+            $sensitiveLabel = t('label.hide_sensitive', [], 'config');
             $sensitiveIcon = 'fa fa-eye-slash';
             $sensitiveCss = 'btn btn-warning btn-sm';
         } else {
             $params['showSensitive'] = 1;
-            $sensitiveLabel = new TranslatableMessage('label.show_sensitive', [], 'config');
+            $sensitiveLabel = t('label.show_sensitive', [], 'config');
             $sensitiveIcon = 'fa fa-eye';
             $sensitiveCss = 'btn btn-outline-warning btn-sm';
         }
@@ -139,6 +220,13 @@ class ConfigCrudController extends AbstractCrudController
             ->setPermission(Action::NEW, $this->configService->get('site-role-needed'))
             ->setPermission('exportSql', $this->configService->get('site-role-needed'))
             ->setPermission('toggleSensitive', $this->configService->get('site-role-needed'))
+            // System configs can't be deleted
+            ->update(Crud::PAGE_INDEX, Action::DELETE, static fn (Action $action) => $action->displayIf(
+                static fn (Config $config): bool => !$config->getIsSystem()
+            ))
+            ->update(Crud::PAGE_DETAIL, Action::DELETE, static fn (Action $action) => $action->displayIf(
+                static fn (Config $config): bool => !$config->getIsSystem()
+            ))
         ;
     }
 
@@ -169,9 +257,13 @@ class ConfigCrudController extends AbstractCrudController
         return $qb;
     }
 
-    // New config - Invalidate cache
+    // New config - encrypt sensitive value if provided, then invalidate cache
     public function persistEntity(EntityManagerInterface $entityManager, mixed $config): void
     {
+        if ($config->getIsSensitive() && null !== $config->getValue() && '' !== $config->getValue()) {
+            $config->setValue($this->vaultEncryptor->encrypt($config->getValue()));
+        }
+
         $config->setCreation(new \DateTime());
         $config->setModification(new \DateTime());
         $this->setUser($config);
@@ -181,9 +273,26 @@ class ConfigCrudController extends AbstractCrudController
         $this->configService->invalidateCache();
     }
 
-    // Updated config - Invalidate cache
+    // Updated config - preserve existing encrypted value when field left empty, encrypt new value otherwise
     public function updateEntity(EntityManagerInterface $entityManager, mixed $config): void
     {
+        if ($config->getIsSensitive()) {
+            $submitted = $config->getValue();
+
+            if (null === $submitted || '' === $submitted) {
+                // Empty submission: restore the original value, encrypting it if it was still plain-text
+                // (e.g. a default loaded before C975L_VAULT_KEY was configured)
+                $original = $entityManager->getUnitOfWork()->getOriginalEntityData($config)['value'] ?? null;
+                if (null !== $original && '' !== $original && !$this->vaultEncryptor->isEncrypted($original)) {
+                    $original = $this->vaultEncryptor->encrypt($original);
+                }
+                $config->setValue($original);
+            } else {
+                // Non-empty submission: encrypt the new plain-text value
+                $config->setValue($this->vaultEncryptor->encrypt($submitted));
+            }
+        }
+
         $config->setModification(new \DateTime());
         $this->setUser($config);
 
@@ -195,13 +304,6 @@ class ConfigCrudController extends AbstractCrudController
     // Deleted config - Invalidate cache
     public function deleteEntity(EntityManagerInterface $entityManager, mixed $config): void
     {
-        // if ($config->getKind() === Config::TYPE_IMAGE && $config->getValue()) {
-        //     $path = rtrim($this->uploadsDirectory, '/') . '/' . $config->getValue();
-        //     if (file_exists($path)) {
-        //         unlink($path);
-        //     }
-        // }
-
         parent::deleteEntity($entityManager, $config);
 
         $this->configService->invalidateCache();
@@ -211,26 +313,27 @@ class ConfigCrudController extends AbstractCrudController
     public function exportSql(AdminContext $context): Response
     {
         $rows = $this->connection->fetchAllAssociative(
-            'SELECT `label`, `slug`, `is_sensitive`, `value`, `kind`, `description`, `creation`, `modification` FROM `site_config` ORDER BY `slug`'
+            'SELECT `label`, `slug`, `is_sensitive`, `is_system`, `value`, `kind`, `description`, `creation`, `modification` FROM `site_config` ORDER BY `slug`'
         );
 
         $now = date('Y-m-d H:i:s');
         $lines = [
             "-- site_config export -- {$now}",
-            '-- Non-sensitive: INSERT ... ON DUPLICATE KEY UPDATE (syncs label/value/kind/description)',
-            '-- Sensitive:     INSERT IGNORE INTO (creates if missing, preserves production values)',
+            '-- Non-sensitive/non-system: INSERT ... ON DUPLICATE KEY UPDATE (syncs label/value/kind/description)',
+            '-- Sensitive or system:      INSERT IGNORE INTO (creates if missing, preserves production values)',
             'SET NAMES utf8mb4;',
             '',
         ];
 
         foreach ($rows as $row) {
-            $sensitive = (bool) $row['is_sensitive'];
-            $cols = '(`label`, `slug`, `is_sensitive`, `value`, `kind`, `description`, `creation`, `modification`)';
+            $protected = (bool) $row['is_sensitive'] || (bool) $row['is_system'];
+            $cols = '(`label`, `slug`, `is_sensitive`, `is_system`, `value`, `kind`, `description`, `creation`, `modification`)';
             $vals = sprintf(
-                '(%s, %s, %d, %s, %s, %s, %s, %s)',
+                '(%s, %s, %d, %d, %s, %s, %s, %s, %s)',
                 $this->sqlQuote($row['label']),
                 $this->sqlQuote($row['slug']),
                 (int) $row['is_sensitive'],
+                (int) $row['is_system'],
                 $this->sqlQuote($row['value']),
                 $this->sqlQuote($row['kind']),
                 $this->sqlQuote($row['description']),
@@ -238,12 +341,12 @@ class ConfigCrudController extends AbstractCrudController
                 $this->sqlQuote($row['modification']),
             );
 
-            if ($sensitive) {
+            if ($protected) {
                 $lines[] = "INSERT IGNORE INTO `site_config` {$cols} VALUES {$vals};";
             } else {
                 $lines[] = "INSERT INTO `site_config` {$cols} VALUES {$vals}"
                     . ' ON DUPLICATE KEY UPDATE'
-                    . ' `label`=VALUES(`label`), `is_sensitive`=VALUES(`is_sensitive`), `value`=VALUES(`value`),'
+                    . ' `label`=VALUES(`label`), `is_sensitive`=VALUES(`is_sensitive`), `is_system`=VALUES(`is_system`), `value`=VALUES(`value`),'
                     . ' `kind`=VALUES(`kind`), `description`=VALUES(`description`), `modification`=VALUES(`modification`);';
             }
         }
@@ -260,6 +363,20 @@ class ConfigCrudController extends AbstractCrudController
     private function sqlQuote(?string $value): string
     {
         return $value === null ? 'NULL' : $this->connection->quote($value);
+    }
+
+    // Parses a stored date value, tolerating empty/invalid strings
+    private function toDate(?string $value): ?\DateTime
+    {
+        if (null === $value || '' === $value) {
+            return null;
+        }
+
+        try {
+            return new \DateTime($value);
+        } catch (\Exception) {
+            return null;
+        }
     }
 
     // Defines the user for the config

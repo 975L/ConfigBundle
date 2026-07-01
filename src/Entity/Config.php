@@ -23,11 +23,13 @@ class Config
     public const TYPE_TEXT = 'text';
     public const TYPE_BOOL = 'bool';
     public const TYPE_INT  = 'int';
+    public const TYPE_DATE  = 'date';
 
     public const TYPES = [
         self::TYPE_TEXT,
         self::TYPE_BOOL,
         self::TYPE_INT,
+        self::TYPE_DATE,
     ];
 
     #[ORM\Id]
@@ -53,6 +55,10 @@ class Config
     #[ORM\Column(length: 20)]
     #[Assert\Choice(choices: self::TYPES)]
     private string $kind = self::TYPE_TEXT;
+
+    #[ORM\Column(type: Types::BOOLEAN, nullable: true)]
+    #[Assert\Type(type: 'bool')]
+    private ?bool $isSystem = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
@@ -112,9 +118,14 @@ class Config
         return $this->value;
     }
 
-    public function setValue(?string $value): static
+    public function setValue(mixed $value): static
     {
-        $this->value = $value;
+        $this->value = match (true) {
+            null === $value => null,
+            is_bool($value) => $value ? 'true' : 'false',
+            $value instanceof \DateTimeInterface => $value->format('Y-m-d'),
+            default => (string) $value,
+        };
 
         return $this;
     }
@@ -127,6 +138,18 @@ class Config
     public function setKind(string $kind): static
     {
         $this->kind = $kind;
+
+        return $this;
+    }
+
+    public function getIsSystem(): ?bool
+    {
+        return $this->isSystem;
+    }
+
+    public function setIsSystem(?bool $isSystem): static
+    {
+        $this->isSystem = $isSystem;
 
         return $this;
     }

@@ -28,6 +28,7 @@ class ConfigService implements ConfigServiceInterface
         private readonly CacheInterface $cache,
         private readonly ParameterBagInterface $params,
         private readonly EntityManagerInterface $manager,
+        private readonly VaultEncryptor $vaultEncryptor,
     ) {}
 
     // Returns the value of a config (or null if not found)
@@ -81,8 +82,17 @@ class ConfigService implements ConfigServiceInterface
             $item->expiresAfter(null);
 
             $configs = [];
-            foreach ($this->configRepository->findAll() as $configClient) {
-                $configs[$configClient->getSlug()] = $this->castValue($configClient->getKind(), $configClient->getValue());
+            foreach ($this->configRepository->findAll() as $configEntry) {
+                $value = $configEntry->getValue();
+
+                // Decrypt sensitive values that have been encrypted
+                if ($configEntry->getIsSensitive() && null !== $value && '' !== $value) {
+                    if ($this->vaultEncryptor->isEncrypted($value)) {
+                        $value = $this->vaultEncryptor->decrypt($value);
+                    }
+                }
+
+                $configs[$configEntry->getSlug()] = $this->castValue($configEntry->getKind(), $value);
             }
 
             return $configs;
@@ -106,6 +116,9 @@ class ConfigService implements ConfigServiceInterface
         $configs = json_decode(file_get_contents($jsonPath), true);
 
         foreach ($configs as $configData) {
+            $isSensitive = $configData['sensitive'] ?? false;
+            $rawValue    = $configData['value'] ?? null;
+
             // Avoids duplicates/replacements
             if ($this->configRepository->findOneBySlug($configData['slug'])) {
                 continue;
@@ -114,12 +127,18 @@ class ConfigService implements ConfigServiceInterface
             $config = new Config();
             $config->setLabel($configData['label']);
             $config->setSlug($configData['slug']);
-            $config->setIsSensitive($configData['sensitive'] ?? false);
-            $config->setValue($configData['value'] ?? null);
+            $config->setIsSensitive($isSensitive);
+            $config->setIsSystem($configData['system'] ?? false);
             $config->setKind($configData['kind'] ?? 'text');
             $config->setDescription($configData['description'] ?? null);
             $config->setCreation(new \DateTime());
             $config->setModification(new \DateTime());
+
+            // Encrypt non-empty sensitive values on import
+            if ($isSensitive && null !== $rawValue && '' !== $rawValue && $this->vaultEncryptor->isKeyDefined()) {
+                $rawValue = $this->vaultEncryptor->encrypt($rawValue);
+            }
+            $config->setValue($rawValue);
 
             $this->manager->persist($config);
         }

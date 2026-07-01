@@ -8,8 +8,10 @@ services:
         resource: '../src/'
         exclude: '../src/{DependencyInjection,Entity}'
 
-    c975L\ConfigBundle\Controller\Management\DashboardController:
+    c975L\ConfigBundle\Management\MenuBuilder:
         arguments:
             $menuProviders: !tagged_iterator c975l.management_menu_provider
+
+    c975L\ConfigBundle\Controller\Management\DashboardController:
         tags: ['controller.service_arguments']
 

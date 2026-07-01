@@ -52,7 +52,7 @@
             </trans-unit>
             <trans-unit id="13">
                 <source>label.is_sensitive_help</source>
-                <target>This field should only be modified by experienced users</target>
+                <target>If sensitive is enabled, the value is encrypted in the database</target>
             </trans-unit>
             <trans-unit id="14">
                 <source>label.show_sensitive</source>
@@ -68,11 +68,11 @@
             </trans-unit>
             <trans-unit id="17">
                 <source>label.int</source>
-                <target>Integer</target>
+                <target>Integer (1, 2, 3, ...)</target>
             </trans-unit>
             <trans-unit id="18">
                 <source>label.boolean</source>
-                <target>Boolean</target>
+                <target>Boolean (True/False)</target>
             </trans-unit>
             <trans-unit id="19">
                 <source>label.text</source>
@@ -85,6 +85,34 @@
             <trans-unit id="21">
                 <source>label.modification</source>
                 <target>Modification</target>
+            </trans-unit>
+            <trans-unit id="22">
+                <source>label.is_system</source>
+                <target>System</target>
+            </trans-unit>
+            <trans-unit id="23">
+                    <source>label.is_system_help</source>
+                    <target>If the system is enabled, this means that this configuration should only be modified by experienced users</target>
+            </trans-unit>
+            <trans-unit id="24">
+                <source>label.date</source>
+                <target>Date (YYYY-MM-DD)</target>
+            </trans-unit>
+            <trans-unit id="25">
+                <source>label.true</source>
+                <target>True</target>
+            </trans-unit>
+            <trans-unit id="26">
+                <source>label.false</source>
+                <target>False</target>
+            </trans-unit>
+            <trans-unit id="27">
+                <source>label.value_sensitive</source>
+                <target>Value (leave empty to keep current value)</target>
+            </trans-unit>
+            <trans-unit id="28">
+                <source>label.links</source>
+                <target>Links</target>
             </trans-unit>
         </body>
     </file>

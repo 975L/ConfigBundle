@@ -48,11 +48,11 @@
             </trans-unit>
             <trans-unit id="12">
                 <source>label.is_sensitive</source>
-                <target>Sensitivo</target>
+                <target>Sensible</target>
             </trans-unit>
             <trans-unit id="13">
                 <source>label.is_sensitive_help</source>
-                <target>Este campo solo debe ser modificado por usuarios experimentados</target>
+                <target>Si sensible está activado, el valor se cifra en la base de datos</target>
             </trans-unit>
             <trans-unit id="14">
                 <source>label.show_sensitive</source>
@@ -68,11 +68,11 @@
             </trans-unit>
             <trans-unit id="17">
                 <source>label.int</source>
-                <target>Entero</target>
+                <target>Entero (1, 2, 3, ...)</target>
             </trans-unit>
             <trans-unit id="18">
                 <source>label.boolean</source>
-                <target>Booleano</target>
+                <target>Booleano (Verdadero/Falso)</target>
             </trans-unit>
             <trans-unit id="19">
                 <source>label.text</source>
@@ -85,6 +85,34 @@
             <trans-unit id="21">
                 <source>label.modification</source>
                 <target>Modificación</target>
+            </trans-unit>
+            <trans-unit id="22">
+                <source>label.is_system</source>
+                <target>Sistema</target>
+            </trans-unit>
+            <trans-unit id="23">
+                <source>label.is_system_help</source>
+                <target>Si el sistema está habilitado, esto significa que esta configuración solo debe ser modificada por usuarios experimentados</target>
+            </trans-unit>
+            <trans-unit id="24">
+                <source>label.date</source>
+                <target>Fecha (AAAA-MM-JJ)</target>
+            </trans-unit>
+            <trans-unit id="25">
+                <source>label.true</source>
+                <target>Verdadero</target>
+            </trans-unit>
+            <trans-unit id="26">
+                <source>label.false</source>
+                <target>Falso</target>
+            </trans-unit>
+            <trans-unit id="27">
+                <source>label.value_sensitive</source>
+                <target>Valor (dejar vacío para no modificar)</target>
+            </trans-unit>
+            <trans-unit id="28">
+                <source>label.links</source>
+                <target>Enlaces</target>
             </trans-unit>
         </body>
     </file>
