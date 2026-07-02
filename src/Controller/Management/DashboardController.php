@@ -12,6 +12,7 @@ namespace c975L\ConfigBundle\Controller\Management;
 
 use c975L\ConfigBundle\Management\MenuBuilder;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
+use c975L\UiBundle\Registry\ScriptAdminRegistry;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Asset;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
@@ -26,6 +27,7 @@ class DashboardController extends AbstractDashboardController
     public function __construct(
         private readonly MenuBuilder $menuBuilder,
         private readonly ConfigServiceInterface $configService,
+        private readonly ScriptAdminRegistry $scriptAdminRegistry,
     ) {}
 
     public function index(): Response
@@ -50,12 +52,20 @@ class DashboardController extends AbstractDashboardController
         ;
     }
 
+    // Each bundle providing EasyAdmin/Stimulus controllers contributes its controllers-admin.js via
+    // BundleScriptAdminProviderInterface (c975L/UiBundle) - each one starts its own independent Stimulus app.
+    // Each entry also needs a matching 'entrypoint' => true line in the app's importmap.php.
     public function configureAssets(): Assets
     {
-        return Assets::new()
-            ->addAssetMapperEntry('app')
+        $assets = Assets::new()
             ->addJsFile(Asset::fromEasyAdminAssetPackage('field-text-editor.js'))
             ->addCssFile(Asset::fromEasyAdminAssetPackage('field-text-editor.css'));
+
+        foreach ($this->scriptAdminRegistry->all() as $script) {
+            $assets->addAssetMapperEntry($script);
+        }
+
+        return $assets;
     }
 
     public function configureMenuItems(): iterable

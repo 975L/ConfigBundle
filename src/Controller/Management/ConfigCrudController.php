@@ -27,17 +27,17 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\SlugField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 use function Symfony\Component\Translation\t;
 
@@ -49,6 +49,7 @@ class ConfigCrudController extends AbstractCrudController
         private readonly VaultEncryptor $vaultEncryptor,
         private readonly Connection $connection,
         private readonly RequestStack $requestStack,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -61,23 +62,20 @@ class ConfigCrudController extends AbstractCrudController
     {
         $context = $this->getContext();
         $entity = null !== $context ? $context->getEntity()->getInstance() : null;
-        $isSystem = $entity instanceof Config && true === $entity->getIsSystem();
         $isSensitive = $entity instanceof Config && true === $entity->getIsSensitive();
 
-        // Kind is locked for system configs
-        $kindField = ChoiceField::new('kind')
+        // Kind is fixed by the import json, never editable through the admin
+        $kindField = TextField::new('kind')
             ->setLabel(t('label.kind', [], 'config'))
-            ->setRequired(true)
-            ->setTranslatableChoices([
-                Config::TYPE_BOOL => t('label.boolean', [], 'config'),
-                Config::TYPE_INT => t('label.int', [], 'config'),
-                Config::TYPE_TEXT => t('label.text', [], 'config'),
-                Config::TYPE_DATE => t('label.date', [], 'config'),
-            ]);
+            ->setFormTypeOption('disabled', true);
 
-        if ($isSystem && Crud::PAGE_EDIT === $pageName) {
-            $kindField->setFormTypeOption('disabled', true);
-        }
+        // Group is fixed by the import json, never editable through the admin
+        $groupField = TextField::new('group')
+            ->setLabel(t('label.group', [], 'config'))
+            ->setFormTypeOption('disabled', true)
+            ->formatValue(fn (?string $group): string =>
+                $group ? $this->translator->trans('label.group_' . $group, [], 'config') : ''
+            );
 
         $kind = $entity instanceof Config ? $entity->getKind() : Config::TYPE_TEXT;
         $rawValue = $entity instanceof Config ? $entity->getValue() : null;
@@ -90,8 +88,8 @@ class ConfigCrudController extends AbstractCrudController
                 ->formatValue(fn (?string $value, Config $config): string =>
                     $config->getIsSensitive() ? '••••••••' : ($value ?? '')
                 );
-        } elseif ($isSensitive && in_array($pageName, [Crud::PAGE_EDIT, Crud::PAGE_NEW], true)) {
-            // Sensitive fields are pre-filled with the decrypted raw string value in edit/new
+        } elseif ($isSensitive && Crud::PAGE_EDIT === $pageName) {
+            // Sensitive fields are pre-filled with the decrypted raw string value in edit
             // (must stay the raw string, not configService->get()'s kind-cast value, otherwise a
             // sensitive bool/int/date config like site-maintenance renders as "1"/"" instead of "true"/"false")
             // (no need to mask with a password widget, the value is already shown in clear on the detail page)
@@ -138,16 +136,21 @@ class ConfigCrudController extends AbstractCrudController
             };
         }
 
+        // Edit form renders field help as plain text below the widget (unlike detail/index, which use a tooltip/popover)
+        if (Crud::PAGE_EDIT === $pageName) {
+            $valueField = $valueField->setHelp(t('help.value', [], 'config'));
+        }
+
         return [
             IdField::new('id')
                 ->onlyOnIndex(),
+            // Label/slug are fixed by the import json, never editable through the admin
             TextField::new('label')
                 ->setLabel(t('label.label', [], 'config'))
-                ->setRequired(true),
-            SlugField::new('slug')
+                ->setFormTypeOption('disabled', true),
+            TextField::new('slug')
                 ->setLabel(t('label.slug', [], 'config'))
-                ->setTargetFieldName('label')
-                ->setRequired(true),
+                ->setFormTypeOption('disabled', true),
 
             // Sensitive
             BooleanField::new('isSensitive')
@@ -156,21 +159,19 @@ class ConfigCrudController extends AbstractCrudController
                 ->setFormTypeOption('disabled', true)
                 ->setHelp(t('label.is_sensitive_help', [], 'config')),
 
-            // System
-            BooleanField::new('isSystem')
-                ->setLabel(t('label.is_system', [], 'config'))
-                ->setRequired(true)
-                ->setFormTypeOption('disabled', true)
-                ->setHelp(t('label.is_system_help', [], 'config')),
-
             // Kind
             $kindField,
 
+            // Group
+            $groupField,
+
             // Content — widget depends on kind (bool/int/date/text); sensitive values are masked in list/detail
             $valueField,
-            TextareaField::new('description')
+
+            // Fixed by the import json, never editable through the admin
+            TextField::new('description')
                 ->setLabel(t('label.description', [], 'config'))
-                ->setRequired(false)
+                ->setFormTypeOption('disabled', true)
                 ->hideOnIndex(),
 
             // Dates
@@ -217,16 +218,10 @@ class ConfigCrudController extends AbstractCrudController
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->add(Crud::PAGE_INDEX, $exportAction)
             ->add(Crud::PAGE_INDEX, $toggleAction)
-            ->setPermission(Action::NEW, $this->configService->get('site-role-needed'))
             ->setPermission('exportSql', $this->configService->get('site-role-needed'))
             ->setPermission('toggleSensitive', $this->configService->get('site-role-needed'))
-            // System configs can't be deleted
-            ->update(Crud::PAGE_INDEX, Action::DELETE, static fn (Action $action) => $action->displayIf(
-                static fn (Config $config): bool => !$config->getIsSystem()
-            ))
-            ->update(Crud::PAGE_DETAIL, Action::DELETE, static fn (Action $action) => $action->displayIf(
-                static fn (Config $config): bool => !$config->getIsSystem()
-            ))
+            // Configs are fixed by the bundles' import json: no manual creation, no deletion
+            ->disable(Action::NEW, Action::DELETE)
         ;
     }
 
@@ -235,6 +230,7 @@ class ConfigCrudController extends AbstractCrudController
         return $crud
             ->showEntityActionsInlined()
             ->setEntityPermission($this->configService->get('site-role-needed'))
+            ->setDefaultSort(['group' => 'ASC', 'label' => 'ASC'])
         ;
     }
 
@@ -242,7 +238,21 @@ class ConfigCrudController extends AbstractCrudController
     {
         return $filters
             ->add('label')
+            ->add(ChoiceFilter::new('group')
+                ->setLabel(t('label.group', [], 'config'))
+                ->setTranslatableChoices($this->groupChoices()))
         ;
+    }
+
+    // Maps each fixed group slug (Config::GROUPS) to its translated label
+    private function groupChoices(): array
+    {
+        $choices = [];
+        foreach (Config::GROUPS as $group) {
+            $choices[$group] = t('label.group_' . $group, [], 'config');
+        }
+
+        return $choices;
     }
 
     public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder
@@ -313,29 +323,29 @@ class ConfigCrudController extends AbstractCrudController
     public function exportSql(AdminContext $context): Response
     {
         $rows = $this->connection->fetchAllAssociative(
-            'SELECT `label`, `slug`, `is_sensitive`, `is_system`, `value`, `kind`, `description`, `creation`, `modification` FROM `site_config` ORDER BY `slug`'
+            'SELECT `label`, `slug`, `is_sensitive`, `value`, `kind`, `group`, `description`, `creation`, `modification` FROM `site_config` ORDER BY `slug`'
         );
 
         $now = date('Y-m-d H:i:s');
         $lines = [
             "-- site_config export -- {$now}",
-            '-- Non-sensitive/non-system: INSERT ... ON DUPLICATE KEY UPDATE (syncs label/value/kind/description)',
-            '-- Sensitive or system:      INSERT IGNORE INTO (creates if missing, preserves production values)',
+            '-- Non-sensitive: INSERT ... ON DUPLICATE KEY UPDATE (syncs label/value/kind/group/description)',
+            '-- Sensitive:     INSERT IGNORE INTO (creates if missing, preserves production values)',
             'SET NAMES utf8mb4;',
             '',
         ];
 
         foreach ($rows as $row) {
-            $protected = (bool) $row['is_sensitive'] || (bool) $row['is_system'];
-            $cols = '(`label`, `slug`, `is_sensitive`, `is_system`, `value`, `kind`, `description`, `creation`, `modification`)';
+            $protected = (bool) $row['is_sensitive'];
+            $cols = '(`label`, `slug`, `is_sensitive`, `value`, `kind`, `group`, `description`, `creation`, `modification`)';
             $vals = sprintf(
-                '(%s, %s, %d, %d, %s, %s, %s, %s, %s)',
+                '(%s, %s, %d, %s, %s, %s, %s, %s, %s)',
                 $this->sqlQuote($row['label']),
                 $this->sqlQuote($row['slug']),
                 (int) $row['is_sensitive'],
-                (int) $row['is_system'],
                 $this->sqlQuote($row['value']),
                 $this->sqlQuote($row['kind']),
+                $this->sqlQuote($row['group']),
                 $this->sqlQuote($row['description']),
                 $this->sqlQuote($row['creation']),
                 $this->sqlQuote($row['modification']),
@@ -346,8 +356,8 @@ class ConfigCrudController extends AbstractCrudController
             } else {
                 $lines[] = "INSERT INTO `site_config` {$cols} VALUES {$vals}"
                     . ' ON DUPLICATE KEY UPDATE'
-                    . ' `label`=VALUES(`label`), `is_sensitive`=VALUES(`is_sensitive`), `is_system`=VALUES(`is_system`), `value`=VALUES(`value`),'
-                    . ' `kind`=VALUES(`kind`), `description`=VALUES(`description`), `modification`=VALUES(`modification`);';
+                    . ' `label`=VALUES(`label`), `is_sensitive`=VALUES(`is_sensitive`), `value`=VALUES(`value`),'
+                    . ' `kind`=VALUES(`kind`), `group`=VALUES(`group`), `description`=VALUES(`description`), `modification`=VALUES(`modification`);';
             }
         }
 

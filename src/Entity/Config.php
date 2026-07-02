@@ -32,6 +32,32 @@ class Config
         self::TYPE_DATE,
     ];
 
+    public const GROUP_SYSTEM = 'system';
+    public const GROUP_GENERAL = 'general';
+    public const GROUP_LEGAL = 'legal';
+    public const GROUP_CREDITS = 'credits';
+    public const GROUP_ANALYTICS = 'analytics';
+    public const GROUP_BACKUP = 'backup';
+    public const GROUP_EMAIL = 'email';
+    public const GROUP_FORM = 'form';
+    public const GROUP_SECURITY = 'security';
+    public const GROUP_SHOP = 'shop';
+    public const GROUP_PAYMENT = 'payment';
+
+    public const GROUPS = [
+        self::GROUP_SYSTEM,
+        self::GROUP_GENERAL,
+        self::GROUP_LEGAL,
+        self::GROUP_CREDITS,
+        self::GROUP_ANALYTICS,
+        self::GROUP_BACKUP,
+        self::GROUP_EMAIL,
+        self::GROUP_FORM,
+        self::GROUP_SECURITY,
+        self::GROUP_SHOP,
+        self::GROUP_PAYMENT,
+    ];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -56,9 +82,12 @@ class Config
     #[Assert\Choice(choices: self::TYPES)]
     private string $kind = self::TYPE_TEXT;
 
-    #[ORM\Column(type: Types::BOOLEAN, nullable: true)]
-    #[Assert\Type(type: 'bool')]
-    private ?bool $isSystem = null;
+    // Column name is backtick-quoted because `group` is a reserved SQL keyword
+    // (MySQL/MariaDB): without this, Doctrine emits unquoted `group` in generated
+    // SQL and every UPDATE/INSERT fails with a syntax error
+    #[ORM\Column(name: '`group`', length: 20, nullable: true)]
+    #[Assert\Choice(choices: self::GROUPS)]
+    private ?string $group = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
@@ -142,14 +171,14 @@ class Config
         return $this;
     }
 
-    public function getIsSystem(): ?bool
+    public function getGroup(): ?string
     {
-        return $this->isSystem;
+        return $this->group;
     }
 
-    public function setIsSystem(?bool $isSystem): static
+    public function setGroup(?string $group): static
     {
-        $this->isSystem = $isSystem;
+        $this->group = $group;
 
         return $this;
     }

@@ -87,32 +87,76 @@
                 <target>Modificación</target>
             </trans-unit>
             <trans-unit id="22">
-                <source>label.is_system</source>
-                <target>Sistema</target>
-            </trans-unit>
-            <trans-unit id="23">
-                <source>label.is_system_help</source>
-                <target>Si el sistema está habilitado, esto significa que esta configuración solo debe ser modificada por usuarios experimentados</target>
-            </trans-unit>
-            <trans-unit id="24">
                 <source>label.date</source>
                 <target>Fecha (AAAA-MM-JJ)</target>
             </trans-unit>
-            <trans-unit id="25">
+            <trans-unit id="23">
                 <source>label.true</source>
                 <target>Verdadero</target>
             </trans-unit>
-            <trans-unit id="26">
+            <trans-unit id="24">
                 <source>label.false</source>
                 <target>Falso</target>
             </trans-unit>
-            <trans-unit id="27">
+            <trans-unit id="25">
                 <source>label.value_sensitive</source>
                 <target>Valor (dejar vacío para no modificar)</target>
             </trans-unit>
-            <trans-unit id="28">
+            <trans-unit id="26">
                 <source>label.links</source>
                 <target>Enlaces</target>
+            </trans-unit>
+            <trans-unit id="27">
+                <source>label.group</source>
+                <target>Grupo</target>
+            </trans-unit>
+            <trans-unit id="28">
+                <source>label.group_system</source>
+                <target>Sistema</target>
+            </trans-unit>
+            <trans-unit id="29">
+                <source>label.group_general</source>
+                <target>General</target>
+            </trans-unit>
+            <trans-unit id="30">
+                <source>label.group_legal</source>
+                <target>Legal</target>
+            </trans-unit>
+            <trans-unit id="31">
+                <source>label.group_credits</source>
+                <target>Créditos</target>
+            </trans-unit>
+            <trans-unit id="32">
+                <source>label.group_analytics</source>
+                <target>Analítica</target>
+            </trans-unit>
+            <trans-unit id="33">
+                <source>label.group_backup</source>
+                <target>Copia de seguridad</target>
+            </trans-unit>
+            <trans-unit id="34">
+                <source>label.group_email</source>
+                <target>Correo</target>
+            </trans-unit>
+            <trans-unit id="35">
+                <source>label.group_form</source>
+                <target>Formulario</target>
+            </trans-unit>
+            <trans-unit id="36">
+                <source>label.group_security</source>
+                <target>Seguridad</target>
+            </trans-unit>
+            <trans-unit id="37">
+                <source>label.group_shop</source>
+                <target>Tienda</target>
+            </trans-unit>
+            <trans-unit id="38">
+                <source>label.group_payment</source>
+                <target>Pago</target>
+            </trans-unit>
+            <trans-unit id="39">
+                <source>help.value</source>
+                <target>Solo este valor puede modificarse; los demás campos están fijados por la importación JSON de los bundles. Si la configuración es sensible, el valor se almacena cifrado.</target>
             </trans-unit>
         </body>
     </file>

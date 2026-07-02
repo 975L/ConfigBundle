@@ -116,35 +116,68 @@ class ConfigService implements ConfigServiceInterface
         $configs = json_decode(file_get_contents($jsonPath), true);
 
         foreach ($configs as $configData) {
-            $isSensitive = $configData['sensitive'] ?? false;
-            $rawValue    = $configData['value'] ?? null;
+            $existing = $this->configRepository->findOneBySlug($configData['slug']);
 
-            // Avoids duplicates/replacements
-            if ($this->configRepository->findOneBySlug($configData['slug'])) {
+            if ($existing) {
+                $this->syncMetadata($existing, $configData);
+
                 continue;
             }
 
-            $config = new Config();
-            $config->setLabel($configData['label']);
-            $config->setSlug($configData['slug']);
-            $config->setIsSensitive($isSensitive);
-            $config->setIsSystem($configData['system'] ?? false);
-            $config->setKind($configData['kind'] ?? 'text');
-            $config->setDescription($configData['description'] ?? null);
-            $config->setCreation(new \DateTime());
-            $config->setModification(new \DateTime());
-
-            // Encrypt non-empty sensitive values on import
-            if ($isSensitive && null !== $rawValue && '' !== $rawValue && $this->vaultEncryptor->isKeyDefined()) {
-                $rawValue = $this->vaultEncryptor->encrypt($rawValue);
-            }
-            $config->setValue($rawValue);
-
-            $this->manager->persist($config);
+            $this->createConfig($configData);
         }
 
         $this->manager->flush();
 
         $this->invalidateCache();
+    }
+
+    // Label/kind/group/description are metadata fixed by the bundle author (not user data),
+    // so they're kept in sync even on existing configs; value/isSensitive carry production state and are never touched here
+    private function syncMetadata(Config $config, array $configData): void
+    {
+        $kind        = $configData['kind'] ?? 'text';
+        $group       = $configData['group'] ?? null;
+        $description = $configData['description'] ?? null;
+
+        if ($config->getLabel() === $configData['label']
+            && $config->getKind() === $kind
+            && $config->getGroup() === $group
+            && $config->getDescription() === $description
+        ) {
+            return;
+        }
+
+        $config->setLabel($configData['label']);
+        $config->setKind($kind);
+        $config->setGroup($group);
+        $config->setDescription($description);
+        $config->setModification(new \DateTime());
+
+        $this->manager->persist($config);
+    }
+
+    private function createConfig(array $configData): void
+    {
+        $isSensitive = $configData['sensitive'] ?? false;
+        $rawValue    = $configData['value'] ?? null;
+
+        $config = new Config();
+        $config->setLabel($configData['label']);
+        $config->setSlug($configData['slug']);
+        $config->setIsSensitive($isSensitive);
+        $config->setKind($configData['kind'] ?? 'text');
+        $config->setGroup($configData['group'] ?? null);
+        $config->setDescription($configData['description'] ?? null);
+        $config->setCreation(new \DateTime());
+        $config->setModification(new \DateTime());
+
+        // Encrypt non-empty sensitive values on import
+        if ($isSensitive && null !== $rawValue && '' !== $rawValue && $this->vaultEncryptor->isKeyDefined()) {
+            $rawValue = $this->vaultEncryptor->encrypt($rawValue);
+        }
+        $config->setValue($rawValue);
+
+        $this->manager->persist($config);
     }
 }

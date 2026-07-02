@@ -3,27 +3,27 @@
         "label": "Site Role Needed",
         "slug": "site-role-needed",
         "sensitive": true,
-        "system": true,
         "value": "ROLE_ADMIN",
         "kind": "text",
+        "group": "system",
         "description": "Role required to access the config parameters i.e. ROLE_ADMIN (default)"
     },
     {
         "label": "Site Maintenance",
         "slug": "site-maintenance",
         "sensitive": true,
-        "system": true,
         "value": "false",
         "kind": "bool",
+        "group": "system",
         "description": "Enable (true) or disable (false) maintenance mode"
     },
     {
         "label": "Site Maintenance Hash",
         "slug": "site-maintenance-hash",
         "sensitive": true,
-        "system": true,
         "value": null,
         "kind": "text",
+        "group": "system",
         "description": "Hash used to access maintenance mode (?t=Hash)"
     }
 ]

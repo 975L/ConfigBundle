@@ -72,7 +72,8 @@ class ConfigLoadAllCommand extends Command
             $io->warning([
                 'C975L_VAULT_KEY is not defined.',
                 'Sensitive settings with values were found but could not be encrypted.',
-                'Add C975L_VAULT_KEY to your .env.local, then run: php bin/console c975l:config:encrypt-sensitive',
+                'Generate a key with: php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"',
+                'Add it to your .env.local as C975L_VAULT_KEY, then run: php bin/console c975l:config:encrypt-sensitive',
             ]);
         }
 

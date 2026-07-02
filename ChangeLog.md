@@ -1,5 +1,11 @@
 # ChangeLog
 
+## v5.3.5
+
+- Suppressed isSystem field as all config are system, and none should be added by user (02/07/2026)
+- Added `group` field to categorize configs by theme, with EasyAdmin filter + default sort (02/07/2026)
+- `c975l:config:load-all` now re-syncs all meta data, `value`/`is_sensitive` remain untouched on existing configs (02/07/2026)
+
 ## v5.3.4
 
 - Added new field isSystem (01/07/2026)
