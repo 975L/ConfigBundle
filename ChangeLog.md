@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v5.3.6
+
+- Added `json` kind for config values, with JSON syntax validation (04/07/2026)
+
 ## v5.3.5
 
 - Suppressed isSystem field as all config are system, and none should be added by user (02/07/2026)

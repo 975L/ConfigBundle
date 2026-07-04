@@ -159,6 +159,14 @@
                 <source>help.value</source>
                 <target>Seule cette valeur peut être modifiée ; les autres champs sont fixés par l'import JSON des bundles. Si la configuration est sensible, la valeur est stockée chiffrée.</target>
             </trans-unit>
+            <trans-unit id="40">
+                <source>help.value_json</source>
+                <target>Saisissez un tableau JSON valide, ex. ["ROLE_ADMIN","ROLE_EDITOR"]</target>
+            </trans-unit>
+            <trans-unit id="41">
+                <source>label.invalid_json</source>
+                <target>Cette valeur doit être un tableau JSON valide</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

@@ -63,7 +63,8 @@ Create a `config/configs.json` file in your bundle. Each entry will be inserted 
 ]
 ```
 
-Supported `kind` values: `text`, `int`, `bool`.
+Supported `kind` values: `text`, `int`, `bool`, `date`, `json`.
+For `json`, `value` is the raw JSON-encoded string (e.g. `"[\"ROLE_ADMIN\",\"ROLE_EDITOR\"]"`); `ConfigService::get()` returns it already decoded into a PHP array (`[]` if empty/invalid).
 Set `sensitive: true` for any entry that holds secrets (API keys, passwords, etc.).
 
 `group` is optional and clusters entries in the EasyAdmin list (filter + default sort). It must be one of the fixed values in `Config::GROUPS`, each backed by a `label.group_*` translation key:

@@ -158,6 +158,14 @@
                 <source>help.value</source>
                 <target>Only this value can be edited; the other fields are fixed by the bundles' JSON import. If the config is sensitive, the value is stored encrypted.</target>
             </trans-unit>
+            <trans-unit id="40">
+                <source>help.value_json</source>
+                <target>Enter a valid JSON array, e.g. ["ROLE_ADMIN","ROLE_EDITOR"]</target>
+            </trans-unit>
+            <trans-unit id="41">
+                <source>label.invalid_json</source>
+                <target>This value must be a valid JSON array</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

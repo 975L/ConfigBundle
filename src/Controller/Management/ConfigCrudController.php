@@ -130,6 +130,10 @@ class ConfigCrudController extends AbstractCrudController
                     ->setValue($this->toDate($rawValue))
                     ->setFormTypeOptions(['data' => $this->toDate($rawValue)])
                     ->setRequired(true),
+                Config::TYPE_JSON => TextareaField::new('value')
+                    ->setLabel(t('label.value', [], 'config'))
+                    ->setHelp(t('help.value_json', [], 'config'))
+                    ->setRequired(false),
                 default => TextareaField::new('value')
                     ->setLabel(t('label.value', [], 'config'))
                     ->setRequired(true),
@@ -137,8 +141,11 @@ class ConfigCrudController extends AbstractCrudController
         }
 
         // Edit form renders field help as plain text below the widget (unlike detail/index, which use a tooltip/popover)
+        // The json kind keeps its own dedicated help instead, since it needs to explain the expected format
         if (Crud::PAGE_EDIT === $pageName) {
-            $valueField = $valueField->setHelp(t('help.value', [], 'config'));
+            $valueField = $valueField->setHelp(Config::TYPE_JSON === $kind
+                ? t('help.value_json', [], 'config')
+                : t('help.value', [], 'config'));
         }
 
         return [

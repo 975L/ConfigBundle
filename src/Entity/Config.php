@@ -14,6 +14,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: ConfigRepository::class)]
 #[ORM\Table(name: 'site_config')]
@@ -24,12 +25,14 @@ class Config
     public const TYPE_BOOL = 'bool';
     public const TYPE_INT  = 'int';
     public const TYPE_DATE  = 'date';
+    public const TYPE_JSON = 'json';
 
     public const TYPES = [
         self::TYPE_TEXT,
         self::TYPE_BOOL,
         self::TYPE_INT,
         self::TYPE_DATE,
+        self::TYPE_JSON,
     ];
 
     public const GROUP_SYSTEM = 'system';
@@ -229,5 +232,20 @@ class Config
         $this->user = $user;
 
         return $this;
+    }
+
+    // Validates that a "json" kind config always holds valid JSON, since its value is edited as raw text
+    #[Assert\Callback]
+    public function validateJsonValue(ExecutionContextInterface $context): void
+    {
+        if (self::TYPE_JSON === $this->kind
+            && null !== $this->value
+            && '' !== $this->value
+            && null === json_decode($this->value)
+        ) {
+            $context->buildViolation('label.invalid_json')
+                ->atPath('value')
+                ->addViolation();
+        }
     }
 }

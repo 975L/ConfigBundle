@@ -106,6 +106,7 @@ class ConfigService implements ConfigServiceInterface
         return match ($kind) {
             Config::TYPE_BOOL => $this->getBool($value),
             Config::TYPE_INT  => (int) $value,
+            Config::TYPE_JSON => is_string($value) ? (json_decode($value, true) ?? []) : [],
             default => $value,
         };
     }
