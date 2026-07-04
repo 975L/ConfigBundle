@@ -10,7 +10,7 @@ A Symfony bundle that stores application configuration as key-value pairs in the
 
 - Key-value config entries stored in the database (`site_config` table)
 - EasyAdmin CRUD interface to manage values
-- SQL export button for production deployment
+- Export button (SQL/CSV/JSON) for production deployment, reusable from any bundle's CRUD controller
 - Twig and PHP service to read values anywhere
 - 1-hour cache with automatic invalidation on change
 
@@ -85,6 +85,8 @@ Set `sensitive: true` for any entry that holds secrets (API keys, passwords, etc
 
 This list is closed on purpose so filtering stays useful; if none fits, leave `group` unset rather than inventing a new value (adding one requires extending `Config::GROUPS` and the matching translations in ConfigBundle itself).
 
+`severity` is optional and flags an entry that needs an admin's attention as long as its `value` is empty — it never affects front-end rendering, `ConfigService::get()` still returns `null`/empty as before. It must be one of `Config::SEVERITIES`: `danger`, `warning`, `info`. Any entry with a severity and no value is listed on the `/management` dashboard as a colored alert with a direct link to fill it in; once a value is set, the alert disappears on its own (no flag to unset).
+
 ## Loading config entries into the database
 
 Auto-discovers every `vendor/c975l/*/config/configs.json` file and loads them in one shot:
@@ -117,29 +119,106 @@ php bin/console c975l:config:encrypt-sensitive
 
 ## EasyAdmin interface
 
-The bundle registers a management dashboard at `/management`. Navigate to **Config** to view entries and edit their `value` — `label`, `slug`, `kind`, `group`, and `description` are fixed by the bundle's `configs.json` and shown read-only; there is no manual creation or deletion, entries only come from `configs.json`.
+The bundle registers a management dashboard at `/management`. Navigate to **Config** to view entries and edit their `value` — `label`, `slug`, `kind`, `group`, `severity`, and `description` are fixed by the bundle's `configs.json` and shown read-only; there is no manual creation or deletion, entries only come from `configs.json`.
+
+Any entry with a `severity` and an empty `value` shows up as a colored alert (danger/warning/info) right on the `/management` home page, each linking directly to its edit form.
 
 ### JS assets loaded on the dashboard
 
 The `/management` dashboard loads a dedicated AssetMapper entry, `@c975l/ui-bundle/admin.js` (not your site's main `app` entry), so that satellite bundles needing Stimulus controllers in the back-office (e.g. `c975l/ui-bundle`'s block editor) don't drag your site's front-end stylesheet into EasyAdmin. See the [UiBundle README](https://github.com/975L/UiBundle#installation) for how to define this entry.
 
-### Deploying to production — Export SQL
+### Deploying to production — Export
 
-On the config list page, click the **Export SQL** button. The browser downloads a `site_config_YYYYMMDD_HHMMSS.sql` file — nothing is written to disk or version control.
+On the config list page, click the **Export** dropdown and pick **SQL**, **CSV**, or **JSON**. The browser downloads a `site_config_YYYYMMDD_HHMMSS.{sql,csv,json}` file — nothing is written to disk or version control.
 
-Import it on your production server:
+Import the SQL export on your production server:
 
 ```bash
 mysql -u user -p dbname < site_config_20260626_120000.sql
 ```
 
-**Behavior per entry type:**
+**Behavior per entry type (SQL export only):**
 
 | `is_sensitive` | SQL statement | Effect on production |
 | --- | --- | --- |
-| `false` | `INSERT … ON DUPLICATE KEY UPDATE` | Creates or updates label, value, kind, group, description |
+| `false` | `INSERT … ON DUPLICATE KEY UPDATE` | Creates or updates label, value, kind, group, description, severity |
 | `true` | `INSERT IGNORE INTO` | Creates if missing; **preserves existing production value** |
 This means non-sensitive values (labels, descriptions, default content) are kept in sync, while live API keys and secrets already set on production are never overwritten.
+
+CSV and JSON exports are a straight dump of the table (no upsert logic) — useful for backups, audits, or feeding another tool.
+
+## Adding an Export button to another bundle's CRUD controller
+
+`c975L\ConfigBundle\Service\Export\TableExporter` is generic: give it a table name and an array
+of associative rows (e.g. from `Connection::fetchAllAssociative()`), it returns a ready-to-serve
+`Response` encoded as SQL, CSV, or JSON (via Symfony's Serializer — `CsvEncoder`/`JsonEncoder`
+plus a custom `SqlEncoder`). Wire it into your own `AbstractCrudController` the same way
+`ConfigCrudController` does:
+
+```php
+use c975L\ConfigBundle\Service\Export\ExportFormat;
+use c975L\ConfigBundle\Service\Export\TableExporter;
+use Doctrine\DBAL\Connection;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\ActionGroup;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
+use Symfony\Component\HttpFoundation\Response;
+
+class MyEntityCrudController extends AbstractCrudController
+{
+    public function __construct(
+        private readonly Connection $connection,
+        private readonly TableExporter $tableExporter,
+    ) {}
+
+    public function configureActions(Actions $actions): Actions
+    {
+        $exportGroup = ActionGroup::new('export', 'Export', 'fa fa-download')
+            ->createAsGlobalActionGroup()
+            ->addAction(Action::new('exportSql', 'SQL')->linkToCrudAction('exportSql'))
+            ->addAction(Action::new('exportCsv', 'CSV')->linkToCrudAction('exportCsv'))
+            ->addAction(Action::new('exportJson', 'JSON')->linkToCrudAction('exportJson'))
+        ;
+
+        return $actions->add(Crud::PAGE_INDEX, $exportGroup);
+    }
+
+    #[AdminRoute]
+    public function exportSql(AdminContext $context): Response
+    {
+        // Set 'primary_key' to enable ON DUPLICATE KEY UPDATE; omit it for a plain INSERT-only dump
+        return $this->tableExporter->export(ExportFormat::Sql, 'my_table', $this->fetchRows());
+    }
+
+    #[AdminRoute]
+    public function exportCsv(AdminContext $context): Response
+    {
+        return $this->tableExporter->export(ExportFormat::Csv, 'my_table', $this->fetchRows());
+    }
+
+    #[AdminRoute]
+    public function exportJson(AdminContext $context): Response
+    {
+        return $this->tableExporter->export(ExportFormat::Json, 'my_table', $this->fetchRows());
+    }
+
+    private function fetchRows(): array
+    {
+        return $this->connection->fetchAllAssociative('SELECT * FROM `my_table`');
+    }
+}
+```
+
+`export()`'s 4th argument is an optional context array, forwarded to the encoder — only `SqlEncoder`
+reads it:
+
+| Key | Type | Effect |
+| --- | --- | --- |
+| `primary_key` | `string` | Unique column; adds `ON DUPLICATE KEY UPDATE` on every other column. Omit for a plain `INSERT INTO` per row. |
+| `exclude_from_update` | `string[]` | Columns never rewritten by the `UPDATE` clause (e.g. an immutable `creation` date). |
+| `insert_ignore_when` | `callable(array $row): bool` | When true for a row, emits `INSERT IGNORE INTO` instead of the upsert — see `ConfigCrudController::exportSql()` for the sensitive-value use case. |
 
 ## Contributing menu items from other bundles
 

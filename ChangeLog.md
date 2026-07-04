@@ -1,5 +1,10 @@
 # ChangeLog
 
+## v5.3.7
+
+- Added severity field on config + message on dashboard (04/07/2026) [Needs db update]
+- Added generic `TableExporter` service (SQL/CSV/JSON via Symfony Serializer) so other bundles' CRUD controllers can add the same export action (04/07/2026)
+
 ## v5.3.6
 
 - Added `json` kind for config values, with JSON syntax validation (04/07/2026)

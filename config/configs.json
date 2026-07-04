@@ -6,6 +6,7 @@
         "value": "ROLE_ADMIN",
         "kind": "text",
         "group": "system",
+        "severity": "danger",
         "description": "Role required to access the config parameters i.e. ROLE_ADMIN (default)"
     },
     {
@@ -15,6 +16,7 @@
         "value": "false",
         "kind": "bool",
         "group": "system",
+        "severity": null,
         "description": "Enable (true) or disable (false) maintenance mode"
     },
     {
@@ -24,6 +26,7 @@
         "value": null,
         "kind": "text",
         "group": "system",
+        "severity": "warning",
         "description": "Hash used to access maintenance mode (?t=Hash)"
     }
 ]

@@ -23,6 +23,7 @@
         "easycorp/easyadmin-bundle": "*",
         "sensiolabs/minify-bundle": "*",
         "symfony/form": "*",
+        "symfony/serializer": "*",
         "symfony/yaml": "*"
     },
     "require-dev": {

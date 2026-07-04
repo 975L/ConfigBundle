@@ -11,6 +11,8 @@ namespace c975L\ConfigBundle\Controller\Management;
 
 use c975L\ConfigBundle\Entity\Config;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
+use c975L\ConfigBundle\Service\Export\ExportFormat;
+use c975L\ConfigBundle\Service\Export\TableExporter;
 use c975L\ConfigBundle\Service\VaultEncryptor;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,6 +21,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\ActionGroup;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
@@ -27,6 +30,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
@@ -50,6 +54,7 @@ class ConfigCrudController extends AbstractCrudController
         private readonly Connection $connection,
         private readonly RequestStack $requestStack,
         private readonly TranslatorInterface $translator,
+        private readonly TableExporter $tableExporter,
     ) {
     }
 
@@ -76,6 +81,23 @@ class ConfigCrudController extends AbstractCrudController
             ->formatValue(fn (?string $group): string =>
                 $group ? $this->translator->trans('label.group_' . $group, [], 'config') : ''
             );
+
+        // Severity is fixed by the import json, never editable through the admin
+        // Rendered as a colored badge so an empty mandatory config stands out in the list
+        $severityFieldChoices = [];
+        foreach (Config::SEVERITIES as $severity) {
+            $severityFieldChoices[$severity] = t('label.severity_' . $severity, [], 'config');
+        }
+
+        $severityField = ChoiceField::new('severity')
+            ->setLabel(t('label.severity', [], 'config'))
+            ->setTranslatableChoices($severityFieldChoices)
+            ->renderAsBadges([
+                Config::SEVERITY_DANGER => 'danger',
+                Config::SEVERITY_WARNING => 'warning',
+                Config::SEVERITY_INFO => 'info',
+            ])
+            ->setFormTypeOption('disabled', true);
 
         $kind = $entity instanceof Config ? $entity->getKind() : Config::TYPE_TEXT;
         $rawValue = $entity instanceof Config ? $entity->getValue() : null;
@@ -150,6 +172,7 @@ class ConfigCrudController extends AbstractCrudController
 
         return [
             IdField::new('id')
+                ->setLabel(false)
                 ->onlyOnIndex(),
             // Label/slug are fixed by the import json, never editable through the admin
             TextField::new('label')
@@ -171,6 +194,9 @@ class ConfigCrudController extends AbstractCrudController
 
             // Group
             $groupField,
+
+            // Severity
+            $severityField,
 
             // Content — widget depends on kind (bool/int/date/text); sensitive values are masked in list/detail
             $valueField,
@@ -195,10 +221,12 @@ class ConfigCrudController extends AbstractCrudController
 
     public function configureActions(Actions $actions): Actions
     {
-        $exportAction = Action::new('exportSql', 'Export SQL', 'fa fa-download')
-            ->linkToCrudAction('exportSql')
-            ->addCssClass('btn btn-secondary btn-sm')
-            ->createAsGlobalAction();
+        $exportGroup = ActionGroup::new('export', t('label.export', [], 'config'), 'fa fa-download')
+            ->createAsGlobalActionGroup()
+            ->addAction(Action::new('exportSql', t('label.export_sql', [], 'config'))->linkToCrudAction('exportSql'))
+            ->addAction(Action::new('exportCsv', t('label.export_csv', [], 'config'))->linkToCrudAction('exportCsv'))
+            ->addAction(Action::new('exportJson', t('label.export_json', [], 'config'))->linkToCrudAction('exportJson'))
+        ;
 
         $request = $this->requestStack->getCurrentRequest();
         $showSensitive = $request?->query->getBoolean('showSensitive', false);
@@ -223,9 +251,11 @@ class ConfigCrudController extends AbstractCrudController
 
         return $actions
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
-            ->add(Crud::PAGE_INDEX, $exportAction)
+            ->add(Crud::PAGE_INDEX, $exportGroup)
             ->add(Crud::PAGE_INDEX, $toggleAction)
             ->setPermission('exportSql', $this->configService->get('site-role-needed'))
+            ->setPermission('exportCsv', $this->configService->get('site-role-needed'))
+            ->setPermission('exportJson', $this->configService->get('site-role-needed'))
             ->setPermission('toggleSensitive', $this->configService->get('site-role-needed'))
             // Configs are fixed by the bundles' import json: no manual creation, no deletion
             ->disable(Action::NEW, Action::DELETE)
@@ -236,6 +266,8 @@ class ConfigCrudController extends AbstractCrudController
     {
         return $crud
             ->showEntityActionsInlined()
+            ->setEntityLabelInSingular(t('label.config', [], 'config'))
+            ->setEntityLabelInPlural(t('label.config', [], 'config'))
             ->setEntityPermission($this->configService->get('site-role-needed'))
             ->setDefaultSort(['group' => 'ASC', 'label' => 'ASC'])
         ;
@@ -248,6 +280,9 @@ class ConfigCrudController extends AbstractCrudController
             ->add(ChoiceFilter::new('group')
                 ->setLabel(t('label.group', [], 'config'))
                 ->setTranslatableChoices($this->groupChoices()))
+            ->add(ChoiceFilter::new('severity')
+                ->setLabel(t('label.severity', [], 'config'))
+                ->setTranslatableChoices($this->severityChoices()))
         ;
     }
 
@@ -257,6 +292,17 @@ class ConfigCrudController extends AbstractCrudController
         $choices = [];
         foreach (Config::GROUPS as $group) {
             $choices[$group] = t('label.group_' . $group, [], 'config');
+        }
+
+        return $choices;
+    }
+
+    // Maps each fixed severity slug (Config::SEVERITIES) to its translated label
+    private function severityChoices(): array
+    {
+        $choices = [];
+        foreach (Config::SEVERITIES as $severity) {
+            $choices[$severity] = t('label.severity_' . $severity, [], 'config');
         }
 
         return $choices;
@@ -329,57 +375,33 @@ class ConfigCrudController extends AbstractCrudController
     #[AdminRoute]
     public function exportSql(AdminContext $context): Response
     {
-        $rows = $this->connection->fetchAllAssociative(
-            'SELECT `label`, `slug`, `is_sensitive`, `value`, `kind`, `group`, `description`, `creation`, `modification` FROM `site_config` ORDER BY `slug`'
-        );
-
-        $now = date('Y-m-d H:i:s');
-        $lines = [
-            "-- site_config export -- {$now}",
-            '-- Non-sensitive: INSERT ... ON DUPLICATE KEY UPDATE (syncs label/value/kind/group/description)',
-            '-- Sensitive:     INSERT IGNORE INTO (creates if missing, preserves production values)',
-            'SET NAMES utf8mb4;',
-            '',
-        ];
-
-        foreach ($rows as $row) {
-            $protected = (bool) $row['is_sensitive'];
-            $cols = '(`label`, `slug`, `is_sensitive`, `value`, `kind`, `group`, `description`, `creation`, `modification`)';
-            $vals = sprintf(
-                '(%s, %s, %d, %s, %s, %s, %s, %s, %s)',
-                $this->sqlQuote($row['label']),
-                $this->sqlQuote($row['slug']),
-                (int) $row['is_sensitive'],
-                $this->sqlQuote($row['value']),
-                $this->sqlQuote($row['kind']),
-                $this->sqlQuote($row['group']),
-                $this->sqlQuote($row['description']),
-                $this->sqlQuote($row['creation']),
-                $this->sqlQuote($row['modification']),
-            );
-
-            if ($protected) {
-                $lines[] = "INSERT IGNORE INTO `site_config` {$cols} VALUES {$vals};";
-            } else {
-                $lines[] = "INSERT INTO `site_config` {$cols} VALUES {$vals}"
-                    . ' ON DUPLICATE KEY UPDATE'
-                    . ' `label`=VALUES(`label`), `is_sensitive`=VALUES(`is_sensitive`), `value`=VALUES(`value`),'
-                    . ' `kind`=VALUES(`kind`), `group`=VALUES(`group`), `description`=VALUES(`description`), `modification`=VALUES(`modification`);';
-            }
-        }
-
-        $sql = implode("\n", $lines) . "\n";
-        $filename = 'site_config_' . date('Ymd_His') . '.sql';
-
-        return new Response($sql, 200, [
-            'Content-Type' => 'application/octet-stream',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        // Non-sensitive: INSERT ... ON DUPLICATE KEY UPDATE (syncs label/value/kind/group/description/severity)
+        // Sensitive:     INSERT IGNORE INTO (creates if missing, preserves production values)
+        return $this->tableExporter->export(ExportFormat::Sql, 'site_config', $this->fetchExportRows(), [
+            'primary_key' => 'slug',
+            'exclude_from_update' => ['creation'],
+            'insert_ignore_when' => fn (array $row): bool => (bool) $row['is_sensitive'],
         ]);
     }
 
-    private function sqlQuote(?string $value): string
+    #[AdminRoute]
+    public function exportCsv(AdminContext $context): Response
     {
-        return $value === null ? 'NULL' : $this->connection->quote($value);
+        return $this->tableExporter->export(ExportFormat::Csv, 'site_config', $this->fetchExportRows());
+    }
+
+    #[AdminRoute]
+    public function exportJson(AdminContext $context): Response
+    {
+        return $this->tableExporter->export(ExportFormat::Json, 'site_config', $this->fetchExportRows());
+    }
+
+    // Sensitive values are kept as stored (encrypted), never decrypted for export
+    private function fetchExportRows(): array
+    {
+        return $this->connection->fetchAllAssociative(
+            'SELECT `label`, `slug`, `is_sensitive`, `value`, `kind`, `group`, `description`, `severity`, `creation`, `modification` FROM `site_config` ORDER BY `slug`'
+        );
     }
 
     // Parses a stored date value, tolerating empty/invalid strings

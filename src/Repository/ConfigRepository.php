@@ -19,4 +19,15 @@ class ConfigRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Config::class);
     }
+
+    // Returns configs flagged with a severity whose value is still empty, i.e. requiring admin attention
+    public function findRequiringAttention(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.severity IS NOT NULL')
+            ->andWhere("c.value IS NULL OR c.value = ''")
+            ->orderBy('c.label', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

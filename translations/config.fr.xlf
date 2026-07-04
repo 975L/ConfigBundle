@@ -167,6 +167,46 @@
                 <source>label.invalid_json</source>
                 <target>Cette valeur doit être un tableau JSON valide</target>
             </trans-unit>
+            <trans-unit id="42">
+                <source>label.severity</source>
+                <target>Sévérité</target>
+            </trans-unit>
+            <trans-unit id="43">
+                <source>label.severity_danger</source>
+                <target>Danger</target>
+            </trans-unit>
+            <trans-unit id="44">
+                <source>label.severity_warning</source>
+                <target>Avertissement</target>
+            </trans-unit>
+            <trans-unit id="45">
+                <source>label.severity_info</source>
+                <target>Information</target>
+            </trans-unit>
+            <trans-unit id="46">
+                <source>label.export</source>
+                <target>Exporter</target>
+            </trans-unit>
+            <trans-unit id="47">
+                <source>label.export_sql</source>
+                <target>SQL</target>
+            </trans-unit>
+            <trans-unit id="48">
+                <source>label.export_csv</source>
+                <target>CSV</target>
+            </trans-unit>
+            <trans-unit id="49">
+                <source>label.export_json</source>
+                <target>JSON</target>
+            </trans-unit>
+            <trans-unit id="50">
+                <source>label.configs_not_filled</source>
+                <target>Configurations non renseignées</target>
+            </trans-unit>
+            <trans-unit id="51">
+                <source>label.please_fill_configs</source>
+                <target>Merci de renseigner les configurations suivantes</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

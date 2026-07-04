@@ -61,6 +61,16 @@ class Config
         self::GROUP_PAYMENT,
     ];
 
+    public const SEVERITY_DANGER = 'danger';
+    public const SEVERITY_WARNING = 'warning';
+    public const SEVERITY_INFO = 'info';
+
+    public const SEVERITIES = [
+        self::SEVERITY_DANGER,
+        self::SEVERITY_WARNING,
+        self::SEVERITY_INFO,
+    ];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -95,13 +105,17 @@ class Config
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Assert\Choice(choices: self::SEVERITIES)]
+    private ?string $severity = null;
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $creation = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $modification = null;
 
-    #[ORM\ManyToOne(inversedBy: 'pages')]
+    #[ORM\ManyToOne]
     private ?User $user = null;
 
     public function getId(): ?int
@@ -194,6 +208,18 @@ class Config
     public function setDescription(?string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getSeverity(): ?string
+    {
+        return $this->severity;
+    }
+
+    public function setSeverity(?string $severity): static
+    {
+        $this->severity = $severity;
 
         return $this;
     }

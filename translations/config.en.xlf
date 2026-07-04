@@ -166,6 +166,46 @@
                 <source>label.invalid_json</source>
                 <target>This value must be a valid JSON array</target>
             </trans-unit>
+            <trans-unit id="42">
+                <source>label.severity</source>
+                <target>Severity</target>
+            </trans-unit>
+            <trans-unit id="43">
+                <source>label.severity_danger</source>
+                <target>Danger</target>
+            </trans-unit>
+            <trans-unit id="44">
+                <source>label.severity_warning</source>
+                <target>Warning</target>
+            </trans-unit>
+            <trans-unit id="45">
+                <source>label.severity_info</source>
+                <target>Info</target>
+            </trans-unit>
+            <trans-unit id="46">
+                <source>label.export</source>
+                <target>Export</target>
+            </trans-unit>
+            <trans-unit id="47">
+                <source>label.export_sql</source>
+                <target>SQL</target>
+            </trans-unit>
+            <trans-unit id="48">
+                <source>label.export_csv</source>
+                <target>CSV</target>
+            </trans-unit>
+            <trans-unit id="49">
+                <source>label.export_json</source>
+                <target>JSON</target>
+            </trans-unit>
+            <trans-unit id="50">
+                <source>label.configs_not_filled</source>
+                <target>Configurations not filled in</target>
+            </trans-unit>
+            <trans-unit id="51">
+                <source>label.please_fill_configs</source>
+                <target>Please fill in the following configurations</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

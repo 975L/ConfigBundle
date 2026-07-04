@@ -133,18 +133,20 @@ class ConfigService implements ConfigServiceInterface
         $this->invalidateCache();
     }
 
-    // Label/kind/group/description are metadata fixed by the bundle author (not user data),
+    // Label/kind/group/description/severity are metadata fixed by the bundle author (not user data),
     // so they're kept in sync even on existing configs; value/isSensitive carry production state and are never touched here
     private function syncMetadata(Config $config, array $configData): void
     {
-        $kind        = $configData['kind'] ?? 'text';
-        $group       = $configData['group'] ?? null;
+        $kind = $configData['kind'] ?? 'text';
+        $group = $configData['group'] ?? null;
         $description = $configData['description'] ?? null;
+        $severity = $configData['severity'] ?? null;
 
         if ($config->getLabel() === $configData['label']
             && $config->getKind() === $kind
             && $config->getGroup() === $group
             && $config->getDescription() === $description
+            && $config->getSeverity() === $severity
         ) {
             return;
         }
@@ -153,6 +155,7 @@ class ConfigService implements ConfigServiceInterface
         $config->setKind($kind);
         $config->setGroup($group);
         $config->setDescription($description);
+        $config->setSeverity($severity);
         $config->setModification(new \DateTime());
 
         $this->manager->persist($config);
@@ -170,6 +173,7 @@ class ConfigService implements ConfigServiceInterface
         $config->setKind($configData['kind'] ?? 'text');
         $config->setGroup($configData['group'] ?? null);
         $config->setDescription($configData['description'] ?? null);
+        $config->setSeverity($configData['severity'] ?? null);
         $config->setCreation(new \DateTime());
         $config->setModification(new \DateTime());
 
