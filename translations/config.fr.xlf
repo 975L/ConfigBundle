@@ -188,24 +188,12 @@
                 <target>Exporter</target>
             </trans-unit>
             <trans-unit id="47">
-                <source>label.export_sql</source>
-                <target>SQL</target>
+                <source>label.configs_not_filled</source>
+                <target>Données de configurations non renseignées</target>
             </trans-unit>
             <trans-unit id="48">
-                <source>label.export_csv</source>
-                <target>CSV</target>
-            </trans-unit>
-            <trans-unit id="49">
-                <source>label.export_json</source>
-                <target>JSON</target>
-            </trans-unit>
-            <trans-unit id="50">
-                <source>label.configs_not_filled</source>
-                <target>Configurations non renseignées</target>
-            </trans-unit>
-            <trans-unit id="51">
-                <source>label.please_fill_configs</source>
-                <target>Merci de renseigner les configurations suivantes</target>
+                <source>label.info_config</source>
+                <target>Données de configuration pour le site web. Les données sensibles sont cryptées en base de données</target>
             </trans-unit>
         </body>
     </file>

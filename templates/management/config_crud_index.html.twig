@@ -1,0 +1,34 @@
+{% extends '@EasyAdmin/crud/index.html.twig' %}
+
+{% block main %}
+    <p>{{ ('label.info_config'|trans({}, 'config')) }}</p>
+
+    {% set hasAlerts = false %}
+    {% for items in alerts|default([]) %}
+        {% if items|length > 0 %}
+            {% set hasAlerts = true %}
+        {% endif %}
+    {% endfor %}
+
+    {% if hasAlerts %}
+        <h2>{{ ('label.configs_not_filled'|trans({}, 'config')) }}</h2>
+
+        {% for severity, items in alerts|default([]) %}
+            {% if items|length > 0 %}
+                <twig:c975LUi:Alert:Alert type="{{ severity }}" icon="false">
+                    <p class="text-left"><strong>{{ ('label.severity_' ~ severity)|trans({}, 'config') }}</strong></p>
+                    <ul class="text-left">
+                        {% for item in items %}
+                            <li>
+                                <a href="{{ item.url }}">{{ item.label }}</a>
+                                {%- if item.description %} - {{ item.description }}{% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </twig:c975LUi:Alert:Alert>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    {{ parent() }}
+{% endblock main %}

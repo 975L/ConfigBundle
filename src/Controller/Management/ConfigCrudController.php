@@ -10,6 +10,7 @@
 namespace c975L\ConfigBundle\Controller\Management;
 
 use c975L\ConfigBundle\Entity\Config;
+use c975L\ConfigBundle\Repository\ConfigRepository;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\ConfigBundle\Service\Export\ExportFormat;
 use c975L\ConfigBundle\Service\Export\TableExporter;
@@ -25,6 +26,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\ActionGroup;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
+use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
@@ -36,8 +38,10 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGeneratorInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -55,6 +59,8 @@ class ConfigCrudController extends AbstractCrudController
         private readonly RequestStack $requestStack,
         private readonly TranslatorInterface $translator,
         private readonly TableExporter $tableExporter,
+        private readonly ConfigRepository $configRepository,
+        private readonly AdminUrlGeneratorInterface $adminUrlGenerator,
     ) {
     }
 
@@ -156,7 +162,8 @@ class ConfigCrudController extends AbstractCrudController
                     ->setLabel(t('label.value', [], 'config'))
                     ->setHelp(t('help.value_json', [], 'config'))
                     ->setRequired(false),
-                default => TextareaField::new('value')
+                // Text kind allows HTML, so reuse EasyAdmin's own rich text editor (same widget as blocks)
+                default => TextEditorField::new('value')
                     ->setLabel(t('label.value', [], 'config'))
                     ->setRequired(true),
             };
@@ -223,9 +230,9 @@ class ConfigCrudController extends AbstractCrudController
     {
         $exportGroup = ActionGroup::new('export', t('label.export', [], 'config'), 'fa fa-download')
             ->createAsGlobalActionGroup()
-            ->addAction(Action::new('exportSql', t('label.export_sql', [], 'config'))->linkToCrudAction('exportSql'))
-            ->addAction(Action::new('exportCsv', t('label.export_csv', [], 'config'))->linkToCrudAction('exportCsv'))
-            ->addAction(Action::new('exportJson', t('label.export_json', [], 'config'))->linkToCrudAction('exportJson'))
+            ->addAction(Action::new('exportSql', 'SQL')->linkToCrudAction('exportSql'))
+            ->addAction(Action::new('exportCsv', 'CSV')->linkToCrudAction('exportCsv'))
+            ->addAction(Action::new('exportJson', 'JSON')->linkToCrudAction('exportJson'))
         ;
 
         $request = $this->requestStack->getCurrentRequest();
@@ -266,11 +273,21 @@ class ConfigCrudController extends AbstractCrudController
     {
         return $crud
             ->showEntityActionsInlined()
+            ->overrideTemplate('crud/index', '@c975LConfig/management/config_crud_index.html.twig')
             ->setEntityLabelInSingular(t('label.config', [], 'config'))
             ->setEntityLabelInPlural(t('label.config', [], 'config'))
             ->setEntityPermission($this->configService->get('site-role-needed'))
             ->setDefaultSort(['group' => 'ASC', 'label' => 'ASC'])
         ;
+    }
+
+    public function configureResponseParameters(KeyValueStore $responseParameters): KeyValueStore
+    {
+        if (Crud::PAGE_INDEX === $responseParameters->get('pageName')) {
+            $responseParameters->set('alerts', $this->getAlerts());
+        }
+
+        return $responseParameters;
     }
 
     public function configureFilters(Filters $filters): Filters
@@ -402,6 +419,31 @@ class ConfigCrudController extends AbstractCrudController
         return $this->connection->fetchAllAssociative(
             'SELECT `label`, `slug`, `is_sensitive`, `value`, `kind`, `group`, `description`, `severity`, `creation`, `modification` FROM `site_config` ORDER BY `slug`'
         );
+    }
+
+    // Groups configs still missing a value despite being flagged with a severity, by severity (danger first)
+    private function getAlerts(): array
+    {
+        $alerts = [
+            Config::SEVERITY_DANGER => [],
+            Config::SEVERITY_WARNING => [],
+            Config::SEVERITY_INFO => [],
+        ];
+
+        foreach ($this->configRepository->findRequiringAttention() as $config) {
+            $alerts[$config->getSeverity()][] = [
+                'label' => $config->getLabel(),
+                'description' => $config->getDescription(),
+                'url' => $this->adminUrlGenerator
+                    ->unsetAll()
+                    ->setController(self::class)
+                    ->setAction(Action::EDIT)
+                    ->setEntityId($config->getId())
+                    ->generateUrl(),
+            ];
+        }
+
+        return $alerts;
     }
 
     // Parses a stored date value, tolerating empty/invalid strings

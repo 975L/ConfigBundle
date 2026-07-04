@@ -39,7 +39,7 @@ class MaintenanceListener
         if ($request->query->get('t') === $this->configService->get("site-maintenance-hash")) {
             $maintenance = [
                 'access' => true,
-                'access_time' => time() + 3 * 60 * 60,
+                'access_time' => time() + 6 * 60 * 60,
             ];
             $request->getSession()->set('site-maintenance', $maintenance);
 

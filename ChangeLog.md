@@ -1,5 +1,10 @@
 # ChangeLog
 
+## v5.3.8
+
+- Added display of config alerts on ConfigCrud index (04/07/2026)
+- Transformed config value textarea to TextEditorField (04/07/2026)
+
 ## v5.3.7
 
 - Added severity field on config + message on dashboard (04/07/2026) [Needs db update]
