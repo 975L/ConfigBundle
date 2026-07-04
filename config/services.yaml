@@ -12,6 +12,10 @@ services:
         arguments:
             $menuProviders: !tagged_iterator c975l.management_menu_provider
 
+    c975L\ConfigBundle\Management\WhatsNewBuilder:
+        arguments:
+            $whatsNewProviders: !tagged_iterator c975l.whatsnew_provider
+
     c975L\ConfigBundle\Controller\Management\DashboardController:
         tags: ['controller.service_arguments']
 

@@ -194,6 +194,26 @@
                 <source>label.info_config</source>
                 <target>Configuration data for the website. Sensitive data is stored encrypted in the database</target>
             </trans-unit>
+            <trans-unit id="49">
+                <source>label.whatsnew</source>
+                <target>What's New</target>
+            </trans-unit>
+            <trans-unit id="50">
+                <source>label.whatsnew_see_all</source>
+                <target>See all release notes</target>
+            </trans-unit>
+            <trans-unit id="51">
+                <source>label.bundle</source>
+                <target>Bundle</target>
+            </trans-unit>
+            <trans-unit id="52">
+                <source>label.version</source>
+                <target>Version</target>
+            </trans-unit>
+            <trans-unit id="53">
+                <source>label.no_whatsnew</source>
+                <target>No release notes yet</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

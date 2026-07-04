@@ -1,0 +1,7 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block main %}
+    <h1>{{ ('label.whatsnew'|trans({}, 'config')) }}</h1>
+
+    {{ include('@c975LConfig/management/whatsnew/_table.html.twig', { entries: entries }) }}
+{% endblock main %}

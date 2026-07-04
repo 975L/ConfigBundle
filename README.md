@@ -13,6 +13,7 @@ A Symfony bundle that stores application configuration as key-value pairs in the
 - Export button (SQL/CSV/JSON) for production deployment, reusable from any bundle's CRUD controller
 - Twig and PHP service to read values anywhere
 - 1-hour cache with automatic invalidation on change
+- "What's new" dashboard section aggregating release notes declared by every c975L bundle
 
 ## Installation
 
@@ -283,6 +284,45 @@ public function getLinks(): array
 ```
 
 Links from every bundle are merged into a single "Links" section (opened in a new tab), sorted alphabetically.
+
+## Contributing "What's new" entries from other bundles
+
+The `/management` dashboard shows the 5 latest release notes merged from every c975L bundle, with a link to the full list at `/management/whatsnew`.
+
+Declare your bundle's entries in a `config/whatsnew.json` file:
+
+```json
+[
+    {
+        "version": "1.2.0",
+        "date": "2026-07-04",
+        "description": "Added new XYZ block"
+    }
+]
+```
+
+Expose them via a `WhatsNewProvider` implementing `WhatsNewProviderInterface` — no manual service tagging needed, `WhatsNewProviderPass` auto-detects any class implementing it (same pattern as `MenuProviderInterface`):
+
+```php
+namespace c975L\MyBundle\Management;
+
+use c975L\ConfigBundle\Management\WhatsNewJsonReader;
+use c975L\ConfigBundle\Management\WhatsNewProviderInterface;
+
+class WhatsNewProvider implements WhatsNewProviderInterface
+{
+    private const BUNDLE_NAME = 'MyBundle';
+
+    public function getEntries(): array
+    {
+        return WhatsNewJsonReader::read(\dirname(__DIR__, 2) . '/config/whatsnew.json', self::BUNDLE_NAME);
+    }
+}
+```
+
+Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
+
+**UiBundle exception:** `UiBundle` cannot depend on `c975l/config-bundle` (the dependency already runs the other way, ConfigBundle → UiBundle), so it doesn't implement `WhatsNewProviderInterface`. It contributes entries through its own `WhatsNewRegistry` (same pattern as `ScriptAdminRegistry`) — see the UiBundle README for how to register entries there; `WhatsNewBuilder` merges them in automatically alongside every other bundle's entries.
 
 ## Reading config values
 

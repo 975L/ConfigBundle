@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v5.3.9
+
+- Added a What's new section on the dashboard + menu (04/07/2026)
+
 ## v5.3.8
 
 - Added display of config alerts on ConfigCrud index (04/07/2026)

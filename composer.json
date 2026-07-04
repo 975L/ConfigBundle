@@ -1,7 +1,7 @@
 {
     "name": "c975l/config-bundle",
     "type": "symfony-bundle",
-    "description": "Used to get/set the config params for a Symfony app",
+    "description": "A Symfony bundle that stores application configuration as key-value pairs in the database, with an EasyAdmin management interface, Twig/PHP accessors, and production deployment tooling.",
     "keywords": ["symfony", "bundle", "config"],
     "homepage": "https://github.com/975L/ConfigBundle",
     "license": "MIT",
@@ -20,6 +20,7 @@
     "require": {
         "php": ">=8.0",
         "doctrine/orm": "*",
+        "c975l/ui-bundle": "*",
         "easycorp/easyadmin-bundle": "*",
         "sensiolabs/minify-bundle": "*",
         "symfony/form": "*",

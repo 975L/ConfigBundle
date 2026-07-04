@@ -33,4 +33,11 @@
             </twig:c975LUi:Alert:Alert>
         {% endif %}
     {% endfor %}
+
+    {# Latest release notes merged from every c975L bundle #}
+    {% if whatsNew|length > 0 %}
+        <h2>{{ ('label.whatsnew'|trans({}, 'config')) }}</h2>
+        {{ include('@c975LConfig/management/whatsnew/_table.html.twig', { entries: whatsNew }) }}
+        <p><a href="{{ path('management_whatsnew_index') }}">{{ ('label.whatsnew_see_all'|trans({}, 'config')) }}</a></p>
+    {% endif %}
 {% endblock main %}

@@ -12,6 +12,7 @@ namespace c975L\ConfigBundle\Controller\Management;
 
 use c975L\ConfigBundle\Entity\Config;
 use c975L\ConfigBundle\Management\MenuBuilder;
+use c975L\ConfigBundle\Management\WhatsNewBuilder;
 use c975L\ConfigBundle\Repository\ConfigRepository;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\UiBundle\Registry\ScriptAdminRegistry;
@@ -30,6 +31,7 @@ class DashboardController extends AbstractDashboardController
 {
     public function __construct(
         private readonly MenuBuilder $menuBuilder,
+        private readonly WhatsNewBuilder $whatsNewBuilder,
         private readonly ConfigServiceInterface $configService,
         private readonly ScriptAdminRegistry $scriptAdminRegistry,
         private readonly ConfigRepository $configRepository,
@@ -46,6 +48,7 @@ class DashboardController extends AbstractDashboardController
                 'menus' => $this->menuBuilder->getMenus(),
                 'routes' => $this->menuBuilder->getLinks(),
                 'alerts' => $this->getAlerts(),
+                'whatsNew' => $this->whatsNewBuilder->getLatest(5),
             ]
         );
     }

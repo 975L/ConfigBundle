@@ -392,6 +392,8 @@ class ConfigCrudController extends AbstractCrudController
     #[AdminRoute]
     public function exportSql(AdminContext $context): Response
     {
+        $this->denyAccessUnlessGranted($this->configService->get('site-role-needed'));
+
         // Non-sensitive: INSERT ... ON DUPLICATE KEY UPDATE (syncs label/value/kind/group/description/severity)
         // Sensitive:     INSERT IGNORE INTO (creates if missing, preserves production values)
         return $this->tableExporter->export(ExportFormat::Sql, 'site_config', $this->fetchExportRows(), [
@@ -404,12 +406,16 @@ class ConfigCrudController extends AbstractCrudController
     #[AdminRoute]
     public function exportCsv(AdminContext $context): Response
     {
+        $this->denyAccessUnlessGranted($this->configService->get('site-role-needed'));
+
         return $this->tableExporter->export(ExportFormat::Csv, 'site_config', $this->fetchExportRows());
     }
 
     #[AdminRoute]
     public function exportJson(AdminContext $context): Response
     {
+        $this->denyAccessUnlessGranted($this->configService->get('site-role-needed'));
+
         return $this->tableExporter->export(ExportFormat::Json, 'site_config', $this->fetchExportRows());
     }
 

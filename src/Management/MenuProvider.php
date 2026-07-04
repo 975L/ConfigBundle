@@ -42,6 +42,13 @@ class MenuProvider implements MenuProviderInterface
 
     public function getLinks(): array
     {
-        return [];
+        return [
+            'whatsnew' => [
+                'label' => 'label.whatsnew',
+                'name' => 'management_whatsnew_index',
+                'translation_domain' => 'config',
+                'icon' => 'fa fa-bullhorn',
+            ],
+        ];
     }
 }

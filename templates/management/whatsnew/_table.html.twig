@@ -1,0 +1,24 @@
+<table class="table">
+    <thead>
+        <tr>
+            <th>{{ ('label.bundle'|trans({}, 'config')) }}</th>
+            <th>{{ ('label.version'|trans({}, 'config')) }}</th>
+            <th>{{ ('label.date'|trans({}, 'config')) }}</th>
+            <th>{{ ('label.description'|trans({}, 'config')) }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in entries %}
+            <tr>
+                <td>{{ entry.bundle }}</td>
+                <td>{{ entry.version }}</td>
+                <td>{{ entry.date|date('Y-m-d') }}</td>
+                <td>{{ entry.description }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">{{ ('label.no_whatsnew'|trans({}, 'config')) }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -194,6 +194,26 @@
                 <source>label.info_config</source>
                 <target>Datos de configuración para el sitio web. Los datos sensibles se almacenan cifrados en la base de datos</target>
             </trans-unit>
+            <trans-unit id="49">
+                <source>label.whatsnew</source>
+                <target>Novedades</target>
+            </trans-unit>
+            <trans-unit id="50">
+                <source>label.whatsnew_see_all</source>
+                <target>Ver todas las notas de versión</target>
+            </trans-unit>
+            <trans-unit id="51">
+                <source>label.bundle</source>
+                <target>Bundle</target>
+            </trans-unit>
+            <trans-unit id="52">
+                <source>label.version</source>
+                <target>Versión</target>
+            </trans-unit>
+            <trans-unit id="53">
+                <source>label.no_whatsnew</source>
+                <target>Todavía no hay notas de versión</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

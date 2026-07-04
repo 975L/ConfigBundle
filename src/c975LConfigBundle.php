@@ -10,6 +10,7 @@
 namespace c975L\ConfigBundle;
 
 use c975L\ConfigBundle\DependencyInjection\Compiler\MenuProviderPass;
+use c975L\ConfigBundle\DependencyInjection\Compiler\WhatsNewProviderPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
@@ -19,6 +20,7 @@ class c975LConfigBundle extends AbstractBundle
     public function build(ContainerBuilder $container): void
     {
         $container->addCompilerPass(new MenuProviderPass());
+        $container->addCompilerPass(new WhatsNewProviderPass());
     }
 
     public function loadExtension(array $config, ContainerConfigurator $containerConfigurator, ContainerBuilder $containerBuilder): void
