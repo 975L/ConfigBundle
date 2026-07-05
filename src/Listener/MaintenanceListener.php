@@ -39,13 +39,19 @@ class MaintenanceListener
              return;
         }
 
+        // /management and /login stay reachable so an admin can always log in and lift maintenance
+        $request = $event->getRequest();
+        $path = $request->getPathInfo();
+        if (str_starts_with($path, '/management') || str_starts_with($path, '/login')) {
+            return;
+        }
+
         // Access already granted to an authenticated admin, so maintenance never locks them out
         if ($this->security->isGranted($this->configService->get('site-role-needed'))) {
             return;
         }
 
         // Access via token in URL : ?t=secret_token
-        $request = $event->getRequest();
         if ($request->query->get('t') === $this->configService->get("site-maintenance-hash")) {
             $maintenance = [
                 'access' => true,

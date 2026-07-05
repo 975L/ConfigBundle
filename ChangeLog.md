@@ -1,5 +1,10 @@
 # ChangeLog
 
+## v5.3.12
+
+- Corrected responsive for maintenance page (05/07/2026)
+- Made /management and /login routes available even in maintenance mode (05/07/2026)
+
 ## v5.3.11.1
 
 - Fixed TaggedInterface (05/07/2026)

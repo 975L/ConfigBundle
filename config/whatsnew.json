@@ -1,5 +1,21 @@
 [
     {
+        "version": "5.3.12",
+        "date": "2026-07-05",
+        "description": [
+            {
+                "en": "Corrected responsive for maintenance page",
+                "fr": "Correction de la réactivité de la page de maintenance",
+                "es": "Corregida la capacidad de respuesta de la página de mantenimiento"
+            },
+            {
+                "en": "Made /management and /login routes available even in maintenance mode",
+                "fr": "Rendre les routes /management et /login disponibles même en mode maintenance",
+                "es": "Hacer que las rutas /management y /login estén disponibles incluso en modo mantenimiento"
+            }
+        ]
+    },
+    {
         "version": "5.3.11",
         "date": "2026-07-05",
         "description": [
