@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v5.3.11.1
+
+- Fixed TaggedInterface (05/07/2026)
+
 ## v5.3.11
 
 - Added a `ShortcutProviderInterface` so any bundle can contribute quick-action buttons to the dashboard (05/07/2026)

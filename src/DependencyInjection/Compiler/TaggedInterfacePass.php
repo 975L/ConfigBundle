@@ -26,8 +26,19 @@ class TaggedInterfacePass implements CompilerPassInterface
     {
         foreach ($container->getDefinitions() as $id => $definition) {
             $class = $definition->getClass();
-            if ($class && is_subclass_of($class, $this->interface)) {
-                $definition->addTag($this->tag);
+            if (!$class) {
+                continue;
+            }
+
+            try {
+                // Some vendor services (e.g. Symfony's translation extractor visitors)
+                // reference classes whose interfaces come from require-dev-only packages
+                // (e.g. nikic/php-parser), which aren't installed in prod (--no-dev)
+                if (is_subclass_of($class, $this->interface)) {
+                    $definition->addTag($this->tag);
+                }
+            } catch (\Throwable $e) {
+                continue;
             }
         }
     }
