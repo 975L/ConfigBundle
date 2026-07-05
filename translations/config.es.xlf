@@ -187,8 +187,8 @@
                 <target>Exportar</target>
             </trans-unit>
             <trans-unit id="47">
-                <source>label.configs_not_filled</source>
-                <target>Datos de configuraciones no completadas</target>
+                <source>label.items_not_filled</source>
+                <target>Elementos sin completar</target>
             </trans-unit>
             <trans-unit id="48">
                 <source>label.info_config</source>
@@ -213,6 +213,10 @@
             <trans-unit id="53">
                 <source>label.no_whatsnew</source>
                 <target>Todavía no hay notas de versión</target>
+            </trans-unit>
+            <trans-unit id="54">
+                <source>label.items_not_filled_for</source>
+                <target>%entity% sin completar</target>
             </trans-unit>
         </body>
     </file>

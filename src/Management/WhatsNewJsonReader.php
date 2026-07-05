@@ -16,14 +16,25 @@ class WhatsNewJsonReader
         $entries = [];
 
         foreach (json_decode(file_get_contents($file), true) ?? [] as $entry) {
+            $descriptions = [];
+            foreach ($entry['description'] as $description) {
+                $descriptions[] = self::resolveDescription($description);
+            }
+
             $entries[] = [
                 'bundle' => $bundleName,
                 'version' => $entry['version'],
                 'date' => new \DateTimeImmutable($entry['date']),
-                'description' => $entry['description'],
+                'description' => $descriptions,
             ];
         }
 
         return $entries;
+    }
+
+    // Picks the description matching the current locale, falling back to English then to the first available translation
+    private static function resolveDescription(array $description): string
+    {
+        return $description[\Locale::getDefault()] ?? $description['en'] ?? reset($description);
     }
 }

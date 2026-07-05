@@ -1,5 +1,11 @@
 # ChangeLog
 
+## v5.3.10
+
+- Factored dashboard alerts behind an `AlertProviderInterface`, any bundle can now contribute alerts; existing config-severity alerts moved to `ConfigAlertProvider` (05/07/2026)
+- Config CRUD's own alert list now reuses the shared `_alerts.html.twig` partial (05/07/2026)
+- What's new is now in three languages (05/07/2026)
+
 ## v5.3.9
 
 - Added a What's new section on the dashboard + menu (04/07/2026)

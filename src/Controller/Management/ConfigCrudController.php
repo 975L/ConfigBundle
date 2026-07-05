@@ -10,7 +10,8 @@
 namespace c975L\ConfigBundle\Controller\Management;
 
 use c975L\ConfigBundle\Entity\Config;
-use c975L\ConfigBundle\Repository\ConfigRepository;
+use c975L\ConfigBundle\Management\AlertBuilder;
+use c975L\ConfigBundle\Management\ConfigAlertProvider;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\ConfigBundle\Service\Export\ExportFormat;
 use c975L\ConfigBundle\Service\Export\TableExporter;
@@ -41,7 +42,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGeneratorInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -59,8 +59,7 @@ class ConfigCrudController extends AbstractCrudController
         private readonly RequestStack $requestStack,
         private readonly TranslatorInterface $translator,
         private readonly TableExporter $tableExporter,
-        private readonly ConfigRepository $configRepository,
-        private readonly AdminUrlGeneratorInterface $adminUrlGenerator,
+        private readonly ConfigAlertProvider $configAlertProvider,
     ) {
     }
 
@@ -284,7 +283,12 @@ class ConfigCrudController extends AbstractCrudController
     public function configureResponseParameters(KeyValueStore $responseParameters): KeyValueStore
     {
         if (Crud::PAGE_INDEX === $responseParameters->get('pageName')) {
-            $responseParameters->set('alerts', $this->getAlerts());
+            $responseParameters->set('alerts', AlertBuilder::groupBySeverity($this->configAlertProvider->getAlerts()));
+            $responseParameters->set('alertsTitle', $this->translator->trans(
+                'label.items_not_filled_for',
+                ['%entity%' => $this->translator->trans('label.config', [], 'config')],
+                'config'
+            ));
         }
 
         return $responseParameters;
@@ -425,31 +429,6 @@ class ConfigCrudController extends AbstractCrudController
         return $this->connection->fetchAllAssociative(
             'SELECT `label`, `slug`, `is_sensitive`, `value`, `kind`, `group`, `description`, `severity`, `creation`, `modification` FROM `site_config` ORDER BY `slug`'
         );
-    }
-
-    // Groups configs still missing a value despite being flagged with a severity, by severity (danger first)
-    private function getAlerts(): array
-    {
-        $alerts = [
-            Config::SEVERITY_DANGER => [],
-            Config::SEVERITY_WARNING => [],
-            Config::SEVERITY_INFO => [],
-        ];
-
-        foreach ($this->configRepository->findRequiringAttention() as $config) {
-            $alerts[$config->getSeverity()][] = [
-                'label' => $config->getLabel(),
-                'description' => $config->getDescription(),
-                'url' => $this->adminUrlGenerator
-                    ->unsetAll()
-                    ->setController(self::class)
-                    ->setAction(Action::EDIT)
-                    ->setEntityId($config->getId())
-                    ->generateUrl(),
-            ];
-        }
-
-        return $alerts;
     }
 
     // Parses a stored date value, tolerating empty/invalid strings

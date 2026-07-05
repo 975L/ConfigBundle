@@ -14,6 +14,7 @@ A Symfony bundle that stores application configuration as key-value pairs in the
 - Twig and PHP service to read values anywhere
 - 1-hour cache with automatic invalidation on change
 - "What's new" dashboard section aggregating release notes declared by every c975L bundle
+- Dashboard alerts (danger/warning/info) aggregating what needs attention, declared by every c975L bundle
 
 ## Installation
 
@@ -323,6 +324,42 @@ class WhatsNewProvider implements WhatsNewProviderInterface
 Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
 
 **UiBundle exception:** `UiBundle` cannot depend on `c975l/config-bundle` (the dependency already runs the other way, ConfigBundle → UiBundle), so it doesn't implement `WhatsNewProviderInterface`. It contributes entries through its own `WhatsNewRegistry` (same pattern as `ScriptAdminRegistry`) — see the UiBundle README for how to register entries there; `WhatsNewBuilder` merges them in automatically alongside every other bundle's entries.
+
+## Contributing dashboard alerts from other bundles
+
+The `/management` dashboard, and each CRUD's own index page, can show a severity-grouped alert list (danger/warning/info) pointing at whatever needs attention — e.g. configs missing a value.
+
+Satellite bundles contribute alerts by implementing `AlertProviderInterface` — no manual service tagging needed, `AlertProviderPass` auto-detects any class implementing it (same pattern as `MenuProviderInterface`):
+
+```php
+namespace c975L\MyBundle\Management;
+
+use c975L\ConfigBundle\Entity\Config;
+use c975L\ConfigBundle\Management\AlertProviderInterface;
+
+class MyAlertProvider implements AlertProviderInterface
+{
+    public function getAlerts(): array
+    {
+        return [
+            [
+                'label' => 'My entity label',
+                'description' => 'Why it needs attention',
+                'severity' => Config::SEVERITY_WARNING,
+                'url' => '/management/my-entity/edit/1',
+            ],
+        ];
+    }
+}
+```
+
+Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
+
+**Dashboard aggregation:** `AlertBuilder::getAlerts()` merges every provider's alerts and groups them by severity for the main `/management` dashboard.
+
+**Own CRUD index:** a controller that only wants its own provider's alerts (not every bundle's) calls `AlertBuilder::groupBySeverity()` directly on that provider's flat list — see `ConfigCrudController` for an example.
+
+**Rendering:** both cases are rendered with the shared `templates/management/_alerts.html.twig` partial, which expects a severity-grouped `alerts` array and a translated `title`.
 
 ## Reading config values
 

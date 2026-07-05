@@ -1,0 +1,32 @@
+{#
+ # Renders a grouped-by-severity alert list (see c975L\ConfigBundle\Management\AlertBuilder).
+ # Expects:
+ #   - alerts: array<string, array> grouped by severity (Config::SEVERITY_*)
+ #   - title: string, already translated - callers decide how generic/specific it should be
+ #}
+{% set hasAlerts = false %}
+{% for items in alerts|default([]) %}
+    {% if items|length > 0 %}
+        {% set hasAlerts = true %}
+    {% endif %}
+{% endfor %}
+
+{% if hasAlerts %}
+    <h2>{{ title }}</h2>
+
+    {% for severity, items in alerts %}
+        {% if items|length > 0 %}
+            <twig:c975LUi:Alert:Alert type="{{ severity }}" icon="false">
+                <p class="text-left"><strong>{{ ('label.severity_' ~ severity)|trans({}, 'config') }}</strong></p>
+                <ul class="text-left">
+                    {% for item in items %}
+                        <li>
+                            <a href="{{ item.url }}">{{ item.label }}</a>
+                            {%- if item.description %} — {{ item.description }}{% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </twig:c975LUi:Alert:Alert>
+        {% endif %}
+    {% endfor %}
+{% endif %}

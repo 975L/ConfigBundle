@@ -1,12 +1,40 @@
 [
     {
+        "version": "5.3.10",
+        "date": "2026-07-05",
+        "description": [
+            {
+                "en": "Dashboard alerts can now be contributed by any bundle via a new AlertProviderInterface, with the config alert list reusing a shared partial",
+                "fr": "Les alertes du tableau de bord peuvent désormais être fournies par n'importe quel bundle via une nouvelle AlertProviderInterface, la liste des alertes de configuration réutilisant un partial commun",
+                "es": "Las alertas del panel de control ahora pueden ser aportadas por cualquier bundle mediante una nueva AlertProviderInterface, y la lista de alertas de configuración reutiliza un parcial compartido"
+            },
+            {
+                "en": "The What's new section is now trilingual (English, French, Spanish)",
+                "fr": "La section « Nouveautés » est désormais trilingue (anglais, français, espagnol)",
+                "es": "La sección de novedades ahora es trilingüe (inglés, francés, español)"
+            }
+        ]
+    },
+    {
         "version": "5.3.9",
         "date": "2026-07-04",
-        "description": "Added a what's new section on dashboard and menu"
+        "description": [
+            {
+                "en": "Added a what's new section on dashboard and menu",
+                "fr": "Ajout d'une section « Nouveautés » sur le tableau de bord et le menu",
+                "es": "Añadida una sección de novedades en el panel de control y el menú"
+            }
+        ]
     },
     {
         "version": "5.3.8",
         "date": "2026-07-04",
-        "description": "Added display of config alerts on ConfigCrud index and transformed config value textarea to TextEditorField"
+        "description": [
+            {
+                "en": "Added display of config alerts on ConfigCrud index and transformed config value textarea to TextEditorField",
+                "fr": "Ajout de l'affichage des alertes de configuration sur la liste ConfigCrud et transformation du textarea de valeur en TextEditorField",
+                "es": "Añadida la visualización de alertas de configuración en el listado ConfigCrud y transformación del textarea de valor en TextEditorField"
+            }
+        ]
     }
 ]

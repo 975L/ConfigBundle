@@ -10,20 +10,17 @@
 
 namespace c975L\ConfigBundle\Controller\Management;
 
-use c975L\ConfigBundle\Entity\Config;
+use c975L\ConfigBundle\Management\AlertBuilder;
 use c975L\ConfigBundle\Management\MenuBuilder;
 use c975L\ConfigBundle\Management\WhatsNewBuilder;
-use c975L\ConfigBundle\Repository\ConfigRepository;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\UiBundle\Registry\ScriptAdminRegistry;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Asset;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Asset;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGeneratorInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 #[AdminDashboard(routePath: '/management', routeName: 'management')]
@@ -32,10 +29,9 @@ class DashboardController extends AbstractDashboardController
     public function __construct(
         private readonly MenuBuilder $menuBuilder,
         private readonly WhatsNewBuilder $whatsNewBuilder,
+        private readonly AlertBuilder $alertBuilder,
         private readonly ConfigServiceInterface $configService,
         private readonly ScriptAdminRegistry $scriptAdminRegistry,
-        private readonly ConfigRepository $configRepository,
-        private readonly AdminUrlGeneratorInterface $adminUrlGenerator,
     ) {}
 
     public function index(): Response
@@ -47,42 +43,18 @@ class DashboardController extends AbstractDashboardController
             [
                 'menus' => $this->menuBuilder->getMenus(),
                 'routes' => $this->menuBuilder->getLinks(),
-                'alerts' => $this->getAlerts(),
+                'alerts' => $this->alertBuilder->getAlerts(),
                 'whatsNew' => $this->whatsNewBuilder->getLatest(5),
             ]
         );
     }
 
-    // Groups configs still missing a value despite being flagged with a severity, by severity (danger first)
-    private function getAlerts(): array
-    {
-        $alerts = [
-            Config::SEVERITY_DANGER => [],
-            Config::SEVERITY_WARNING => [],
-            Config::SEVERITY_INFO => [],
-        ];
-
-        foreach ($this->configRepository->findRequiringAttention() as $config) {
-            $alerts[$config->getSeverity()][] = [
-                'label' => $config->getLabel(),
-                'description' => $config->getDescription(),
-                'url' => $this->adminUrlGenerator
-                    ->unsetAll()
-                    ->setController(ConfigCrudController::class)
-                    ->setAction(Action::EDIT)
-                    ->setEntityId($config->getId())
-                    ->generateUrl(),
-            ];
-        }
-
-        return $alerts;
-    }
-
     public function configureDashboard(): Dashboard
     {
         return Dashboard::new()
-            ->setTitle('<img src="' . $this->configService->get('site-favicon') . '">' . $this->configService->get('site-name'))
-            ->setFaviconPath($this->configService->get('site-favicon'))
+            // Fixed path: c975L\SiteBundle's SiteGraphicCrudController always saves the favicon there (see UiMediaNamer)
+            ->setTitle('<img src="/favicon.ico">' . $this->configService->get('site-name'))
+            ->setFaviconPath('/favicon.ico')
             ->setTranslationDomain('config')
         ;
     }

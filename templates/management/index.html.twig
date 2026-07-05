@@ -15,24 +15,11 @@
             {% endfor %}
         </p>
     </section>
-    {# Displays alerts about config values not filled #}
-    {% for severity, items in alerts %}
-        {% if items|length > 0 %}
-            <h2>{{ ('label.configs_not_filled'|trans({}, 'config')) }}</h2>
-            <p>{{ ('label.please_fill_configs'|trans({}, 'config')) }}</p>
-            <twig:c975LUi:Alert:Alert type="{{ severity }}" icon="false">
-                <p class="text-left"><strong>{{ ('label.severity_' ~ severity)|trans({}, 'config') }}</strong></p>
-                <ul class="text-left">
-                    {% for item in items %}
-                        <li>
-                            <a href="{{ item.url }}">{{ item.label }}</a>
-                            {%- if item.description %} — {{ item.description }}{% endif %}
-                        </li>
-                    {% endfor %}
-                </ul>
-            </twig:c975LUi:Alert:Alert>
-        {% endif %}
-    {% endfor %}
+    {# Alerts merged across every bundle's AlertProvider - generic title since it mixes several kinds of items #}
+    {{ include('@c975LConfig/management/_alerts.html.twig', {
+        alerts: alerts,
+        title: 'label.items_not_filled'|trans({}, 'config'),
+    }) }}
 
     {# Latest release notes merged from every c975L bundle #}
     {% if whatsNew|length > 0 %}

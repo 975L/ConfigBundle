@@ -13,7 +13,17 @@
                 <td>{{ entry.bundle }}</td>
                 <td>{{ entry.version }}</td>
                 <td>{{ entry.date|date('Y-m-d') }}</td>
-                <td>{{ entry.description }}</td>
+                <td>
+                    {% if entry.description|length > 1 %}
+                        <ul class="mb-0">
+                            {% for description in entry.description %}
+                                <li>{{ description }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        {{ entry.description|first }}
+                    {% endif %}
+                </td>
             </tr>
         {% else %}
             <tr>

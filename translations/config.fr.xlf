@@ -188,8 +188,8 @@
                 <target>Exporter</target>
             </trans-unit>
             <trans-unit id="47">
-                <source>label.configs_not_filled</source>
-                <target>Données de configurations non renseignées</target>
+                <source>label.items_not_filled</source>
+                <target>Éléments non renseignés</target>
             </trans-unit>
             <trans-unit id="48">
                 <source>label.info_config</source>
@@ -214,6 +214,10 @@
             <trans-unit id="53">
                 <source>label.no_whatsnew</source>
                 <target>Aucune note de version pour l'instant</target>
+            </trans-unit>
+            <trans-unit id="54">
+                <source>label.items_not_filled_for</source>
+                <target>%entity% non renseigné(e)s</target>
             </trans-unit>
         </body>
     </file>
