@@ -15,6 +15,13 @@
             {% endfor %}
         </p>
     </section>
+
+    {# Shortcuts merged across every bundle's ShortcutProvider #}
+    {% if shortcuts|length > 0 %}
+        <h2>{{ ('label.shortcuts'|trans({}, 'config')) }}</h2>
+        {{ include('@c975LConfig/management/_shortcuts.html.twig', { shortcuts: shortcuts }) }}
+    {% endif %}
+
     {# Alerts merged across every bundle's AlertProvider - generic title since it mixes several kinds of items #}
     {{ include('@c975LConfig/management/_alerts.html.twig', {
         alerts: alerts,

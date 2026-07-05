@@ -29,10 +29,10 @@ class WhatsNewBuilder
     // Returns every entry across all bundles, sorted by date desc
     public function getAll(): array
     {
-        $entries = $this->uiWhatsNewRegistry->all();
-        foreach ($this->whatsNewProviders as $provider) {
-            $entries = array_merge($entries, $provider->getEntries());
-        }
+        $entries = array_merge(
+            $this->uiWhatsNewRegistry->all(),
+            ProviderMerger::merge($this->whatsNewProviders, fn (WhatsNewProviderInterface $provider) => $provider->getEntries()),
+        );
 
         usort($entries, fn (array $a, array $b) => $b['date'] <=> $a['date']);
 

@@ -16,9 +16,8 @@
 
     {% for severity, items in alerts %}
         {% if items|length > 0 %}
-            <twig:c975LUi:Alert:Alert type="{{ severity }}" icon="false">
-                <p class="text-left"><strong>{{ ('label.severity_' ~ severity)|trans({}, 'config') }}</strong></p>
-                <ul class="text-left">
+            <twig:c975LUi:Alert:Alert type="{{ severity }}">
+                <ul class="list-unstyled small text-left" style="margin: 0;">
                     {% for item in items %}
                         <li>
                             <a href="{{ item.url }}">{{ item.label }}</a>

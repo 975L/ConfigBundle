@@ -22,6 +22,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 class Config
 {
     public const TYPE_TEXT = 'text';
+    public const TYPE_HTML = 'html';
     public const TYPE_BOOL = 'bool';
     public const TYPE_INT  = 'int';
     public const TYPE_DATE  = 'date';
@@ -29,6 +30,7 @@ class Config
 
     public const TYPES = [
         self::TYPE_TEXT,
+        self::TYPE_HTML,
         self::TYPE_BOOL,
         self::TYPE_INT,
         self::TYPE_DATE,

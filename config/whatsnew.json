@@ -1,5 +1,36 @@
 [
     {
+        "version": "5.3.11",
+        "date": "2026-07-05",
+        "description": [
+            {
+                "en": "Dashboard shortcuts can now be contributed by any bundle via a new ShortcutProviderInterface (quick actions like clearing a cache or toggling a mode); ConfigBundle now exposes a \"Clear config cache\" shortcut",
+                "fr": "Les raccourcis du tableau de bord peuvent désormais être fournis par n'importe quel bundle via une nouvelle ShortcutProviderInterface (actions rapides comme vider un cache ou activer un mode) ; ConfigBundle propose désormais un raccourci « Vider le cache de configuration »",
+                "es": "Los atajos del panel de control ahora pueden ser aportados por cualquier bundle mediante una nueva ShortcutProviderInterface (acciones rápidas como vaciar una caché o activar un modo); ConfigBundle ahora ofrece un atajo «Vaciar la caché de configuración»"
+            },
+            {
+                "en": "SiteBundle menu items can now link to a route contributed by another bundle (e.g. a contact page), not just an existing site page",
+                "fr": "Les éléments de menu de SiteBundle peuvent désormais pointer vers une route fournie par un autre bundle (une page de contact par exemple), et pas seulement vers une page du site",
+                "es": "Los elementos de menú de SiteBundle ahora pueden enlazar a una ruta aportada por otro bundle (por ejemplo, una página de contacto), no solo a una página del sitio"
+            },
+            {
+                "en": "Admins are no longer locked out of the back-office while maintenance mode is enabled",
+                "fr": "Les administrateurs ne sont plus bloqués hors du back-office lorsque le mode maintenance est activé",
+                "es": "Los administradores ya no quedan bloqueados fuera del back-office cuando el modo mantenimiento está activado"
+            },
+            {
+                "en": "The dashboard now has a \"Toggle maintenance mode\" shortcut, in its own titled section, and a more compact alerts list",
+                "fr": "Le tableau de bord propose désormais un raccourci « Activer/désactiver le mode maintenance », dans sa propre section dédiée, ainsi qu'une liste d'alertes plus compacte",
+                "es": "El panel de control ahora ofrece un atajo «Activar/desactivar el modo mantenimiento», en su propia sección dedicada, y una lista de alertas más compacta"
+            },
+            {
+                "en": "Config values can now use a \"Rich text\" kind with a full editor, in addition to plain text; fixed the maintenance page failing to display",
+                "fr": "Les valeurs de configuration peuvent désormais utiliser un type « Texte enrichi » avec un éditeur complet, en plus du texte simple ; correction de la page de maintenance qui ne s'affichait plus",
+                "es": "Los valores de configuración ahora pueden usar un tipo «Texto enriquecido» con un editor completo, además del texto simple; corregido el fallo que impedía mostrar la página de mantenimiento"
+            }
+        ]
+    },
+    {
         "version": "5.3.10",
         "date": "2026-07-05",
         "description": [

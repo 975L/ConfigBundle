@@ -22,10 +22,7 @@ class AlertBuilder
     // Every alert, across every provider, grouped by severity - for the main dashboard
     public function getAlerts(): array
     {
-        $alerts = [];
-        foreach ($this->alertProviders as $provider) {
-            $alerts = array_merge($alerts, $provider->getAlerts());
-        }
+        $alerts = ProviderMerger::merge($this->alertProviders, fn (AlertProviderInterface $provider) => $provider->getAlerts());
 
         return self::groupBySeverity($alerts);
     }

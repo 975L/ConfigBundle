@@ -52,23 +52,13 @@ class MenuBuilder
     // Returns all menus, merged across providers and sorted alphabetically
     public function getMenus(): array
     {
-        $menus = [];
-        foreach ($this->menuProviders as $provider) {
-            $menus = array_merge($menus, $provider->getMenus());
-        }
-
-        return $this->sortAlphabetically($menus);
+        return $this->sortAlphabetically(ProviderMerger::merge($this->menuProviders, fn (MenuProviderInterface $provider) => $provider->getMenus()));
     }
 
     // Returns all links, merged across providers and sorted alphabetically
     public function getLinks(): array
     {
-        $links = [];
-        foreach ($this->menuProviders as $provider) {
-            $links = array_merge($links, $provider->getLinks());
-        }
-
-        return $this->sortAlphabetically($links);
+        return $this->sortAlphabetically(ProviderMerger::merge($this->menuProviders, fn (MenuProviderInterface $provider) => $provider->getLinks()));
     }
 
     // Groups the menus by section, so providers sharing the same section (label + translation_domain) are merged

@@ -1,0 +1,17 @@
+{#
+ # Renders the dashboard shortcuts (see c975L\ConfigBundle\Management\ShortcutBuilder).
+ # Expects:
+ #   - shortcuts: array of ['label', 'icon', 'route', 'active']
+ # Each shortcut is a POST form (not a plain link) since it triggers an action, protected by its own CSRF token
+ # Caller is responsible for checking shortcuts|length > 0 (see management/index.html.twig)
+ #}
+<p class="flex-center">
+    {% for shortcut in shortcuts %}
+        <form method="post" action="{{ path(shortcut.route) }}" class="d-inline-block">
+            <input type="hidden" name="_token" value="{{ csrf_token(shortcut.route) }}">
+            <button type="submit" class="btn {{ shortcut.active ? 'btn-danger' : 'btn-outline-secondary' }}">
+                <i class="{{ shortcut.icon }}"></i> {{ shortcut.label }}
+            </button>
+        </form>
+    {% endfor %}
+</p>

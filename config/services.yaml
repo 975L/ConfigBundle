@@ -20,6 +20,14 @@ services:
         arguments:
             $alertProviders: !tagged_iterator c975l.alert_provider
 
+    c975L\ConfigBundle\Management\ShortcutBuilder:
+        arguments:
+            $shortcutProviders: !tagged_iterator c975l.shortcut_provider
+
+    c975L\ConfigBundle\Management\LinkableRouteRegistry:
+        arguments:
+            $providers: !tagged_iterator c975l.linkable_route_provider
+
     c975L\ConfigBundle\Controller\Management\DashboardController:
         tags: ['controller.service_arguments']
 

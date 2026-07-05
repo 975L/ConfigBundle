@@ -1,5 +1,16 @@
 # ChangeLog
 
+## v5.3.11
+
+- Added a `ShortcutProviderInterface` so any bundle can contribute quick-action buttons to the dashboard (05/07/2026)
+- Added `LinkableRouteProviderInterface` so bundles without a SiteBundle dependency can expose one of their own routes as a selectable target for menu items (05/07/2026)
+- `MaintenanceListener` now runs at priority 6 and lets an already-authenticated admin (`isGranted` on `site-role-needed`) through (05/07/2026)
+- Added a "Toggle maintenance mode" dashboard shortcut, flipping the existing `site-maintenance` config used by `MaintenanceListener` (05/07/2026)
+- Reduced the height of the dashboard alerts list (dropped the redundant severity label, compact unstyled list) (05/07/2026)
+- Added a `html` kind for config values needing rich content (EasyAdmin `TextEditorField`); plain `text` is now edited as a textarea instead (05/07/2026)
+- Fixed the `@c975Config` Twig namespace typo (now `@c975LConfig`) that broke the maintenance page rendering, and moved its translations from the `site` to the `config` domain (05/07/2026)
+- Replaced the three separate `MenuProviderPass`/`WhatsNewProviderPass`/`AlertProviderPass` compiler passes with a single generic `TaggedInterfacePass`, and factored the repeated provider-merge loop into `ProviderMerger` (05/07/2026)
+
 ## v5.3.10
 
 - Factored dashboard alerts behind an `AlertProviderInterface`, any bundle can now contribute alerts; existing config-severity alerts moved to `ConfigAlertProvider` (05/07/2026)
@@ -41,7 +52,7 @@
 
 - Added config due to conversion to Stimulus to c975L/UiBundle blocks.js (28/06/2026)
 
-## v5.3.2
+## v5.3.2
 
 - Removed cache ttl for values as not needed (28/06/2026)
 - Added request-scoped memoization to avoid redundant cache lookups within a single HTTP request (28/06/2026)

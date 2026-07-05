@@ -161,8 +161,12 @@ class ConfigCrudController extends AbstractCrudController
                     ->setLabel(t('label.value', [], 'config'))
                     ->setHelp(t('help.value_json', [], 'config'))
                     ->setRequired(false),
-                // Text kind allows HTML, so reuse EasyAdmin's own rich text editor (same widget as blocks)
-                default => TextEditorField::new('value')
+                // Html kind is for the rare configs needing rich content, reuses EasyAdmin's own rich text editor (same widget as blocks)
+                Config::TYPE_HTML => TextEditorField::new('value')
+                    ->setLabel(t('label.value', [], 'config'))
+                    ->setRequired(true),
+                // Text kind is plain string (URLs, ids, emails...), a rich editor would wrap it in a <div>
+                default => TextareaField::new('value')
                     ->setLabel(t('label.value', [], 'config'))
                     ->setRequired(true),
             };

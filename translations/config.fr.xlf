@@ -219,6 +219,42 @@
                 <source>label.items_not_filled_for</source>
                 <target>%entity% non renseigné(e)s</target>
             </trans-unit>
+            <trans-unit id="55">
+                <source>label.config_clear_cache</source>
+                <target>Vider le cache de configuration</target>
+            </trans-unit>
+            <trans-unit id="56">
+                <source>flash.config_cache_cleared</source>
+                <target>Cache de configuration vidé</target>
+            </trans-unit>
+            <trans-unit id="57">
+                <source>label.shortcuts</source>
+                <target>Raccourcis</target>
+            </trans-unit>
+            <trans-unit id="58">
+                <source>label.maintenance_enable</source>
+                <target>Activer le mode maintenance</target>
+            </trans-unit>
+            <trans-unit id="59">
+                <source>label.maintenance_disable</source>
+                <target>Désactiver le mode maintenance</target>
+            </trans-unit>
+            <trans-unit id="60">
+                <source>flash.maintenance_enabled</source>
+                <target>Mode maintenance activé</target>
+            </trans-unit>
+            <trans-unit id="61">
+                <source>flash.maintenance_disabled</source>
+                <target>Mode maintenance désactivé</target>
+            </trans-unit>
+            <trans-unit id="62">
+                <source>label.maintenance</source>
+                <target>Maintenance</target>
+            </trans-unit>
+            <trans-unit id="63">
+                <source>label.maintenance_message</source>
+                <target>Nous travaillons pour vous offrir une meilleure expérience. Revenez bientôt !</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

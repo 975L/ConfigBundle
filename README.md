@@ -65,7 +65,8 @@ Create a `config/configs.json` file in your bundle. Each entry will be inserted 
 ]
 ```
 
-Supported `kind` values: `text`, `int`, `bool`, `date`, `json`.
+Supported `kind` values: `text`, `html`, `int`, `bool`, `date`, `json`.
+`text` is edited as a plain textarea (URLs, ids, emails...); `html` is for rare configs needing rich content and is edited with EasyAdmin's own rich text editor (same widget as UiBundle blocks).
 For `json`, `value` is the raw JSON-encoded string (e.g. `"[\"ROLE_ADMIN\",\"ROLE_EDITOR\"]"`); `ConfigService::get()` returns it already decoded into a PHP array (`[]` if empty/invalid).
 Set `sensitive: true` for any entry that holds secrets (API keys, passwords, etc.).
 
@@ -286,6 +287,34 @@ public function getLinks(): array
 
 Links from every bundle are merged into a single "Links" section (opened in a new tab), sorted alphabetically.
 
+## Contributing linkable routes for SiteBundle menus
+
+SiteBundle lets site admins add navbar/footer menu items that link to an existing database `Page`, or to a route contributed by another bundle (e.g. ContactFormBundle's `/contact`). This interface lives here (not in SiteBundle) precisely so that bundles which don't depend on SiteBundle (ContactFormBundle, ShopBundle, BookBundle...) can still expose a route, by implementing `LinkableRouteProviderInterface` — no manual service tagging needed, `LinkableRouteProviderPass` auto-detects any class implementing it, same mechanism as `MenuProviderInterface` above.
+
+```php
+namespace c975L\MyBundle\Management;
+
+use c975L\ConfigBundle\Management\LinkableRouteProviderInterface;
+
+class LinkableRouteProvider implements LinkableRouteProviderInterface
+{
+    // Route name => ['label' => translation key, 'translation_domain' => domain]; return [] if none
+    public function getLinkableRoutes(): array
+    {
+        return [
+            'my_bundle_display' => [
+                'label' => 'label.my_page',
+                'translation_domain' => 'my_bundle',
+            ],
+        ];
+    }
+}
+```
+
+Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
+
+Routes are checked live: if the contributing bundle is later removed (or its provider stops returning that route), any menu item pointing to it simply disappears from the rendered menu instead of producing a broken link.
+
 ## Contributing "What's new" entries from other bundles
 
 The `/management` dashboard shows the 5 latest release notes merged from every c975L bundle, with a link to the full list at `/management/whatsnew`.
@@ -360,6 +389,48 @@ Make sure your bundle's `services.yaml` includes the `Management/` folder in its
 **Own CRUD index:** a controller that only wants its own provider's alerts (not every bundle's) calls `AlertBuilder::groupBySeverity()` directly on that provider's flat list — see `ConfigCrudController` for an example.
 
 **Rendering:** both cases are rendered with the shared `templates/management/_alerts.html.twig` partial, which expects a severity-grouped `alerts` array and a translated `title`.
+
+## Contributing dashboard shortcuts from other bundles
+
+The `/management` dashboard shows a row of quick-action buttons (e.g. clearing a cache, toggling maintenance mode) contributed by any bundle.
+
+Satellite bundles contribute shortcuts by implementing `ShortcutProviderInterface` — no manual service tagging needed, `ShortcutProviderPass` auto-detects any class implementing it (same pattern as `MenuProviderInterface`):
+
+```php
+namespace c975L\MyBundle\Management;
+
+use c975L\ConfigBundle\Management\ShortcutProviderInterface;
+use c975L\MyBundle\Controller\Management\MyShortcutController;
+use Symfony\Contracts\Translation\TranslatorInterface;
+
+class MyShortcutProvider implements ShortcutProviderInterface
+{
+    public function __construct(
+        private readonly TranslatorInterface $translator,
+    ) {
+    }
+
+    public function getShortcuts(): array
+    {
+        return [
+            [
+                'label' => $this->translator->trans('label.toggle_maintenance', [], 'my_bundle'),
+                'icon' => 'fas fa-wrench',
+                'route' => MyShortcutController::TOGGLE_MAINTENANCE_ROUTE,
+                'active' => $this->isMaintenanceOn(),
+            ],
+        ];
+    }
+}
+```
+
+Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
+
+**Unlike menus/links, shortcuts trigger an action, not just navigation.** `route` must accept a `POST` request and validate its own CSRF token (`csrf_token(route)` is the token id used by the shared template) — see `ConfigShortcutController::clearCache()` for a one-shot reference implementation that clears the config cache.
+
+**`active`:** styles the button (`btn-danger` when `true`, `btn-outline-secondary` otherwise) to reflect an on/off state. See `MaintenanceShortcutController::toggle()` for a toggle reference implementation flipping the `site-maintenance` config used by `MaintenanceListener`, with `ConfigShortcutProvider::getShortcuts()` reading that same config to decide `active` and pick the right label ("Enable"/"Disable"). One-shot actions with no on/off state can always return `false`.
+
+**Rendering:** shortcuts are merged across every provider by `ShortcutBuilder::getShortcuts()` and rendered with the shared `templates/management/_shortcuts.html.twig` partial, each one as its own small `<form method="post">`.
 
 ## Reading config values
 

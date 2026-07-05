@@ -9,18 +9,25 @@
 
 namespace c975L\ConfigBundle\DependencyInjection\Compiler;
 
-use c975L\ConfigBundle\Management\MenuProviderInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-class MenuProviderPass implements CompilerPassInterface
+// Auto-tags every service implementing $interface with $tag, so it's collected by a !tagged_iterator
+// (one instance per provider mechanism, see c975LConfigBundle::build())
+class TaggedInterfacePass implements CompilerPassInterface
 {
+    public function __construct(
+        private readonly string $interface,
+        private readonly string $tag,
+    ) {
+    }
+
     public function process(ContainerBuilder $container): void
     {
         foreach ($container->getDefinitions() as $id => $definition) {
             $class = $definition->getClass();
-            if ($class && is_subclass_of($class, MenuProviderInterface::class)) {
-                $definition->addTag('c975l.management_menu_provider');
+            if ($class && is_subclass_of($class, $this->interface)) {
+                $definition->addTag($this->tag);
             }
         }
     }
