@@ -2,7 +2,7 @@
     {
         "label": "Site Role Needed",
         "slug": "site-role-needed",
-        "sensitive": true,
+        "sensitive": false,
         "value": "ROLE_ADMIN",
         "kind": "text",
         "group": "system",
@@ -12,7 +12,7 @@
     {
         "label": "Site Maintenance",
         "slug": "site-maintenance",
-        "sensitive": true,
+        "sensitive": false,
         "value": "false",
         "kind": "bool",
         "group": "system",
@@ -22,7 +22,7 @@
     {
         "label": "Site Maintenance Hash",
         "slug": "site-maintenance-hash",
-        "sensitive": true,
+        "sensitive": false,
         "value": null,
         "kind": "text",
         "group": "system",

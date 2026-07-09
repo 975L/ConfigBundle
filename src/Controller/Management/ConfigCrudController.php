@@ -80,12 +80,20 @@ class ConfigCrudController extends AbstractCrudController
             ->setFormTypeOption('disabled', true);
 
         // Group is fixed by the import json, never editable through the admin
+        // formatValue() only runs on index/detail (EasyAdmin skips it for disabled form fields),
+        // so the edit page's disabled input needs the translated text injected via form data instead
         $groupField = TextField::new('group')
             ->setLabel(t('label.group', [], 'config'))
             ->setFormTypeOption('disabled', true)
             ->formatValue(fn (?string $group): string =>
                 $group ? $this->translator->trans('label.group_' . $group, [], 'config') : ''
             );
+        if (Crud::PAGE_EDIT === $pageName && $entity instanceof Config) {
+            $group = $entity->getGroup();
+            $groupField->setFormTypeOptions([
+                'data' => $group ? $this->translator->trans('label.group_' . $group, [], 'config') : '',
+            ]);
+        }
 
         // Severity is fixed by the import json, never editable through the admin
         // Rendered as a colored badge so an empty mandatory config stands out in the list
@@ -130,7 +138,7 @@ class ConfigCrudController extends AbstractCrudController
                 ->setFormTypeOptions([
                     'data' => $decryptedValue,
                 ])
-                ->setRequired(true);
+                ->setRequired(false);
         } elseif ($isSensitive) {
             // Detail page: reveal the decrypted value
             $valueField = TextareaField::new('value')
@@ -151,12 +159,12 @@ class ConfigCrudController extends AbstractCrudController
                 Config::TYPE_INT => IntegerField::new('value')
                     ->setLabel(t('label.value', [], 'config'))
                     ->setFormTypeOptions(['data' => null !== $rawValue ? (int) $rawValue : null])
-                    ->setRequired(true),
+                    ->setRequired(false),
                 Config::TYPE_DATE => DateField::new('value')
                     ->setLabel(t('label.value', [], 'config'))
                     ->setValue($this->toDate($rawValue))
                     ->setFormTypeOptions(['data' => $this->toDate($rawValue)])
-                    ->setRequired(true),
+                    ->setRequired(false),
                 Config::TYPE_JSON => TextareaField::new('value')
                     ->setLabel(t('label.value', [], 'config'))
                     ->setHelp(t('help.value_json', [], 'config'))
@@ -164,11 +172,11 @@ class ConfigCrudController extends AbstractCrudController
                 // Html kind is for the rare configs needing rich content, reuses EasyAdmin's own rich text editor (same widget as blocks)
                 Config::TYPE_HTML => TextEditorField::new('value')
                     ->setLabel(t('label.value', [], 'config'))
-                    ->setRequired(true),
+                    ->setRequired(false),
                 // Text kind is plain string (URLs, ids, emails...), a rich editor would wrap it in a <div>
                 default => TextField::new('value')
                     ->setLabel(t('label.value', [], 'config'))
-                    ->setRequired(true),
+                    ->setRequired(false),
             };
         }
 
@@ -178,6 +186,24 @@ class ConfigCrudController extends AbstractCrudController
             $valueField = $valueField->setHelp(Config::TYPE_JSON === $kind
                 ? t('help.value_json', [], 'config')
                 : t('help.value', [], 'config'));
+        }
+
+        // Description holds a 'site_config' translation key (label.xxx) once a bundle has migrated
+        // to it; trans() safely falls back to the raw text unchanged for bundles that haven't yet.
+        // formatValue() only runs on index/detail (EasyAdmin skips it for disabled form fields), so
+        // the edit page's disabled input needs the translated text injected via form data instead
+        $descriptionField = TextField::new('description')
+            ->setLabel(t('label.description', [], 'config'))
+            ->setFormTypeOption('disabled', true)
+            ->hideOnIndex()
+            ->formatValue(fn (?string $description): string =>
+                $description ? $this->translator->trans($description, [], 'site_config') : ''
+            );
+        if (Crud::PAGE_EDIT === $pageName && $entity instanceof Config) {
+            $description = $entity->getDescription();
+            $descriptionField->setFormTypeOptions([
+                'data' => $description ? $this->translator->trans($description, [], 'site_config') : '',
+            ]);
         }
 
         return [
@@ -211,16 +237,8 @@ class ConfigCrudController extends AbstractCrudController
             // Content — widget depends on kind (bool/int/date/text); sensitive values are masked in list/detail
             $valueField,
 
-            // Fixed by the import json, never editable through the admin. description holds a
-            // 'site_config' translation key (label.xxx) once a bundle has migrated to it; trans()
-            // safely falls back to the raw text unchanged for bundles that haven't yet
-            TextField::new('description')
-                ->setLabel(t('label.description', [], 'config'))
-                ->setFormTypeOption('disabled', true)
-                ->hideOnIndex()
-                ->formatValue(fn (?string $description): string =>
-                    $description ? $this->translator->trans($description, [], 'site_config') : ''
-                ),
+            // Fixed by the import json, never editable through the admin
+            $descriptionField,
 
             // Dates
             DateTimeField::new('creation')
@@ -366,22 +384,16 @@ class ConfigCrudController extends AbstractCrudController
         $this->configService->invalidateCache();
     }
 
-    // Updated config - preserve existing encrypted value when field left empty, encrypt new value otherwise
+    // Updated config - encrypt sensitive value if provided, then invalidate cache
     public function updateEntity(EntityManagerInterface $entityManager, mixed $config): void
     {
         if ($config->getIsSensitive()) {
             $submitted = $config->getValue();
 
-            if (null === $submitted || '' === $submitted) {
-                // Empty submission: restore the original value, encrypting it if it was still plain-text
-                // (e.g. a default loaded before C975L_VAULT_KEY was configured)
-                $original = $entityManager->getUnitOfWork()->getOriginalEntityData($config)['value'] ?? null;
-                if (null !== $original && '' !== $original && !$this->vaultEncryptor->isEncrypted($original)) {
-                    $original = $this->vaultEncryptor->encrypt($original);
-                }
-                $config->setValue($original);
-            } else {
-                // Non-empty submission: encrypt the new plain-text value
+            // Non-empty submission: encrypt the new plain-text value. A blank submission clears
+            // the value: the field is pre-filled with the decrypted value on edit, so blank means
+            // the user actively emptied it, not that they left it untouched
+            if (null !== $submitted && '' !== $submitted) {
                 $config->setValue($this->vaultEncryptor->encrypt($submitted));
             }
         }

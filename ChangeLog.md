@@ -1,5 +1,10 @@
 # ChangeLog
 
+## v5.3.13.1
+
+- Corrected sensitive on config (09/07/2026)
+- Corrected translation of description on EasyAdmin (09/07/2026)
+
 ## v5.3.13
 
 - Made description of configs translated (09/07/2026)
