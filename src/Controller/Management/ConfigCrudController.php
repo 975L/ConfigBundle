@@ -166,7 +166,7 @@ class ConfigCrudController extends AbstractCrudController
                     ->setLabel(t('label.value', [], 'config'))
                     ->setRequired(true),
                 // Text kind is plain string (URLs, ids, emails...), a rich editor would wrap it in a <div>
-                default => TextareaField::new('value')
+                default => TextField::new('value')
                     ->setLabel(t('label.value', [], 'config'))
                     ->setRequired(true),
             };
@@ -211,11 +211,16 @@ class ConfigCrudController extends AbstractCrudController
             // Content — widget depends on kind (bool/int/date/text); sensitive values are masked in list/detail
             $valueField,
 
-            // Fixed by the import json, never editable through the admin
+            // Fixed by the import json, never editable through the admin. description holds a
+            // 'site_config' translation key (label.xxx) once a bundle has migrated to it; trans()
+            // safely falls back to the raw text unchanged for bundles that haven't yet
             TextField::new('description')
                 ->setLabel(t('label.description', [], 'config'))
                 ->setFormTypeOption('disabled', true)
-                ->hideOnIndex(),
+                ->hideOnIndex()
+                ->formatValue(fn (?string $description): string =>
+                    $description ? $this->translator->trans($description, [], 'site_config') : ''
+                ),
 
             // Dates
             DateTimeField::new('creation')

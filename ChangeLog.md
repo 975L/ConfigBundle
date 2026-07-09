@@ -1,5 +1,11 @@
 # ChangeLog
 
+## v5.3.13
+
+- Made description of configs translated (09/07/2026)
+- Changed default fcrufd field for config value (09/07/2026)
+- Suppressed icon on alerts for dashboard (09/07/2026)
+
 ## v5.3.12
 
 - Corrected responsive for maintenance page (05/07/2026)

@@ -7,7 +7,7 @@
         "kind": "text",
         "group": "system",
         "severity": "danger",
-        "description": "Role required to access the config parameters i.e. ROLE_ADMIN (default)"
+        "description": "label.site_role_needed"
     },
     {
         "label": "Site Maintenance",
@@ -17,7 +17,7 @@
         "kind": "bool",
         "group": "system",
         "severity": null,
-        "description": "Enable (true) or disable (false) maintenance mode"
+        "description": "label.site_maintenance"
     },
     {
         "label": "Site Maintenance Hash",
@@ -27,6 +27,6 @@
         "kind": "text",
         "group": "system",
         "severity": "warning",
-        "description": "Hash used to access maintenance mode (?t=Hash)"
+        "description": "label.site_maintenance_hash"
     }
 ]

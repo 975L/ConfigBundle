@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" target-language="fr" datatype="plaintext" original="site_config.fr.xlf">
+        <body>
+            <trans-unit id="1">
+                <source>label.site_role_needed</source>
+                <target>Rôle requis pour accéder aux paramètres de configuration, ex. ROLE_ADMIN (par défaut)</target>
+            </trans-unit>
+            <trans-unit id="2">
+                <source>label.site_maintenance</source>
+                <target>Active (true) ou désactive (false) le mode maintenance</target>
+            </trans-unit>
+            <trans-unit id="3">
+                <source>label.site_maintenance_hash</source>
+                <target>Hash utilisé pour accéder au site en mode maintenance (?t=Hash)</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
