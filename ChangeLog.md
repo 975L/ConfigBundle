@@ -1,5 +1,12 @@
 # ChangeLog
 
+## v5.4
+
+- Suppressed actions buttons on dashoard (10/07/2026)
+- Commented What's New display until review (10/07/2026)
+- Added isRestricted column on Config, for ROLE_SUPER_ADMIN (10/07/2026) [DB-Migration]
+- Added ROLE_SUPER_ADMIN filtering (10/07/2026)
+
 ## v5.3.13.1
 
 - Corrected sensitive on config (09/07/2026)

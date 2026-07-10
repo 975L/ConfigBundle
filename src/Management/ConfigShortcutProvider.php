@@ -38,6 +38,7 @@ class ConfigShortcutProvider implements ShortcutProviderInterface
                 'icon' => 'fa fa-broom',
                 'route' => ConfigShortcutController::CLEAR_CACHE_ROUTE,
                 'active' => false,
+                'role' => 'ROLE_SUPER_ADMIN',
             ],
             [
                 'label' => $this->translator->trans(
@@ -46,8 +47,9 @@ class ConfigShortcutProvider implements ShortcutProviderInterface
                     'config',
                 ),
                 'icon' => 'fa fa-wrench',
-                'route' => MaintenanceShortcutController::TOGGLE_ROUTE,
+                'route' => MaintenanceShortcutController::TOGGLE_ROUTE_MAINTENANCE,
                 'active' => $maintenanceEnabled,
+                'role' => $this->configService->get('site-role-needed'),
             ],
         ];
     }

@@ -133,20 +133,22 @@ class ConfigService implements ConfigServiceInterface
         $this->invalidateCache();
     }
 
-    // Label/kind/group/description/severity are metadata fixed by the bundle author (not user data),
-    // so they're kept in sync even on existing configs; value/isSensitive carry production state and are never touched here
+    // Label/kind/group/description/severity/isRestricted are metadata fixed by the bundle author (not user
+    // data), so they're kept in sync even on existing configs; value/isSensitive carry production state and are never touched here
     private function syncMetadata(Config $config, array $configData): void
     {
         $kind = $configData['kind'] ?? 'text';
         $group = $configData['group'] ?? null;
         $description = $configData['description'] ?? null;
         $severity = $configData['severity'] ?? null;
+        $isRestricted = $configData['restricted'] ?? false;
 
         if ($config->getLabel() === $configData['label']
             && $config->getKind() === $kind
             && $config->getGroup() === $group
             && $config->getDescription() === $description
             && $config->getSeverity() === $severity
+            && $config->getIsRestricted() === $isRestricted
         ) {
             return;
         }
@@ -156,6 +158,7 @@ class ConfigService implements ConfigServiceInterface
         $config->setGroup($group);
         $config->setDescription($description);
         $config->setSeverity($severity);
+        $config->setIsRestricted($isRestricted);
         $config->setModification(new \DateTime());
 
         $this->manager->persist($config);
@@ -170,6 +173,7 @@ class ConfigService implements ConfigServiceInterface
         $config->setLabel($configData['label']);
         $config->setSlug($configData['slug']);
         $config->setIsSensitive($isSensitive);
+        $config->setIsRestricted($configData['restricted'] ?? false);
         $config->setKind($configData['kind'] ?? 'text');
         $config->setGroup($configData['group'] ?? null);
         $config->setDescription($configData['description'] ?? null);

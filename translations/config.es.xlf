@@ -254,6 +254,14 @@
                 <source>label.maintenance_message</source>
                 <target>Estamos trabajando para ofrecerte una mejor experiencia. ¡Vuelve pronto!</target>
             </trans-unit>
+            <trans-unit id="64">
+                <source>label.is_restricted</source>
+                <target>Restringido</target>
+            </trans-unit>
+            <trans-unit id="65">
+                <source>label.is_restricted_help</source>
+                <target>Si restringido está activado, solo un usuario ROLE_SUPER_ADMIN puede ver/editar esta configuración</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

@@ -6,12 +6,14 @@
  # Caller is responsible for checking shortcuts|length > 0 (see management/index.html.twig)
  #}
 <p class="flex-center">
-    {% for shortcut in shortcuts %}
+{% for shortcut in shortcuts %}
+    {% if shortcut.role is defined and is_granted(shortcut.role) %}
         <form method="post" action="{{ path(shortcut.route) }}" class="d-inline-block">
             <input type="hidden" name="_token" value="{{ csrf_token(shortcut.route) }}">
             <button type="submit" class="btn {{ shortcut.active ? 'btn-danger' : 'btn-outline-secondary' }}">
                 <i class="{{ shortcut.icon }}"></i> {{ shortcut.label }}
             </button>
         </form>
-    {% endfor %}
+    {% endif %}
+{% endfor %}
 </p>

@@ -254,6 +254,14 @@
                 <source>label.maintenance_message</source>
                 <target>We're working to bring you a better experience. Check back soon!</target>
             </trans-unit>
+            <trans-unit id="64">
+                <source>label.is_restricted</source>
+                <target>Restricted</target>
+            </trans-unit>
+            <trans-unit id="65">
+                <source>label.is_restricted_help</source>
+                <target>If restricted is enabled, only a ROLE_SUPER_ADMIN user can view/edit this config</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

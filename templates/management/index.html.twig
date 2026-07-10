@@ -4,16 +4,6 @@
     <section class="text-center">
         <h1>{{ ('label.management'|trans({}, 'config')) }}</h1>
         <p>{{ ('label.management_interface'|trans({}, 'config')) }}</p>
-        <p class="flex-center">
-            {% for key, menu in menus %}
-                <a href="{{ path('management_'~ key ~ '_index') }}" class="btn btn-primary"><i class="{{ menu.icon }}"></i> {{ ((menu.label)|trans({}, menu.translation_domain)) }}</a>
-            {% endfor %}
-        </p>
-        <p class="flex-center">
-            {% for key, route in routes %}
-                <a href="{{ path(route.name) }}" class="btn btn-secondary" target="_blank"><i class="{{ route.icon }}"></i> {{ ((route.label)|trans({}, route.translation_domain)) }}</a>
-            {% endfor %}
-        </p>
     </section>
 
     {# Shortcuts merged across every bundle's ShortcutProvider #}
@@ -30,8 +20,8 @@
 
     {# Latest release notes merged from every c975L bundle #}
     {% if whatsNew|length > 0 %}
-        <h2>{{ ('label.whatsnew'|trans({}, 'config')) }}</h2>
+        {# <h2>{{ ('label.whatsnew'|trans({}, 'config')) }}</h2>
         {{ include('@c975LConfig/management/whatsnew/_table.html.twig', { entries: whatsNew }) }}
-        <p><a href="{{ path('management_whatsnew_index') }}">{{ ('label.whatsnew_see_all'|trans({}, 'config')) }}</a></p>
+        <p><a href="{{ path('management_whatsnew_index') }}">{{ ('label.whatsnew_see_all'|trans({}, 'config')) }}</a></p> #}
     {% endif %}
 {% endblock main %}

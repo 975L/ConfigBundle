@@ -57,6 +57,7 @@ Create a `config/configs.json` file in your bundle. Each entry will be inserted 
         "label": "Stripe Secret Key",
         "slug": "stripe-secret-key",
         "sensitive": true,
+        "restricted": true,
         "value": null,
         "kind": "text",
         "group": "payment",
@@ -68,7 +69,8 @@ Create a `config/configs.json` file in your bundle. Each entry will be inserted 
 Supported `kind` values: `text`, `html`, `int`, `bool`, `date`, `json`.
 `text` is edited as a plain textarea (URLs, ids, emails...); `html` is for rare configs needing rich content and is edited with EasyAdmin's own rich text editor (same widget as UiBundle blocks).
 For `json`, `value` is the raw JSON-encoded string (e.g. `"[\"ROLE_ADMIN\",\"ROLE_EDITOR\"]"`); `ConfigService::get()` returns it already decoded into a PHP array (`[]` if empty/invalid).
-Set `sensitive: true` for any entry that holds secrets (API keys, passwords, etc.).
+Set `sensitive: true` for any entry that holds secrets (API keys, passwords, etc.) — the value is encrypted at rest and masked in the admin list.
+Set `restricted: true` on top of that for secrets shared across the whole install rather than per-site data — see [Restricting configs to ROLE_SUPER_ADMIN](#restricting-configs-to-role_super_admin).
 
 `group` is optional and clusters entries in the EasyAdmin list (filter + default sort). It must be one of the fixed values in `Config::GROUPS`, each backed by a `label.group_*` translation key:
 
@@ -98,7 +100,7 @@ Auto-discovers every `vendor/c975l/*/config/configs.json` file and loads them in
 php bin/console c975l:config:load-all
 ```
 
-New entries (new `slug`) are inserted with their `value` from the JSON. For entries that already exist, only the metadata fixed by the bundle author — `label`, `kind`, `group`, `description` — is re-synced from the JSON on every run; `value` and `sensitive` carry production state and are never touched, so editing a `configs.json` file (e.g. moving a config to a new group, fixing a typo in a label) and re-running `load-all` is enough to propagate the change, without risking an admin-set value.
+New entries (new `slug`) are inserted with their `value` from the JSON. For entries that already exist, only the metadata fixed by the bundle author — `label`, `kind`, `group`, `severity`, `description`, `restricted` — is re-synced from the JSON on every run; `value` and `sensitive` carry production state and are never touched, so editing a `configs.json` file (e.g. moving a config to a new group, fixing a typo in a label) and re-running `load-all` is enough to propagate the change, without risking an admin-set value.
 
 ## Encrypting sensitive values
 
@@ -149,6 +151,21 @@ mysql -u user -p dbname < site_config_20260626_120000.sql
 This means non-sensitive values (labels, descriptions, default content) are kept in sync, while live API keys and secrets already set on production are never overwritten.
 
 CSV and JSON exports are a straight dump of the table (no upsert logic) — useful for backups, audits, or feeding another tool.
+
+## Restricting configs to ROLE_SUPER_ADMIN
+
+Some configs are secrets shared across the whole install rather than per-site application data —
+a database backup user, a payment provider's live API key. Anyone with `site-role-needed` access
+to the Config admin can normally see and edit every entry (encrypted `sensitive` values are masked
+in the list but still revealed in clear on the detail/edit page). Flagging an entry
+`"restricted": true` in its `configs.json` takes it a step further: that config disappears
+entirely — from the index list, the detail page, the edit page, and every export (SQL/CSV/JSON) —
+for anyone who isn't granted `ROLE_SUPER_ADMIN`, regardless of what `site-role-needed` is set to.
+
+This is opt-in per entry (not per `group`), so a bundle only restricts the specific secrets that
+need it, leaving the rest of its configs manageable by a regular site admin. `ROLE_SUPER_ADMIN` is
+a plain Symfony role, not declared or granted by ConfigBundle itself — the consuming app (or a
+bundle like `c975l/site-bundle`) decides who holds it.
 
 ## Adding an Export button to another bundle's CRUD controller
 

@@ -21,7 +21,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class MaintenanceShortcutController extends AbstractController
 {
     // EasyAdmin prefixes this with the Dashboard's own route name, giving management_config_maintenance_toggle
-    public const TOGGLE_ROUTE = 'management_config_maintenance_toggle';
+    public const TOGGLE_ROUTE_MAINTENANCE = 'management_config_maintenance_toggle';
 
     public function __construct(
         private readonly ConfigRepository $configRepository,
@@ -32,8 +32,12 @@ class MaintenanceShortcutController extends AbstractController
     }
 
     // Flips the 'site-maintenance' config value; enforcement itself lives in MaintenanceListener
-    #[AdminRoute(path: '/config/maintenance-toggle', name: 'config_maintenance_toggle', options: ['methods' => ['POST']])]
-    public function toggle(Request $request): RedirectResponse
+    #[AdminRoute(
+        path: '/config/maintenance-toggle',
+        name: 'config_maintenance_toggle',
+        options: ['methods' => ['POST']]
+    )]
+    public function toggleMaintenance(Request $request): RedirectResponse
     {
         $this->denyAccessUnlessGranted($this->configService->get('site-role-needed'));
 

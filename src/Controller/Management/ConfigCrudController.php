@@ -225,6 +225,13 @@ class ConfigCrudController extends AbstractCrudController
                 ->setFormTypeOption('disabled', true)
                 ->setHelp(t('label.is_sensitive_help', [], 'config')),
 
+            // Restricted — hides this config entirely below ROLE_SUPER_ADMIN, see denyAccessToRestrictedConfig()
+            BooleanField::new('isRestricted')
+                ->setLabel(t('label.is_restricted', [], 'config'))
+                ->setRequired(false)
+                ->setFormTypeOption('disabled', true)
+                ->setHelp(t('label.is_restricted_help', [], 'config')),
+
             // Kind
             $kindField,
 
@@ -365,7 +372,39 @@ class ConfigCrudController extends AbstractCrudController
         $qb->andWhere('entity.isSensitive = :isSensitive')
             ->setParameter('isSensitive', $showSensitive);
 
+        // Configs flagged "restricted" (backup DB credentials, payment API keys...) stay out of the
+        // list entirely below ROLE_SUPER_ADMIN, see denyAccessToRestrictedConfig()
+        // (isRestricted is nullable: legacy rows not yet synced must NOT be treated as restricted)
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            $qb->andWhere('entity.isRestricted IS NULL OR entity.isRestricted = :isRestricted')
+                ->setParameter('isRestricted', false);
+        }
+
         return $qb;
+    }
+
+    // A "restricted" config must stay invisible to any admin below ROLE_SUPER_ADMIN: it's a secret
+    // shared across the install (backup DB credentials, payment API keys...), never per-client application data
+    private function denyAccessToRestrictedConfig(AdminContext $context): void
+    {
+        $entity = $context->getEntity()->getInstance();
+        if ($entity instanceof Config && $entity->getIsRestricted()) {
+            $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
+        }
+    }
+
+    public function detail(AdminContext $context): KeyValueStore|Response
+    {
+        $this->denyAccessToRestrictedConfig($context);
+
+        return parent::detail($context);
+    }
+
+    public function edit(AdminContext $context): KeyValueStore|Response
+    {
+        $this->denyAccessToRestrictedConfig($context);
+
+        return parent::edit($context);
     }
 
     // New config - encrypt sensitive value if provided, then invalidate cache
@@ -445,11 +484,17 @@ class ConfigCrudController extends AbstractCrudController
     }
 
     // Sensitive values are kept as stored (encrypted), never decrypted for export
+    // Restricted configs (backup DB credentials, payment API keys...) are excluded below ROLE_SUPER_ADMIN,
+    // same restriction as the CRUD itself; is_restricted is nullable, legacy rows must NOT be treated as restricted
     private function fetchExportRows(): array
     {
-        return $this->connection->fetchAllAssociative(
-            'SELECT `label`, `slug`, `is_sensitive`, `value`, `kind`, `group`, `description`, `severity`, `creation`, `modification` FROM `site_config` ORDER BY `slug`'
-        );
+        $sql = 'SELECT `label`, `slug`, `is_sensitive`, `is_restricted`, `value`, `kind`, `group`, `description`, `severity`, `creation`, `modification` FROM `site_config`';
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            $sql .= ' WHERE `is_restricted` IS NULL OR `is_restricted` = 0';
+        }
+        $sql .= ' ORDER BY `slug`';
+
+        return $this->connection->fetchAllAssociative($sql);
     }
 
     // Parses a stored date value, tolerating empty/invalid strings

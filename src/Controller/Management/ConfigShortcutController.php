@@ -27,10 +27,14 @@ class ConfigShortcutController extends AbstractController
     ) {
     }
 
-    #[AdminRoute(path: '/config/clear-cache', name: 'config_clear_cache', options: ['methods' => ['POST']])]
+    #[AdminRoute(
+        path: '/config/clear-cache',
+        name: 'config_clear_cache',
+        options: ['methods' => ['POST']]
+    )]
     public function clearCache(Request $request): RedirectResponse
     {
-        $this->denyAccessUnlessGranted($this->configService->get('site-role-needed'));
+        $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
 
         if ($this->isCsrfTokenValid(self::CLEAR_CACHE_ROUTE, $request->request->get('_token'))) {
             $this->configService->invalidateCache();

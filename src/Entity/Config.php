@@ -90,6 +90,12 @@ class Config
     #[Assert\Type(type: 'bool')]
     private ?bool $isSensitive = null;
 
+    // Restricts the config (regardless of group) to ROLE_SUPER_ADMIN only, for secrets shared across
+    // an install (backup DB credentials, payment API keys...) that a regular site admin must never see
+    #[ORM\Column(type: Types::BOOLEAN, nullable: true)]
+    #[Assert\Type(type: 'bool')]
+    private ?bool $isRestricted = null;
+
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $value = null;
 
@@ -157,6 +163,18 @@ class Config
     public function setIsSensitive(?bool $isSensitive): static
     {
         $this->isSensitive = $isSensitive;
+
+        return $this;
+    }
+
+    public function getIsRestricted(): ?bool
+    {
+        return $this->isRestricted;
+    }
+
+    public function setIsRestricted(?bool $isRestricted): static
+    {
+        $this->isRestricted = $isRestricted;
 
         return $this;
     }
