@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v5.5.1
+
+- Added StylesheetProvider (11/07/2026)
+
 ## v5.5
 
 - Replaced site-role-needed by site-role-admin (11/07/2026)

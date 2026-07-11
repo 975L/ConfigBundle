@@ -16,6 +16,7 @@ use c975L\ConfigBundle\Management\ShortcutBuilder;
 use c975L\ConfigBundle\Management\WhatsNewBuilder;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\UiBundle\Registry\ScriptAdminRegistry;
+use c975L\UiBundle\Registry\StylesheetManagementRegistry;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Asset;
@@ -34,6 +35,7 @@ class DashboardController extends AbstractDashboardController
         private readonly ShortcutBuilder $shortcutBuilder,
         private readonly ConfigServiceInterface $configService,
         private readonly ScriptAdminRegistry $scriptAdminRegistry,
+        private readonly StylesheetManagementRegistry $stylesheetManagementRegistry,
     ) {}
 
     public function index(): Response
@@ -73,6 +75,10 @@ class DashboardController extends AbstractDashboardController
 
         foreach ($this->scriptAdminRegistry->all() as $script) {
             $assets->addAssetMapperEntry($script);
+        }
+
+        foreach ($this->stylesheetManagementRegistry->all() as $stylesheet) {
+            $assets->addCssFile($stylesheet);
         }
 
         return $assets;
