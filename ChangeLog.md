@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v5.5.3
+
+- Tagged new version due to tag problem (11/07/2026)
+
 ## v5.5.2
 
 - Added made by logo + link on easyadmin menu bar (11/07/2026)
