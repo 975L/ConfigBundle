@@ -4,6 +4,7 @@
     <section class="text-center">
         <h1>{{ ('label.management'|trans({}, 'config')) }}</h1>
         <p>{{ ('label.management_interface'|trans({}, 'config')) }}</p>
+        <p>{{ app.user.roles|join(', ') }}</p>
     </section>
 
     {# Shortcuts merged across every bundle's ShortcutProvider #}

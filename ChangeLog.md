@@ -1,5 +1,11 @@
 # ChangeLog
 
+## v5.5
+
+- Replaced site-role-needed by site-role-admin (11/07/2026)
+- Added site-role-editor (11/07/2026)
+- Added ROLE_SUPER_ADMIN to allow access to config (11/07/2026)
+
 ## v5.4
 
 - Suppressed actions buttons on dashoard (10/07/2026)
@@ -31,7 +37,7 @@
 
 - Added a `ShortcutProviderInterface` so any bundle can contribute quick-action buttons to the dashboard (05/07/2026)
 - Added `LinkableRouteProviderInterface` so bundles without a SiteBundle dependency can expose one of their own routes as a selectable target for menu items (05/07/2026)
-- `MaintenanceListener` now runs at priority 6 and lets an already-authenticated admin (`isGranted` on `site-role-needed`) through (05/07/2026)
+- `MaintenanceListener` now runs at priority 6 and lets an already-authenticated admin (`isGranted` on `site-role-admin`) through (05/07/2026)
 - Added a "Toggle maintenance mode" dashboard shortcut, flipping the existing `site-maintenance` config used by `MaintenanceListener` (05/07/2026)
 - Reduced the height of the dashboard alerts list (dropped the redundant severity label, compact unstyled list) (05/07/2026)
 - Added a `html` kind for config values needing rich content (EasyAdmin `TextEditorField`); plain `text` is now edited as a textarea instead (05/07/2026)

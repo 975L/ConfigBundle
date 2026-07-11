@@ -49,7 +49,7 @@ class ConfigShortcutProvider implements ShortcutProviderInterface
                 'icon' => 'fa fa-wrench',
                 'route' => MaintenanceShortcutController::TOGGLE_ROUTE_MAINTENANCE,
                 'active' => $maintenanceEnabled,
-                'role' => $this->configService->get('site-role-needed'),
+                'role' => $this->configService->get('site-role-admin'),
             ],
         ];
     }

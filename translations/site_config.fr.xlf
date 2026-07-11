@@ -3,7 +3,7 @@
     <file source-language="en" target-language="fr" datatype="plaintext" original="site_config.fr.xlf">
         <body>
             <trans-unit id="1">
-                <source>label.site_role_needed</source>
+                <source>label.site_role_admin</source>
                 <target>Rôle requis pour accéder aux paramètres de configuration, ex. ROLE_ADMIN (par défaut)</target>
             </trans-unit>
             <trans-unit id="2">
@@ -13,6 +13,10 @@
             <trans-unit id="3">
                 <source>label.site_maintenance_hash</source>
                 <target>Hash utilisé pour accéder au site en mode maintenance (?t=Hash)</target>
+            </trans-unit>
+            <trans-unit id="4">
+                <source>label.site_role_editor</source>
+                <target>Rôle requis pour accéder aux actions de niveau éditeur, ex. ROLE_EDITOR (par défaut)</target>
             </trans-unit>
         </body>
     </file>

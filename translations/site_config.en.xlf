@@ -3,7 +3,7 @@
     <file source-language="en" target-language="en" datatype="plaintext" original="site_config.en.xlf">
         <body>
             <trans-unit id="1">
-                <source>label.site_role_needed</source>
+                <source>label.site_role_admin</source>
                 <target>Role required to access the config parameters i.e. ROLE_ADMIN (default)</target>
             </trans-unit>
             <trans-unit id="2">
@@ -13,6 +13,10 @@
             <trans-unit id="3">
                 <source>label.site_maintenance_hash</source>
                 <target>Hash used to access maintenance mode (?t=Hash)</target>
+            </trans-unit>
+            <trans-unit id="4">
+                <source>label.site_role_editor</source>
+                <target>Role required to access editor-level actions i.e. ROLE_EDITOR (default)</target>
             </trans-unit>
         </body>
     </file>

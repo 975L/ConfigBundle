@@ -28,7 +28,7 @@ class WhatsNewController extends AbstractController
     #[AdminRoute(path: '/whatsnew', name: 'whatsnew_index')]
     public function index(): Response
     {
-        $this->denyAccessUnlessGranted($this->configService->get('site-role-needed'));
+        $this->denyAccessUnlessGranted($this->configService->get('site-role-admin'));
 
         return $this->render(
             '@c975LConfig/management/whatsnew/index.html.twig',

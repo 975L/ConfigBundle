@@ -39,7 +39,7 @@ class MaintenanceShortcutController extends AbstractController
     )]
     public function toggleMaintenance(Request $request): RedirectResponse
     {
-        $this->denyAccessUnlessGranted($this->configService->get('site-role-needed'));
+        $this->denyAccessUnlessGranted($this->configService->get('site-role-admin'));
 
         $config = $this->configRepository->findOneBySlug('site-maintenance');
         if (null !== $config && $this->isCsrfTokenValid(self::TOGGLE_ROUTE, $request->request->get('_token'))) {

@@ -38,7 +38,7 @@ class DashboardController extends AbstractDashboardController
 
     public function index(): Response
     {
-        $this->denyAccessUnlessGranted($this->configService->get('site-role-needed'));
+        $this->denyAccessUnlessGranted($this->configService->get('site-role-admin'));
 
         return $this->render(
             '@c975LConfig/management/index.html.twig',
@@ -80,7 +80,7 @@ class DashboardController extends AbstractDashboardController
 
     public function configureMenuItems(): iterable
     {
-        yield MenuItem::linkToDashboard('label.dashboard', 'fa fa-home')->setPermission($this->configService->get('site-role-needed'));
+        yield MenuItem::linkToDashboard('label.dashboard', 'fa fa-home')->setPermission($this->configService->get('site-role-admin'));
 
         // Menu from bundles, grouped by section and sorted alphabetically
         yield from $this->menuBuilder->getMenuItems();

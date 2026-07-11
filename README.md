@@ -155,12 +155,12 @@ CSV and JSON exports are a straight dump of the table (no upsert logic) — usef
 ## Restricting configs to ROLE_SUPER_ADMIN
 
 Some configs are secrets shared across the whole install rather than per-site application data —
-a database backup user, a payment provider's live API key. Anyone with `site-role-needed` access
+a database backup user, a payment provider's live API key. Anyone with `site-role-admin` access
 to the Config admin can normally see and edit every entry (encrypted `sensitive` values are masked
 in the list but still revealed in clear on the detail/edit page). Flagging an entry
 `"restricted": true` in its `configs.json` takes it a step further: that config disappears
 entirely — from the index list, the detail page, the edit page, and every export (SQL/CSV/JSON) —
-for anyone who isn't granted `ROLE_SUPER_ADMIN`, regardless of what `site-role-needed` is set to.
+for anyone who isn't granted `ROLE_SUPER_ADMIN`, regardless of what `site-role-admin` is set to.
 
 This is opt-in per entry (not per `group`), so a bundle only restricts the specific secrets that
 need it, leaving the rest of its configs manageable by a regular site admin. `ROLE_SUPER_ADMIN` is

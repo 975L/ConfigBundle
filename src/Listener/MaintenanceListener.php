@@ -46,8 +46,16 @@ class MaintenanceListener
             return;
         }
 
+        // Symfony's own dev-tool routes (web debug toolbar, profiler) are only
+        // registered in dev/test, so this never opens anything in prod
+        foreach (['/_wdt', '/_profiler', '/_error', '/_fragment'] as $devToolPrefix) {
+            if (str_starts_with($path, $devToolPrefix)) {
+                return;
+            }
+        }
+
         // Access already granted to an authenticated admin, so maintenance never locks them out
-        if ($this->security->isGranted($this->configService->get('site-role-needed'))) {
+        if ($this->security->isGranted($this->configService->get('site-role-admin'))) {
             return;
         }
 

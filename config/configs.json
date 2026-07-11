@@ -1,14 +1,25 @@
 [
     {
-        "label": "Site Role Needed",
-        "slug": "site-role-needed",
+        "label": "Site Role Admin",
+        "slug": "site-role-admin",
         "sensitive": false,
         "restricted": true,
         "value": "ROLE_ADMIN",
         "kind": "text",
         "group": "system",
         "severity": "danger",
-        "description": "label.site_role_needed"
+        "description": "label.site_role_admin"
+    },
+    {
+        "label": "Site Role Editor",
+        "slug": "site-role-editor",
+        "sensitive": false,
+        "restricted": true,
+        "value": "ROLE_EDITOR",
+        "kind": "text",
+        "group": "system",
+        "severity": "warning",
+        "description": "label.site_role_editor"
     },
     {
         "label": "Site Maintenance",

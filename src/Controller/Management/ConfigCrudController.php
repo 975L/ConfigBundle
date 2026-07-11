@@ -293,10 +293,10 @@ class ConfigCrudController extends AbstractCrudController
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->add(Crud::PAGE_INDEX, $exportGroup)
             ->add(Crud::PAGE_INDEX, $toggleAction)
-            ->setPermission('exportSql', $this->configService->get('site-role-needed'))
-            ->setPermission('exportCsv', $this->configService->get('site-role-needed'))
-            ->setPermission('exportJson', $this->configService->get('site-role-needed'))
-            ->setPermission('toggleSensitive', $this->configService->get('site-role-needed'))
+            ->setPermission('exportCsv', $this->configService->get('site-role-admin'))
+            ->setPermission('toggleSensitive', $this->configService->get('site-role-admin'))
+            ->setPermission('exportSql', 'ROLE_SUPER_ADMIN')
+            ->setPermission('exportJson', 'ROLE_SUPER_ADMIN')
             // Configs are fixed by the bundles' import json: no manual creation, no deletion
             ->disable(Action::NEW, Action::DELETE)
         ;
@@ -309,7 +309,7 @@ class ConfigCrudController extends AbstractCrudController
             ->overrideTemplate('crud/index', '@c975LConfig/management/config_crud_index.html.twig')
             ->setEntityLabelInSingular(t('label.config', [], 'config'))
             ->setEntityLabelInPlural(t('label.config', [], 'config'))
-            ->setEntityPermission($this->configService->get('site-role-needed'))
+            ->setEntityPermission($this->configService->get('site-role-admin'))
             ->setDefaultSort(['group' => 'ASC', 'label' => 'ASC'])
         ;
     }
@@ -456,7 +456,7 @@ class ConfigCrudController extends AbstractCrudController
     #[AdminRoute]
     public function exportSql(AdminContext $context): Response
     {
-        $this->denyAccessUnlessGranted($this->configService->get('site-role-needed'));
+        $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
 
         // Non-sensitive: INSERT ... ON DUPLICATE KEY UPDATE (syncs label/value/kind/group/description/severity)
         // Sensitive:     INSERT IGNORE INTO (creates if missing, preserves production values)
@@ -470,7 +470,7 @@ class ConfigCrudController extends AbstractCrudController
     #[AdminRoute]
     public function exportCsv(AdminContext $context): Response
     {
-        $this->denyAccessUnlessGranted($this->configService->get('site-role-needed'));
+        $this->denyAccessUnlessGranted($this->configService->get('site-role-admin'));
 
         return $this->tableExporter->export(ExportFormat::Csv, 'site_config', $this->fetchExportRows());
     }
@@ -478,7 +478,7 @@ class ConfigCrudController extends AbstractCrudController
     #[AdminRoute]
     public function exportJson(AdminContext $context): Response
     {
-        $this->denyAccessUnlessGranted($this->configService->get('site-role-needed'));
+        $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
 
         return $this->tableExporter->export(ExportFormat::Json, 'site_config', $this->fetchExportRows());
     }

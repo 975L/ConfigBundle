@@ -35,7 +35,7 @@ class MenuBuilder
             yield MenuItem::section(new TranslatableMessage($section['label'], [], $section['translation_domain']));
 
             foreach ($section['items'] as $menu) {
-                yield MenuItem::linkTo($menu['controller'], new TranslatableMessage($menu['label'], [], $menu['translation_domain']), $menu['icon'])->setPermission($this->configService->get('site-role-needed'));
+                yield MenuItem::linkTo($menu['controller'], new TranslatableMessage($menu['label'], [], $menu['translation_domain']), $menu['icon'])->setPermission($this->configService->get('site-role-admin'));
             }
         }
 
