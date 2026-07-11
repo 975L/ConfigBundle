@@ -1,0 +1,30 @@
+/*
+ * (c) 2026: 975L <contact@975l.com>
+ * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+/* MADE BY (Controller/Management/DashboardController.php) */
+.menu-item-made-by {
+  /* EasyAdmin's own #main-menu .menu .menu-item-contents rule only sets align-items,
+     so justify-content is free to center this single-child link without a specificity fight */
+  justify-content: center;
+}
+
+.menu-item-made-by .menu-item-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.config-made-by-logo {
+  height: 50px;
+}
+
+ul {
+  list-style: url(/bundles/c975lsite/icons/angle-right.svg);
+}
+
+/*# sourceMappingURL=management.css.map */

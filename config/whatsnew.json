@@ -1,86 +1,86 @@
 [
     {
-        "version": "5.3.12",
-        "date": "2026-07-05",
+        "date": "2026-07-11",
         "description": [
             {
-                "en": "Corrected responsive for maintenance page",
-                "fr": "Correction de la réactivité de la page de maintenance",
-                "es": "Corregida la capacidad de respuesta de la página de mantenimiento"
+                "en": "Added a new \"Editor\" role, alongside \"Admin\", for more fine-grained access control",
+                "fr": "Ajout d'un nouveau rôle « Éditeur », aux côtés du rôle « Admin », pour un contrôle d'accès plus fin",
+                "es": "Añadido un nuevo rol «Editor», junto al rol «Admin», para un control de acceso más preciso"
             },
             {
-                "en": "Made /management and /login routes available even in maintenance mode",
-                "fr": "Rendre les routes /management et /login disponibles même en mode maintenance",
-                "es": "Hacer que las rutas /management y /login estén disponibles incluso en modo mantenimiento"
+                "en": "Access to configuration entries can now be restricted to super-administrators only",
+                "fr": "L'accès à certaines entrées de configuration peut désormais être réservé aux super-administrateurs",
+                "es": "El acceso a determinadas entradas de configuración ahora puede reservarse solo a los superadministradores"
             }
         ]
     },
     {
-        "version": "5.3.11",
-        "date": "2026-07-05",
+        "date": "2026-07-09",
         "description": [
             {
-                "en": "Dashboard shortcuts can now be contributed by any bundle via a new ShortcutProviderInterface (quick actions like clearing a cache or toggling a mode); ConfigBundle now exposes a \"Clear config cache\" shortcut",
-                "fr": "Les raccourcis du tableau de bord peuvent désormais être fournis par n'importe quel bundle via une nouvelle ShortcutProviderInterface (actions rapides comme vider un cache ou activer un mode) ; ConfigBundle propose désormais un raccourci « Vider le cache de configuration »",
-                "es": "Los atajos del panel de control ahora pueden ser aportados por cualquier bundle mediante una nueva ShortcutProviderInterface (acciones rápidas como vaciar una caché o activar un modo); ConfigBundle ahora ofrece un atajo «Vaciar la caché de configuración»"
+                "en": "Configuration descriptions are now displayed in your language in the back office",
+                "fr": "Les descriptions des configurations s'affichent désormais dans votre langue dans le back-office",
+                "es": "Las descripciones de las configuraciones ahora se muestran en su idioma en el back-office"
             },
             {
-                "en": "SiteBundle menu items can now link to a route contributed by another bundle (e.g. a contact page), not just an existing site page",
-                "fr": "Les éléments de menu de SiteBundle peuvent désormais pointer vers une route fournie par un autre bundle (une page de contact par exemple), et pas seulement vers une page du site",
-                "es": "Los elementos de menú de SiteBundle ahora pueden enlazar a una ruta aportada por otro bundle (por ejemplo, una página de contacto), no solo a una página del sitio"
-            },
-            {
-                "en": "Admins are no longer locked out of the back-office while maintenance mode is enabled",
-                "fr": "Les administrateurs ne sont plus bloqués hors du back-office lorsque le mode maintenance est activé",
-                "es": "Los administradores ya no quedan bloqueados fuera del back-office cuando el modo mantenimiento está activado"
-            },
-            {
-                "en": "The dashboard now has a \"Toggle maintenance mode\" shortcut, in its own titled section, and a more compact alerts list",
-                "fr": "Le tableau de bord propose désormais un raccourci « Activer/désactiver le mode maintenance », dans sa propre section dédiée, ainsi qu'une liste d'alertes plus compacte",
-                "es": "El panel de control ahora ofrece un atajo «Activar/desactivar el modo mantenimiento», en su propia sección dedicada, y una lista de alertas más compacta"
-            },
-            {
-                "en": "Config values can now use a \"Rich text\" kind with a full editor, in addition to plain text; fixed the maintenance page failing to display",
-                "fr": "Les valeurs de configuration peuvent désormais utiliser un type « Texte enrichi » avec un éditeur complet, en plus du texte simple ; correction de la page de maintenance qui ne s'affichait plus",
-                "es": "Los valores de configuración ahora pueden usar un tipo «Texto enriquecido» con un editor completo, además del texto simple; corregido el fallo que impedía mostrar la página de mantenimiento"
+                "en": "The dashboard alerts now have a cleaner, icon-free look",
+                "fr": "Les alertes du tableau de bord ont désormais un affichage plus épuré, sans icône",
+                "es": "Las alertas del panel de control ahora tienen un aspecto más limpio, sin icono"
             }
         ]
     },
     {
-        "version": "5.3.10",
         "date": "2026-07-05",
         "description": [
             {
-                "en": "Dashboard alerts can now be contributed by any bundle via a new AlertProviderInterface, with the config alert list reusing a shared partial",
-                "fr": "Les alertes du tableau de bord peuvent désormais être fournies par n'importe quel bundle via une nouvelle AlertProviderInterface, la liste des alertes de configuration réutilisant un partial commun",
-                "es": "Las alertas del panel de control ahora pueden ser aportadas por cualquier bundle mediante una nueva AlertProviderInterface, y la lista de alertas de configuración reutiliza un parcial compartido"
+                "en": "Fixed the maintenance page so it displays correctly on mobile",
+                "fr": "Correction de l'affichage de la page de maintenance sur mobile",
+                "es": "Corregida la visualización de la página de mantenimiento en móvil"
             },
             {
-                "en": "The What's new section is now trilingual (English, French, Spanish)",
-                "fr": "La section « Nouveautés » est désormais trilingue (anglais, français, espagnol)",
-                "es": "La sección de novedades ahora es trilingüe (inglés, francés, español)"
+                "en": "The login page and the back office stay reachable during maintenance mode, and administrators are no longer locked out while it's on",
+                "fr": "La page de connexion et le back-office restent accessibles en mode maintenance, et les administrateurs n'en sont plus bloqués",
+                "es": "La página de inicio de sesión y el back-office siguen accesibles en modo mantenimiento, y los administradores ya no quedan bloqueados"
+            },
+            {
+                "en": "Added dashboard shortcuts to clear the configuration cache and to turn maintenance mode on or off in one click",
+                "fr": "Ajout de raccourcis sur le tableau de bord pour vider le cache de configuration et activer/désactiver le mode maintenance en un clic",
+                "es": "Añadidos atajos en el panel de control para vaciar la caché de configuración y activar o desactivar el modo mantenimiento en un clic"
+            },
+            {
+                "en": "Menu items can now link directly to a page provided by another module, not just to a page of the site (e.g. the contact page)",
+                "fr": "Les éléments de menu peuvent désormais pointer directement vers une page fournie par un autre module, et pas seulement vers une page du site (la page de contact par exemple)",
+                "es": "Los elementos de menú ahora pueden enlazar directamente a una página aportada por otro módulo, no solo a una página del sitio (la página de contacto, por ejemplo)"
+            },
+            {
+                "en": "Configuration values can now be edited with a rich text editor, not just plain text",
+                "fr": "Les valeurs de configuration peuvent désormais être modifiées avec un éditeur de texte enrichi, et pas seulement en texte simple",
+                "es": "Los valores de configuración ahora se pueden editar con un editor de texto enriquecido, y no solo en texto plano"
+            },
+            {
+                "en": "The dashboard alerts list is now shared across every module and more compact",
+                "fr": "La liste des alertes du tableau de bord est désormais commune à tous les modules et plus compacte",
+                "es": "La lista de alertas del panel de control ahora es común a todos los módulos y más compacta"
+            },
+            {
+                "en": "The \"What's new\" section is now available in English, French and Spanish",
+                "fr": "La section « Quoi de neuf » est désormais disponible en anglais, français et espagnol",
+                "es": "La sección de novedades ya está disponible en inglés, francés y español"
             }
         ]
     },
     {
-        "version": "5.3.9",
         "date": "2026-07-04",
         "description": [
             {
-                "en": "Added a what's new section on dashboard and menu",
-                "fr": "Ajout d'une section « Nouveautés » sur le tableau de bord et le menu",
-                "es": "Añadida una sección de novedades en el panel de control y el menú"
-            }
-        ]
-    },
-    {
-        "version": "5.3.8",
-        "date": "2026-07-04",
-        "description": [
+                "en": "Added the \"What's new\" section to the dashboard and menu",
+                "fr": "Ajout de la section « Quoi de neuf » sur le tableau de bord et le menu",
+                "es": "Añadida la sección de novedades en el panel de control y el menú"
+            },
             {
-                "en": "Added display of config alerts on ConfigCrud index and transformed config value textarea to TextEditorField",
-                "fr": "Ajout de l'affichage des alertes de configuration sur la liste ConfigCrud et transformation du textarea de valeur en TextEditorField",
-                "es": "Añadida la visualización de alertas de configuración en el listado ConfigCrud y transformación del textarea de valor en TextEditorField"
+                "en": "Configuration alerts are now shown directly in the configuration list, with a nicer editor for long text values",
+                "fr": "Les alertes de configuration s'affichent désormais directement dans la liste des configurations, avec un éditeur plus agréable pour les textes longs",
+                "es": "Las alertas de configuración ahora se muestran directamente en el listado de configuración, con un editor más cómodo para los textos largos"
             }
         ]
     }

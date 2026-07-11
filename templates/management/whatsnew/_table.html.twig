@@ -1,8 +1,6 @@
 <table class="table">
     <thead>
         <tr>
-            <th>{{ ('label.bundle'|trans({}, 'config')) }}</th>
-            <th>{{ ('label.version'|trans({}, 'config')) }}</th>
             <th>{{ ('label.date'|trans({}, 'config')) }}</th>
             <th>{{ ('label.description'|trans({}, 'config')) }}</th>
         </tr>
@@ -10,24 +8,18 @@
     <tbody>
         {% for entry in entries %}
             <tr>
-                <td>{{ entry.bundle }}</td>
-                <td>{{ entry.version }}</td>
-                <td>{{ entry.date|date('Y-m-d') }}</td>
+                <td>{{ entry.date|format_date('long') }}</td>
                 <td>
-                    {% if entry.description|length > 1 %}
-                        <ul class="mb-0">
-                            {% for description in entry.description %}
-                                <li>{{ description }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        {{ entry.description|first }}
-                    {% endif %}
+                    <ul class="mb-0">
+                        {% for description in entry.description %}
+                            <li>{{ description }}</li>
+                        {% endfor %}
+                    </ul>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="4">{{ ('label.no_whatsnew'|trans({}, 'config')) }}</td>
+                <td colspan="2">{{ ('label.no_whatsnew'|trans({}, 'config')) }}</td>
             </tr>
         {% endfor %}
     </tbody>

@@ -24,6 +24,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AdminDashboard(routePath: '/management', routeName: 'management')]
 class DashboardController extends AbstractDashboardController
@@ -36,6 +37,7 @@ class DashboardController extends AbstractDashboardController
         private readonly ConfigServiceInterface $configService,
         private readonly ScriptAdminRegistry $scriptAdminRegistry,
         private readonly StylesheetManagementRegistry $stylesheetManagementRegistry,
+        private readonly TranslatorInterface $translator,
     ) {}
 
     public function index(): Response
@@ -49,7 +51,7 @@ class DashboardController extends AbstractDashboardController
                 'routes' => $this->menuBuilder->getLinks(),
                 'alerts' => $this->alertBuilder->getAlerts(),
                 'shortcuts' => $this->shortcutBuilder->getShortcuts(),
-                'whatsNew' => $this->whatsNewBuilder->getLatest(5),
+                'whatsNew' => $this->whatsNewBuilder->getLatest(),
             ]
         );
     }
@@ -93,5 +95,21 @@ class DashboardController extends AbstractDashboardController
 
         yield MenuItem::section('label.user');
         yield MenuItem::linkToLogout('label.signout', 'fa fa-exit');
+
+        // "Made by" logo, shown at the very bottom of the sidebar, only when both configs are filled
+        $madeByLogo = $this->configService->get('site-made-by-logo');
+        $madeByUrl = $this->configService->get('site-made-by-url');
+        if ($madeByLogo && $madeByUrl) {
+            $madeByLabel = htmlspecialchars($this->translator->trans('label.made_by', [], 'site'), ENT_QUOTES);
+            yield MenuItem::linkToUrl(
+                sprintf(
+                    '<span>%s</span><img src="%s" alt="" class="config-made-by-logo">',
+                    $madeByLabel,
+                    htmlspecialchars($madeByLogo, ENT_QUOTES),
+                ),
+                null,
+                $madeByUrl,
+            )->setLinkTarget('_blank')->setCssClass('menu-item-made-by');
+        }
     }
 }

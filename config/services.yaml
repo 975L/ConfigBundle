@@ -31,3 +31,7 @@ services:
     c975L\ConfigBundle\Controller\Management\DashboardController:
         tags: ['controller.service_arguments']
 
+    c975L\ConfigBundle\Service\StylesheetProvider:
+        tags:
+            - { name: 'ui.management_stylesheet' }
+

@@ -20,13 +20,26 @@ class WhatsNewBuilder
     ) {
     }
 
-    // Returns the $limit most recent entries across all bundles
-    public function getLatest(int $limit = 5): array
+    // Returns the most recent dates, capped at $maxItems total description lines
+    // (always includes at least one date, even if it alone exceeds the cap, to avoid an empty dashboard widget)
+    public function getLatest(int $maxItems = 8): array
     {
-        return \array_slice($this->getAll(), 0, $limit);
+        $latest = [];
+        $count = 0;
+
+        foreach ($this->getAll() as $entry) {
+            if ($count > 0 && $count + \count($entry['description']) > $maxItems) {
+                break;
+            }
+
+            $latest[] = $entry;
+            $count += \count($entry['description']);
+        }
+
+        return $latest;
     }
 
-    // Returns every entry across all bundles, sorted by date desc
+    // Returns one entry per date across all bundles (their descriptions merged), sorted by date desc
     public function getAll(): array
     {
         $entries = array_merge(
@@ -34,8 +47,16 @@ class WhatsNewBuilder
             ProviderMerger::merge($this->whatsNewProviders, fn (WhatsNewProviderInterface $provider) => $provider->getEntries()),
         );
 
-        usort($entries, fn (array $a, array $b) => $b['date'] <=> $a['date']);
+        $groupedByDate = [];
+        foreach ($entries as $entry) {
+            $key = $entry['date']->format('Y-m-d');
+            $groupedByDate[$key] ??= ['date' => $entry['date'], 'description' => []];
+            $groupedByDate[$key]['description'] = array_merge($groupedByDate[$key]['description'], $entry['description']);
+        }
 
-        return $entries;
+        $groupedByDate = array_values($groupedByDate);
+        usort($groupedByDate, fn (array $a, array $b) => $b['date'] <=> $a['date']);
+
+        return $groupedByDate;
     }
 }

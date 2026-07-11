@@ -10,6 +10,6 @@ namespace c975L\ConfigBundle\Management;
 
 interface WhatsNewProviderInterface
 {
-    // Each entry: ['bundle' => string, 'version' => string, 'date' => \DateTimeImmutable, 'description' => string]
+    // Each entry: ['date' => \DateTimeImmutable, 'description' => string[]]
     public function getEntries(): array;
 }

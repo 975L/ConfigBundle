@@ -11,7 +11,7 @@ namespace c975L\ConfigBundle\Management;
 // Shared by every bundle's WhatsNewProvider to turn its own config/whatsnew.json into entries
 class WhatsNewJsonReader
 {
-    public static function read(string $file, string $bundleName): array
+    public static function read(string $file): array
     {
         $entries = [];
 
@@ -22,8 +22,6 @@ class WhatsNewJsonReader
             }
 
             $entries[] = [
-                'bundle' => $bundleName,
-                'version' => $entry['version'],
                 'date' => new \DateTimeImmutable($entry['date']),
                 'description' => $descriptions,
             ];

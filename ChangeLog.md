@@ -1,5 +1,10 @@
 # ChangeLog
 
+## v5.5.2
+
+- Added made by logo + link on easyadmin menu bar (11/07/2026)
+- Reviewed the What's new section(11/07/2026)
+
 ## v5.5.1
 
 - Added StylesheetProvider (11/07/2026)

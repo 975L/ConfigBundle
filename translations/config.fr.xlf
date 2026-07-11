@@ -203,14 +203,6 @@
                 <source>label.whatsnew_see_all</source>
                 <target>Voir toutes les notes de version</target>
             </trans-unit>
-            <trans-unit id="51">
-                <source>label.bundle</source>
-                <target>Bundle</target>
-            </trans-unit>
-            <trans-unit id="52">
-                <source>label.version</source>
-                <target>Version</target>
-            </trans-unit>
             <trans-unit id="53">
                 <source>label.no_whatsnew</source>
                 <target>Aucune note de version pour l'instant</target>

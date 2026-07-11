@@ -336,14 +336,21 @@ Routes are checked live: if the contributing bundle is later removed (or its pro
 
 The `/management` dashboard shows the 5 latest release notes merged from every c975L bundle, with a link to the full list at `/management/whatsnew`.
 
+This is a marketing-style feed for non-developer back-office users, not a developer changelog (see `ChangeLog.md` for that) — there's no `version` or `bundle` field, and entries should read as user-facing benefits, not technical changes.
+
 Declare your bundle's entries in a `config/whatsnew.json` file:
 
 ```json
 [
     {
-        "version": "1.2.0",
         "date": "2026-07-04",
-        "description": "Added new XYZ block"
+        "description": [
+            {
+                "en": "Added a new XYZ block",
+                "fr": "Ajout d'un nouveau bloc XYZ",
+                "es": "Añadido un nuevo bloque XYZ"
+            }
+        ]
     }
 ]
 ```
@@ -358,11 +365,9 @@ use c975L\ConfigBundle\Management\WhatsNewProviderInterface;
 
 class WhatsNewProvider implements WhatsNewProviderInterface
 {
-    private const BUNDLE_NAME = 'MyBundle';
-
     public function getEntries(): array
     {
-        return WhatsNewJsonReader::read(\dirname(__DIR__, 2) . '/config/whatsnew.json', self::BUNDLE_NAME);
+        return WhatsNewJsonReader::read(\dirname(__DIR__, 2) . '/config/whatsnew.json');
     }
 }
 ```
