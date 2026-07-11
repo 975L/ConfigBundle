@@ -44,7 +44,7 @@ class MenuBuilder
             yield MenuItem::section(new TranslatableMessage(self::LINKS_SECTION_LABEL, [], self::LINKS_SECTION_TRANSLATION_DOMAIN));
 
             foreach ($links as $link) {
-                yield MenuItem::linkToRoute(new TranslatableMessage($link['label'], [], $link['translation_domain']), $link['icon'], $link['name'])->setLinkTarget('_blank');
+                yield MenuItem::linkToRoute(new TranslatableMessage($link['label'], [], $link['translation_domain']), $link['icon'], $link['name']);
             }
         }
     }

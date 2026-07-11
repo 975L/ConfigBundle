@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v5.5.3.1
+
+- Removed target _blank for links in menu provider (11/07/2026)
+
 ## v5.5.3
 
 - Tagged new version due to tag problem (11/07/2026)
