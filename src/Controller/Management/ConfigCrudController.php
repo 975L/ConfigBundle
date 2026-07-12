@@ -188,7 +188,7 @@ class ConfigCrudController extends AbstractCrudController
                 : t('help.value', [], 'config'));
         }
 
-        // Description holds a 'site_config' translation key (label.xxx) once a bundle has migrated
+        // Description holds a 'site_config' translation key (description.xxx) once a bundle has migrated
         // to it; trans() safely falls back to the raw text unchanged for bundles that haven't yet.
         // formatValue() only runs on index/detail (EasyAdmin skips it for disabled form fields), so
         // the edit page's disabled input needs the translated text injected via form data instead
@@ -206,14 +206,28 @@ class ConfigCrudController extends AbstractCrudController
             ]);
         }
 
+        // Label uses a 'site_config' translation key derived from the slug (label.xxx), mirroring
+        // description's key format; trans() falls back to the raw key unchanged if not translated.
+        // formatValue() only runs on index/detail (EasyAdmin skips it for disabled form fields), so
+        // the edit page's disabled input needs the translated text injected via form data instead
+        $labelField = TextField::new('label')
+            ->setLabel(t('label.label', [], 'config'))
+            ->setFormTypeOption('disabled', true)
+            ->formatValue(fn (string $label, Config $config): string =>
+                $this->translator->trans($config->getLabelTranslationKey(), [], 'site_config')
+            );
+        if (Crud::PAGE_EDIT === $pageName && $entity instanceof Config) {
+            $labelField->setFormTypeOptions([
+                'data' => $this->translator->trans($entity->getLabelTranslationKey(), [], 'site_config'),
+            ]);
+        }
+
         return [
             IdField::new('id')
                 ->setLabel(false)
                 ->onlyOnIndex(),
             // Label/slug are fixed by the import json, never editable through the admin
-            TextField::new('label')
-                ->setLabel(t('label.label', [], 'config'))
-                ->setFormTypeOption('disabled', true),
+            $labelField,
             TextField::new('slug')
                 ->setLabel(t('label.slug', [], 'config'))
                 ->setFormTypeOption('disabled', true),

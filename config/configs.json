@@ -1,6 +1,6 @@
 [
     {
-        "label": "Site Role Admin",
+        "label": "label.site_role_admin",
         "slug": "site-role-admin",
         "sensitive": false,
         "restricted": true,
@@ -8,10 +8,10 @@
         "kind": "text",
         "group": "system",
         "severity": "danger",
-        "description": "label.site_role_admin"
+        "description": "description.site_role_admin"
     },
     {
-        "label": "Site Role Editor",
+        "label": "label.site_role_editor",
         "slug": "site-role-editor",
         "sensitive": false,
         "restricted": true,
@@ -19,10 +19,10 @@
         "kind": "text",
         "group": "system",
         "severity": "warning",
-        "description": "label.site_role_editor"
+        "description": "description.site_role_editor"
     },
     {
-        "label": "Site Maintenance",
+        "label": "label.site_maintenance",
         "slug": "site-maintenance",
         "sensitive": false,
         "restricted": false,
@@ -30,10 +30,10 @@
         "kind": "bool",
         "group": "system",
         "severity": null,
-        "description": "label.site_maintenance"
+        "description": "description.site_maintenance"
     },
     {
-        "label": "Site Maintenance Hash",
+        "label": "label.site_maintenance_hash",
         "slug": "site-maintenance-hash",
         "sensitive": false,
         "restricted": false,
@@ -41,6 +41,6 @@
         "kind": "text",
         "group": "system",
         "severity": "warning",
-        "description": "label.site_maintenance_hash"
+        "description": "description.site_maintenance_hash"
     }
 ]

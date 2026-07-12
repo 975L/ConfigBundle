@@ -148,6 +148,12 @@ class Config
         return $this->slug;
     }
 
+    // 'site_config' translation key for the label, derived from the slug (searchable, mirrors description.xxx)
+    public function getLabelTranslationKey(): string
+    {
+        return 'label.' . str_replace('-', '_', $this->slug);
+    }
+
     public function setSlug(string $slug): static
     {
         $this->slug = $slug;

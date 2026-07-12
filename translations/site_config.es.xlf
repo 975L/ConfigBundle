@@ -3,20 +3,36 @@
     <file source-language="en" target-language="es" datatype="plaintext" original="site_config.es.xlf">
         <body>
             <trans-unit id="1">
-                <source>label.site_role_admin</source>
+                <source>description.site_role_admin</source>
                 <target>Rol requerido para acceder a los parámetros de configuración, ej. ROLE_ADMIN (por defecto)</target>
             </trans-unit>
             <trans-unit id="2">
-                <source>label.site_maintenance</source>
+                <source>description.site_maintenance</source>
                 <target>Activa (true) o desactiva (false) el modo mantenimiento</target>
             </trans-unit>
             <trans-unit id="3">
-                <source>label.site_maintenance_hash</source>
+                <source>description.site_maintenance_hash</source>
                 <target>Hash utilizado para acceder al sitio en modo mantenimiento (?t=Hash)</target>
             </trans-unit>
             <trans-unit id="4">
-                <source>label.site_role_editor</source>
+                <source>description.site_role_editor</source>
                 <target>Rol requerido para acceder a las acciones de nivel editor, ej. ROLE_EDITOR (por defecto)</target>
+            </trans-unit>
+            <trans-unit id="5">
+                <source>label.site_role_admin</source>
+                <target>Rol de administrador del sitio</target>
+            </trans-unit>
+            <trans-unit id="6">
+                <source>label.site_role_editor</source>
+                <target>Rol de editor del sitio</target>
+            </trans-unit>
+            <trans-unit id="7">
+                <source>label.site_maintenance</source>
+                <target>Mantenimiento del sitio</target>
+            </trans-unit>
+            <trans-unit id="8">
+                <source>label.site_maintenance_hash</source>
+                <target>Hash de mantenimiento del sitio</target>
             </trans-unit>
         </body>
     </file>

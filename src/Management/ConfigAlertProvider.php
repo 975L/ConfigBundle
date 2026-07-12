@@ -28,7 +28,7 @@ class ConfigAlertProvider implements AlertProviderInterface
 
         foreach ($this->configRepository->findRequiringAttention() as $config) {
             $alerts[] = [
-                'label' => $config->getLabel(),
+                'label' => $config->getLabelTranslationKey(),
                 'description' => $config->getDescription(),
                 'severity' => $config->getSeverity(),
                 'url' => $this->adminUrlGenerator

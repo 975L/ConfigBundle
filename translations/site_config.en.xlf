@@ -3,20 +3,36 @@
     <file source-language="en" target-language="en" datatype="plaintext" original="site_config.en.xlf">
         <body>
             <trans-unit id="1">
-                <source>label.site_role_admin</source>
+                <source>description.site_role_admin</source>
                 <target>Role required to access the config parameters i.e. ROLE_ADMIN (default)</target>
             </trans-unit>
             <trans-unit id="2">
-                <source>label.site_maintenance</source>
+                <source>description.site_maintenance</source>
                 <target>Enable (true) or disable (false) maintenance mode</target>
             </trans-unit>
             <trans-unit id="3">
-                <source>label.site_maintenance_hash</source>
+                <source>description.site_maintenance_hash</source>
                 <target>Hash used to access maintenance mode (?t=Hash)</target>
             </trans-unit>
             <trans-unit id="4">
-                <source>label.site_role_editor</source>
+                <source>description.site_role_editor</source>
                 <target>Role required to access editor-level actions i.e. ROLE_EDITOR (default)</target>
+            </trans-unit>
+            <trans-unit id="5">
+                <source>label.site_role_admin</source>
+                <target>Site Role Admin</target>
+            </trans-unit>
+            <trans-unit id="6">
+                <source>label.site_role_editor</source>
+                <target>Site Role Editor</target>
+            </trans-unit>
+            <trans-unit id="7">
+                <source>label.site_maintenance</source>
+                <target>Site Maintenance</target>
+            </trans-unit>
+            <trans-unit id="8">
+                <source>label.site_maintenance_hash</source>
+                <target>Site Maintenance Hash</target>
             </trans-unit>
         </body>
     </file>

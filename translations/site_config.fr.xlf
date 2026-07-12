@@ -3,20 +3,36 @@
     <file source-language="en" target-language="fr" datatype="plaintext" original="site_config.fr.xlf">
         <body>
             <trans-unit id="1">
-                <source>label.site_role_admin</source>
+                <source>description.site_role_admin</source>
                 <target>Rôle requis pour accéder aux paramètres de configuration, ex. ROLE_ADMIN (par défaut)</target>
             </trans-unit>
             <trans-unit id="2">
-                <source>label.site_maintenance</source>
+                <source>description.site_maintenance</source>
                 <target>Active (true) ou désactive (false) le mode maintenance</target>
             </trans-unit>
             <trans-unit id="3">
-                <source>label.site_maintenance_hash</source>
+                <source>description.site_maintenance_hash</source>
                 <target>Hash utilisé pour accéder au site en mode maintenance (?t=Hash)</target>
             </trans-unit>
             <trans-unit id="4">
-                <source>label.site_role_editor</source>
+                <source>description.site_role_editor</source>
                 <target>Rôle requis pour accéder aux actions de niveau éditeur, ex. ROLE_EDITOR (par défaut)</target>
+            </trans-unit>
+            <trans-unit id="5">
+                <source>label.site_role_admin</source>
+                <target>Rôle Admin du site</target>
+            </trans-unit>
+            <trans-unit id="6">
+                <source>label.site_role_editor</source>
+                <target>Rôle Éditeur du site</target>
+            </trans-unit>
+            <trans-unit id="7">
+                <source>label.site_maintenance</source>
+                <target>Maintenance du site</target>
+            </trans-unit>
+            <trans-unit id="8">
+                <source>label.site_maintenance_hash</source>
+                <target>Hash de maintenance du site</target>
             </trans-unit>
         </body>
     </file>

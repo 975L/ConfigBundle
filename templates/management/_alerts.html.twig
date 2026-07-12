@@ -20,7 +20,7 @@
                 <ul class="list-unstyled small text-left">
                     {% for item in items %}
                         <li>
-                            <a href="{{ item.url }}">{{ item.label }}</a>
+                            <a href="{{ item.url }}">{{ item.label|trans({}, 'site_config') }}</a>
                             {%- if item.description %} — {{ item.description|trans({}, 'site_config') }}{% endif %}
                         </li>
                     {% endfor %}
