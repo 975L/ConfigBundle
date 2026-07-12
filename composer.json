@@ -29,6 +29,7 @@
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "*",
+        "phpunit/phpunit": "^13.2",
         "symfony/browser-kit": "*",
         "symfony/css-selector": "*",
         "symfony/phpunit-bridge": "*",
@@ -43,7 +44,11 @@
         }
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "vendor-dir": ".vendor"
+    },
+    "scripts": {
+        "test": "phpunit"
     },
     "support": {
         "email": "contact@975l.com",

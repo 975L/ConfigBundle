@@ -15,11 +15,13 @@ use c975L\ConfigBundle\Management\MenuBuilder;
 use c975L\ConfigBundle\Management\ShortcutBuilder;
 use c975L\ConfigBundle\Management\WhatsNewBuilder;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
+use c975L\UiBundle\Registry\FormThemeRegistry;
 use c975L\UiBundle\Registry\ScriptAdminRegistry;
 use c975L\UiBundle\Registry\StylesheetManagementRegistry;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Asset;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
@@ -37,6 +39,7 @@ class DashboardController extends AbstractDashboardController
         private readonly ConfigServiceInterface $configService,
         private readonly ScriptAdminRegistry $scriptAdminRegistry,
         private readonly StylesheetManagementRegistry $stylesheetManagementRegistry,
+        private readonly FormThemeRegistry $formThemeRegistry,
         private readonly TranslatorInterface $translator,
     ) {}
 
@@ -64,6 +67,22 @@ class DashboardController extends AbstractDashboardController
             ->setFaviconPath('/favicon.ico')
             ->setTranslationDomain('config')
         ;
+    }
+
+    // EasyAdmin renders every CRUD form with "{% form_theme form with ea.crud.formThemes only %}"
+    // (see vendor/easycorp/.../crud/edit.html.twig) - the "only" keyword means the app-wide
+    // twig.form_themes config is never consulted there, so bundle-contributed form themes (Trix
+    // editor, icon picker, "used in"...) have to be injected into the Crud config itself instead,
+    // here, the single place every CRUD controller's own configureCrud() inherits its default from
+    // (see FormThemeProviderInterface for the extension point bundles implement to reach this).
+    public function configureCrud(): Crud
+    {
+        $crud = Crud::new();
+        foreach ($this->formThemeRegistry->all() as $formTheme) {
+            $crud->addFormTheme($formTheme);
+        }
+
+        return $crud;
     }
 
     // Each bundle providing EasyAdmin/Stimulus controllers contributes its controllers-admin.js via

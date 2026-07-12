@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v5.5.5
+
+- Added tests (12/07/2026)
+
 ## v5.5.4
 
 - Added translations for configs label (12/07/2026)

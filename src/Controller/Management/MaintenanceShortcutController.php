@@ -42,7 +42,7 @@ class MaintenanceShortcutController extends AbstractController
         $this->denyAccessUnlessGranted($this->configService->get('site-role-admin'));
 
         $config = $this->configRepository->findOneBySlug('site-maintenance');
-        if (null !== $config && $this->isCsrfTokenValid(self::TOGGLE_ROUTE, $request->request->get('_token'))) {
+        if (null !== $config && $this->isCsrfTokenValid(self::TOGGLE_ROUTE_MAINTENANCE, $request->request->get('_token'))) {
             $enabled = !$this->configService->getBool($config->getValue());
             $config->setValue($enabled);
             $config->setModification(new \DateTime());
