@@ -6,7 +6,7 @@ services:
 
     c975L\ConfigBundle\:
         resource: '../src/'
-        exclude: '../src/{DependencyInjection,Entity,Tests}'
+        exclude: '../src/{DependencyInjection,Entity}'
 
     c975L\ConfigBundle\Management\MenuBuilder:
         arguments:

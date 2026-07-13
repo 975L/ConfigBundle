@@ -43,6 +43,11 @@
             "c975L\\ConfigBundle\\Migrations\\": "migrations/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "c975L\\ConfigBundle\\Tests\\": "tests/"
+        }
+    },
     "config": {
         "sort-packages": true,
         "vendor-dir": ".vendor"

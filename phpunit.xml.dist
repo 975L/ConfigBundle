@@ -7,7 +7,7 @@
 >
     <testsuites>
         <testsuite name="c975LConfigBundle Test Suite">
-            <directory>src/Tests</directory>
+            <directory>tests</directory>
         </testsuite>
     </testsuites>
 
@@ -15,8 +15,5 @@
         <include>
             <directory>src</directory>
         </include>
-        <exclude>
-            <directory>src/Tests</directory>
-        </exclude>
     </source>
 </phpunit>
