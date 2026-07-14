@@ -4,6 +4,7 @@
          bootstrap=".vendor/autoload.php"
          colors="true"
          cacheDirectory=".phpunit.cache"
+         failOnDeprecation="true"
 >
     <testsuites>
         <testsuite name="c975LConfigBundle Test Suite">
@@ -11,9 +12,15 @@
         </testsuite>
     </testsuites>
 
-    <source>
+    <source ignoreSuppressionOfDeprecations="true">
         <include>
             <directory>src</directory>
         </include>
+
+        <deprecationTrigger>
+            <method>Doctrine\Deprecations\Deprecation::trigger</method>
+            <method>Doctrine\Deprecations\Deprecation::delegateTriggerToBackend</method>
+            <function>trigger_deprecation</function>
+        </deprecationTrigger>
     </source>
 </phpunit>

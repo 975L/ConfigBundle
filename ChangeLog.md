@@ -1,5 +1,13 @@
 # ChangeLog
 
+## v5.5.9
+
+- Added test to trigger deprecations (14/07/2026)
+
+## v5.5.8
+
+- Suppressed DependencyInjection as not needed (14/07/2026)
+
 ## v5.5.7
 
 - Added LinkableRouteProvider for management Route (14/07/2026)
