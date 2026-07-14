@@ -18,7 +18,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 #[AsCommand(
     name: 'c975l:deprecations:check',
-    description: 'Groups the deprecations logged by Monolog\'s "deprecation" channel and flags the ones found in an installed c975L bundle'
+    description: 'Groups the deprecations logged by Monolog\'s "deprecation" channel and flags the ones found in the app\'s own src/ or an installed c975L bundle'
 )]
 class CheckDeprecationsCommand extends Command
 {
@@ -67,16 +67,19 @@ class CheckDeprecationsCommand extends Command
             return Command::SUCCESS;
         }
 
-        $bundleDirs = array_filter(glob($this->projectDir . '/vendor/c975l/*') ?: [], 'is_dir');
-        $report = $this->buildReport($messages, $bundleDirs);
+        $sourceDirs = ['app' => $this->projectDir . '/src'];
+        foreach (array_filter(glob($this->projectDir . '/vendor/c975l/*') ?: [], 'is_dir') as $dir) {
+            $sourceDirs[basename($dir)] = $dir . '/src';
+        }
+        $report = $this->buildReport($messages, $sourceDirs);
 
         foreach ($report as $entry) {
             $io->section(sprintf('[%dx] %s', $entry['count'], $entry['message']));
             if ($entry['hits']) {
-                $io->warning('ACTIONNABLE - trouvé dans vos bundles c975L :');
+                $io->warning('ACTIONNABLE - trouvé dans votre code (app ou bundle c975L) :');
                 $io->listing($entry['hits']);
             } else {
-                $io->text('Non localisé dans vendor/c975l - vient probablement d\'un package tiers ou de l\'app elle-même.');
+                $io->text('Non localisé dans src/ ni dans vendor/c975l - vient probablement d\'un package tiers.');
             }
         }
 
@@ -85,18 +88,21 @@ class CheckDeprecationsCommand extends Command
         return Command::SUCCESS;
     }
 
-    // Cross-references each unique deprecation message against the installed c975L bundles' source,
-    // sorted actionable-first then by frequency
-    private function buildReport(array $messages, array $bundleDirs): array
+    // Cross-references each unique deprecation message against the app's own src/ and the installed
+    // c975L bundles' source, sorted actionable-first then by frequency
+    private function buildReport(array $messages, array $sourceDirs): array
     {
         $report = [];
         foreach ($messages as $message => $count) {
             $hits = [];
             foreach ($this->extractTokens($message) as $token) {
-                foreach ($bundleDirs as $dir) {
-                    $found = shell_exec(sprintf('grep -Frl %s %s 2>/dev/null', escapeshellarg($token), escapeshellarg($dir . '/src')));
+                foreach ($sourceDirs as $label => $dir) {
+                    if (!is_dir($dir)) {
+                        continue;
+                    }
+                    $found = shell_exec(sprintf('grep -Frl %s %s 2>/dev/null', escapeshellarg($token), escapeshellarg($dir)));
                     foreach (array_filter(explode("\n", trim((string) $found))) as $file) {
-                        $hits[basename($dir) . ' -> ' . str_replace($this->projectDir . '/', '', $file)] = true;
+                        $hits[$label . ' -> ' . str_replace($this->projectDir . '/', '', $file)] = true;
                     }
                 }
             }

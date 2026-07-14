@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v5.5.10
+
+- Added app/src for triggering deprecations (14/07/2026)
+
 ## v5.5.9
 
 - Added test to trigger deprecations (14/07/2026)
