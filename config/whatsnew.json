@@ -1,5 +1,15 @@
 [
     {
+        "date": "2026-07-14",
+        "description": [
+            {
+                "en": "You can now link management menu in MenuLink Block",
+                "fr": "Vous pouvez désormais lier le menu de gestion dans le bloc MenuLink",
+                "es": "Ahora puede vincular el menú de administración en el bloque MenuLink"
+            }
+        ]
+    },
+    {
         "date": "2026-07-11",
         "description": [
             {

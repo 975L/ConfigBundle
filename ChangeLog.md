@@ -1,8 +1,12 @@
 # ChangeLog
 
+## v5.5.7
+
+- Added LinkableRouteProvider for management Route (14/07/2026)
+
 ## v5.5.6
 
-- Movd tests to the right place (13/07/2026)
+- Moved tests to the right place (13/07/2026)
 
 ## v5.5.5
 
