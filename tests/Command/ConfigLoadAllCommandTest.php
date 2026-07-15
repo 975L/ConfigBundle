@@ -34,11 +34,11 @@ class ConfigLoadAllCommandTest extends TestCase
         $this->filesystem->remove($this->projectDir);
     }
 
-    private function createBundleConfigFile(string $bundleName, array $configs): void
+    private function createBundleConfigFile(string $bundleName, array $configs, string $filename = 'configs.json'): void
     {
         $dir = $this->projectDir . '/vendor/c975l/' . $bundleName . '/config';
         $this->filesystem->mkdir($dir);
-        $this->filesystem->dumpFile($dir . '/configs.json', json_encode($configs));
+        $this->filesystem->dumpFile($dir . '/' . $filename, json_encode($configs));
     }
 
     private function createTester(
@@ -57,7 +57,7 @@ class ConfigLoadAllCommandTest extends TestCase
         $tester->execute([]);
 
         $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
-        $this->assertStringContainsString('No configs.json found', $tester->getDisplay());
+        $this->assertStringContainsString('No configs*.json found', $tester->getDisplay());
     }
 
     public function testExecuteLoadsEachBundleConfigFileFound(): void
@@ -74,6 +74,23 @@ class ConfigLoadAllCommandTest extends TestCase
         $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
         $this->assertStringContainsString('config-bundle', $tester->getDisplay());
         $this->assertStringContainsString('ui-bundle', $tester->getDisplay());
+        $this->assertStringContainsString('2 bundle config(s) processed', $tester->getDisplay());
+    }
+
+    // A single bundle can ship its config as several files (e.g. configs.json + configs-css.json for
+    // theme variables), all matched by the configs*.json glob and loaded independently
+    public function testExecuteLoadsEveryConfigsJsonFileWithinASingleBundle(): void
+    {
+        $this->createBundleConfigFile('site-bundle', [['slug' => 'site-name']], 'configs.json');
+        $this->createBundleConfigFile('site-bundle', [['slug' => 'theme-color-primary']], 'configs-css.json');
+
+        $configService = $this->createMock(ConfigServiceInterface::class);
+        $configService->expects($this->exactly(2))->method('loadDefaultConfig');
+
+        $tester = $this->createTester($configService, new VaultEncryptor(null));
+        $tester->execute([]);
+
+        $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
         $this->assertStringContainsString('2 bundle config(s) processed', $tester->getDisplay());
     }
 

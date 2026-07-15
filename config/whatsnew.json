@@ -1,5 +1,20 @@
 [
     {
+        "date": "2026-07-15",
+        "description": [
+            {
+                "en": "You can now customize your site's theme (colors, fonts, light/dark mode) from a dedicated Theme page in the back office",
+                "fr": "Vous pouvez désormais personnaliser le thème de votre site (couleurs, polices, mode clair/sombre) depuis une page Thème dédiée dans le back-office",
+                "es": "Ahora puede personalizar el tema de su sitio (colores, fuentes, modo claro/oscuro) desde una página Tema dedicada en el back-office"
+            },
+            {
+                "en": "Ready-made theme presets can now be applied in one click from the Theme page",
+                "fr": "Des thèmes prêts à l'emploi peuvent désormais être appliqués en un clic depuis la page Thème",
+                "es": "Ahora se pueden aplicar temas predefinidos con un solo clic desde la página Tema"
+            }
+        ]
+    },
+    {
         "date": "2026-07-14",
         "description": [
             {

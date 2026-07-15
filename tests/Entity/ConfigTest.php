@@ -100,4 +100,82 @@ class ConfigTest extends TestCase
 
         $config->validateJsonValue($context);
     }
+
+    public function testValidateThemeColorValueAddsViolationForAnInvalidColor(): void
+    {
+        $config = (new Config())->setGroup(Config::GROUP_THEME)->setSlug('theme-color-primary')->setValue('red; background: url(evil.css)');
+
+        $violationBuilder = $this->createMock(ConstraintViolationBuilderInterface::class);
+        $violationBuilder->expects($this->once())->method('atPath')->with('value')->willReturnSelf();
+        $violationBuilder->expects($this->once())->method('addViolation');
+
+        $context = $this->createMock(ExecutionContextInterface::class);
+        $context->expects($this->once())
+            ->method('buildViolation')
+            ->with('label.invalid_theme_color')
+            ->willReturn($violationBuilder);
+
+        $config->validateThemeColorValue($context);
+    }
+
+    public function testValidateThemeColorValueAddsNoViolationForAValidHexColor(): void
+    {
+        $config = (new Config())->setGroup(Config::GROUP_THEME)->setSlug('theme-color-primary')->setValue('#b30000');
+
+        $context = $this->createMock(ExecutionContextInterface::class);
+        $context->expects($this->never())->method('buildViolation');
+
+        $config->validateThemeColorValue($context);
+    }
+
+    public function testValidateThemeColorValueAddsNoViolationForAValidRgbaColor(): void
+    {
+        $config = (new Config())->setGroup(Config::GROUP_THEME)->setSlug('theme-color-secondary')->setValue('rgba(11, 55, 178, .5)');
+
+        $context = $this->createMock(ExecutionContextInterface::class);
+        $context->expects($this->never())->method('buildViolation');
+
+        $config->validateThemeColorValue($context);
+    }
+
+    public function testValidateThemeColorValueAddsNoViolationForAValidNamedColor(): void
+    {
+        $config = (new Config())->setGroup(Config::GROUP_THEME)->setSlug('theme-color-background')->setValue('tomato');
+
+        $context = $this->createMock(ExecutionContextInterface::class);
+        $context->expects($this->never())->method('buildViolation');
+
+        $config->validateThemeColorValue($context);
+    }
+
+    public function testValidateThemeColorValueAddsNoViolationWhenGroupIsNotTheme(): void
+    {
+        $config = (new Config())->setGroup(Config::GROUP_GENERAL)->setSlug('theme-color-primary')->setValue('red; background: url(evil.css)');
+
+        $context = $this->createMock(ExecutionContextInterface::class);
+        $context->expects($this->never())->method('buildViolation');
+
+        $config->validateThemeColorValue($context);
+    }
+
+    // theme-mode holds a fixed light/dark/auto choice, not a CSS color, so it's exempt even within the theme group
+    public function testValidateThemeColorValueAddsNoViolationWhenSlugIsNotAThemeColor(): void
+    {
+        $config = (new Config())->setGroup(Config::GROUP_THEME)->setSlug('theme-mode')->setValue('not-a-color-or-a-mode;');
+
+        $context = $this->createMock(ExecutionContextInterface::class);
+        $context->expects($this->never())->method('buildViolation');
+
+        $config->validateThemeColorValue($context);
+    }
+
+    public function testValidateThemeColorValueAddsNoViolationWhenValueIsNullOrEmpty(): void
+    {
+        $config = (new Config())->setGroup(Config::GROUP_THEME)->setSlug('theme-color-primary')->setValue(null);
+
+        $context = $this->createMock(ExecutionContextInterface::class);
+        $context->expects($this->never())->method('buildViolation');
+
+        $config->validateThemeColorValue($context);
+    }
 }

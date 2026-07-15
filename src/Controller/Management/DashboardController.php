@@ -25,6 +25,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -41,6 +42,8 @@ class DashboardController extends AbstractDashboardController
         private readonly StylesheetManagementRegistry $stylesheetManagementRegistry,
         private readonly FormThemeRegistry $formThemeRegistry,
         private readonly TranslatorInterface $translator,
+        #[Autowire('%kernel.debug%')]
+        private readonly bool $debug,
     ) {}
 
     public function index(): Response
@@ -98,8 +101,14 @@ class DashboardController extends AbstractDashboardController
             $assets->addAssetMapperEntry($script);
         }
 
-        foreach ($this->stylesheetManagementRegistry->all() as $stylesheet) {
-            $assets->addCssFile($stylesheet);
+        // In dev, keeps each bundle's stylesheet separate for instant reload on every CSS edit;
+        // in prod, links to the single file compiled by StylesheetCacheWarmer (c975L/UiBundle) instead
+        if ($this->debug) {
+            foreach ($this->stylesheetManagementRegistry->all() as $stylesheet) {
+                $assets->addCssFile($stylesheet);
+            }
+        } else {
+            $assets->addCssFile('bundles/build/admin.css');
         }
 
         return $assets;

@@ -9,6 +9,7 @@
 namespace c975L\ConfigBundle\Tests\Management;
 
 use c975L\ConfigBundle\Controller\Management\ConfigCrudController;
+use c975L\ConfigBundle\Controller\Management\ThemeCrudController;
 use c975L\ConfigBundle\Management\MenuProvider;
 use c975L\ConfigBundle\Management\MenuProviderInterface;
 use PHPUnit\Framework\TestCase;
@@ -32,6 +33,17 @@ class MenuProviderTest extends TestCase
         $this->assertSame(ConfigCrudController::class, $menus['config']['controller']);
         $this->assertSame('label.config', $menus['config']['label']);
         $this->assertSame('config', $menus['config']['translation_domain']);
+    }
+
+    public function testGetMenusExposesTheThemeCrudControllerEntry(): void
+    {
+        $provider = new MenuProvider();
+
+        $menus = $provider->getMenus();
+
+        $this->assertSame(ThemeCrudController::class, $menus['theme']['controller']);
+        $this->assertSame('label.theme', $menus['theme']['label']);
+        $this->assertSame('config', $menus['theme']['translation_domain']);
     }
 
     public function testGetLinksExposesTheWhatsNewLink(): void

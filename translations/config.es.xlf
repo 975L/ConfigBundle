@@ -254,6 +254,50 @@
                 <source>label.is_restricted_help</source>
                 <target>Si restringido está activado, solo un usuario ROLE_SUPER_ADMIN puede ver/editar esta configuración</target>
             </trans-unit>
+            <trans-unit id="66">
+                <source>label.group_theme</source>
+                <target>Tema</target>
+            </trans-unit>
+            <trans-unit id="67">
+                <source>label.theme</source>
+                <target>Tema</target>
+            </trans-unit>
+            <trans-unit id="68">
+                <source>label.theme_mode_auto</source>
+                <target>Automático (sigue el dispositivo del visitante)</target>
+            </trans-unit>
+            <trans-unit id="69">
+                <source>label.theme_mode_light</source>
+                <target>Claro</target>
+            </trans-unit>
+            <trans-unit id="70">
+                <source>label.theme_mode_dark</source>
+                <target>Oscuro</target>
+            </trans-unit>
+            <trans-unit id="71">
+                <source>label.presets</source>
+                <target>Temas</target>
+            </trans-unit>
+            <trans-unit id="72">
+                <source>label.theme_preset_default</source>
+                <target>Por defecto</target>
+            </trans-unit>
+            <trans-unit id="73">
+                <source>confirm.apply_preset</source>
+                <target>¿Aplicar este tema? Los colores y fuentes actuales serán sobrescritos.</target>
+            </trans-unit>
+            <trans-unit id="74">
+                <source>label.invalid_theme_color</source>
+                <target>Este valor no parece ser un color CSS válido</target>
+            </trans-unit>
+            <trans-unit id="75">
+                <source>help.value_theme_color</source>
+                <target>Hexadecimal (#b30000), rgb()/rgba(), hsl()/hsla(), o un nombre de color CSS (ej. tomato)</target>
+            </trans-unit>
+            <trans-unit id="76">
+                <source>label.theme_preset_warm_artisan</source>
+                <target>Cálido y artesanal</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

@@ -36,10 +36,10 @@ class ConfigLoadAllCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $files = glob($this->projectDir . '/vendor/c975l/*/config/configs.json') ?: [];
+        $files = glob($this->projectDir . '/vendor/c975l/*/config/configs*.json') ?: [];
 
         if (empty($files)) {
-            $io->warning('No configs.json found in vendor/c975l/*/config/');
+            $io->warning('No configs*.json found in vendor/c975l/*/config/');
 
             return Command::SUCCESS;
         }

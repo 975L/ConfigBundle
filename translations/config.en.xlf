@@ -254,6 +254,50 @@
                 <source>label.is_restricted_help</source>
                 <target>If restricted is enabled, only a ROLE_SUPER_ADMIN user can view/edit this config</target>
             </trans-unit>
+            <trans-unit id="66">
+                <source>label.group_theme</source>
+                <target>Theme</target>
+            </trans-unit>
+            <trans-unit id="67">
+                <source>label.theme</source>
+                <target>Theme</target>
+            </trans-unit>
+            <trans-unit id="68">
+                <source>label.theme_mode_auto</source>
+                <target>Auto (follows the visitor's device)</target>
+            </trans-unit>
+            <trans-unit id="69">
+                <source>label.theme_mode_light</source>
+                <target>Light</target>
+            </trans-unit>
+            <trans-unit id="70">
+                <source>label.theme_mode_dark</source>
+                <target>Dark</target>
+            </trans-unit>
+            <trans-unit id="71">
+                <source>label.presets</source>
+                <target>Presets</target>
+            </trans-unit>
+            <trans-unit id="72">
+                <source>label.theme_preset_default</source>
+                <target>Default</target>
+            </trans-unit>
+            <trans-unit id="73">
+                <source>confirm.apply_preset</source>
+                <target>Apply this preset? It overwrites the current theme colors and fonts.</target>
+            </trans-unit>
+            <trans-unit id="74">
+                <source>label.invalid_theme_color</source>
+                <target>This value doesn't look like a valid CSS color</target>
+            </trans-unit>
+            <trans-unit id="75">
+                <source>help.value_theme_color</source>
+                <target>Hex (#b30000), rgb()/rgba(), hsl()/hsla(), or a CSS color name (e.g. tomato)</target>
+            </trans-unit>
+            <trans-unit id="76">
+                <source>label.theme_preset_warm_artisan</source>
+                <target>Warm &amp; artisan</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

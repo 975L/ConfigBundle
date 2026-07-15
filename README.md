@@ -87,6 +87,7 @@ Set `restricted: true` on top of that for secrets shared across the whole instal
 | `security` | ReCaptcha and similar anti-abuse keys |
 | `shop` | Currency, shipping, shop identity |
 | `payment` | Payment provider keys (Stripe...) |
+| `theme` | Theme CSS variables (colors, fonts, light/dark mode) |
 
 This list is closed on purpose so filtering stays useful; if none fits, leave `group` unset rather than inventing a new value (adding one requires extending `Config::GROUPS` and the matching translations in ConfigBundle itself).
 
@@ -94,7 +95,7 @@ This list is closed on purpose so filtering stays useful; if none fits, leave `g
 
 ## Loading config entries into the database
 
-Auto-discovers every `vendor/c975l/*/config/configs.json` file and loads them in one shot:
+Auto-discovers every `vendor/c975l/*/config/configs*.json` file and loads them in one shot — a bundle can ship several files (e.g. `configs.json` plus `configs-css.json` for theme variables), each loaded independently:
 
 ```bash
 php bin/console c975l:config:load-all
@@ -125,6 +126,10 @@ php bin/console c975l:config:encrypt-sensitive
 ## EasyAdmin interface
 
 The bundle registers a management dashboard at `/management`. Navigate to **Config** to view entries and edit their `value` — `label`, `slug`, `kind`, `group`, `severity`, and `description` are fixed by the bundle's `configs.json` and shown read-only; there is no manual creation or deletion, entries only come from `configs.json`.
+
+Entries in the `theme` group have their own **Theme** page instead, for the same reason (no manual creation/deletion, fixed by a bundle's `configs-css.json`) — kept separate so theme CSS variables (colors, fonts, light/dark mode) don't get mixed up with the general config list.
+
+The Theme page has its own permission tiers, stricter than the general Config page: `site-role-editor` can view the page and apply a preset (a vetted set of values from a `ThemePresetProviderInterface`), but hand-editing any individual field — even a non-restricted one like a color — requires `ROLE_SUPER_ADMIN`. Entries flagged `"restricted": true` (see [Restricting configs to ROLE_SUPER_ADMIN](#restricting-configs-to-role_super_admin)) are additionally hidden from the list entirely below `ROLE_SUPER_ADMIN`, same as on the Config page.
 
 Any entry with a `severity` and an empty `value` shows up as a colored alert (danger/warning/info) right on the `/management` home page, each linking directly to its edit form.
 
@@ -453,6 +458,39 @@ Make sure your bundle's `services.yaml` includes the `Management/` folder in its
 **`active`:** styles the button (`btn-danger` when `true`, `btn-outline-secondary` otherwise) to reflect an on/off state. See `MaintenanceShortcutController::toggle()` for a toggle reference implementation flipping the `site-maintenance` config used by `MaintenanceListener`, with `ConfigShortcutProvider::getShortcuts()` reading that same config to decide `active` and pick the right label ("Enable"/"Disable"). One-shot actions with no on/off state can always return `false`.
 
 **Rendering:** shortcuts are merged across every provider by `ShortcutBuilder::getShortcuts()` and rendered with the shared `templates/management/_shortcuts.html.twig` partial, each one as its own small `<form method="post">`.
+
+## Contributing theme presets from other bundles
+
+The **Theme** page (see the `theme` group above) can show a "Presets" action group letting an admin overwrite every `theme-*` config's value in one click — a ready-made color/font combination, optionally paired with a whole page-template stylesheet.
+
+Satellite bundles contribute presets by implementing `ThemePresetProviderInterface` — no manual service tagging needed, `TaggedInterfacePass` auto-detects any class implementing it, same mechanism as `MenuProviderInterface` above:
+
+```php
+namespace c975L\MyBundle\Management;
+
+use c975L\ConfigBundle\Management\ThemePresetProviderInterface;
+
+class MyThemePresetProvider implements ThemePresetProviderInterface
+{
+    // id => ['label' => translation key, 'values' => [theme slug => value], 'stylesheet' => optional]
+    public function getPresets(): array
+    {
+        return [
+            'my-preset' => [
+                'label' => 'label.my_preset',
+                'values' => [
+                    'theme-color-primary' => '#b30000',
+                    'theme-font-family-title' => 'Georgia, serif',
+                ],
+            ],
+        ];
+    }
+}
+```
+
+Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
+
+**Applying a preset** (`ThemeCrudController::applyPreset()`) overwrites, in a single flush, every existing `theme-*` config whose slug is a key of `values`; if the preset also sets a `stylesheet` key, `theme-stylesheet` is overwritten too, switching the whole site design alongside the colors/fonts. Presets with no `stylesheet` key only touch colors/fonts.
 
 ## Reading config values
 

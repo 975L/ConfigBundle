@@ -9,6 +9,7 @@
 namespace c975L\ConfigBundle\Management;
 
 use c975L\ConfigBundle\Controller\Management\ConfigCrudController;
+use c975L\ConfigBundle\Controller\Management\ThemeCrudController;
 use c975L\ConfigBundle\Management\MenuProviderInterface;
 
 // To add a MenuProvider, you need to:
@@ -36,6 +37,12 @@ class MenuProvider implements MenuProviderInterface
                 'label' => 'label.config',
                 'translation_domain' => 'config',
                 'icon' => 'fa fa-cog',
+            ],
+            'theme' => [
+                'controller' => ThemeCrudController::class,
+                'label' => 'label.theme',
+                'translation_domain' => 'config',
+                'icon' => 'fa fa-palette',
             ],
         ];
     }

@@ -49,8 +49,7 @@
         }
     },
     "config": {
-        "sort-packages": true,
-        "vendor-dir": ".vendor"
+        "sort-packages": true
     },
     "scripts": {
         "test": "phpunit"

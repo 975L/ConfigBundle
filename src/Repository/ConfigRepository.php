@@ -30,4 +30,15 @@ class ConfigRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    // Returns every config belonging to the given group (e.g. Config::GROUP_THEME), sorted by label
+    public function findByGroup(string $group): array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.group = :group')
+            ->setParameter('group', $group)
+            ->orderBy('c.label', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

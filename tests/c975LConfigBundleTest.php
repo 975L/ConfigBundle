@@ -15,6 +15,7 @@ use c975L\ConfigBundle\Management\AlertProviderInterface;
 use c975L\ConfigBundle\Management\LinkableRouteProviderInterface;
 use c975L\ConfigBundle\Management\MenuProviderInterface;
 use c975L\ConfigBundle\Management\ShortcutProviderInterface;
+use c975L\ConfigBundle\Management\ThemePresetProviderInterface;
 use c975L\ConfigBundle\Management\WhatsNewProviderInterface;
 use c975L\ConfigBundle\Service\ConfigService;
 use PHPUnit\Framework\TestCase;
@@ -34,6 +35,7 @@ class c975LConfigBundleTest extends TestCase
         $container->register('alert_provider', c975LConfigBundleTestAlertProviderFixture::class);
         $container->register('shortcut_provider', c975LConfigBundleTestShortcutProviderFixture::class);
         $container->register('linkable_route_provider', c975LConfigBundleTestLinkableRouteProviderFixture::class);
+        $container->register('theme_preset_provider', c975LConfigBundleTestThemePresetProviderFixture::class);
 
         (new c975LConfigBundle())->build($container);
 
@@ -48,6 +50,7 @@ class c975LConfigBundleTest extends TestCase
         $this->assertTrue($container->getDefinition('alert_provider')->hasTag('c975l.alert_provider'));
         $this->assertTrue($container->getDefinition('shortcut_provider')->hasTag('c975l.shortcut_provider'));
         $this->assertTrue($container->getDefinition('linkable_route_provider')->hasTag('c975l.linkable_route_provider'));
+        $this->assertTrue($container->getDefinition('theme_preset_provider')->hasTag('c975l.theme_preset_provider'));
     }
 
     // Mirrors how Symfony's own kernel invokes it (BundleExtension::load() builds the
@@ -117,6 +120,14 @@ class c975LConfigBundleTestShortcutProviderFixture implements ShortcutProviderIn
 class c975LConfigBundleTestLinkableRouteProviderFixture implements LinkableRouteProviderInterface
 {
     public function getLinkableRoutes(): array
+    {
+        return [];
+    }
+}
+
+class c975LConfigBundleTestThemePresetProviderFixture implements ThemePresetProviderInterface
+{
+    public function getPresets(): array
     {
         return [];
     }

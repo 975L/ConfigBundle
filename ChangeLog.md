@@ -1,5 +1,15 @@
 # ChangeLog
 
+## v5.6
+
+- Added `theme` config group and `ThemeCrudController` for managing theme CSS variables (colors, fonts, light/dark mode) in their own dashboard view (15/07/2026)
+- Added `ThemePresetProviderInterface` and `ThemePresetRegistry` so satellite bundles (e.g. SiteBundle) can contribute one-click theme presets, applied in a single flush via `ThemeCrudController::applyPreset()` (15/07/2026)
+- `c975l:config:load-all` now matches `configs*.json` so a bundle can ship several config files, e.g. `configs.json` + `configs-css.json` (15/07/2026)
+- `DashboardController::configureAssets()` links the compiled `bundles/build/admin.css` outside dev instead of each bundle's stylesheet separately (15/07/2026)
+- Added `ConfigRepository::findByGroup()` (15/07/2026)
+- `ThemeCrudController` now mirrors `ConfigCrudController`'s restricted-config protection: `site-role-editor` can view the Theme page and apply a preset, manual field editing requires `ROLE_SUPER_ADMIN`, and `restricted` theme entries stay hidden below `ROLE_SUPER_ADMIN` (15/07/2026)
+- Reverted `vendor-dir` to the default `vendor/` (previously `.vendor`) in `composer.json` and `phpunit.xml.dist` (15/07/2026)
+
 ## v5.5.10
 
 - Added app/src for triggering deprecations (14/07/2026)
