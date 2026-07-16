@@ -307,7 +307,18 @@ public function getLinks(): array
 }
 ```
 
-Links from every bundle are merged into a single "Links" section (opened in a new tab), sorted alphabetically.
+Links from every bundle are merged into a single "Links" section, sorted alphabetically. `name` is a route name resolved to its real URL through the app's own router (not EasyAdmin's dashboard routing, so it also works for a route outside the dashboard, e.g. a public page). Use `url` instead for a literal, already-absolute URL — it's used as-is, no route resolution at all, and takes precedence when both are set:
+
+```php
+'showcase' => [
+    'url' => 'https://example.com/showcase',
+    'label' => 'label.showcase',
+    'translation_domain' => 'my_bundle',
+    'icon' => 'fas fa-shapes',
+],
+```
+
+Two more optional keys: `role` (e.g. `'ROLE_EDITOR'`) hides the link from users lacking it — omit it for links with no access restriction of their own; `target` (e.g. `'_blank'`) is for a link leaving the admin entirely — it gets an external-link glyph automatically, and (for a `name`-based link) resolves to a full absolute URL instead of a relative path.
 
 ## Contributing linkable routes for SiteBundle menus
 
@@ -461,7 +472,7 @@ Make sure your bundle's `services.yaml` includes the `Management/` folder in its
 
 ## Contributing theme presets from other bundles
 
-The **Theme** page (see the `theme` group above) can show a "Presets" action group letting an admin overwrite every `theme-*` config's value in one click — a ready-made color/font combination, optionally paired with a whole page-template stylesheet.
+The **Theme** page (see the `theme` group above) can show a "Presets" action group letting an admin switch the site's visual shape (page-template stylesheet: rounded corners, shadows, navigation/footer layout...) in one click. Colors and fonts stay entirely admin-owned — a preset never overwrites them.
 
 Satellite bundles contribute presets by implementing `ThemePresetProviderInterface` — no manual service tagging needed, `TaggedInterfacePass` auto-detects any class implementing it, same mechanism as `MenuProviderInterface` above:
 
@@ -472,16 +483,15 @@ use c975L\ConfigBundle\Management\ThemePresetProviderInterface;
 
 class MyThemePresetProvider implements ThemePresetProviderInterface
 {
-    // id => ['label' => translation key, 'values' => [theme slug => value], 'stylesheet' => optional]
+    // id => ['label' => translation key, 'domain' => translation domain, 'stylesheet' => Config::GROUP_THEME's "theme-stylesheet" value, 'previewUrl' => optional callable(): string]
     public function getPresets(): array
     {
         return [
             'my-preset' => [
                 'label' => 'label.my_preset',
-                'values' => [
-                    'theme-color-primary' => '#b30000',
-                    'theme-font-family-title' => 'Georgia, serif',
-                ],
+                'domain' => 'my_bundle',
+                'stylesheet' => 'my-preset',
+                'previewUrl' => fn () => $this->router->generate('my_bundle_preview', ['preset' => 'my-preset']),
             ],
         ];
     }
@@ -490,7 +500,11 @@ class MyThemePresetProvider implements ThemePresetProviderInterface
 
 Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
 
-**Applying a preset** (`ThemeCrudController::applyPreset()`) overwrites, in a single flush, every existing `theme-*` config whose slug is a key of `values`; if the preset also sets a `stylesheet` key, `theme-stylesheet` is overwritten too, switching the whole site design alongside the colors/fonts. Presets with no `stylesheet` key only touch colors/fonts.
+**`domain`** is the translation domain owning `label` — your own bundle's, not necessarily `config` (which is only the fallback for a provider that doesn't declare one).
+
+**`previewUrl`** must be a lazy callable, not an already-generated string: `ThemePresetRegistry` is built as a constructor dependency while EasyAdmin is still enumerating routes, so eagerly calling the router at that point deadlocks. When present, a "Preview" action opens it in a new tab so an admin can judge the look before committing.
+
+**Applying a preset** (`ThemeCrudController::applyPreset()`) overwrites, in a single flush, only the `theme-stylesheet` config with the preset's `stylesheet` value — colors and fonts are never touched, so a preset never overwrites values the admin has deliberately chosen. `stylesheet` is nullable: a preset that sets it to `null` leaves the current stylesheet untouched instead of blanking it.
 
 ## Reading config values
 
@@ -524,6 +538,16 @@ class MyService
 {# Read from Symfony container parameters #}
 {{ configParam('kernel.environment') }}
 ```
+
+---
+
+> [!TIP]
+> If this project **helps you save development time**:
+>
+> - [**star** it on GitHub](https://github.com/975L/ConfigBundle) — helps others find it
+> - [**open an issue**](https://github.com/975L/ConfigBundle/issues/new) to share how you use it — genuinely useful feedback
+>
+> And if you'd like to support the work directly, the **Sponsor** button at the top of the GitHub page is there for that. Thank you!
 
 ## License
 

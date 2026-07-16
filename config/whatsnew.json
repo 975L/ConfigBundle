@@ -1,5 +1,30 @@
 [
     {
+        "date": "2026-07-16",
+        "description": [
+            {
+                "en": "Applying a ready-made theme now only changes the site's shape (corners, shadows, navigation) - your chosen colors and fonts are kept",
+                "fr": "L'application d'un thème prêt à l'emploi ne change désormais que la forme du site (arrondis, ombres, navigation) - vos couleurs et polices sont conservées",
+                "es": "Aplicar un tema predefinido ahora solo cambia la forma del sitio (bordes, sombras, navegación) - tus colores y fuentes se conservan"
+            },
+            {
+                "en": "You can now preview a theme before applying it",
+                "fr": "Vous pouvez désormais prévisualiser un thème avant de l'appliquer",
+                "es": "Ahora puede previsualizar un tema antes de aplicarlo"
+            },
+            {
+                "en": "The Edit and View buttons in back-office lists are now more compact icons",
+                "fr": "Les boutons Modifier et Voir dans les listes du back-office sont désormais des icônes plus compactes",
+                "es": "Los botones Editar y Ver en las listas del back-office ahora son iconos más compactos"
+            },
+            {
+                "en": "Fixed some back-office menu links that could point to the wrong page",
+                "fr": "Correction de certains liens du menu du back-office qui pouvaient pointer vers la mauvaise page",
+                "es": "Corrección de algunos enlaces del menú del back-office que podían apuntar a la página incorrecta"
+            }
+        ]
+    },
+    {
         "date": "2026-07-15",
         "description": [
             {

@@ -14,6 +14,7 @@ use c975L\ConfigBundle\Entity\Config;
 use c975L\ConfigBundle\Management\ThemePresetRegistry;
 use c975L\ConfigBundle\Repository\ConfigRepository;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
+use c975L\ConfigBundle\Tests\Repository\ConfigRepositoryFindOneBySlugFixture;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\QueryBuilder;
@@ -21,6 +22,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Context\CrudContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
@@ -180,11 +182,18 @@ class ThemeCrudControllerTest extends TestCase
 
     // --- configureActions -----------------------------------------------------------------------------------
 
+    // A real EasyAdmin runtime pre-populates default actions (EDIT...) before calling configureActions() -
+    // the controller's update(EDIT) call assumes it already exists on PAGE_INDEX (it adds DETAIL itself)
+    private function createActionsWithDefaults(): Actions
+    {
+        return Actions::new()->add(Crud::PAGE_INDEX, Action::EDIT);
+    }
+
     public function testConfigureActionsBuildsWithoutError(): void
     {
         $controller = $this->createController();
 
-        $actions = $controller->configureActions(Actions::new());
+        $actions = $controller->configureActions($this->createActionsWithDefaults());
 
         $this->assertInstanceOf(Actions::class, $actions);
     }
@@ -192,30 +201,81 @@ class ThemeCrudControllerTest extends TestCase
     public function testConfigureActionsBuildsWithRegisteredPresets(): void
     {
         $registry = new ThemePresetRegistry([$this->createPresetProvider([
-            'default' => ['label' => 'label.theme_preset_default', 'values' => ['theme-color-primary' => 'rgb(11, 55, 178)']],
+            'default' => ['label' => 'label.theme_preset_default', 'stylesheet' => ''],
         ])]);
         $controller = $this->createController(themePresetRegistry: $registry);
 
-        $actions = $controller->configureActions(Actions::new());
+        $actions = $controller->configureActions($this->createActionsWithDefaults());
 
         $this->assertInstanceOf(Actions::class, $actions);
     }
 
     // Manual field editing (colors, fonts, mode) is reserved to ROLE_SUPER_ADMIN even for
-    // non-restricted values; applying a preset (vetted values only) stays at the lower editor level
+    // non-restricted values; applying a preset (shape only) stays at the lower editor level
     public function testConfigureActionsRestrictsManualEditToSuperAdminAndPresetsToEditor(): void
     {
         $configService = $this->createConfigService();
         $registry = new ThemePresetRegistry([$this->createPresetProvider([
-            'default' => ['label' => 'label.theme_preset_default', 'values' => ['theme-color-primary' => 'rgb(11, 55, 178)']],
+            'default' => ['label' => 'label.theme_preset_default', 'stylesheet' => ''],
         ])]);
         $controller = $this->createController(configService: $configService, themePresetRegistry: $registry);
 
-        $actions = $controller->configureActions(Actions::new());
+        $actions = $controller->configureActions($this->createActionsWithDefaults());
 
         $permissions = $actions->getAsDto(null)->getActionPermissions();
         $this->assertSame('ROLE_SUPER_ADMIN', $permissions[Action::EDIT]);
         $this->assertSame('site-role-editor', $permissions['applyPreset_default']);
+    }
+
+    // Preview lets an editor judge a preset before committing to "Apply preset" - only shown when the
+    // owning bundle's provider supplies a ready-made link (see SiteThemePresetProvider), since only it
+    // knows which page/route can render one
+    public function testConfigureActionsAddsPreviewActionWhenPresetDeclaresPreviewUrl(): void
+    {
+        $registry = new ThemePresetRegistry([$this->createPresetProvider([
+            'default' => [
+                'label' => 'label.theme_preset_default',
+                'values' => ['theme-color-primary' => 'rgb(11, 55, 178)'],
+                'previewUrl' => '/pages/home/preview?preset=default',
+            ],
+        ])]);
+        $controller = $this->createController(themePresetRegistry: $registry);
+
+        $actions = $controller->configureActions($this->createActionsWithDefaults());
+
+        $permissions = $actions->getAsDto(null)->getActionPermissions();
+        $this->assertSame('site-role-editor', $permissions['previewPreset_default']);
+    }
+
+    public function testConfigureActionsSkipsPreviewActionWhenPresetHasNoPreviewUrl(): void
+    {
+        $registry = new ThemePresetRegistry([$this->createPresetProvider([
+            'default' => ['label' => 'label.theme_preset_default', 'values' => ['theme-color-primary' => 'rgb(11, 55, 178)']],
+        ])]);
+        $controller = $this->createController(themePresetRegistry: $registry);
+
+        $actions = $controller->configureActions($this->createActionsWithDefaults());
+
+        $permissions = $actions->getAsDto(null)->getActionPermissions();
+        $this->assertArrayNotHasKey('previewPreset_default', $permissions);
+    }
+
+    // Index-page row actions become icon-only (see EasyAdminActionHelper::toIconOnly()), the label
+    // moving to the hover "title" instead
+    public function testConfigureActionsSetsEditAndDetailIconOnlyOnIndexPage(): void
+    {
+        $controller = $this->createController();
+
+        $actions = $controller->configureActions($this->createActionsWithDefaults());
+
+        $actionConfigDto = $actions->getAsDto(Crud::PAGE_INDEX);
+        $editAction = $actionConfigDto->getAction(Crud::PAGE_INDEX, Action::EDIT);
+        $detailAction = $actionConfigDto->getAction(Crud::PAGE_INDEX, Action::DETAIL);
+
+        $this->assertFalse($editAction->getLabel());
+        $this->assertSame(['title' => 'action.edit'], $editAction->getHtmlAttributes());
+        $this->assertFalse($detailAction->getLabel());
+        $this->assertSame(['title' => 'action.detail'], $detailAction->getHtmlAttributes());
     }
 
     // --- denyAccessToRestrictedConfig / detail / edit ----------------------------------------------------------
@@ -289,19 +349,14 @@ class ThemeCrudControllerTest extends TestCase
 
     // --- applyPreset ------------------------------------------------------------------------------------------
 
-    public function testApplyPresetOverwritesMatchingConfigsAndInvalidatesCache(): void
+    public function testApplyPresetOverwritesThemeStylesheetAndInvalidatesCache(): void
     {
-        $primary = (new Config())->setSlug('theme-color-primary')->setValue(null);
-        $secondary = (new Config())->setSlug('theme-color-secondary')->setValue(null);
+        $stylesheet = (new Config())->setSlug('theme-stylesheet')->setValue(null);
 
-        $configRepository = $this->createStub(ConfigRepository::class);
-        $configRepository->method('findByGroup')->willReturn([$primary, $secondary]);
+        $configRepository = new ConfigRepositoryFindOneBySlugFixture($stylesheet);
 
         $registry = new ThemePresetRegistry([$this->createPresetProvider([
-            'default' => ['label' => 'label.theme_preset_default', 'values' => [
-                'theme-color-primary' => 'rgb(11, 55, 178)',
-                'theme-color-secondary' => 'rgb(218, 126, 57)',
-            ]],
+            'warm' => ['label' => 'label.theme_preset_warm', 'stylesheet' => 'warm'],
         ])]);
 
         $configService = $this->createMock(ConfigServiceInterface::class);
@@ -320,17 +375,48 @@ class ThemeCrudControllerTest extends TestCase
         $entityManager = $this->createMock(EntityManagerInterface::class);
         $entityManager->expects($this->once())->method('flush');
 
-        $controller->applyPreset(new Request(query: ['preset' => 'default']), $entityManager);
+        $controller->applyPreset(new Request(query: ['preset' => 'warm']), $entityManager);
 
-        $this->assertSame('rgb(11, 55, 178)', $primary->getValue());
-        $this->assertSame('rgb(218, 126, 57)', $secondary->getValue());
-        $this->assertNotNull($primary->getModification());
+        $this->assertSame('warm', $stylesheet->getValue());
+        $this->assertNotNull($stylesheet->getModification());
+    }
+
+    // A preset's 'stylesheet' is nullable (see ThemePresetProviderInterface) - a null value must leave
+    // the current stylesheet untouched, not blank it, since colors/fonts stay entirely admin-owned
+    public function testApplyPresetLeavesStylesheetUntouchedWhenPresetStylesheetIsNull(): void
+    {
+        $stylesheet = (new Config())->setSlug('theme-stylesheet')->setValue('warm');
+
+        $configRepository = new ConfigRepositoryFindOneBySlugFixture($stylesheet);
+
+        $registry = new ThemePresetRegistry([$this->createPresetProvider([
+            'colors-only' => ['label' => 'label.theme_preset_colors_only', 'stylesheet' => null],
+        ])]);
+
+        $configService = $this->createMock(ConfigServiceInterface::class);
+        $configService->method('get')->willReturn('site-role-admin');
+        $configService->expects($this->never())->method('invalidateCache');
+
+        $controller = $this->createController(
+            configService: $configService,
+            themePresetRegistry: $registry,
+            configRepository: $configRepository,
+        );
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+        ]));
+
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager->expects($this->never())->method('flush');
+
+        $controller->applyPreset(new Request(query: ['preset' => 'colors-only']), $entityManager);
+
+        $this->assertSame('warm', $stylesheet->getValue());
     }
 
     public function testApplyPresetDoesNothingForUnknownPreset(): void
     {
-        $configRepository = $this->createStub(ConfigRepository::class);
-        $configRepository->method('findByGroup')->willReturn([]);
+        $configRepository = new ConfigRepositoryFindOneBySlugFixture(null);
 
         $configService = $this->createMock(ConfigServiceInterface::class);
         $configService->method('get')->willReturn('site-role-admin');

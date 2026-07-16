@@ -278,13 +278,9 @@
                 <source>label.presets</source>
                 <target>Presets</target>
             </trans-unit>
-            <trans-unit id="72">
-                <source>label.theme_preset_default</source>
-                <target>Default</target>
-            </trans-unit>
             <trans-unit id="73">
                 <source>confirm.apply_preset</source>
-                <target>Apply this preset? It overwrites the current theme colors and fonts.</target>
+                <target>Apply this preset? It switches the site's visual shape (rounded corners, shadows, navigation...) - your colors and fonts are not affected.</target>
             </trans-unit>
             <trans-unit id="74">
                 <source>label.invalid_theme_color</source>
@@ -294,9 +290,9 @@
                 <source>help.value_theme_color</source>
                 <target>Hex (#b30000), rgb()/rgba(), hsl()/hsla(), or a CSS color name (e.g. tomato)</target>
             </trans-unit>
-            <trans-unit id="76">
-                <source>label.theme_preset_warm_artisan</source>
-                <target>Warm &amp; artisan</target>
+            <trans-unit id="78">
+                <source>action.preview_preset</source>
+                <target>Preview: %label%</target>
             </trans-unit>
         </body>
     </file>

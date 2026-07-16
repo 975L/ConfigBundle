@@ -279,13 +279,9 @@
                 <source>label.presets</source>
                 <target>Thèmes</target>
             </trans-unit>
-            <trans-unit id="72">
-                <source>label.theme_preset_default</source>
-                <target>Par défaut</target>
-            </trans-unit>
             <trans-unit id="73">
                 <source>confirm.apply_preset</source>
-                <target>Appliquer ce thème ? Les couleurs et polices actuelles seront écrasées.</target>
+                <target>Appliquer ce thème ? Il change la forme visuelle du site (arrondis, ombres, navigation...) - vos couleurs et polices ne sont pas modifiées.</target>
             </trans-unit>
             <trans-unit id="74">
                 <source>label.invalid_theme_color</source>
@@ -295,9 +291,9 @@
                 <source>help.value_theme_color</source>
                 <target>Hexadécimal (#b30000), rgb()/rgba(), hsl()/hsla(), ou un nom de couleur CSS (ex. tomato)</target>
             </trans-unit>
-            <trans-unit id="76">
-                <source>label.theme_preset_warm_artisan</source>
-                <target>Chaleureux &amp; artisan</target>
+            <trans-unit id="78">
+                <source>action.preview_preset</source>
+                <target>Aperçu : %label%</target>
             </trans-unit>
         </body>
     </file>

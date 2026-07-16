@@ -10,6 +10,7 @@
 namespace c975L\ConfigBundle\Controller\Management;
 
 use c975L\ConfigBundle\Entity\Config;
+use c975L\ConfigBundle\Management\EasyAdminActionHelper;
 use c975L\ConfigBundle\Management\ThemePresetRegistry;
 use c975L\ConfigBundle\Repository\ConfigRepository;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
@@ -149,9 +150,15 @@ class ThemeCrudController extends AbstractCrudController
             // EDIT permission below), so it's allowed at the lower site-role-editor level
             $permission = $this->configService->get('site-role-editor');
             foreach ($presets as $id => $preset) {
+                // 'label' belongs to whichever bundle contributed the preset (see
+                // ThemePresetProviderInterface), not necessarily this bundle's own 'config' domain -
+                // 'config' is only the fallback for a provider that hasn't declared one
+                $domain = $preset['domain'] ?? 'config';
+                $label = $this->translator->trans($preset['label'], [], $domain);
+
                 $actionName = 'applyPreset_' . $id;
                 $presetsGroup->addAction(
-                    Action::new($actionName, $this->translator->trans($preset['label'], [], 'config'))
+                    Action::new($actionName, $label)
                         ->linkToUrl(fn () => $this->adminUrlGenerator
                             ->setController(self::class)
                             ->setAction('applyPreset')
@@ -160,6 +167,23 @@ class ThemeCrudController extends AbstractCrudController
                         ->askConfirmation(t('confirm.apply_preset', [], 'config'))
                 );
                 $actions->setPermission($actionName, $permission);
+
+                // Lets an editor judge the preset's look (colors/fonts/shape, demo layout) before
+                // committing to it - a ready-made link built by the owning bundle (see
+                // SiteThemePresetProvider), since only it knows which page/route can render it
+                $previewUrl = $preset['previewUrl'] ?? null;
+                if (null !== $previewUrl) {
+                    $previewActionName = 'previewPreset_' . $id;
+                    $presetsGroup->addAction(
+                        Action::new(
+                            $previewActionName,
+                            $this->translator->trans('action.preview_preset', ['%label%' => $label], 'config')
+                        )
+                            ->linkToUrl($previewUrl)
+                            ->setHtmlAttributes(['target' => '_blank'])
+                    );
+                    $actions->setPermission($previewActionName, $permission);
+                }
             }
 
             $actions->add(Crud::PAGE_INDEX, $presetsGroup);
@@ -167,6 +191,14 @@ class ThemeCrudController extends AbstractCrudController
 
         return $actions
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
+            ->update(Crud::PAGE_INDEX, Action::EDIT, fn (Action $action) => EasyAdminActionHelper::toIconOnly(
+                $action,
+                $this->translator->trans('action.edit', [], 'EasyAdminBundle'),
+            ))
+            ->update(Crud::PAGE_INDEX, Action::DETAIL, fn (Action $action) => EasyAdminActionHelper::toIconOnly(
+                $action,
+                $this->translator->trans('action.detail', [], 'EasyAdminBundle'),
+            ))
             // Manual field-by-field editing (colors, fonts, mode) is reserved to ROLE_SUPER_ADMIN,
             // even for non-restricted values - editors/admins may only apply a vetted preset above
             ->setPermission(Action::EDIT, 'ROLE_SUPER_ADMIN')
@@ -200,36 +232,25 @@ class ThemeCrudController extends AbstractCrudController
         return parent::edit($context);
     }
 
-    // Bulk-overwrites the current theme-* config values with a preset's, in a single flush - the
-    // existing ThemeVariablesCssListener (already listening to postUpdate) regenerates site-theme.css
+    // Overwrites theme-stylesheet (the site's visual "shape" - radius/shadows/nav/footer, see
+    // StylesheetProvider) with the preset's - the existing ThemeVariablesCssListener (already
+    // listening to postUpdate) regenerates site-theme.css. Colors and fonts are never touched here:
+    // they stay entirely admin-owned (see configureFields()), so a preset never overwrites values
+    // the admin has deliberately chosen - it only ever switches the shape.
     #[AdminRoute('/apply-preset')]
     public function applyPreset(Request $request, EntityManagerInterface $entityManager): RedirectResponse
     {
         $this->denyAccessUnlessGranted($this->configService->get('site-role-editor'));
 
         $preset = $this->themePresetRegistry->get((string) $request->query->get('preset'));
-        if (null !== $preset) {
-            $configsBySlug = [];
-            foreach ($this->configRepository->findByGroup(Config::GROUP_THEME) as $config) {
-                $configsBySlug[$config->getSlug()] = $config;
-            }
+        $config = null !== $preset ? $this->configRepository->findOneBySlug('theme-stylesheet') : null;
 
-            // "stylesheet" (page-template look) rides along with "values" (colors/fonts) so picking
-            // a preset switches the whole site design in one action - only applied if the preset
-            // actually declares the key, so color-only presets don't touch it
-            $values = $preset['values'];
-            if (array_key_exists('stylesheet', $preset)) {
-                $values['theme-stylesheet'] = $preset['stylesheet'];
-            }
-
-            foreach ($values as $slug => $value) {
-                if (isset($configsBySlug[$slug])) {
-                    $configsBySlug[$slug]->setValue($value);
-                    $configsBySlug[$slug]->setModification(new \DateTime());
-                    $this->setUser($configsBySlug[$slug]);
-                }
-            }
-
+        // A preset with no 'stylesheet' (nullable per ThemePresetProviderInterface) leaves the
+        // current stylesheet untouched, rather than blanking it
+        if (null !== $config && null !== $preset['stylesheet']) {
+            $config->setValue($preset['stylesheet']);
+            $config->setModification(new \DateTime());
+            $this->setUser($config);
             $entityManager->flush();
             $this->configService->invalidateCache();
         }

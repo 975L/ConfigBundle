@@ -12,6 +12,7 @@ namespace c975L\ConfigBundle\Controller\Management;
 use c975L\ConfigBundle\Entity\Config;
 use c975L\ConfigBundle\Management\AlertBuilder;
 use c975L\ConfigBundle\Management\ConfigAlertProvider;
+use c975L\ConfigBundle\Management\EasyAdminActionHelper;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\ConfigBundle\Service\Export\ExportFormat;
 use c975L\ConfigBundle\Service\Export\TableExporter;
@@ -307,6 +308,14 @@ class ConfigCrudController extends AbstractCrudController
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->add(Crud::PAGE_INDEX, $exportGroup)
             ->add(Crud::PAGE_INDEX, $toggleAction)
+            ->update(Crud::PAGE_INDEX, Action::EDIT, fn (Action $action) => EasyAdminActionHelper::toIconOnly(
+                $action,
+                $this->translator->trans('action.edit', [], 'EasyAdminBundle'),
+            ))
+            ->update(Crud::PAGE_INDEX, Action::DETAIL, fn (Action $action) => EasyAdminActionHelper::toIconOnly(
+                $action,
+                $this->translator->trans('action.detail', [], 'EasyAdminBundle'),
+            ))
             ->setPermission('exportCsv', $this->configService->get('site-role-admin'))
             ->setPermission('toggleSensitive', $this->configService->get('site-role-admin'))
             ->setPermission('exportSql', 'ROLE_SUPER_ADMIN')

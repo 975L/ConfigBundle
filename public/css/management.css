@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /*
  * (c) 2026: 975L <contact@975l.com>
  * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
@@ -27,4 +28,11 @@ ul {
   list-style: url(/bundles/c975lsite/icons/angle-right.svg);
 }
 
-/*# sourceMappingURL=management.css.map */
+/* A sidebar link leaving the admin entirely (see MenuBuilder/MenuProviderInterface's optional "target"
+   link key) gets a small external-link glyph automatically - a plain Unicode character, not an icon-font
+   glyph, so it doesn't depend on whichever icon set/version a menu item's own "icon" happens to use. */
+a.menu-item-contents[target=_blank]::after {
+  content: "↗";
+  margin-left: 0.35em;
+  opacity: 0.6;
+}

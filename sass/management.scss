@@ -27,3 +27,12 @@
 ul {
     list-style: url(/bundles/c975lsite/icons/angle-right.svg);
 }
+
+/* A sidebar link leaving the admin entirely (see MenuBuilder/MenuProviderInterface's optional "target"
+   link key) gets a small external-link glyph automatically - a plain Unicode character, not an icon-font
+   glyph, so it doesn't depend on whichever icon set/version a menu item's own "icon" happens to use. */
+a.menu-item-contents[target="_blank"]::after {
+    content: '\2197';
+    margin-left: .35em;
+    opacity: .6;
+}

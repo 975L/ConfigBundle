@@ -278,13 +278,9 @@
                 <source>label.presets</source>
                 <target>Temas</target>
             </trans-unit>
-            <trans-unit id="72">
-                <source>label.theme_preset_default</source>
-                <target>Por defecto</target>
-            </trans-unit>
             <trans-unit id="73">
                 <source>confirm.apply_preset</source>
-                <target>¿Aplicar este tema? Los colores y fuentes actuales serán sobrescritos.</target>
+                <target>¿Aplicar este tema? Cambia la forma visual del sitio (bordes, sombras, navegación...) - tus colores y fuentes no se ven afectados.</target>
             </trans-unit>
             <trans-unit id="74">
                 <source>label.invalid_theme_color</source>
@@ -294,9 +290,9 @@
                 <source>help.value_theme_color</source>
                 <target>Hexadecimal (#b30000), rgb()/rgba(), hsl()/hsla(), o un nombre de color CSS (ej. tomato)</target>
             </trans-unit>
-            <trans-unit id="76">
-                <source>label.theme_preset_warm_artisan</source>
-                <target>Cálido y artesanal</target>
+            <trans-unit id="78">
+                <source>action.preview_preset</source>
+                <target>Vista previa: %label%</target>
             </trans-unit>
         </body>
     </file>

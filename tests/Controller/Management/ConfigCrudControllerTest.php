@@ -22,7 +22,9 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Context\CrudContext;
@@ -335,9 +337,38 @@ class ConfigCrudControllerTest extends TestCase
 
         $controller = $this->createController(requestStack: $requestStack);
 
-        $actions = $controller->configureActions(Actions::new());
+        // A real EasyAdmin runtime pre-populates default actions (EDIT, DETAIL...) before calling
+        // configureActions() - update() below assumes EDIT/DETAIL already exist on PAGE_INDEX
+        $actions = $controller->configureActions(
+            Actions::new()
+                ->add(Crud::PAGE_INDEX, Action::EDIT)
+        );
 
         $this->assertInstanceOf(Actions::class, $actions);
+    }
+
+    // Index-page row actions become icon-only (see EasyAdminActionHelper::toIconOnly()), the label
+    // moving to the hover "title" instead
+    public function testConfigureActionsSetsEditAndDetailIconOnlyOnIndexPage(): void
+    {
+        $requestStack = new RequestStack();
+        $requestStack->push(new Request());
+
+        $controller = $this->createController(requestStack: $requestStack);
+
+        $actions = $controller->configureActions(
+            Actions::new()
+                ->add(Crud::PAGE_INDEX, Action::EDIT)
+        );
+
+        $actionConfigDto = $actions->getAsDto(Crud::PAGE_INDEX);
+        $editAction = $actionConfigDto->getAction(Crud::PAGE_INDEX, Action::EDIT);
+        $detailAction = $actionConfigDto->getAction(Crud::PAGE_INDEX, Action::DETAIL);
+
+        $this->assertFalse($editAction->getLabel());
+        $this->assertSame(['title' => 'action.edit'], $editAction->getHtmlAttributes());
+        $this->assertFalse($detailAction->getLabel());
+        $this->assertSame(['title' => 'action.detail'], $detailAction->getHtmlAttributes());
     }
 
     // --- configureFilters -----------------------------------------------------------------------------------

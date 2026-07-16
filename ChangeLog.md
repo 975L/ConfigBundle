@@ -1,5 +1,18 @@
 # ChangeLog
 
+## v5.7
+
+- `ThemeCrudController::applyPreset()` now only ever overwrites `theme-stylesheet`, colors/fonts stay admin-owned (16/07/2026) [BC-Break]
+- `ThemeCrudController` now translates a preset's label in the domain declared by its provider, falling back to `config` (16/07/2026) [BC-Break]
+- Removed the now-misplaced `theme_preset_default`/`warm_artisan`/`blueprint` translations (moved to SiteBundle) (16/07/2026) [BC-Break]
+- Added a "Preview" action per theme preset when the provider supplies a `previewUrl` (16/07/2026)
+- Added `label.theme_preset_blueprint` translation for SiteBundle's new `blueprint` theme preset (16/07/2026)
+- `ThemePresetProviderInterface`'s `previewUrl` is now a lazy callable, fixing a router deadlock that 500'd `/management` (16/07/2026) [BC-Break]
+- Fixed `MenuBuilder` resolving a link's URL through EasyAdmin's `AdminUrlGenerator`, now uses the plain router (16/07/2026) [BC-Break]
+- Added an optional `target` key to `MenuProviderInterface::getLinks()`, shown with an external-link glyph (16/07/2026)
+- Added an optional `url` key to `MenuProviderInterface::getLinks()`, a literal absolute URL used as-is (16/07/2026)
+- Added `EasyAdminActionHelper::toIconOnly()`, index-page inline row actions (Edit/Detail) now show icon-only with the label as hover title (16/07/2026)
+
 ## v5.6
 
 - Added `theme` config group and `ThemeCrudController` for managing theme CSS variables (colors, fonts, light/dark mode) in their own dashboard view (15/07/2026)
