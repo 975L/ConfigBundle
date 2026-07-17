@@ -71,19 +71,36 @@ class CheckDeprecationsCommand extends Command
         foreach (array_filter(glob($this->projectDir . '/vendor/c975l/*') ?: [], 'is_dir') as $dir) {
             $sourceDirs[basename($dir)] = $dir . '/src';
         }
-        $report = $this->buildReport($messages, $sourceDirs);
+        // Only messages tied to app/c975L source (confirmed or possible) are worth surfacing - one
+        // with neither is surely a third-party package's own concern, nothing we can act on
+        $report = array_values(array_filter(
+            $this->buildReport($messages, $sourceDirs),
+            fn (array $entry) => $entry['hits'] || $entry['possibleHits']
+        ));
+
+        if (!$report) {
+            $io->success('Aucune dépréciation actionnable trouvée dans ' . $logFile . ' - elles viennent toutes de packages tiers.');
+
+            return Command::SUCCESS;
+        }
 
         foreach ($report as $entry) {
             $io->section(sprintf('[%dx] %s', $entry['count'], $entry['message']));
             if ($entry['hits']) {
                 $io->warning('ACTIONNABLE - trouvé dans votre code (app ou bundle c975L) :');
                 $io->listing($entry['hits']);
-            } else {
-                $io->text('Non localisé dans src/ ni dans vendor/c975l - vient probablement d\'un package tiers.');
+            }
+            if ($entry['possibleHits']) {
+                $io->note('À vérifier - namespace de la classe dépréciée retrouvé, sans certitude que ce soit elle qui est utilisée :');
+                $io->listing($entry['possibleHits']);
             }
         }
 
-        $io->success(sprintf('%d dépréciation(s) unique(s), %d occurrence(s) au total.', count($report), array_sum($messages)));
+        $io->success(sprintf(
+            '%d dépréciation(s) actionnable(s), %d occurrence(s) au total.',
+            count($report),
+            array_sum(array_column($report, 'count'))
+        ));
 
         return Command::SUCCESS;
     }
@@ -95,44 +112,73 @@ class CheckDeprecationsCommand extends Command
         $report = [];
         foreach ($messages as $message => $count) {
             $hits = [];
-            foreach ($this->extractTokens($message) as $token) {
+            $possibleHits = [];
+            foreach ($this->extractTokens($message) as $token => $exact) {
                 foreach ($sourceDirs as $label => $dir) {
                     if (!is_dir($dir)) {
                         continue;
                     }
                     $found = shell_exec(sprintf('grep -Frl %s %s 2>/dev/null', escapeshellarg($token), escapeshellarg($dir)));
                     foreach (array_filter(explode("\n", trim((string) $found))) as $file) {
-                        $hits[$label . ' -> ' . str_replace($this->projectDir . '/', '', $file)] = true;
+                        $key = $label . ' -> ' . str_replace($this->projectDir . '/', '', $file);
+                        if ($exact) {
+                            $hits[$key] = true;
+                        } else {
+                            $possibleHits[$key] = true;
+                        }
                     }
                 }
             }
 
-            $report[] = ['message' => $message, 'count' => $count, 'hits' => array_keys($hits)];
+            // A namespace-only match on a file already confirmed by an exact FQCN match adds no signal
+            $possibleHits = array_diff_key($possibleHits, $hits);
+
+            $report[] = [
+                'message' => $message,
+                'count' => $count,
+                'hits' => array_keys($hits),
+                'possibleHits' => array_keys($possibleHits),
+            ];
         }
 
-        usort($report, fn (array $a, array $b) => (count($b['hits']) <=> count($a['hits'])) ?: ($b['count'] <=> $a['count']));
+        usort(
+            $report,
+            fn (array $a, array $b) => (count($b['hits']) <=> count($a['hits']))
+                ?: (count($b['possibleHits']) <=> count($a['possibleHits']))
+                ?: ($b['count'] <=> $a['count'])
+        );
 
         return $report;
     }
 
-    // Candidate tokens: fully-qualified class names and composer package names quoted in the message,
-    // plus each FQCN's parent namespace - code that imports it via "use Foo\Bar\Annotation as X;" and
-    // references "X\Uploadable" never spells out the full "Foo\Bar\Annotation\Uploadable" string,
-    // only the "use" line does
+    // Candidate tokens: fully-qualified class names and composer package names quoted in the message
+    // are "exact" (high-confidence) matches. Each FQCN's parent namespace is kept as a lower-confidence
+    // token - code that imports it via "use Foo\Bar\Annotation as X;" and references "X\Uploadable"
+    // never spells out the full "Foo\Bar\Annotation\Uploadable" string, only the "use" line does - but
+    // a namespace shared by unrelated sibling classes (e.g. "use Foo\Bar\Annotation\SomethingElse;")
+    // matches just as easily without actually using the deprecated class, hence "possible" and not
+    // "actionable"
     private function extractTokens(string $message): array
     {
         preg_match_all('/"([A-Za-z0-9_]+(?:\\\\[A-Za-z0-9_]+)+)"/', $message, $fqcnMatches);
         preg_match_all('/\b([a-z0-9_-]+\/[a-z0-9_-]+)\b/', $message, $pkgMatches);
-        $tokens = array_merge($fqcnMatches[1], $pkgMatches[1]);
+
+        $tokens = [];
+        foreach (array_merge($fqcnMatches[1], $pkgMatches[1]) as $token) {
+            $tokens[$token] = true;
+        }
 
         foreach ($fqcnMatches[1] as $fqcn) {
             $parts = explode('\\', $fqcn);
             if (count($parts) > 1) {
                 array_pop($parts);
-                $tokens[] = implode('\\', $parts);
+                $namespace = implode('\\', $parts);
+                if (!isset($tokens[$namespace])) {
+                    $tokens[$namespace] = false;
+                }
             }
         }
 
-        return array_unique($tokens);
+        return $tokens;
     }
 }

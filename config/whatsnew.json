@@ -1,5 +1,15 @@
 [
     {
+        "date": "2026-07-17",
+        "description": [
+            {
+                "en": "The ready-made theme presets option is temporarily hidden while we improve it",
+                "fr": "L'option des thèmes prêts à l'emploi est temporairement masquée le temps d'une amélioration",
+                "es": "La opción de temas predefinidos está temporalmente oculta mientras la mejoramos"
+            }
+        ]
+    },
+    {
         "date": "2026-07-16",
         "description": [
             {

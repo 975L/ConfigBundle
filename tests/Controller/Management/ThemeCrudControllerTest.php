@@ -260,6 +260,22 @@ class ThemeCrudControllerTest extends TestCase
         $this->assertArrayNotHasKey('previewPreset_default', $permissions);
     }
 
+    // The presets action group is temporarily hidden pending rework - applyPreset() itself and its
+    // permission stay reachable (see testConfigureActionsRestrictsManualEditToSuperAdminAndPresetsToEditor),
+    // only the index-page button is not displayed
+    public function testConfigureActionsDoesNotAddPresetsGroupToIndexPage(): void
+    {
+        $registry = new ThemePresetRegistry([$this->createPresetProvider([
+            'default' => ['label' => 'label.theme_preset_default', 'stylesheet' => ''],
+        ])]);
+        $controller = $this->createController(themePresetRegistry: $registry);
+
+        $actions = $controller->configureActions($this->createActionsWithDefaults());
+
+        $actionConfigDto = $actions->getAsDto(Crud::PAGE_INDEX);
+        $this->assertNull($actionConfigDto->getAction(Crud::PAGE_INDEX, 'presets'));
+    }
+
     // Index-page row actions become icon-only (see EasyAdminActionHelper::toIconOnly()), the label
     // moving to the hover "title" instead
     public function testConfigureActionsSetsEditAndDetailIconOnlyOnIndexPage(): void

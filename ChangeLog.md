@@ -1,5 +1,11 @@
 # ChangeLog
 
+## v5.7.1
+
+- `c975l:deprecations:check` now distinguishes exact FQCN matches from namespace-only "possible" matches, shown separately (17/07/2026)
+- `c975l:deprecations:check` no longer reports messages with no match at all in app/c975L source, since nothing can be done about a third-party package's own deprecations (17/07/2026)
+- Temporarily hid the theme presets action group on the Theme page pending rework, `applyPreset()` stays reachable (17/07/2026)
+
 ## v5.7
 
 - `ThemeCrudController::applyPreset()` now only ever overwrites `theme-stylesheet`, colors/fonts stay admin-owned (16/07/2026) [BC-Break]

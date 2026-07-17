@@ -186,7 +186,9 @@ class ThemeCrudController extends AbstractCrudController
                 }
             }
 
-            $actions->add(Crud::PAGE_INDEX, $presetsGroup);
+            // Temporarily hidden pending rework - the group/permissions are still built above and
+            // applyPreset() stays reachable, only the index button is not displayed
+            // $actions->add(Crud::PAGE_INDEX, $presetsGroup);
         }
 
         return $actions
