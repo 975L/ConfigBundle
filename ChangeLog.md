@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v5.7.2
+
+- `EasyAdminActionHelper::toIconOnly()` now merges with existing HTML attributes (eg. `target`) instead of overwriting them (17/07/2026)
+
 ## v5.7.1
 
 - `c975l:deprecations:check` now distinguishes exact FQCN matches from namespace-only "possible" matches, shown separately (17/07/2026)

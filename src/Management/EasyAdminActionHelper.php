@@ -16,6 +16,9 @@ class EasyAdminActionHelper
 {
     public static function toIconOnly(Action|ActionGroup $action, string $title): Action|ActionGroup
     {
-        return $action->setLabel(false)->setHtmlAttributes(['title' => $title]);
+        // Merges with existing attributes (eg. target) instead of overwriting them
+        $htmlAttributes = $action->getAsDto()->getHtmlAttributes();
+
+        return $action->setLabel(false)->setHtmlAttributes([...$htmlAttributes, 'title' => $title]);
     }
 }
