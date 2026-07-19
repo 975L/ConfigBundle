@@ -1,0 +1,38 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{# Intermediate "pick a group" screen shown by ConfigCrudController::index() whenever no "group" is
+   selected yet - one row per distinct group (translated via label.group_*), linking into the same
+   index filtered to it (?group=...). #}
+{% block main %}
+    <h1>{{ ('label.config'|trans({}, 'config')) }}</h1>
+
+    <p>{{ ('label.info_config'|trans({}, 'config')) }}</p>
+
+    {{ include('@c975LConfig/management/_alerts.html.twig', {
+        alerts: alerts|default([]),
+        title: alertsTitle|default(''),
+    }) }}
+
+    {% if counts|length > 0 %}
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>{{ ('label.group'|trans({}, 'config')) }}</th>
+                        <th>{{ ('label.group_items_count'|trans({}, 'config')) }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for group, count in counts %}
+                    <tr>
+                        <td>
+                            <a href="{{ ea_url().setAction('index').set('group', group) }}">{{ ('label.group_' ~ group)|trans({}, 'config') }}</a>
+                        </td>
+                        <td>{{ count }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+{% endblock main %}

@@ -16,6 +16,21 @@
                 "en": "Fixed the Edit/Detail icons sometimes stacking on two lines in the config list",
                 "fr": "Correction des icônes Modifier/Voir qui s'affichaient parfois sur deux lignes dans la liste des configurations",
                 "es": "Corregido que los iconos Editar/Ver aparecieran a veces en dos líneas en la lista de configuraciones"
+            },
+            {
+                "en": "The configuration list is now organized by category — pick one to see its entries, instead of scrolling one long list",
+                "fr": "La liste des configurations est désormais organisée par catégorie : choisissez-en une pour voir ses entrées, au lieu de faire défiler une longue liste",
+                "es": "La lista de configuraciones ahora está organizada por categorías: elige una para ver sus entradas, en lugar de desplazarte por una lista larga"
+            },
+            {
+                "en": "Theme settings (colors, fonts, light/dark mode) are now edited from the Configuration section instead of a separate Theme page, and site administrators can now edit them directly, not just super-administrators",
+                "fr": "Les réglages du thème (couleurs, polices, mode clair/sombre) se modifient désormais depuis la section Configuration, et non plus depuis une page Thème séparée, et les administrateurs du site peuvent désormais les modifier directement, pas seulement les super-administrateurs",
+                "es": "Los ajustes del tema (colores, fuentes, modo claro/oscuro) ahora se editan desde la sección Configuración en lugar de una página Tema aparte, y los administradores del sitio ya pueden editarlos directamente, no solo los superadministradores"
+            },
+            {
+                "en": "Fixed message-cleanup settings showing an untranslated category name in the configuration list",
+                "fr": "Correction de l'affichage d'un nom de catégorie non traduit pour les réglages de nettoyage des messages dans la liste des configurations",
+                "es": "Corregido que los ajustes de limpieza de mensajes mostraran un nombre de categoría sin traducir en la lista de configuraciones"
             }
         ]
     },

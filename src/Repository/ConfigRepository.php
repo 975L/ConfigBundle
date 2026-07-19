@@ -41,4 +41,26 @@ class ConfigRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    // Config count per group, respecting the same "sensitive"/"restricted" visibility rules as ConfigCrudController's own index query - backs its intermediate "pick a group" screen. Reads live DISTINCT group values rather than the fixed Config::GROUPS enum, so a group only present in data (e.g. a bundle's configs.json using a value not yet added to that enum) still shows up
+    public function countsByGroup(bool $isSensitive, bool $includeRestricted): array
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->select('c.group AS grp, COUNT(c.id) AS itemCount')
+            ->andWhere('c.group IS NOT NULL')
+            ->andWhere('c.isSensitive = :isSensitive')
+            ->setParameter('isSensitive', $isSensitive)
+            ->groupBy('c.group')
+            ->orderBy('c.group', 'ASC')
+        ;
+
+        if (!$includeRestricted) {
+            $qb->andWhere('c.isRestricted IS NULL OR c.isRestricted = :isRestricted')
+                ->setParameter('isRestricted', false);
+        }
+
+        $rows = $qb->getQuery()->getResult();
+
+        return array_combine(array_column($rows, 'grp'), array_column($rows, 'itemCount'));
+    }
 }

@@ -9,7 +9,6 @@
 namespace c975L\ConfigBundle\Tests\Management;
 
 use c975L\ConfigBundle\Controller\Management\ConfigCrudController;
-use c975L\ConfigBundle\Controller\Management\ThemeCrudController;
 use c975L\ConfigBundle\Management\MenuProvider;
 use c975L\ConfigBundle\Management\MenuProviderInterface;
 use PHPUnit\Framework\TestCase;
@@ -35,15 +34,14 @@ class MenuProviderTest extends TestCase
         $this->assertSame('config', $menus['config']['translation_domain']);
     }
 
-    public function testGetMenusExposesTheThemeCrudControllerEntry(): void
+    // Theme configs are edited via Config's own "theme" group (its picker screen) since ThemeCrudController was removed - no separate menu entry
+    public function testGetMenusDoesNotExposeASeparateThemeEntry(): void
     {
         $provider = new MenuProvider();
 
         $menus = $provider->getMenus();
 
-        $this->assertSame(ThemeCrudController::class, $menus['theme']['controller']);
-        $this->assertSame('label.theme', $menus['theme']['label']);
-        $this->assertSame('config', $menus['theme']['translation_domain']);
+        $this->assertArrayNotHasKey('theme', $menus);
     }
 
     public function testGetLinksExposesTheWhatsNewLink(): void

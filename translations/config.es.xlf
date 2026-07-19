@@ -298,6 +298,18 @@
                 <source>action.preview_preset</source>
                 <target>Vista previa: %label%</target>
             </trans-unit>
+            <trans-unit id="80">
+                <source>label.group_items_count</source>
+                <target>Número de elementos</target>
+            </trans-unit>
+            <trans-unit id="81">
+                <source>label.group_messenger</source>
+                <target>Messenger</target>
+            </trans-unit>
+            <trans-unit id="82">
+                <source>label.info_theme</source>
+                <target>Variables CSS del tema (colores, fuentes, modo claro/oscuro). La edición manual campo por campo está reservada a ROLE_SUPER_ADMIN; aplicar un preset desde la acción "Presets" sigue disponible desde el rol editor.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

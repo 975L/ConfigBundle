@@ -299,6 +299,18 @@
                 <source>action.preview_preset</source>
                 <target>Aperçu : %label%</target>
             </trans-unit>
+            <trans-unit id="80">
+                <source>label.group_items_count</source>
+                <target>Nombre d'éléments</target>
+            </trans-unit>
+            <trans-unit id="81">
+                <source>label.group_messenger</source>
+                <target>Messenger</target>
+            </trans-unit>
+            <trans-unit id="82">
+                <source>label.info_theme</source>
+                <target>Variables CSS du thème (couleurs, polices, mode clair/sombre). L'édition manuelle champ par champ est réservée à ROLE_SUPER_ADMIN ; un preset appliqué depuis l'action "Presets" reste accessible dès le rôle éditeur.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

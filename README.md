@@ -72,7 +72,7 @@ For `json`, `value` is the raw JSON-encoded string (e.g. `"[\"ROLE_ADMIN\",\"ROL
 Set `sensitive: true` for any entry that holds secrets (API keys, passwords, etc.) — the value is encrypted at rest and masked in the admin list.
 Set `restricted: true` on top of that for secrets shared across the whole install rather than per-site data — see [Restricting configs to ROLE_SUPER_ADMIN](#restricting-configs-to-role_super_admin).
 
-`group` is optional and clusters entries in the EasyAdmin list (filter + default sort). It must be one of the fixed values in `Config::GROUPS`, each backed by a `label.group_*` translation key:
+`group` is optional and clusters entries on the "pick a group" screen (see below). It must be one of the fixed values in `Config::GROUPS`, each backed by a `label.group_*` translation key:
 
 | Value | Meaning |
 | --- | --- |
@@ -89,6 +89,7 @@ Set `restricted: true` on top of that for secrets shared across the whole instal
 | `payment` | Payment provider keys (Stripe...) |
 | `theme` | Theme CSS variables (colors, fonts, light/dark mode) |
 | `ai` | AI-related settings (LLM providers, prompts...) |
+| `messenger` | Symfony Messenger cleanup settings |
 
 This list is closed on purpose so filtering stays useful; if none fits, leave `group` unset rather than inventing a new value (adding one requires extending `Config::GROUPS` and the matching translations in ConfigBundle itself).
 
@@ -128,9 +129,9 @@ php bin/console c975l:config:encrypt-sensitive
 
 The bundle registers a management dashboard at `/management`. Navigate to **Config** to view entries and edit their `value` — `label`, `slug`, `kind`, `group`, `severity`, and `description` are fixed by the bundle's `configs.json` and shown read-only; there is no manual creation or deletion, entries only come from `configs.json`.
 
-Entries in the `theme` group have their own **Theme** page instead, for the same reason (no manual creation/deletion, fixed by a bundle's `configs-css.json`) — kept separate so theme CSS variables (colors, fonts, light/dark mode) don't get mixed up with the general config list.
+**Config** opens on a "pick a group" screen (one row per distinct `group`, with its entry count) rather than one flat table of every entry — picking a group filters the familiar EasyAdmin grid down to just that group's entries, with a "← Config" action to go back. This keeps the list readable as more bundles/groups accumulate; the entry count shown per group respects both the current sensitive/non-sensitive view and, below `ROLE_SUPER_ADMIN`, excludes restricted entries the viewer wouldn't see anyway.
 
-The Theme page has its own permission tiers, stricter than the general Config page: `site-role-editor` can view the page and apply a preset (a vetted set of values from a `ThemePresetProviderInterface`), but hand-editing any individual field — even a non-restricted one like a color — requires `ROLE_SUPER_ADMIN`. Entries flagged `"restricted": true` (see [Restricting configs to ROLE_SUPER_ADMIN](#restricting-configs-to-role_super_admin)) are additionally hidden from the list entirely below `ROLE_SUPER_ADMIN`, same as on the Config page.
+Theme CSS variables (colors, fonts, light/dark mode, fixed by a bundle's `configs-css.json`) are entries like any other, under the `theme` group — reachable the same way, via **Config**'s "pick a group" screen, at the same `site-role-admin` permission as every other group (no dedicated page, no separate permission tier).
 
 Any entry with a `severity` and an empty `value` shows up as a colored alert (danger/warning/info) right on the `/management` home page, each linking directly to its edit form.
 
@@ -473,7 +474,7 @@ Make sure your bundle's `services.yaml` includes the `Management/` folder in its
 
 ## Contributing theme presets from other bundles
 
-The **Theme** page (see the `theme` group above) can show a "Presets" action group letting an admin switch the site's visual shape (page-template stylesheet: rounded corners, shadows, navigation/footer layout...) in one click. Colors and fonts stay entirely admin-owned — a preset never overwrites them.
+`ThemePresetProviderInterface` lets a satellite bundle contribute named presets — a vetted set of values (currently just the site's visual shape: rounded corners, shadows, navigation/footer layout...) an admin could switch to in one click, without touching colors/fonts (those stay entirely admin-owned, a preset never overwrites them). There is currently no admin UI applying a preset from the Config screen itself (the former **Theme** page's "Presets" action group was removed along with that dedicated page — theme entries are now just the `theme` group on the regular Config screen, see above); the interface still exists for any bundle-owned feature that reads presets directly (e.g. SiteBundle's own `?preset=<slug>` per-page preview).
 
 Satellite bundles contribute presets by implementing `ThemePresetProviderInterface` — no manual service tagging needed, `TaggedInterfacePass` auto-detects any class implementing it, same mechanism as `MenuProviderInterface` above:
 
@@ -503,9 +504,9 @@ Make sure your bundle's `services.yaml` includes the `Management/` folder in its
 
 **`domain`** is the translation domain owning `label` — your own bundle's, not necessarily `config` (which is only the fallback for a provider that doesn't declare one).
 
-**`previewUrl`** must be a lazy callable, not an already-generated string: `ThemePresetRegistry` is built as a constructor dependency while EasyAdmin is still enumerating routes, so eagerly calling the router at that point deadlocks. When present, a "Preview" action opens it in a new tab so an admin can judge the look before committing.
+**`previewUrl`** must be a lazy callable, not an already-generated string: `ThemePresetRegistry` is built as a constructor dependency while EasyAdmin is still enumerating routes, so eagerly calling the router at that point deadlocks.
 
-**Applying a preset** (`ThemeCrudController::applyPreset()`) overwrites, in a single flush, only the `theme-stylesheet` config with the preset's `stylesheet` value — colors and fonts are never touched, so a preset never overwrites values the admin has deliberately chosen. `stylesheet` is nullable: a preset that sets it to `null` leaves the current stylesheet untouched instead of blanking it.
+**`stylesheet`** is meant to be the only config a preset ever writes (the `theme-stylesheet` entry, under the `theme` group) — colors and fonts are never touched, so a preset never overwrites values the admin has deliberately chosen. It's nullable: a preset that sets it to `null` is expected to leave the current stylesheet untouched rather than blanking it.
 
 ## Reading config values
 

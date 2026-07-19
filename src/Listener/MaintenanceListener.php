@@ -37,10 +37,10 @@ class MaintenanceListener
              return;
         }
 
-        // /management and /login stay reachable so an admin can always log in and lift maintenance
+        // /management, /login and /m (its shortcut, see ManagementShortcutController) stay reachable so an admin can always log in and lift maintenance
         $request = $event->getRequest();
         $path = $request->getPathInfo();
-        if (str_starts_with($path, '/management') || str_starts_with($path, '/login')) {
+        if (str_starts_with($path, '/management') || str_starts_with($path, '/login') || '/m' === $path) {
             return;
         }
 

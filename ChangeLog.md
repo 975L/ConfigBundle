@@ -1,5 +1,13 @@
 # ChangeLog
 
+## v5.8
+
+- `Config` list now opens on a "pick a group" screen instead of one flat table (19/07/2026)
+- Removed the `group` EasyAdmin filter from the Config list (19/07/2026) [BC-Break]
+- Added `Config::GROUP_MESSENGER` config group and translation (19/07/2026)
+- Removed `ThemeCrudController` and its "Theme" menu entry, see UPGRADE.md (19/07/2026) [BC-Break]
+- Added `/m` shortcut redirecting to `/management`, reachable during maintenance mode too (19/07/2026)
+
 ## v5.7.3
 
 - Fixed `Config` index actions column wrapping Edit/Detail icons onto two lines (19/07/2026)

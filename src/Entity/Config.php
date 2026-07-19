@@ -50,6 +50,7 @@ class Config
     public const GROUP_PAYMENT = 'payment';
     public const GROUP_THEME = 'theme';
     public const GROUP_AI = 'ai';
+    public const GROUP_MESSENGER = 'messenger';
 
     public const GROUPS = [
         self::GROUP_SYSTEM,
@@ -65,6 +66,7 @@ class Config
         self::GROUP_PAYMENT,
         self::GROUP_THEME,
         self::GROUP_AI,
+        self::GROUP_MESSENGER,
     ];
 
     public const SEVERITY_DANGER = 'danger';

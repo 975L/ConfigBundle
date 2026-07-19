@@ -81,6 +81,10 @@ class MaintenanceListenerTest extends TestCase
         $loginEvent = $this->createRequestEvent('/login');
         $listener->onKernelRequest($loginEvent);
         $this->assertFalse($loginEvent->hasResponse());
+
+        $shortcutEvent = $this->createRequestEvent('/m');
+        $listener->onKernelRequest($shortcutEvent);
+        $this->assertFalse($shortcutEvent->hasResponse());
     }
 
     public function testDevToolRoutesStayReachableDuringMaintenance(): void

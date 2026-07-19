@@ -12,6 +12,7 @@ namespace c975L\ConfigBundle\Tests\Controller\Management;
 use c975L\ConfigBundle\Controller\Management\ConfigCrudController;
 use c975L\ConfigBundle\Entity\Config;
 use c975L\ConfigBundle\Management\ConfigAlertProvider;
+use c975L\ConfigBundle\Repository\ConfigRepository;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\ConfigBundle\Service\Export\ExportFormat;
 use c975L\ConfigBundle\Service\Export\TableExporter;
@@ -31,20 +32,60 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\CrudContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Orm\EntityRepositoryInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Provider\AdminContextProviderInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Provider\AdminContextProviderInterface as EaAdminContextProviderInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Registry\AdminControllerRegistryInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Router\AdminRouteGeneratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ConfigCrudControllerTest extends TestCase
 {
     use ControllerContainerTestTrait;
+
+    // AdminUrlGenerator is final - can't be mocked, so it's built for real with stubbed interface collaborators, same pattern as SiteBundle's PageCrudControllerTest/CollectionItemCrudControllerTest
+    private function createAdminUrlGenerator(): AdminUrlGenerator
+    {
+        $adminControllers = $this->createStub(AdminControllerRegistryInterface::class);
+        $adminControllers->method('getDashboardCount')->willReturn(1);
+        $adminControllers->method('getFirstDashboard')->willReturn('App\\Controller\\Management\\DashboardController');
+        $adminControllers->method('getFirstDashboardRoute')->willReturn('admin');
+
+        $routeGenerator = $this->createStub(AdminRouteGeneratorInterface::class);
+        $routeGenerator->method('findRouteName')->willReturn('admin');
+
+        $urlGenerator = $this->createStub(UrlGeneratorInterface::class);
+        $urlGenerator->method('generate')->willReturn('/management/config');
+
+        return new AdminUrlGenerator(
+            $this->createStub(EaAdminContextProviderInterface::class),
+            $urlGenerator,
+            $adminControllers,
+            $routeGenerator,
+            new ArrayAdapter(),
+        );
+    }
+
+    // Simulates browsing the index already scoped to a group (?group=...)
+    private function createRequestStackWithGroup(?string $group): RequestStack
+    {
+        $request = new Request(null !== $group ? ['group' => $group] : []);
+
+        $requestStack = new RequestStack();
+        $requestStack->push($request);
+
+        return $requestStack;
+    }
 
     private function createController(
         ?Security $security = null,
@@ -53,6 +94,8 @@ class ConfigCrudControllerTest extends TestCase
         ?Connection $connection = null,
         ?RequestStack $requestStack = null,
         ?TableExporter $tableExporter = null,
+        ?ConfigRepository $configRepository = null,
+        ?AdminUrlGenerator $adminUrlGenerator = null,
     ): ConfigCrudController {
         $translator = $this->createStub(TranslatorInterface::class);
         $translator->method('trans')->willReturnArgument(0);
@@ -66,6 +109,8 @@ class ConfigCrudControllerTest extends TestCase
             $translator,
             $tableExporter ?? $this->createStub(TableExporter::class),
             $this->createStub(ConfigAlertProvider::class),
+            $configRepository ?? $this->createStub(ConfigRepository::class),
+            $adminUrlGenerator ?? $this->createAdminUrlGenerator(),
         );
     }
 
@@ -91,6 +136,62 @@ class ConfigCrudControllerTest extends TestCase
     private function createAdminContext(): AdminContext
     {
         return AdminContext::forTesting();
+    }
+
+    // --- currentGroup (private) -----------------------------------------------------------------------
+
+    public function testCurrentGroupReturnsNullWhenNoGroupQueryParam(): void
+    {
+        $controller = $this->createController(requestStack: $this->createRequestStackWithGroup(null));
+
+        $this->assertNull($this->invokePrivate($controller, 'currentGroup'));
+    }
+
+    public function testCurrentGroupReturnsTheGroupQueryParam(): void
+    {
+        $controller = $this->createController(requestStack: $this->createRequestStackWithGroup('legal'));
+
+        $this->assertSame('legal', $this->invokePrivate($controller, 'currentGroup'));
+    }
+
+    // --- index ------------------------------------------------------------------------------------------
+
+    // Without a "group" to scope to, index() renders the "pick a group" screen directly (bypassing EasyAdmin's own grid/parent::index()) - AbstractController::render() only needs a "twig" service in the container, so this is exercised without a real Twig environment or template file
+    public function testIndexRendersGroupsScreenWithCountsWhenNoGroupIsSelected(): void
+    {
+        $security = $this->createStub(Security::class);
+        $security->method('isGranted')->willReturn(true);
+
+        $configRepository = $this->createMock(ConfigRepository::class);
+        $configRepository->expects($this->once())
+            ->method('countsByGroup')
+            ->with(false, true)
+            ->willReturn(['general' => 3, 'legal' => 2]);
+
+        $controller = $this->createController(
+            security: $security,
+            configRepository: $configRepository,
+            requestStack: $this->createRequestStackWithGroup(null),
+        );
+
+        $twig = $this->createMock(\Twig\Environment::class);
+        $twig->expects($this->once())
+            ->method('render')
+            ->with(
+                '@c975LConfig/management/config_crud_groups.html.twig',
+                $this->callback(function (array $parameters) {
+                    $this->assertSame(['general' => 3, 'legal' => 2], $parameters['counts']);
+
+                    return true;
+                })
+            )
+            ->willReturn('<html>groups</html>');
+
+        $controller->setContainer($this->createContainer(['twig' => $twig]));
+
+        $response = $controller->index(AdminContext::forTesting());
+
+        $this->assertSame('<html>groups</html>', $response->getContent());
     }
 
     // --- persistEntity / updateEntity / deleteEntity -------------------------------------------------
@@ -229,6 +330,41 @@ class ConfigCrudControllerTest extends TestCase
         );
     }
 
+    // The index is scoped to one group via ?group=... (see index()/currentGroup()) once a group has been picked on the "groups" screen
+    public function testCreateIndexQueryBuilderFiltersByCurrentGroupWhenOneIsSelected(): void
+    {
+        $security = $this->createStub(Security::class);
+        $security->method('isGranted')->willReturn(true);
+
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        // isSensitive + group, isRestricted skipped (super admin)
+        $queryBuilder->expects($this->exactly(2))->method('andWhere')->willReturnSelf();
+        $queryBuilder->expects($this->exactly(2))->method('setParameter')->willReturnCallback(
+            function (string $name, mixed $value) use ($queryBuilder) {
+                if ('group' === $name) {
+                    $this->assertSame('general', $value);
+                }
+
+                return $queryBuilder;
+            }
+        );
+
+        $repository = $this->createStub(EntityRepositoryInterface::class);
+        $repository->method('createQueryBuilder')->willReturn($queryBuilder);
+
+        $controller = $this->createController(security: $security, requestStack: $this->createRequestStackWithGroup('general'));
+        $controller->setContainer($this->createContainer([
+            EntityRepositoryInterface::class => $repository,
+        ]));
+
+        $controller->createIndexQueryBuilder(
+            new SearchDto(new Request(), null, null, [], [], null),
+            new EntityDto(Config::class, new ClassMetadata(Config::class)),
+            new FieldCollection([]),
+            new FilterCollection([]),
+        );
+    }
+
     // EasyAdmin's own search only ever matches raw DB columns ("label" stores a translation key like
     // "label.ai_help_llm_enabled", never the rendered "Donovan (Q&A) - Activé" an admin actually types)
     // - a non-empty query must instead restrict to slugs whose *translated* label/description contain it
@@ -276,6 +412,8 @@ class ConfigCrudControllerTest extends TestCase
             $translator,
             $this->createStub(TableExporter::class),
             $this->createStub(ConfigAlertProvider::class),
+            $this->createStub(ConfigRepository::class),
+            $this->createAdminUrlGenerator(),
         );
         $controller->setContainer($this->createContainer([
             EntityRepositoryInterface::class => $repository,

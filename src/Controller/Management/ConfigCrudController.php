@@ -14,6 +14,7 @@ use c975L\ConfigBundle\Form\Type\ReadonlyTextType;
 use c975L\ConfigBundle\Management\AlertBuilder;
 use c975L\ConfigBundle\Management\ConfigAlertProvider;
 use c975L\ConfigBundle\Management\EasyAdminActionHelper;
+use c975L\ConfigBundle\Repository\ConfigRepository;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\ConfigBundle\Service\Export\ExportFormat;
 use c975L\ConfigBundle\Service\Export\TableExporter;
@@ -44,6 +45,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -62,12 +64,34 @@ class ConfigCrudController extends AbstractCrudController
         private readonly TranslatorInterface $translator,
         private readonly TableExporter $tableExporter,
         private readonly ConfigAlertProvider $configAlertProvider,
+        private readonly ConfigRepository $configRepository,
+        private readonly AdminUrlGenerator $adminUrlGenerator,
     ) {
     }
 
     public static function getEntityFqcn(): string
     {
         return Config::class;
+    }
+
+    // Without a "group" to scope to, shows the intermediate "pick a group" screen instead of EasyAdmin's own grid - same reasoning/pattern as SiteBundle's CollectionItemCrudController: the flat list became unreadable once enough groups accumulated
+    public function index(AdminContext $context): KeyValueStore|Response
+    {
+        if (!$this->currentGroup()) {
+            $showSensitive = $this->requestStack->getCurrentRequest()?->query->getBoolean('showSensitive', false) ?? false;
+
+            return $this->render('@c975LConfig/management/config_crud_groups.html.twig', [
+                'counts' => $this->configRepository->countsByGroup($showSensitive, $this->security->isGranted('ROLE_SUPER_ADMIN')),
+                'alerts' => AlertBuilder::groupBySeverity($this->configAlertProvider->getAlerts()),
+                'alertsTitle' => $this->translator->trans(
+                    'label.items_not_filled_for',
+                    ['%entity%' => $this->translator->trans('label.config', [], 'config')],
+                    'config'
+                ),
+            ]);
+        }
+
+        return parent::index($context);
     }
 
     public function configureFields(string $pageName): iterable
@@ -301,10 +325,20 @@ class ConfigCrudController extends AbstractCrudController
             ->addCssClass($sensitiveCss)
             ->createAsGlobalAction();
 
+        // Only reachable once a group is selected (the "pick a group" screen replaces the grid entirely otherwise) - unsets "group" to go back to it
+        $backToGroupsAction = Action::new('groups', t('label.config', [], 'config'), 'fas fa-layer-group')
+            ->linkToUrl(fn () => $this->adminUrlGenerator
+                ->setController(self::class)
+                ->setAction(Action::INDEX)
+                ->unset('group')
+                ->generateUrl())
+            ->createAsGlobalAction();
+
         return $actions
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->add(Crud::PAGE_INDEX, $exportGroup)
             ->add(Crud::PAGE_INDEX, $toggleAction)
+            ->add(Crud::PAGE_INDEX, $backToGroupsAction)
             ->update(Crud::PAGE_INDEX, Action::EDIT, fn (Action $action) => EasyAdminActionHelper::toIconOnly(
                 $action,
                 $this->translator->trans('action.edit', [], 'EasyAdminBundle'),
@@ -331,7 +365,7 @@ class ConfigCrudController extends AbstractCrudController
             ->setEntityLabelInSingular(t('label.config', [], 'config'))
             ->setEntityLabelInPlural(t('label.config', [], 'config'))
             ->setEntityPermission($this->configService->get('site-role-admin'))
-            ->setDefaultSort(['group' => 'ASC', 'label' => 'ASC'])
+            ->setDefaultSort(['label' => 'ASC'])
         ;
     }
 
@@ -349,28 +383,15 @@ class ConfigCrudController extends AbstractCrudController
         return $responseParameters;
     }
 
+    // "group" is deliberately not filterable here anymore - the index is already scoped to one group via the "pick a group" screen (see index()), and a second, conflicting group filter on top of that URL-driven scoping would just AND against it and silently return zero rows
     public function configureFilters(Filters $filters): Filters
     {
         return $filters
             ->add('label')
-            ->add(ChoiceFilter::new('group')
-                ->setLabel(t('label.group', [], 'config'))
-                ->setTranslatableChoices($this->groupChoices()))
             ->add(ChoiceFilter::new('severity')
                 ->setLabel(t('label.severity', [], 'config'))
                 ->setTranslatableChoices($this->severityChoices()))
         ;
-    }
-
-    // Maps each fixed group slug (Config::GROUPS) to its translated label
-    private function groupChoices(): array
-    {
-        $choices = [];
-        foreach (Config::GROUPS as $group) {
-            $choices[$group] = t('label.group_' . $group, [], 'config');
-        }
-
-        return $choices;
     }
 
     // Maps each fixed severity slug (Config::SEVERITIES) to its translated label
@@ -429,7 +450,19 @@ class ConfigCrudController extends AbstractCrudController
                 ->setParameter('isRestricted', false);
         }
 
+        $group = $this->currentGroup();
+        if (null !== $group) {
+            $qb->andWhere('entity.group = :group')->setParameter('group', $group);
+        }
+
         return $qb;
+    }
+
+    private function currentGroup(): ?string
+    {
+        $group = $this->requestStack->getCurrentRequest()?->query->get('group');
+
+        return \is_string($group) && '' !== $group ? $group : null;
     }
 
     // Slugs whose slug/translated-label/translated-description contain $query (case-insensitive) - raw
