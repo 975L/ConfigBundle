@@ -77,8 +77,7 @@ class ConfigLoadAllCommandTest extends TestCase
         $this->assertStringContainsString('2 bundle config(s) processed', $tester->getDisplay());
     }
 
-    // A single bundle can ship its config as several files (e.g. configs.json + configs-css.json for
-    // theme variables), all matched by the configs*.json glob and loaded independently
+    // A single bundle can ship its config as several files (e.g. configs.json + configs-css.json for theme variables), all matched by the configs*.json glob and loaded independently
     public function testExecuteLoadsEveryConfigsJsonFileWithinASingleBundle(): void
     {
         $this->createBundleConfigFile('site-bundle', [['slug' => 'site-name']], 'configs.json');

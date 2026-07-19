@@ -60,9 +60,7 @@ class VaultEncryptorTest extends TestCase
         $this->assertSame('pre-migration-plaintext', $encryptor->decrypt('pre-migration-plaintext'));
     }
 
-    // A malformed payload (a full 16-byte IV followed by ciphertext that isn't a multiple of the
-    // AES block size) makes openssl_decrypt() fail deterministically and without a PHP warning,
-    // unlike a merely "wrong key" case which could randomly still unpad successfully
+    // A malformed payload (a full 16-byte IV followed by ciphertext that isn't a multiple of the AES block size) makes openssl_decrypt() fail deterministically and without a PHP warning, unlike a merely "wrong key" case which could randomly still unpad successfully
     public function testDecryptWithMalformedPayloadThrowsRuntimeException(): void
     {
         $encryptor = new VaultEncryptor('a-test-vault-key');

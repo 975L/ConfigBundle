@@ -36,3 +36,10 @@ a.menu-item-contents[target=_blank]::after {
   margin-left: 0.35em;
   opacity: 0.6;
 }
+
+/* Config's index has many columns (kind/group/severity/value...), so EasyAdmin's auto table layout
+   squeezes the actions cell. It then wraps at the only breakable point left - the whitespace between
+   the icon-only Detail/Edit buttons - stacking them on two lines instead of shrinking another column. */
+.datagrid td.actions {
+  white-space: nowrap;
+}

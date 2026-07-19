@@ -10,8 +10,7 @@ namespace c975L\ConfigBundle\Management;
 
 use c975L\ConfigBundle\Entity\Config;
 
-// Merges the dashboard alerts contributed by every AlertProvider (bundles depending on ConfigBundle),
-// grouped by severity (danger first)
+// Merges the dashboard alerts contributed by every AlertProvider (bundles depending on ConfigBundle), grouped by severity (danger first)
 class AlertBuilder
 {
     public function __construct(
@@ -27,8 +26,7 @@ class AlertBuilder
         return self::groupBySeverity($alerts);
     }
 
-    // Groups a single provider's flat alert list by severity - for a CRUD's own index page, which
-    // only wants its own alerts (see ConfigCrudController/SiteGraphicCrudController)
+    // Groups a single provider's flat alert list by severity - for a CRUD's own index page, which only wants its own alerts (see ConfigCrudController/SiteGraphicCrudController)
     public static function groupBySeverity(array $alerts): array
     {
         $grouped = [

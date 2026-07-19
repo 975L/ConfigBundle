@@ -42,8 +42,7 @@ class ProviderMergerTest extends TestCase
         $this->assertSame([], $merged);
     }
 
-    // A later provider's numeric-keyed items don't overwrite an earlier one's since array_merge
-    // renumbers them, while string keys shared by two providers do overwrite (last wins)
+    // A later provider's numeric-keyed items don't overwrite an earlier one's since array_merge renumbers them, while string keys shared by two providers do overwrite (last wins)
     public function testMergeRenumbersNumericKeysButLastWinsForStringKeys(): void
     {
         $providers = [
@@ -63,8 +62,7 @@ class ProviderMergerTest extends TestCase
 
         $merged = ProviderMerger::merge($providers, fn (object $provider) => $provider->getItems());
 
-        // array_merge() overwrites a string key in place (keeping its original position) while
-        // numeric keys are always appended, renumbered, at the end
+        // array_merge() overwrites a string key in place (keeping its original position) while numeric keys are always appended, renumbered, at the end
         $this->assertSame([0 => 'first', 'shared' => 'from-second', 1 => 'second'], $merged);
     }
 }

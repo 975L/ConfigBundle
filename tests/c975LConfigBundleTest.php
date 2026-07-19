@@ -23,10 +23,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class c975LConfigBundleTest extends TestCase
 {
-    // Each provider mechanism (menu, whatsnew, alert, shortcut, linkable route) needs its own
-    // interface -> tag compiler pass; this exercises the passes end-to-end (via addCompilerPass +
-    // container compilation) rather than just asserting on pass count/type, since that's what
-    // actually breaks silently if an interface/tag pairing is ever mistyped
+    // Each provider mechanism (menu, whatsnew, alert, shortcut, linkable route) needs its own interface -> tag compiler pass; this exercises the passes end-to-end (via addCompilerPass + container compilation) rather than just asserting on pass count/type, since that's what actually breaks silently if an interface/tag pairing is ever mistyped
     public function testBuildRegistersACompilerPassTaggingServicesForEachProviderInterface(): void
     {
         $container = new ContainerBuilder();
@@ -53,9 +50,7 @@ class c975LConfigBundleTest extends TestCase
         $this->assertTrue($container->getDefinition('theme_preset_provider')->hasTag('c975l.theme_preset_provider'));
     }
 
-    // Mirrors how Symfony's own kernel invokes it (BundleExtension::load() builds the
-    // ContainerConfigurator and calls loadExtension() for us), so this also validates that
-    // config/services.yaml itself parses and wires without error
+    // Mirrors how Symfony's own kernel invokes it (BundleExtension::load() builds the ContainerConfigurator and calls loadExtension() for us), so this also validates that config/services.yaml itself parses and wires without error
     public function testLoadExtensionImportsServicesYaml(): void
     {
         $container = new ContainerBuilder();
@@ -73,8 +68,7 @@ class c975LConfigBundleTest extends TestCase
     }
 }
 
-// Own PSR-4 files (see TaggedInterfacePassTest for why): a class only ever defined as a side
-// effect inside a test method can't be reflected by a consuming app's attribute route loader
+// Own PSR-4 files (see TaggedInterfacePassTest for why): a class only ever defined as a side effect inside a test method can't be reflected by a consuming app's attribute route loader
 class c975LConfigBundleTestMenuProviderFixture implements MenuProviderInterface
 {
     public function getMenuSection(): array

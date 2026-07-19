@@ -38,8 +38,7 @@ class TaggedInterfacePassTest extends TestCase
         $this->assertFalse($container->getDefinition('no_class')->hasTag('c975l_config.alert_provider'));
     }
 
-    // A definition pointing at a class that doesn't exist (e.g. a require-dev-only package
-    // missing in prod) must not break the pass nor be tagged
+    // A definition pointing at a class that doesn't exist (e.g. a require-dev-only package missing in prod) must not break the pass nor be tagged
     public function testProcessIgnoresDefinitionsWithAnUnresolvableClassWithoutThrowing(): void
     {
         $container = new ContainerBuilder();

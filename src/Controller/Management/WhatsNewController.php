@@ -23,8 +23,7 @@ class WhatsNewController extends AbstractController
     ) {
     }
 
-    // Custom admin page (not tied to any entity), registered under the Dashboard's own route path/name
-    // (EasyAdmin prefixes both with the Dashboard's own path/name, giving /management/whatsnew and management_whatsnew_index)
+    // Custom admin page (not tied to any entity), registered under the Dashboard's own route path/name (EasyAdmin prefixes both with the Dashboard's own path/name, giving /management/whatsnew and management_whatsnew_index)
     #[AdminRoute(path: '/whatsnew', name: 'whatsnew_index')]
     public function index(): Response
     {

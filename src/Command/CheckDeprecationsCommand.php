@@ -71,8 +71,7 @@ class CheckDeprecationsCommand extends Command
         foreach (array_filter(glob($this->projectDir . '/vendor/c975l/*') ?: [], 'is_dir') as $dir) {
             $sourceDirs[basename($dir)] = $dir . '/src';
         }
-        // Only messages tied to app/c975L source (confirmed or possible) are worth surfacing - one
-        // with neither is surely a third-party package's own concern, nothing we can act on
+        // Only messages tied to app/c975L source (confirmed or possible) are worth surfacing - one with neither is surely a third-party package's own concern, nothing we can act on
         $report = array_values(array_filter(
             $this->buildReport($messages, $sourceDirs),
             fn (array $entry) => $entry['hits'] || $entry['possibleHits']
@@ -105,8 +104,7 @@ class CheckDeprecationsCommand extends Command
         return Command::SUCCESS;
     }
 
-    // Cross-references each unique deprecation message against the app's own src/ and the installed
-    // c975L bundles' source, sorted actionable-first then by frequency
+    // Cross-references each unique deprecation message against the app's own src/ and the installed c975L bundles' source, sorted actionable-first then by frequency
     private function buildReport(array $messages, array $sourceDirs): array
     {
         $report = [];
@@ -151,13 +149,7 @@ class CheckDeprecationsCommand extends Command
         return $report;
     }
 
-    // Candidate tokens: fully-qualified class names and composer package names quoted in the message
-    // are "exact" (high-confidence) matches. Each FQCN's parent namespace is kept as a lower-confidence
-    // token - code that imports it via "use Foo\Bar\Annotation as X;" and references "X\Uploadable"
-    // never spells out the full "Foo\Bar\Annotation\Uploadable" string, only the "use" line does - but
-    // a namespace shared by unrelated sibling classes (e.g. "use Foo\Bar\Annotation\SomethingElse;")
-    // matches just as easily without actually using the deprecated class, hence "possible" and not
-    // "actionable"
+    // Candidate tokens: fully-qualified class names and composer package names quoted in the message are "exact" (high-confidence) matches. Each FQCN's parent namespace is kept as a lower-confidence token - code that imports it via "use Foo\Bar\Annotation as X;" and references "X\Uploadable" never spells out the full "Foo\Bar\Annotation\Uploadable" string, only the "use" line does - but a namespace shared by unrelated sibling classes (e.g. "use Foo\Bar\Annotation\SomethingElse;") matches just as easily without actually using the deprecated class, hence "possible" and not "actionable"
     private function extractTokens(string $message): array
     {
         preg_match_all('/"([A-Za-z0-9_]+(?:\\\\[A-Za-z0-9_]+)+)"/', $message, $fqcnMatches);

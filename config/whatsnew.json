@@ -1,5 +1,25 @@
 [
     {
+        "date": "2026-07-19",
+        "description": [
+            {
+                "en": "Searching in the config list now matches what you actually see on screen, not just internal names",
+                "fr": "La recherche dans la liste des configurations correspond désormais à ce que vous voyez à l'écran, et non plus seulement aux noms internes",
+                "es": "La búsqueda en la lista de configuraciones ahora coincide con lo que ves en pantalla, no solo con los nombres internos"
+            },
+            {
+                "en": "JSON values are now displayed nicely formatted and easier to read",
+                "fr": "Les valeurs JSON sont désormais affichées de manière lisible et bien mise en forme",
+                "es": "Los valores JSON ahora se muestran bien formateados y son más fáciles de leer"
+            },
+            {
+                "en": "Fixed the Edit/Detail icons sometimes stacking on two lines in the config list",
+                "fr": "Correction des icônes Modifier/Voir qui s'affichaient parfois sur deux lignes dans la liste des configurations",
+                "es": "Corregido que los iconos Editar/Ver aparecieran a veces en dos líneas en la lista de configuraciones"
+            }
+        ]
+    },
+    {
         "date": "2026-07-17",
         "description": [
             {

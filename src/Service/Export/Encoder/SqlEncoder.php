@@ -13,12 +13,7 @@ use c975L\ConfigBundle\Service\Export\ExportFormat;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 
-// Encodes an array of associative rows (e.g. Connection::fetchAllAssociative()) as SQL INSERT
-// statements. Context options:
-// - table (string, required): the table name
-// - primary_key (string): unique column, enables an ON DUPLICATE KEY UPDATE clause on the other columns
-// - exclude_from_update (string[]): columns never rewritten by the UPDATE clause (e.g. an immutable creation date)
-// - insert_ignore_when (callable(array $row): bool): when true for a row, emits INSERT IGNORE instead of the upsert
+// Encodes an array of associative rows (e.g. Connection::fetchAllAssociative()) as SQL INSERT statements. Context options: - table (string, required): the table name - primary_key (string): unique column, enables an ON DUPLICATE KEY UPDATE clause on the other columns - exclude_from_update (string[]): columns never rewritten by the UPDATE clause (e.g. an immutable creation date) - insert_ignore_when (callable(array $row): bool): when true for a row, emits INSERT IGNORE instead of the upsert
 class SqlEncoder implements EncoderInterface
 {
     public function __construct(private readonly Connection $connection)

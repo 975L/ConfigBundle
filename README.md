@@ -88,6 +88,7 @@ Set `restricted: true` on top of that for secrets shared across the whole instal
 | `shop` | Currency, shipping, shop identity |
 | `payment` | Payment provider keys (Stripe...) |
 | `theme` | Theme CSS variables (colors, fonts, light/dark mode) |
+| `ai` | AI-related settings (LLM providers, prompts...) |
 
 This list is closed on purpose so filtering stays useful; if none fits, leave `group` unset rather than inventing a new value (adding one requires extending `Config::GROUPS` and the matching translations in ConfigBundle itself).
 

@@ -19,9 +19,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
-// AbstractController only ever calls $this->container->has()/get() with plain service ids, so a
-// bare Symfony\Component\DependencyInjection\Container (which implements Psr\Container\ContainerInterface)
-// populated via set() is enough to unit-test controller actions without booting a kernel
+// AbstractController only ever calls $this->container->has()/get() with plain service ids, so a bare Symfony\Component\DependencyInjection\Container (which implements Psr\Container\ContainerInterface) populated via set() is enough to unit-test controller actions without booting a kernel
 trait ControllerContainerTestTrait
 {
     private function createContainer(array $services): Container

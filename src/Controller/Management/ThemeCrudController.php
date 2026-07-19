@@ -40,9 +40,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 use function Symfony\Component\Translation\t;
 
-// Same Config entity/table as ConfigCrudController, restricted to the "theme" group (CSS variables
-// editable by the admin - colors, fonts, light/dark mode), kept in its own dashboard view so it
-// doesn't get mixed up with the general site_config list
+// Same Config entity/table as ConfigCrudController, restricted to the "theme" group (CSS variables editable by the admin - colors, fonts, light/dark mode), kept in its own dashboard view so it doesn't get mixed up with the general site_config list
 class ThemeCrudController extends AbstractCrudController
 {
     // Choices for the theme-mode config's value, the only theme slug that isn't a raw CSS value
@@ -79,8 +77,7 @@ class ThemeCrudController extends AbstractCrudController
         $entity = null !== $context ? $context->getEntity()->getInstance() : null;
         $slug = $entity instanceof Config ? $entity->getSlug() : null;
 
-        // Description holds a 'site_config' translation key (description.xxx); trans() safely falls
-        // back to the raw text unchanged for slugs that haven't migrated to it
+        // Description holds a 'site_config' translation key (description.xxx); trans() safely falls back to the raw text unchanged for slugs that haven't migrated to it
         $descriptionField = TextField::new('description')
             ->setLabel(t('label.description', [], 'config'))
             ->setFormTypeOption('disabled', true)
@@ -108,8 +105,7 @@ class ThemeCrudController extends AbstractCrudController
             ]);
         }
 
-        // Every theme slug is a plain CSS value (color, font stack...) edited as free text, except
-        // theme-mode, which picks the site-wide light/dark/auto mode and is edited as a fixed choice
+        // Every theme slug is a plain CSS value (color, font stack...) edited as free text, except theme-mode, which picks the site-wide light/dark/auto mode and is edited as a fixed choice
         $valueField = match (true) {
             'theme-mode' === $slug => ChoiceField::new('value')
                 ->setLabel(t('label.value', [], 'config'))
@@ -140,19 +136,15 @@ class ThemeCrudController extends AbstractCrudController
     {
         $presets = $this->themePresetRegistry->all();
 
-        // No preset provider registered (e.g. ConfigBundle used without SiteBundle): skip the group
-        // entirely, EasyAdmin rejects an ActionGroup with zero actions
+        // No preset provider registered (e.g. ConfigBundle used without SiteBundle): skip the group entirely, EasyAdmin rejects an ActionGroup with zero actions
         if ([] !== $presets) {
             $presetsGroup = ActionGroup::new('presets', t('label.presets', [], 'config'), 'fa fa-swatchbook')
                 ->createAsGlobalActionGroup();
 
-            // Applying a preset only ever writes vetted values, unlike manual field editing (see the
-            // EDIT permission below), so it's allowed at the lower site-role-editor level
+            // Applying a preset only ever writes vetted values, unlike manual field editing (see the EDIT permission below), so it's allowed at the lower site-role-editor level
             $permission = $this->configService->get('site-role-editor');
             foreach ($presets as $id => $preset) {
-                // 'label' belongs to whichever bundle contributed the preset (see
-                // ThemePresetProviderInterface), not necessarily this bundle's own 'config' domain -
-                // 'config' is only the fallback for a provider that hasn't declared one
+                // 'label' belongs to whichever bundle contributed the preset (see ThemePresetProviderInterface), not necessarily this bundle's own 'config' domain - 'config' is only the fallback for a provider that hasn't declared one
                 $domain = $preset['domain'] ?? 'config';
                 $label = $this->translator->trans($preset['label'], [], $domain);
 
@@ -168,9 +160,7 @@ class ThemeCrudController extends AbstractCrudController
                 );
                 $actions->setPermission($actionName, $permission);
 
-                // Lets an editor judge the preset's look (colors/fonts/shape, demo layout) before
-                // committing to it - a ready-made link built by the owning bundle (see
-                // SiteThemePresetProvider), since only it knows which page/route can render it
+                // Lets an editor judge the preset's look (colors/fonts/shape, demo layout) before committing to it - a ready-made link built by the owning bundle (see SiteThemePresetProvider), since only it knows which page/route can render it
                 $previewUrl = $preset['previewUrl'] ?? null;
                 if (null !== $previewUrl) {
                     $previewActionName = 'previewPreset_' . $id;
@@ -186,8 +176,7 @@ class ThemeCrudController extends AbstractCrudController
                 }
             }
 
-            // Temporarily hidden pending rework - the group/permissions are still built above and
-            // applyPreset() stays reachable, only the index button is not displayed
+            // Temporarily hidden pending rework - the group/permissions are still built above and applyPreset() stays reachable, only the index button is not displayed
             // $actions->add(Crud::PAGE_INDEX, $presetsGroup);
         }
 
@@ -201,17 +190,14 @@ class ThemeCrudController extends AbstractCrudController
                 $action,
                 $this->translator->trans('action.detail', [], 'EasyAdminBundle'),
             ))
-            // Manual field-by-field editing (colors, fonts, mode) is reserved to ROLE_SUPER_ADMIN,
-            // even for non-restricted values - editors/admins may only apply a vetted preset above
+            // Manual field-by-field editing (colors, fonts, mode) is reserved to ROLE_SUPER_ADMIN, even for non-restricted values - editors/admins may only apply a vetted preset above
             ->setPermission(Action::EDIT, 'ROLE_SUPER_ADMIN')
             // Theme configs are fixed by SiteBundle's configs-css.json: no manual creation, no deletion
             ->disable(Action::NEW, Action::DELETE)
         ;
     }
 
-    // A "restricted" theme config (font family, stylesheet) must stay invisible to any admin below
-    // ROLE_SUPER_ADMIN, same protection as ConfigCrudController::denyAccessToRestrictedConfig() for
-    // the same entity/table
+    // A "restricted" theme config (font family, stylesheet) must stay invisible to any admin below ROLE_SUPER_ADMIN, same protection as ConfigCrudController::denyAccessToRestrictedConfig() for the same entity/table
     private function denyAccessToRestrictedConfig(AdminContext $context): void
     {
         $entity = $context->getEntity()->getInstance();
@@ -234,11 +220,7 @@ class ThemeCrudController extends AbstractCrudController
         return parent::edit($context);
     }
 
-    // Overwrites theme-stylesheet (the site's visual "shape" - radius/shadows/nav/footer, see
-    // StylesheetProvider) with the preset's - the existing ThemeVariablesCssListener (already
-    // listening to postUpdate) regenerates site-theme.css. Colors and fonts are never touched here:
-    // they stay entirely admin-owned (see configureFields()), so a preset never overwrites values
-    // the admin has deliberately chosen - it only ever switches the shape.
+    // Overwrites theme-stylesheet (the site's visual "shape" - radius/shadows/nav/footer, see StylesheetProvider) with the preset's - the existing ThemeVariablesCssListener (already listening to postUpdate) regenerates site-theme.css. Colors and fonts are never touched here: they stay entirely admin-owned (see configureFields()), so a preset never overwrites values the admin has deliberately chosen - it only ever switches the shape.
     #[AdminRoute('/apply-preset')]
     public function applyPreset(Request $request, EntityManagerInterface $entityManager): RedirectResponse
     {
@@ -247,8 +229,7 @@ class ThemeCrudController extends AbstractCrudController
         $preset = $this->themePresetRegistry->get((string) $request->query->get('preset'));
         $config = null !== $preset ? $this->configRepository->findOneBySlug('theme-stylesheet') : null;
 
-        // A preset with no 'stylesheet' (nullable per ThemePresetProviderInterface) leaves the
-        // current stylesheet untouched, rather than blanking it
+        // A preset with no 'stylesheet' (nullable per ThemePresetProviderInterface) leaves the current stylesheet untouched, rather than blanking it
         if (null !== $config && null !== $preset['stylesheet']) {
             $config->setValue($preset['stylesheet']);
             $config->setModification(new \DateTime());
@@ -281,9 +262,7 @@ class ThemeCrudController extends AbstractCrudController
         $qb->andWhere('entity.group = :group')
             ->setParameter('group', Config::GROUP_THEME);
 
-        // Restricted theme configs (font families, stylesheet) stay out of the list entirely below
-        // ROLE_SUPER_ADMIN, see denyAccessToRestrictedConfig() - same protection as ConfigCrudController
-        // (isRestricted is nullable: legacy rows not yet synced must NOT be treated as restricted)
+        // Restricted theme configs (font families, stylesheet) stay out of the list entirely below ROLE_SUPER_ADMIN, see denyAccessToRestrictedConfig() - same protection as ConfigCrudController (isRestricted is nullable: legacy rows not yet synced must NOT be treated as restricted)
         if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
             $qb->andWhere('entity.isRestricted IS NULL OR entity.isRestricted = :isRestricted')
                 ->setParameter('isRestricted', false);
@@ -292,8 +271,7 @@ class ThemeCrudController extends AbstractCrudController
         return $qb;
     }
 
-    // Updated theme value - invalidates the config cache (the CSS file itself is regenerated by
-    // SiteBundle's ThemeVariablesCssListener, which reacts to the same Doctrine postUpdate event)
+    // Updated theme value - invalidates the config cache (the CSS file itself is regenerated by SiteBundle's ThemeVariablesCssListener, which reacts to the same Doctrine postUpdate event)
     public function updateEntity(EntityManagerInterface $entityManager, mixed $config): void
     {
         if ($config instanceof Config) {

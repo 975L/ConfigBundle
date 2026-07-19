@@ -14,8 +14,7 @@ use PHPUnit\Framework\TestCase;
 
 class WhatsNewProviderTest extends TestCase
 {
-    // Confirms getEntries() resolves the bundle's own config/whatsnew.json (two levels up from
-    // src/Management) and matches exactly what WhatsNewJsonReader::read() would return for it
+    // Confirms getEntries() resolves the bundle's own config/whatsnew.json (two levels up from src/Management) and matches exactly what WhatsNewJsonReader::read() would return for it
     public function testGetEntriesReadsTheBundlesOwnWhatsNewJsonFile(): void
     {
         $expected = WhatsNewJsonReader::read(\dirname(__DIR__, 2) . '/config/whatsnew.json');

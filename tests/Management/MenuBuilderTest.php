@@ -46,11 +46,7 @@ class MenuBuilderTest extends TestCase
         return $service;
     }
 
-    // Real route names aren't registered in a unit test - stands in for the plain Symfony router
-    // (see MenuBuilder, uses generate() instead of EasyAdmin's own AdminUrlGenerator so a link to a
-    // route outside the dashboard resolves to its real path, not "/management?routeName=..."). The
-    // fake "https://example.test/" prefix for an ABSOLUTE_URL request (vs a bare "/" for the default
-    // ABSOLUTE_PATH) lets tests tell the two apart without needing a real router/request context.
+    // Real route names aren't registered in a unit test - stands in for the plain Symfony router (see MenuBuilder, uses generate() instead of EasyAdmin's own AdminUrlGenerator so a link to a route outside the dashboard resolves to its real path, not "/management?routeName=..."). The fake "https://example.test/" prefix for an ABSOLUTE_URL request (vs a bare "/" for the default ABSOLUTE_PATH) lets tests tell the two apart without needing a real router/request context.
     private function createUrlGenerator(): UrlGeneratorInterface
     {
         $generator = $this->createStub(UrlGeneratorInterface::class);
@@ -119,8 +115,7 @@ class MenuBuilderTest extends TestCase
         $providerWithoutLinks = $this->createProvider($section, []);
         $builderWithoutLinks = new MenuBuilder([$providerWithoutLinks], $this->createConfigService(), $this->createTranslator(), $this->createUrlGenerator());
 
-        // A provider's section header is yielded even when it contributes no items, since
-        // getGroupedMenus() registers the section for every provider regardless of getMenus()
+        // A provider's section header is yielded even when it contributes no items, since getGroupedMenus() registers the section for every provider regardless of getMenus()
         $itemsWithoutLinks = iterator_to_array($builderWithoutLinks->getMenuItems(), false);
         $this->assertCount(1, $itemsWithoutLinks);
         $this->assertSame('label.management', $itemsWithoutLinks[0]->getAsDto()->getLabel()->getMessage());
@@ -135,8 +130,7 @@ class MenuBuilderTest extends TestCase
 
         $items = iterator_to_array($builderWithLinks->getMenuItems(), false);
 
-        // The provider's own (empty) menu section header, then the "links" section header
-        // followed by the one link item
+        // The provider's own (empty) menu section header, then the "links" section header followed by the one link item
         $this->assertCount(3, $items);
         $this->assertSame('label.management', $items[0]->getAsDto()->getLabel()->getMessage());
         $this->assertSame('label.links', $items[1]->getAsDto()->getLabel()->getMessage());
@@ -165,17 +159,13 @@ class MenuBuilderTest extends TestCase
 
         $items = iterator_to_array($builder->getMenuItems(), false);
 
-        // Provider's own (empty) menu section header, then the "links" section header,
-        // then links sorted alphabetically: media before shop
+        // Provider's own (empty) menu section header, then the "links" section header, then links sorted alphabetically: media before shop
         $this->assertCount(4, $items);
         $this->assertSame('ROLE_EDITOR', $items[2]->getAsDto()->getPermission());
         $this->assertNull($items[3]->getAsDto()->getPermission());
     }
 
-    // A link's URL must come from the plain router (generate()), not EasyAdmin's own AdminUrlGenerator -
-    // the latter assumes the route is one of the dashboard's own registered actions and wraps it as
-    // "/management?routeName=...", which is wrong for a route outside the dashboard entirely (e.g. a
-    // consuming app's own public page) - regression test for exactly that bug
+    // A link's URL must come from the plain router (generate()), not EasyAdmin's own AdminUrlGenerator - the latter assumes the route is one of the dashboard's own registered actions and wraps it as "/management?routeName=...", which is wrong for a route outside the dashboard entirely (e.g. a consuming app's own public page) - regression test for exactly that bug
     public function testGetMenuItemsResolvesLinkUrlThroughThePlainRouter(): void
     {
         $section = ['label' => 'label.management', 'translation_domain' => 'site'];
@@ -194,11 +184,7 @@ class MenuBuilderTest extends TestCase
         $this->assertSame('/app_block_showcase_index', $items[2]->getAsDto()->getLinkUrl());
     }
 
-    // Optional per-link "target" (e.g. '_blank' for a link leaving the admin) - unset by default,
-    // same opt-in shape as "role". A "target" link also gets a full absolute URL (scheme+host), not just
-    // a path, generated fresh from the current request each time (never a hardcoded domain, so it stays
-    // correct across dev/staging/prod or any future domain change) - it's meant to stand on its own once
-    // opened in a new tab, unlike a same-tab link staying relative to the current page.
+    // Optional per-link "target" (e.g. '_blank' for a link leaving the admin) - unset by default, same opt-in shape as "role". A "target" link also gets a full absolute URL (scheme+host), not just a path, generated fresh from the current request each time (never a hardcoded domain, so it stays correct across dev/staging/prod or any future domain change) - it's meant to stand on its own once opened in a new tab, unlike a same-tab link staying relative to the current page.
     public function testGetMenuItemsAppliesLinkTargetAndAbsoluteUrlWhenProvidedAndLeavesBothUnsetOtherwise(): void
     {
         $section = ['label' => 'label.management', 'translation_domain' => 'site'];
@@ -221,18 +207,14 @@ class MenuBuilderTest extends TestCase
 
         $items = iterator_to_array($builder->getMenuItems(), false);
 
-        // Links sorted alphabetically by translated label: "label.block_showcase" before "label.shop".
-        // MenuItemDto's own default target (not set by MenuBuilder) is '_self', not null
+        // Links sorted alphabetically by translated label: "label.block_showcase" before "label.shop". MenuItemDto's own default target (not set by MenuBuilder) is '_self', not null
         $this->assertSame('_blank', $items[2]->getAsDto()->getLinkTarget());
         $this->assertSame('https://example.test/app_block_showcase_index', $items[2]->getAsDto()->getLinkUrl());
         $this->assertSame('_self', $items[3]->getAsDto()->getLinkTarget());
         $this->assertSame('/shop_index', $items[3]->getAsDto()->getLinkUrl());
     }
 
-    // An explicit "url" (a literal, already-absolute URL) is used as-is, bypassing route resolution
-    // entirely - for a provider that wants a link fixed/directly editable rather than derived from a
-    // route (e.g. 975l.com's own MenuProvider pinning its "vitrine des blocks" link to the real
-    // production domain on purpose, see App\Management\MenuProvider)
+    // An explicit "url" (a literal, already-absolute URL) is used as-is, bypassing route resolution entirely - for a provider that wants a link fixed/directly editable rather than derived from a route (e.g. 975l.com's own MenuProvider pinning its "vitrine des blocks" link to the real production domain on purpose, see App\Management\MenuProvider)
     public function testGetMenuItemsUsesAnExplicitUrlAsIsWithoutRouteResolution(): void
     {
         $section = ['label' => 'label.management', 'translation_domain' => 'site'];

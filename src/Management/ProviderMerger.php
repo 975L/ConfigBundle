@@ -8,8 +8,7 @@
  */
 namespace c975L\ConfigBundle\Management;
 
-// Merges the arrays returned by every provider of a tagged_iterator into a single flat array
-// (shared by MenuBuilder, AlertBuilder, WhatsNewBuilder, ShortcutBuilder, LinkableRouteRegistry...)
+// Merges the arrays returned by every provider of a tagged_iterator into a single flat array (shared by MenuBuilder, AlertBuilder, WhatsNewBuilder, ShortcutBuilder, LinkableRouteRegistry...)
 class ProviderMerger
 {
     // @param iterable<object> $providers

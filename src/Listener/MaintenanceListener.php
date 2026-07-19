@@ -16,9 +16,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Twig\Environment;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
-// Priority 6 = after FirewallListener (8, token/user is set), so isGranted() below
-// is reliable; ManagementAuthenticationListener (7) may already have redirected
-// unauthenticated /management requests to login before we even run.
+// Priority 6 = after FirewallListener (8, token/user is set), so isGranted() below is reliable; ManagementAuthenticationListener (7) may already have redirected unauthenticated /management requests to login before we even run.
 #[AsEventListener(event: 'kernel.request', method: 'onKernelRequest', priority: 6)]
 class MaintenanceListener
 {
@@ -46,8 +44,7 @@ class MaintenanceListener
             return;
         }
 
-        // Symfony's own dev-tool routes (web debug toolbar, profiler) are only
-        // registered in dev/test, so this never opens anything in prod
+        // Symfony's own dev-tool routes (web debug toolbar, profiler) are only registered in dev/test, so this never opens anything in prod
         foreach (['/_wdt', '/_profiler', '/_error', '/_fragment'] as $devToolPrefix) {
             if (str_starts_with($path, $devToolPrefix)) {
                 return;

@@ -120,8 +120,7 @@ class CheckDeprecationsCommandTest extends TestCase
         $this->assertStringNotContainsString('À vérifier', $display);
     }
 
-    // Nothing traces back to app/c975L source - it's surely the sole concern of the third-party
-    // package that logged it, so it's dropped from the report entirely instead of just being noted
+    // Nothing traces back to app/c975L source - it's surely the sole concern of the third-party package that logged it, so it's dropped from the report entirely instead of just being noted
     public function testExecuteSkipsMessagesWithNoAppOrC975lMatch(): void
     {
         $this->writeDeprecationsLog(['Class "Some\Vendor\Thing" is deprecated, use something else instead.']);

@@ -72,12 +72,7 @@ class DashboardController extends AbstractDashboardController
         ;
     }
 
-    // EasyAdmin renders every CRUD form with "{% form_theme form with ea.crud.formThemes only %}"
-    // (see vendor/easycorp/.../crud/edit.html.twig) - the "only" keyword means the app-wide
-    // twig.form_themes config is never consulted there, so bundle-contributed form themes (Trix
-    // editor, icon picker, "used in"...) have to be injected into the Crud config itself instead,
-    // here, the single place every CRUD controller's own configureCrud() inherits its default from
-    // (see FormThemeProviderInterface for the extension point bundles implement to reach this).
+    // EasyAdmin renders every CRUD form with "{% form_theme form with ea.crud.formThemes only %}" (see vendor/easycorp/.../crud/edit.html.twig) - the "only" keyword means the app-wide twig.form_themes config is never consulted there, so bundle-contributed form themes (Trix editor, icon picker, "used in"...) have to be injected into the Crud config itself instead, here, the single place every CRUD controller's own configureCrud() inherits its default from (see FormThemeProviderInterface for the extension point bundles implement to reach this).
     public function configureCrud(): Crud
     {
         $crud = Crud::new();
@@ -88,9 +83,7 @@ class DashboardController extends AbstractDashboardController
         return $crud;
     }
 
-    // Each bundle providing EasyAdmin/Stimulus controllers contributes its controllers-admin.js via
-    // BundleScriptAdminProviderInterface (c975L/UiBundle) - each one starts its own independent Stimulus app.
-    // Each entry also needs a matching 'entrypoint' => true line in the app's importmap.php.
+    // Each bundle providing EasyAdmin/Stimulus controllers contributes its controllers-admin.js via BundleScriptAdminProviderInterface (c975L/UiBundle) - each one starts its own independent Stimulus app. Each entry also needs a matching 'entrypoint' => true line in the app's importmap.php.
     public function configureAssets(): Assets
     {
         $assets = Assets::new()
@@ -101,8 +94,7 @@ class DashboardController extends AbstractDashboardController
             $assets->addAssetMapperEntry($script);
         }
 
-        // In dev, keeps each bundle's stylesheet separate for instant reload on every CSS edit;
-        // in prod, links to the single file compiled by StylesheetCacheWarmer (c975L/UiBundle) instead
+        // In dev, keeps each bundle's stylesheet separate for instant reload on every CSS edit; in prod, links to the single file compiled by StylesheetCacheWarmer (c975L/UiBundle) instead
         if ($this->debug) {
             foreach ($this->stylesheetManagementRegistry->all() as $stylesheet) {
                 $assets->addCssFile($stylesheet);

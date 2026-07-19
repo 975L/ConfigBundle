@@ -40,8 +40,7 @@ class ConfigServiceTest extends TestCase
         return $config;
     }
 
-    // Builds a ConfigRepository double returning the given configs, recording each findAll() call so
-    // tests can assert on ConfigService's in-memory memoization without a real database
+    // Builds a ConfigRepository double returning the given configs, recording each findAll() call so tests can assert on ConfigService's in-memory memoization without a real database
     private function createConfigRepository(array $configs, array &$findAllCallLog): ConfigRepository
     {
         $repository = $this->createStub(ConfigRepository::class);
@@ -54,8 +53,7 @@ class ConfigServiceTest extends TestCase
         return $repository;
     }
 
-    // Builds a CacheInterface double that always invokes the callback (a permanent cache miss), since
-    // ConfigService already memoizes the result in memory and the cache backend itself isn't under test
+    // Builds a CacheInterface double that always invokes the callback (a permanent cache miss), since ConfigService already memoizes the result in memory and the cache backend itself isn't under test
     private function createCache(): CacheInterface
     {
         $item = $this->createStub(ItemInterface::class);

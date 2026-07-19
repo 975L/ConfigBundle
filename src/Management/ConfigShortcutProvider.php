@@ -13,12 +13,7 @@ use c975L\ConfigBundle\Controller\Management\MaintenanceShortcutController;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-// To add a ShortcutProvider, you need to:
-// add the Management Folder in the src/ folder of your bundle
-// Create a class implementing ShortcutProviderInterface, providing a getShortcuts() method (label already translated, like AlertProviderInterface)
-// Each shortcut's 'route' must accept a POST request and check its own CSRF token (see ConfigShortcutController)
-// add the declaration of the Management folder in the services.yaml file of your bundle
-// ConfigBundle will automatically detect the ShortcutProvider and add it to the dashboard
+// To add a ShortcutProvider, you need to: add the Management Folder in the src/ folder of your bundle; create a class implementing ShortcutProviderInterface, providing a getShortcuts() method (label already translated, like AlertProviderInterface); each shortcut's 'route' must accept a POST request and check its own CSRF token (see ConfigShortcutController); add the declaration of the Management folder in the services.yaml file of your bundle; ConfigBundle will automatically detect the ShortcutProvider and add it to the dashboard
 
 class ConfigShortcutProvider implements ShortcutProviderInterface
 {

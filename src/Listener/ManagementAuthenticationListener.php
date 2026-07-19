@@ -15,11 +15,7 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 
-// Priority 7 = after FirewallListener (8, token is set) and RouterListener (32),
-// but before AdminRouterSubscriber (1, which sets the EasyAdmin admin context).
-// Without an admin context, EasyAdmin's ExceptionListener (priority -64) ignores
-// the exception, so Symfony's security ExceptionListener (priority 1) handles it
-// and triggers the authentication entry point redirect to login.
+// Priority 7 = after FirewallListener (8, token is set) and RouterListener (32), but before AdminRouterSubscriber (1, which sets the EasyAdmin admin context). Without an admin context, EasyAdmin's ExceptionListener (priority -64) ignores the exception, so Symfony's security ExceptionListener (priority 1) handles it and triggers the authentication entry point redirect to login.
 #[AsEventListener(event: 'kernel.request', priority: 7)]
 class ManagementAuthenticationListener
 {

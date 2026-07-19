@@ -13,8 +13,7 @@ use PHPUnit\Framework\TestCase;
 
 class ExportFormatTest extends TestCase
 {
-    // Locks down the backing string values, since TableExporter/SqlEncoder match against them
-    // (ExportFormat::Sql->value, ContentType map keys...) and a silent rename would break both
+    // Locks down the backing string values, since TableExporter/SqlEncoder match against them (ExportFormat::Sql->value, ContentType map keys...) and a silent rename would break both
     public function testCasesExposeTheExpectedBackingValues(): void
     {
         $this->assertSame('sql', ExportFormat::Sql->value);

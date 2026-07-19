@@ -8,12 +8,7 @@
  */
 namespace c975L\ConfigBundle\Management;
 
-// To add a WhatsNewProvider, you need to:
-// add the Management Folder in the src/ folder of your bundle
-// Create a WhatsNewProvider.php file in it with a class that implements WhatsNewProviderInterface, providing getEntries()
-// Store your entries in a config/whatsnew.json file, read via WhatsNewJsonReader::read()
-// add the declaration of the Management folder in the services.yaml file of your bundle
-// ConfigBundle will automatically detect the WhatsNewProvider and merge its entries into the dashboard
+// To add a WhatsNewProvider, you need to: add the Management Folder in the src/ folder of your bundle; create a WhatsNewProvider.php file in it with a class that implements WhatsNewProviderInterface, providing getEntries(); store your entries in a config/whatsnew.json file, read via WhatsNewJsonReader::read(); add the declaration of the Management folder in the services.yaml file of your bundle; ConfigBundle will automatically detect the WhatsNewProvider and merge its entries into the dashboard
 
 class WhatsNewProvider implements WhatsNewProviderInterface
 {

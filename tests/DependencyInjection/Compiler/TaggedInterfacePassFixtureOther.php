@@ -8,8 +8,7 @@
  */
 namespace c975L\ConfigBundle\Tests\DependencyInjection\Compiler;
 
-// Fixture NOT implementing AlertProviderInterface, used by TaggedInterfacePassTest to verify the
-// pass leaves it untagged - see TaggedInterfacePassFixtureProvider for why this is its own file
+// Fixture NOT implementing AlertProviderInterface, used by TaggedInterfacePassTest to verify the pass leaves it untagged - see TaggedInterfacePassFixtureProvider for why this is its own file
 class TaggedInterfacePassFixtureOther
 {
 }

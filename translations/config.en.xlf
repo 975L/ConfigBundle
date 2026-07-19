@@ -258,6 +258,10 @@
                 <source>label.group_theme</source>
                 <target>Theme</target>
             </trans-unit>
+            <trans-unit id="79">
+                <source>label.group_ai</source>
+                <target>AI</target>
+            </trans-unit>
             <trans-unit id="67">
                 <source>label.theme</source>
                 <target>Theme</target>

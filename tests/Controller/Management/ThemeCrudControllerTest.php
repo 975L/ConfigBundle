@@ -78,8 +78,7 @@ class ThemeCrudControllerTest extends TestCase
         return $service;
     }
 
-    // AdminUrlGenerator is final - can't be mocked, so it's built for real with stubbed interface
-    // collaborators, matching how PageCrudControllerTest (SiteBundle) does it
+    // AdminUrlGenerator is final - can't be mocked, so it's built for real with stubbed interface collaborators, matching how PageCrudControllerTest (SiteBundle) does it
     private function createAdminUrlGenerator(string $generatedUrl = '/admin'): AdminUrlGenerator
     {
         $adminControllers = $this->createStub(AdminControllerRegistryInterface::class);
@@ -182,8 +181,7 @@ class ThemeCrudControllerTest extends TestCase
 
     // --- configureActions -----------------------------------------------------------------------------------
 
-    // A real EasyAdmin runtime pre-populates default actions (EDIT...) before calling configureActions() -
-    // the controller's update(EDIT) call assumes it already exists on PAGE_INDEX (it adds DETAIL itself)
+    // A real EasyAdmin runtime pre-populates default actions (EDIT...) before calling configureActions() - the controller's update(EDIT) call assumes it already exists on PAGE_INDEX (it adds DETAIL itself)
     private function createActionsWithDefaults(): Actions
     {
         return Actions::new()->add(Crud::PAGE_INDEX, Action::EDIT);
@@ -210,8 +208,7 @@ class ThemeCrudControllerTest extends TestCase
         $this->assertInstanceOf(Actions::class, $actions);
     }
 
-    // Manual field editing (colors, fonts, mode) is reserved to ROLE_SUPER_ADMIN even for
-    // non-restricted values; applying a preset (shape only) stays at the lower editor level
+    // Manual field editing (colors, fonts, mode) is reserved to ROLE_SUPER_ADMIN even for non-restricted values; applying a preset (shape only) stays at the lower editor level
     public function testConfigureActionsRestrictsManualEditToSuperAdminAndPresetsToEditor(): void
     {
         $configService = $this->createConfigService();
@@ -227,9 +224,7 @@ class ThemeCrudControllerTest extends TestCase
         $this->assertSame('site-role-editor', $permissions['applyPreset_default']);
     }
 
-    // Preview lets an editor judge a preset before committing to "Apply preset" - only shown when the
-    // owning bundle's provider supplies a ready-made link (see SiteThemePresetProvider), since only it
-    // knows which page/route can render one
+    // Preview lets an editor judge a preset before committing to "Apply preset" - only shown when the owning bundle's provider supplies a ready-made link (see SiteThemePresetProvider), since only it knows which page/route can render one
     public function testConfigureActionsAddsPreviewActionWhenPresetDeclaresPreviewUrl(): void
     {
         $registry = new ThemePresetRegistry([$this->createPresetProvider([
@@ -260,9 +255,7 @@ class ThemeCrudControllerTest extends TestCase
         $this->assertArrayNotHasKey('previewPreset_default', $permissions);
     }
 
-    // The presets action group is temporarily hidden pending rework - applyPreset() itself and its
-    // permission stay reachable (see testConfigureActionsRestrictsManualEditToSuperAdminAndPresetsToEditor),
-    // only the index-page button is not displayed
+    // The presets action group is temporarily hidden pending rework - applyPreset() itself and its permission stay reachable (see testConfigureActionsRestrictsManualEditToSuperAdminAndPresetsToEditor), only the index-page button is not displayed
     public function testConfigureActionsDoesNotAddPresetsGroupToIndexPage(): void
     {
         $registry = new ThemePresetRegistry([$this->createPresetProvider([
@@ -276,8 +269,7 @@ class ThemeCrudControllerTest extends TestCase
         $this->assertNull($actionConfigDto->getAction(Crud::PAGE_INDEX, 'presets'));
     }
 
-    // Index-page row actions become icon-only (see EasyAdminActionHelper::toIconOnly()), the label
-    // moving to the hover "title" instead
+    // Index-page row actions become icon-only (see EasyAdminActionHelper::toIconOnly()), the label moving to the hover "title" instead
     public function testConfigureActionsSetsEditAndDetailIconOnlyOnIndexPage(): void
     {
         $controller = $this->createController();
@@ -296,8 +288,7 @@ class ThemeCrudControllerTest extends TestCase
 
     // --- denyAccessToRestrictedConfig / detail / edit ----------------------------------------------------------
 
-    // A "restricted" theme config (font family, stylesheet) must stay invisible to any admin below
-    // ROLE_SUPER_ADMIN, same protection as ConfigCrudController for the same entity/table
+    // A "restricted" theme config (font family, stylesheet) must stay invisible to any admin below ROLE_SUPER_ADMIN, same protection as ConfigCrudController for the same entity/table
     public function testDenyAccessToRestrictedConfigDeniesAccessWhenConfigIsRestrictedAndNotSuperAdmin(): void
     {
         $this->expectException(AccessDeniedException::class);
@@ -397,8 +388,7 @@ class ThemeCrudControllerTest extends TestCase
         $this->assertNotNull($stylesheet->getModification());
     }
 
-    // A preset's 'stylesheet' is nullable (see ThemePresetProviderInterface) - a null value must leave
-    // the current stylesheet untouched, not blank it, since colors/fonts stay entirely admin-owned
+    // A preset's 'stylesheet' is nullable (see ThemePresetProviderInterface) - a null value must leave the current stylesheet untouched, not blank it, since colors/fonts stay entirely admin-owned
     public function testApplyPresetLeavesStylesheetUntouchedWhenPresetStylesheetIsNull(): void
     {
         $stylesheet = (new Config())->setSlug('theme-stylesheet')->setValue('warm');

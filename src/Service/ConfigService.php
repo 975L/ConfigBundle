@@ -133,8 +133,7 @@ class ConfigService implements ConfigServiceInterface
         $this->invalidateCache();
     }
 
-    // Label/kind/group/description/severity/isRestricted are metadata fixed by the bundle author (not user
-    // data), so they're kept in sync even on existing configs; value/isSensitive carry production state and are never touched here
+    // Label/kind/group/description/severity/isRestricted are metadata fixed by the bundle author (not user data), so they're kept in sync even on existing configs; value/isSensitive carry production state and are never touched here
     private function syncMetadata(Config $config, array $configData): void
     {
         $kind = $configData['kind'] ?? 'text';

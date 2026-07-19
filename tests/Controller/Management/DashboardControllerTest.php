@@ -54,8 +54,7 @@ class DashboardControllerTest extends TestCase
         $this->assertNotContains('bundles/build/admin.css', $cssPaths);
     }
 
-    // Outside debug, links to the single file compiled by StylesheetCacheWarmer (c975L/UiBundle) instead
-    // of the per-bundle list
+    // Outside debug, links to the single file compiled by StylesheetCacheWarmer (c975L/UiBundle) instead of the per-bundle list
     public function testConfigureAssetsAddsCompiledAdminStylesheetWhenNotDebug(): void
     {
         $controller = $this->createController(false, ['bundles/c975lconfig/css/management.min.css']);

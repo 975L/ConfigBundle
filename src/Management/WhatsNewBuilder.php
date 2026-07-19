@@ -10,8 +10,7 @@ namespace c975L\ConfigBundle\Management;
 
 use c975L\UiBundle\Registry\WhatsNewRegistry;
 
-// Merges the whatsnew entries contributed by every WhatsNewProvider (bundles depending on ConfigBundle)
-// plus UiBundle's own providers (UiBundle cannot depend on ConfigBundle, see WhatsNewRegistry), sorted by date desc
+// Merges the whatsnew entries contributed by every WhatsNewProvider (bundles depending on ConfigBundle) plus UiBundle's own providers (UiBundle cannot depend on ConfigBundle, see WhatsNewRegistry), sorted by date desc
 class WhatsNewBuilder
 {
     public function __construct(
@@ -20,8 +19,7 @@ class WhatsNewBuilder
     ) {
     }
 
-    // Returns the most recent dates, capped at $maxItems total description lines
-    // (always includes at least one date, even if it alone exceeds the cap, to avoid an empty dashboard widget)
+    // Returns the most recent dates, capped at $maxItems total description lines (always includes at least one date, even if it alone exceeds the cap, to avoid an empty dashboard widget)
     public function getLatest(int $maxItems = 8): array
     {
         $latest = [];

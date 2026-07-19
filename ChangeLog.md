@@ -1,5 +1,13 @@
 # ChangeLog
 
+## v5.7.3
+
+- Fixed `Config` index actions column wrapping Edit/Detail icons onto two lines (19/07/2026)
+- Config list search now matches against translated label/description instead of raw translation keys (19/07/2026)
+- `json` kind values are now pretty-printed on the edit page (19/07/2026)
+- Added `ReadonlyTextType`, `description` now renders as plain text instead of a disabled input on the edit page (19/07/2026)
+- Added `Config::GROUP_AI` config group (19/07/2026)
+
 ## v5.7.2
 
 - `EasyAdminActionHelper::toIconOnly()` now merges with existing HTML attributes (eg. `target`) instead of overwriting them (17/07/2026)

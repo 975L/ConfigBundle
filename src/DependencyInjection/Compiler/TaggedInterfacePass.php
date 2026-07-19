@@ -12,8 +12,7 @@ namespace c975L\ConfigBundle\DependencyInjection\Compiler;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-// Auto-tags every service implementing $interface with $tag, so it's collected by a !tagged_iterator
-// (one instance per provider mechanism, see c975LConfigBundle::build())
+// Auto-tags every service implementing $interface with $tag, so it's collected by a !tagged_iterator (one instance per provider mechanism, see c975LConfigBundle::build())
 class TaggedInterfacePass implements CompilerPassInterface
 {
     public function __construct(
@@ -31,9 +30,7 @@ class TaggedInterfacePass implements CompilerPassInterface
             }
 
             try {
-                // Some vendor services (e.g. Symfony's translation extractor visitors)
-                // reference classes whose interfaces come from require-dev-only packages
-                // (e.g. nikic/php-parser), which aren't installed in prod (--no-dev)
+                // Some vendor services (e.g. Symfony's translation extractor visitors) reference classes whose interfaces come from require-dev-only packages (e.g. nikic/php-parser), which aren't installed in prod (--no-dev)
                 if (is_subclass_of($class, $this->interface)) {
                     $definition->addTag($this->tag);
                 }

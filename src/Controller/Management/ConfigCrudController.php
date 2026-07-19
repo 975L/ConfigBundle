@@ -10,6 +10,7 @@
 namespace c975L\ConfigBundle\Controller\Management;
 
 use c975L\ConfigBundle\Entity\Config;
+use c975L\ConfigBundle\Form\Type\ReadonlyTextType;
 use c975L\ConfigBundle\Management\AlertBuilder;
 use c975L\ConfigBundle\Management\ConfigAlertProvider;
 use c975L\ConfigBundle\Management\EasyAdminActionHelper;
@@ -80,9 +81,7 @@ class ConfigCrudController extends AbstractCrudController
             ->setLabel(t('label.kind', [], 'config'))
             ->setFormTypeOption('disabled', true);
 
-        // Group is fixed by the import json, never editable through the admin
-        // formatValue() only runs on index/detail (EasyAdmin skips it for disabled form fields),
-        // so the edit page's disabled input needs the translated text injected via form data instead
+        // Group is fixed by the import json, never editable through the admin. formatValue() only runs on index/detail (EasyAdmin skips it for disabled form fields), so the edit page's disabled input needs the translated text injected via form data instead
         $groupField = TextField::new('group')
             ->setLabel(t('label.group', [], 'config'))
             ->setFormTypeOption('disabled', true)
@@ -96,8 +95,7 @@ class ConfigCrudController extends AbstractCrudController
             ]);
         }
 
-        // Severity is fixed by the import json, never editable through the admin
-        // Rendered as a colored badge so an empty mandatory config stands out in the list
+        // Severity is fixed by the import json, never editable through the admin. Rendered as a colored badge so an empty mandatory config stands out in the list
         $severityFieldChoices = [];
         foreach (Config::SEVERITIES as $severity) {
             $severityFieldChoices[$severity] = t('label.severity_' . $severity, [], 'config');
@@ -116,8 +114,7 @@ class ConfigCrudController extends AbstractCrudController
         $kind = $entity instanceof Config ? $entity->getKind() : Config::TYPE_TEXT;
         $rawValue = $entity instanceof Config ? $entity->getValue() : null;
 
-        // Index lists every config in one column: kind/sensitivity vary per row and
-        // can't be resolved from the (null) top-level entity, so decide via the row's $config argument
+        // Index lists every config in one column: kind/sensitivity vary per row and can't be resolved from the (null) top-level entity, so decide via the row's $config argument
         if (Crud::PAGE_INDEX === $pageName) {
             $valueField = TextareaField::new('value')
                 ->setLabel(t('label.value', [], 'config'))
@@ -125,19 +122,18 @@ class ConfigCrudController extends AbstractCrudController
                     $config->getIsSensitive() ? '••••••••' : ($value ?? '')
                 );
         } elseif ($isSensitive && Crud::PAGE_EDIT === $pageName) {
-            // Sensitive fields are pre-filled with the decrypted raw string value in edit
-            // (must stay the raw string, not configService->get()'s kind-cast value, otherwise a
-            // sensitive bool/int/date config like site-maintenance renders as "1"/"" instead of "true"/"false")
-            // (no need to mask with a password widget, the value is already shown in clear on the detail page)
+            // Sensitive fields are pre-filled with the decrypted raw string value in edit (must stay the raw string, not configService->get()'s kind-cast value, otherwise a sensitive bool/int/date config like site-maintenance renders as "1"/"" instead of "true"/"false") (no need to mask with a password widget, the value is already shown in clear on the detail page)
             $decryptedValue = null;
             if (null !== $rawValue && '' !== $rawValue) {
                 $decryptedValue = $this->vaultEncryptor->decrypt($rawValue);
             }
 
-            $valueField = TextField::new('value')
+            // A sensitive json config (e.g. an authorized-tokens map) still needs a multi-line widget -
+            // the single-line TextField below is fine for a sensitive string/key but unusable for json
+            $valueField = (Config::TYPE_JSON === $kind ? TextareaField::new('value') : TextField::new('value'))
                 ->setLabel(t('label.value_sensitive', [], 'config'))
                 ->setFormTypeOptions([
-                    'data' => $decryptedValue,
+                    'data' => Config::TYPE_JSON === $kind ? $this->prettyJson($decryptedValue) : $decryptedValue,
                 ])
                 ->setRequired(false);
         } elseif ($isSensitive) {
@@ -145,14 +141,19 @@ class ConfigCrudController extends AbstractCrudController
             $valueField = TextareaField::new('value')
                 ->setLabel(t('label.value', [], 'config'))
                 ->setRequired(true)
-                ->formatValue(fn (?string $value): string =>
-                    null === $value || '' === $value ? ($value ?? '') : $this->vaultEncryptor->decrypt($value)
-                );
+                ->formatValue(function (?string $value) use ($kind): string {
+                    if (null === $value || '' === $value) {
+                        return $value ?? '';
+                    }
+
+                    $decrypted = $this->vaultEncryptor->decrypt($value);
+
+                    return Config::TYPE_JSON === $kind ? ($this->prettyJson($decrypted) ?? '') : $decrypted;
+                });
         } else {
             // Non-sensitive fields use a widget matching the config kind
             $valueField = match ($kind) {
-                // The raw string value must be overridden with a real bool/DateTime via setValue(),
-                // since EasyAdmin's boolean/date templates and formatters read the field's raw value directly
+                // The raw string value must be overridden with a real bool/DateTime via setValue(), since EasyAdmin's boolean/date templates and formatters read the field's raw value directly
                 Config::TYPE_BOOL => BooleanField::new('value')
                     ->setLabel(t('label.value', [], 'config'))
                     ->setValue($this->configService->getBool($rawValue))
@@ -169,6 +170,8 @@ class ConfigCrudController extends AbstractCrudController
                 Config::TYPE_JSON => TextareaField::new('value')
                     ->setLabel(t('label.value', [], 'config'))
                     ->setHelp(t('help.value_json', [], 'config'))
+                    ->setFormTypeOptions(['data' => $this->prettyJson($rawValue)])
+                    ->formatValue(fn (?string $value): string => $this->prettyJson($value) ?? '')
                     ->setRequired(false),
                 // Html kind is for the rare configs needing rich content, reuses EasyAdmin's own rich text editor (same widget as blocks)
                 Config::TYPE_HTML => TextEditorField::new('value')
@@ -181,20 +184,17 @@ class ConfigCrudController extends AbstractCrudController
             };
         }
 
-        // Edit form renders field help as plain text below the widget (unlike detail/index, which use a tooltip/popover)
-        // The json kind keeps its own dedicated help instead, since it needs to explain the expected format
+        // Edit form renders field help as plain text below the widget (unlike detail/index, which use a tooltip/popover). The json kind keeps its own dedicated help instead, since it needs to explain the expected format
         if (Crud::PAGE_EDIT === $pageName) {
             $valueField = $valueField->setHelp(Config::TYPE_JSON === $kind
                 ? t('help.value_json', [], 'config')
                 : t('help.value', [], 'config'));
         }
 
-        // Description holds a 'site_config' translation key (description.xxx) once a bundle has migrated
-        // to it; trans() safely falls back to the raw text unchanged for bundles that haven't yet.
-        // formatValue() only runs on index/detail (EasyAdmin skips it for disabled form fields), so
-        // the edit page's disabled input needs the translated text injected via form data instead
+        // Description holds a 'site_config' translation key (description.xxx) once a bundle has migrated to it; trans() safely falls back to the raw text unchanged for bundles that haven't yet. formatValue() only runs on index/detail (EasyAdmin skips it for disabled form fields), so the edit page's disabled input needs the translated text injected via form data instead. ReadonlyTextType renders a <p> instead of an <input> - see form_theme.html.twig
         $descriptionField = TextField::new('description')
             ->setLabel(t('label.description', [], 'config'))
+            ->setFormType(ReadonlyTextType::class)
             ->setFormTypeOption('disabled', true)
             ->hideOnIndex()
             ->formatValue(fn (?string $description): string =>
@@ -207,10 +207,7 @@ class ConfigCrudController extends AbstractCrudController
             ]);
         }
 
-        // Label uses a 'site_config' translation key derived from the slug (label.xxx), mirroring
-        // description's key format; trans() falls back to the raw key unchanged if not translated.
-        // formatValue() only runs on index/detail (EasyAdmin skips it for disabled form fields), so
-        // the edit page's disabled input needs the translated text injected via form data instead
+        // Label uses a 'site_config' translation key derived from the slug (label.xxx), mirroring description's key format; trans() falls back to the raw key unchanged if not translated. formatValue() only runs on index/detail (EasyAdmin skips it for disabled form fields), so the edit page's disabled input needs the translated text injected via form data instead
         $labelField = TextField::new('label')
             ->setLabel(t('label.label', [], 'config'))
             ->setFormTypeOption('disabled', true)
@@ -330,6 +327,7 @@ class ConfigCrudController extends AbstractCrudController
         return $crud
             ->showEntityActionsInlined()
             ->overrideTemplate('crud/index', '@c975LConfig/management/config_crud_index.html.twig')
+            ->addFormTheme('@c975LConfig/management/form_theme.html.twig')
             ->setEntityLabelInSingular(t('label.config', [], 'config'))
             ->setEntityLabelInPlural(t('label.config', [], 'config'))
             ->setEntityPermission($this->configService->get('site-role-admin'))
@@ -388,16 +386,44 @@ class ConfigCrudController extends AbstractCrudController
 
     public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder
     {
+        $query = $searchDto->getQuery();
+
+        // EasyAdmin's own search only matches raw DB columns, but "label"/"description" store
+        // translation keys ("label.ai_help_llm_enabled"), never the rendered text an admin actually
+        // searches for ("Donovan (Q&A) - Activé") - a non-empty query is instead resolved against every
+        // row's *translated* label/description in memory (the whole config list is always small, a few
+        // dozen rows) into a slug allowlist below. The query itself is blanked out before calling
+        // parent() so its own SQL LIKE search (which would always find nothing against those keys)
+        // doesn't also apply and AND against zero rows
+        $matchingSlugs = null;
+        if ('' !== $query) {
+            $matchingSlugs = $this->slugsMatchingTranslatedQuery($query);
+            $searchDto = new SearchDto(
+                $searchDto->getRequest(),
+                $searchDto->getSearchableProperties(),
+                '',
+                $searchDto->getDefaultSort(),
+                $searchDto->getCustomSort(),
+                $searchDto->getAppliedFilters(),
+                $searchDto->getSearchMode(),
+            );
+        }
+
         $qb = parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters);
+
+        if (null !== $matchingSlugs) {
+            // Never an empty IN() - Doctrine/DBAL reject an empty parameter array, and a slug that can't
+            // exist cleanly yields zero rows when nothing matched
+            $qb->andWhere('entity.slug IN (:matchingSlugs)')
+                ->setParameter('matchingSlugs', $matchingSlugs ?: ['']);
+        }
 
         $request = $this->requestStack->getCurrentRequest();
         $showSensitive = $request?->query->getBoolean('showSensitive', false);
         $qb->andWhere('entity.isSensitive = :isSensitive')
             ->setParameter('isSensitive', $showSensitive);
 
-        // Configs flagged "restricted" (backup DB credentials, payment API keys...) stay out of the
-        // list entirely below ROLE_SUPER_ADMIN, see denyAccessToRestrictedConfig()
-        // (isRestricted is nullable: legacy rows not yet synced must NOT be treated as restricted)
+        // Configs flagged "restricted" (backup DB credentials, payment API keys...) stay out of the list entirely below ROLE_SUPER_ADMIN, see denyAccessToRestrictedConfig() (isRestricted is nullable: legacy rows not yet synced must NOT be treated as restricted)
         if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
             $qb->andWhere('entity.isRestricted IS NULL OR entity.isRestricted = :isRestricted')
                 ->setParameter('isRestricted', false);
@@ -406,8 +432,33 @@ class ConfigCrudController extends AbstractCrudController
         return $qb;
     }
 
-    // A "restricted" config must stay invisible to any admin below ROLE_SUPER_ADMIN: it's a secret
-    // shared across the install (backup DB credentials, payment API keys...), never per-client application data
+    // Slugs whose slug/translated-label/translated-description contain $query (case-insensitive) - raw
+    // SQL rather than the entity repository since this class already fetches this way (see
+    // fetchExportRows()) and doesn't otherwise need Doctrine ORM here. A throwaway Config instance
+    // reuses Config::getLabelTranslationKey() instead of duplicating its slug->key derivation
+    private function slugsMatchingTranslatedQuery(string $query): array
+    {
+        $needle = mb_strtolower($query);
+        $rows = $this->connection->fetchAllAssociative('SELECT `slug`, `description` FROM `site_config`');
+
+        $matching = [];
+        foreach ($rows as $row) {
+            $slug = $row['slug'];
+            $label = $this->translator->trans((new Config())->setSlug($slug)->getLabelTranslationKey(), [], 'site_config');
+            $description = $row['description'] ? $this->translator->trans($row['description'], [], 'site_config') : '';
+
+            if (str_contains(mb_strtolower($slug), $needle)
+                || str_contains(mb_strtolower($label), $needle)
+                || str_contains(mb_strtolower($description), $needle)
+            ) {
+                $matching[] = $slug;
+            }
+        }
+
+        return $matching;
+    }
+
+    // A "restricted" config must stay invisible to any admin below ROLE_SUPER_ADMIN: it's a secret shared across the install (backup DB credentials, payment API keys...), never per-client application data
     private function denyAccessToRestrictedConfig(AdminContext $context): void
     {
         $entity = $context->getEntity()->getInstance();
@@ -452,9 +503,7 @@ class ConfigCrudController extends AbstractCrudController
         if ($config->getIsSensitive()) {
             $submitted = $config->getValue();
 
-            // Non-empty submission: encrypt the new plain-text value. A blank submission clears
-            // the value: the field is pre-filled with the decrypted value on edit, so blank means
-            // the user actively emptied it, not that they left it untouched
+            // Non-empty submission: encrypt the new plain-text value. A blank submission clears the value: the field is pre-filled with the decrypted value on edit, so blank means the user actively emptied it, not that they left it untouched
             if (null !== $submitted && '' !== $submitted) {
                 $config->setValue($this->vaultEncryptor->encrypt($submitted));
             }
@@ -481,8 +530,7 @@ class ConfigCrudController extends AbstractCrudController
     {
         $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
 
-        // Non-sensitive: INSERT ... ON DUPLICATE KEY UPDATE (syncs label/value/kind/group/description/severity)
-        // Sensitive:     INSERT IGNORE INTO (creates if missing, preserves production values)
+        // Non-sensitive: INSERT ... ON DUPLICATE KEY UPDATE (syncs label/value/kind/group/description/severity); sensitive: INSERT IGNORE INTO (creates if missing, preserves production values)
         return $this->tableExporter->export(ExportFormat::Sql, 'site_config', $this->fetchExportRows(), [
             'primary_key' => 'slug',
             'exclude_from_update' => ['creation'],
@@ -506,9 +554,7 @@ class ConfigCrudController extends AbstractCrudController
         return $this->tableExporter->export(ExportFormat::Json, 'site_config', $this->fetchExportRows());
     }
 
-    // Sensitive values are kept as stored (encrypted), never decrypted for export
-    // Restricted configs (backup DB credentials, payment API keys...) are excluded below ROLE_SUPER_ADMIN,
-    // same restriction as the CRUD itself; is_restricted is nullable, legacy rows must NOT be treated as restricted
+    // Sensitive values are kept as stored (encrypted), never decrypted for export. Restricted configs (backup DB credentials, payment API keys...) are excluded below ROLE_SUPER_ADMIN, same restriction as the CRUD itself; is_restricted is nullable, legacy rows must NOT be treated as restricted
     private function fetchExportRows(): array
     {
         $sql = 'SELECT `label`, `slug`, `is_sensitive`, `is_restricted`, `value`, `kind`, `group`, `description`, `severity`, `creation`, `modification` FROM `site_config`';
@@ -518,6 +564,20 @@ class ConfigCrudController extends AbstractCrudController
         $sql .= ' ORDER BY `slug`';
 
         return $this->connection->fetchAllAssociative($sql);
+    }
+
+    // Re-indents a stored json config value for readability; falls back to the raw string if it isn't valid JSON
+    private function prettyJson(?string $value): ?string
+    {
+        if (null === $value || '' === $value) {
+            return $value;
+        }
+
+        $decoded = json_decode($value, true);
+
+        return null === $decoded && 'null' !== trim($value)
+            ? $value
+            : json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     // Parses a stored date value, tolerating empty/invalid strings
