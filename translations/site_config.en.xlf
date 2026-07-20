@@ -4,7 +4,7 @@
         <body>
             <trans-unit id="1">
                 <source>description.site_role_admin</source>
-                <target>Role required to access the config parameters i.e. ROLE_ADMIN (default)</target>
+                <target>Role required for config access, e.g. ROLE_ADMIN (default)</target>
             </trans-unit>
             <trans-unit id="2">
                 <source>description.site_maintenance</source>
@@ -16,7 +16,7 @@
             </trans-unit>
             <trans-unit id="4">
                 <source>description.site_role_editor</source>
-                <target>Role required to access editor-level actions i.e. ROLE_EDITOR (default)</target>
+                <target>Role required for editor actions, e.g. ROLE_EDITOR (default)</target>
             </trans-unit>
             <trans-unit id="5">
                 <source>label.site_role_admin</source>

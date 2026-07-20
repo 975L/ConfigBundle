@@ -4,7 +4,7 @@
         <body>
             <trans-unit id="1">
                 <source>description.site_role_admin</source>
-                <target>Rol requerido para acceder a los parámetros de configuración, ej. ROLE_ADMIN (por defecto)</target>
+                <target>Rol requerido para la configuración, ej. ROLE_ADMIN (por defecto)</target>
             </trans-unit>
             <trans-unit id="2">
                 <source>description.site_maintenance</source>
@@ -16,7 +16,7 @@
             </trans-unit>
             <trans-unit id="4">
                 <source>description.site_role_editor</source>
-                <target>Rol requerido para acceder a las acciones de nivel editor, ej. ROLE_EDITOR (por defecto)</target>
+                <target>Rol requerido para las acciones de editor, ej. ROLE_EDITOR (por defecto)</target>
             </trans-unit>
             <trans-unit id="5">
                 <source>label.site_role_admin</source>

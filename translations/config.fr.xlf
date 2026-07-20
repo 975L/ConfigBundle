@@ -157,7 +157,7 @@
             </trans-unit>
             <trans-unit id="39">
                 <source>help.value</source>
-                <target>Seule cette valeur peut être modifiée ; les autres champs sont fixés par l'import JSON des bundles. Si la configuration est sensible, la valeur est stockée chiffrée.</target>
+                <target>Seule cette valeur est modifiable (le reste vient des bundles). Chiffrée si sensible.</target>
             </trans-unit>
             <trans-unit id="40">
                 <source>help.value_json</source>
@@ -193,7 +193,7 @@
             </trans-unit>
             <trans-unit id="48">
                 <source>label.info_config</source>
-                <target>Données de configuration pour le site web. Les données sensibles sont cryptées en base de données</target>
+                <target>Configuration du site ; les valeurs sensibles sont chiffrées en base</target>
             </trans-unit>
             <trans-unit id="49">
                 <source>label.whatsnew</source>
@@ -253,7 +253,7 @@
             </trans-unit>
             <trans-unit id="65">
                 <source>label.is_restricted_help</source>
-                <target>Si restreint est activé, seul un utilisateur ROLE_SUPER_ADMIN peut voir/éditer cette configuration</target>
+                <target>Si activé, seul un ROLE_SUPER_ADMIN peut voir/éditer cette configuration</target>
             </trans-unit>
             <trans-unit id="66">
                 <source>label.group_theme</source>
@@ -293,7 +293,7 @@
             </trans-unit>
             <trans-unit id="75">
                 <source>help.value_theme_color</source>
-                <target>Hexadécimal (#b30000), rgb()/rgba(), hsl()/hsla(), ou un nom de couleur CSS (ex. tomato)</target>
+                <target>Hexadécimal (#b30000), rgb()/rgba(), hsl()/hsla(), ou un nom CSS (ex. tomato)</target>
             </trans-unit>
             <trans-unit id="78">
                 <source>action.preview_preset</source>
@@ -309,7 +309,11 @@
             </trans-unit>
             <trans-unit id="82">
                 <source>label.info_theme</source>
-                <target>Variables CSS du thème (couleurs, polices, mode clair/sombre). L'édition manuelle champ par champ est réservée à ROLE_SUPER_ADMIN ; un preset appliqué depuis l'action "Presets" reste accessible dès le rôle éditeur.</target>
+                <target>Couleurs, polices, mode clair/sombre. Édition manuelle réservée à ROLE_SUPER_ADMIN ; presets accessibles dès éditeur.</target>
+            </trans-unit>
+            <trans-unit id="83">
+                <source>label.config_export_sql</source>
+                <target>Exporter (SQL) la configuration</target>
             </trans-unit>
         </body>
     </file>

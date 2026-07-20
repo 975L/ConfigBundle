@@ -1,5 +1,11 @@
 # ChangeLog
 
+## v5.8.2
+
+- Added `ConfigSqlExporter`, reused by the Config SQL export and a new dashboard shortcut (20/07/2026)
+- Added a dashboard shortcut to export the SQL configuration without opening Config (20/07/2026)
+- Shortened several config/site_config translation strings (en/es/fr) (20/07/2026)
+
 ## v5.8.1
 
 - Corrected dependency (20/07/2026)

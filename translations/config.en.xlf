@@ -156,7 +156,7 @@
             </trans-unit>
             <trans-unit id="39">
                 <source>help.value</source>
-                <target>Only this value can be edited; the other fields are fixed by the bundles' JSON import. If the config is sensitive, the value is stored encrypted.</target>
+                <target>Only this value is editable (the rest comes from the bundles). Encrypted if sensitive.</target>
             </trans-unit>
             <trans-unit id="40">
                 <source>help.value_json</source>
@@ -192,7 +192,7 @@
             </trans-unit>
             <trans-unit id="48">
                 <source>label.info_config</source>
-                <target>Configuration data for the website. Sensitive data is stored encrypted in the database</target>
+                <target>Site configuration; sensitive values are stored encrypted</target>
             </trans-unit>
             <trans-unit id="49">
                 <source>label.whatsnew</source>
@@ -252,7 +252,7 @@
             </trans-unit>
             <trans-unit id="65">
                 <source>label.is_restricted_help</source>
-                <target>If restricted is enabled, only a ROLE_SUPER_ADMIN user can view/edit this config</target>
+                <target>If enabled, only a ROLE_SUPER_ADMIN can view/edit this config</target>
             </trans-unit>
             <trans-unit id="66">
                 <source>label.group_theme</source>
@@ -292,7 +292,7 @@
             </trans-unit>
             <trans-unit id="75">
                 <source>help.value_theme_color</source>
-                <target>Hex (#b30000), rgb()/rgba(), hsl()/hsla(), or a CSS color name (e.g. tomato)</target>
+                <target>Hex (#b30000), rgb()/rgba(), hsl()/hsla(), or a CSS name (e.g. tomato)</target>
             </trans-unit>
             <trans-unit id="78">
                 <source>action.preview_preset</source>
@@ -308,7 +308,11 @@
             </trans-unit>
             <trans-unit id="82">
                 <source>label.info_theme</source>
-                <target>Theme CSS variables (colors, fonts, light/dark mode). Manual field-by-field editing is reserved to ROLE_SUPER_ADMIN; applying a preset from the "Presets" action stays available from the editor role.</target>
+                <target>Colors, fonts, light/dark mode. Manual editing reserved to ROLE_SUPER_ADMIN; presets stay available from editor role.</target>
+            </trans-unit>
+            <trans-unit id="83">
+                <source>label.config_export_sql</source>
+                <target>Export (SQL) the configuration</target>
             </trans-unit>
         </body>
     </file>

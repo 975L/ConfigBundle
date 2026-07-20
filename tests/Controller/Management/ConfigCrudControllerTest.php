@@ -14,6 +14,7 @@ use c975L\ConfigBundle\Entity\Config;
 use c975L\ConfigBundle\Management\ConfigAlertProvider;
 use c975L\ConfigBundle\Repository\ConfigRepository;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
+use c975L\ConfigBundle\Service\Export\ConfigSqlExporter;
 use c975L\ConfigBundle\Service\Export\ExportFormat;
 use c975L\ConfigBundle\Service\Export\TableExporter;
 use c975L\ConfigBundle\Service\VaultEncryptor;
@@ -94,6 +95,7 @@ class ConfigCrudControllerTest extends TestCase
         ?Connection $connection = null,
         ?RequestStack $requestStack = null,
         ?TableExporter $tableExporter = null,
+        ?ConfigSqlExporter $configSqlExporter = null,
         ?ConfigRepository $configRepository = null,
         ?AdminUrlGenerator $adminUrlGenerator = null,
     ): ConfigCrudController {
@@ -108,6 +110,7 @@ class ConfigCrudControllerTest extends TestCase
             $requestStack ?? new RequestStack(),
             $translator,
             $tableExporter ?? $this->createStub(TableExporter::class),
+            $configSqlExporter ?? $this->createStub(ConfigSqlExporter::class),
             $this->createStub(ConfigAlertProvider::class),
             $configRepository ?? $this->createStub(ConfigRepository::class),
             $adminUrlGenerator ?? $this->createAdminUrlGenerator(),
@@ -411,6 +414,7 @@ class ConfigCrudControllerTest extends TestCase
             new RequestStack(),
             $translator,
             $this->createStub(TableExporter::class),
+            $this->createStub(ConfigSqlExporter::class),
             $this->createStub(ConfigAlertProvider::class),
             $this->createStub(ConfigRepository::class),
             $this->createAdminUrlGenerator(),
@@ -499,6 +503,22 @@ class ConfigCrudControllerTest extends TestCase
         ]));
 
         $controller->exportCsv($this->createAdminContext());
+    }
+
+    public function testExportSqlDelegatesToConfigSqlExporter(): void
+    {
+        $exportResponse = new Response();
+        $configSqlExporter = $this->createMock(ConfigSqlExporter::class);
+        $configSqlExporter->expects($this->once())->method('export')->willReturn($exportResponse);
+
+        $controller = $this->createController(configSqlExporter: $configSqlExporter);
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+        ]));
+
+        $response = $controller->exportSql($this->createAdminContext());
+
+        $this->assertSame($exportResponse, $response);
     }
 
     public function testExportSqlDeniesAccessBelowSuperAdmin(): void

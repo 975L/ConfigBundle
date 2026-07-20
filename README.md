@@ -159,6 +159,8 @@ This means non-sensitive values (labels, descriptions, default content) are kept
 
 CSV and JSON exports are a straight dump of the table (no upsert logic) — useful for backups, audits, or feeding another tool.
 
+The SQL export is also available as a `/management` dashboard shortcut ("Export (SQL) the configuration", `ROLE_SUPER_ADMIN`), downloading the same file without opening **Config** first.
+
 ## Restricting configs to ROLE_SUPER_ADMIN
 
 Some configs are secrets shared across the whole install rather than per-site application data —

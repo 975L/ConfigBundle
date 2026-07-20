@@ -36,6 +36,13 @@ class ConfigShortcutProvider implements ShortcutProviderInterface
                 'role' => 'ROLE_SUPER_ADMIN',
             ],
             [
+                'label' => $this->translator->trans('label.config_export_sql', [], 'config'),
+                'icon' => 'fas fa-database',
+                'route' => ConfigShortcutController::EXPORT_SQL_ROUTE,
+                'active' => false,
+                'role' => 'ROLE_SUPER_ADMIN',
+            ],
+            [
                 'label' => $this->translator->trans(
                     $maintenanceEnabled ? 'label.maintenance_disable' : 'label.maintenance_enable',
                     [],

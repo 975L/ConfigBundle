@@ -47,10 +47,13 @@ class ConfigShortcutProviderTest extends TestCase
 
         $this->assertSame(ConfigShortcutController::CLEAR_CACHE_ROUTE, $shortcuts[0]['route']);
         $this->assertFalse($shortcuts[0]['active']);
-        $this->assertSame(MaintenanceShortcutController::TOGGLE_ROUTE_MAINTENANCE, $shortcuts[1]['route']);
+        $this->assertSame(ConfigShortcutController::EXPORT_SQL_ROUTE, $shortcuts[1]['route']);
         $this->assertFalse($shortcuts[1]['active']);
-        $this->assertSame('label.maintenance_enable', $shortcuts[1]['label']);
-        $this->assertSame('ROLE_ADMIN', $shortcuts[1]['role']);
+        $this->assertSame('ROLE_SUPER_ADMIN', $shortcuts[1]['role']);
+        $this->assertSame(MaintenanceShortcutController::TOGGLE_ROUTE_MAINTENANCE, $shortcuts[2]['route']);
+        $this->assertFalse($shortcuts[2]['active']);
+        $this->assertSame('label.maintenance_enable', $shortcuts[2]['label']);
+        $this->assertSame('ROLE_ADMIN', $shortcuts[2]['role']);
     }
 
     public function testGetShortcutsReflectsMaintenanceEnabledState(): void
@@ -63,7 +66,7 @@ class ConfigShortcutProviderTest extends TestCase
 
         $shortcuts = $provider->getShortcuts();
 
-        $this->assertTrue($shortcuts[1]['active']);
-        $this->assertSame('label.maintenance_disable', $shortcuts[1]['label']);
+        $this->assertTrue($shortcuts[2]['active']);
+        $this->assertSame('label.maintenance_disable', $shortcuts[2]['label']);
     }
 }

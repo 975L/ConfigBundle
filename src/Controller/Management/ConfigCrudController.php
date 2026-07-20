@@ -16,6 +16,7 @@ use c975L\ConfigBundle\Management\ConfigAlertProvider;
 use c975L\ConfigBundle\Management\EasyAdminActionHelper;
 use c975L\ConfigBundle\Repository\ConfigRepository;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
+use c975L\ConfigBundle\Service\Export\ConfigSqlExporter;
 use c975L\ConfigBundle\Service\Export\ExportFormat;
 use c975L\ConfigBundle\Service\Export\TableExporter;
 use c975L\ConfigBundle\Service\VaultEncryptor;
@@ -63,6 +64,7 @@ class ConfigCrudController extends AbstractCrudController
         private readonly RequestStack $requestStack,
         private readonly TranslatorInterface $translator,
         private readonly TableExporter $tableExporter,
+        private readonly ConfigSqlExporter $configSqlExporter,
         private readonly ConfigAlertProvider $configAlertProvider,
         private readonly ConfigRepository $configRepository,
         private readonly AdminUrlGenerator $adminUrlGenerator,
@@ -563,12 +565,7 @@ class ConfigCrudController extends AbstractCrudController
     {
         $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
 
-        // Non-sensitive: INSERT ... ON DUPLICATE KEY UPDATE (syncs label/value/kind/group/description/severity); sensitive: INSERT IGNORE INTO (creates if missing, preserves production values)
-        return $this->tableExporter->export(ExportFormat::Sql, 'site_config', $this->fetchExportRows(), [
-            'primary_key' => 'slug',
-            'exclude_from_update' => ['creation'],
-            'insert_ignore_when' => fn (array $row): bool => (bool) $row['is_sensitive'],
-        ]);
+        return $this->configSqlExporter->export();
     }
 
     #[AdminRoute]

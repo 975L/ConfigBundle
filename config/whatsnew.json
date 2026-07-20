@@ -1,5 +1,15 @@
 [
     {
+        "date": "2026-07-20",
+        "description": [
+            {
+                "en": "You can now export the SQL configuration directly from the dashboard, without opening the Configuration section first",
+                "fr": "Vous pouvez désormais exporter la configuration SQL directement depuis le tableau de bord, sans passer par la section Configuration",
+                "es": "Ahora puedes exportar la configuración SQL directamente desde el panel, sin necesidad de abrir antes la sección Configuración"
+            }
+        ]
+    },
+    {
         "date": "2026-07-19",
         "description": [
             {
