@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v5.8.1
+
+- Corrected dependency (20/07/2026)
+
 ## v5.8
 
 - `Config` list now opens on a "pick a group" screen instead of one flat table (19/07/2026)

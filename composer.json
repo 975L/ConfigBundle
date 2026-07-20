@@ -21,7 +21,7 @@
         "php": ">=8.0",
         "doctrine/orm": "*",
         "c975l/ui-bundle": "*",
-        "easycorp/easyadmin-bundle": "*",
+        "easycorp/easyadmin-bundle": "^5.1",
         "sensiolabs/minify-bundle": "*",
         "symfony/form": "*",
         "symfony/serializer": "*",
