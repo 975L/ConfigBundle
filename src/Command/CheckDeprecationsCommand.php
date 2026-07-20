@@ -149,15 +149,21 @@ class CheckDeprecationsCommand extends Command
         return $report;
     }
 
-    // Candidate tokens: fully-qualified class names and composer package names quoted in the message are "exact" (high-confidence) matches. Each FQCN's parent namespace is kept as a lower-confidence token - code that imports it via "use Foo\Bar\Annotation as X;" and references "X\Uploadable" never spells out the full "Foo\Bar\Annotation\Uploadable" string, only the "use" line does - but a namespace shared by unrelated sibling classes (e.g. "use Foo\Bar\Annotation\SomethingElse;") matches just as easily without actually using the deprecated class, hence "possible" and not "actionable"
+    // Candidate tokens: fully-qualified class names quoted in the message are "exact" (high-confidence) matches. Composer package names and each FQCN's parent namespace are kept as lower-confidence tokens - code that imports a class via "use Foo\Bar\Annotation as X;" and references "X\Uploadable" never spells out the full "Foo\Bar\Annotation\Uploadable" string, only the "use" line does, and a bundle can mention a package name (e.g. in a comment or composer.json) without using the specific deprecated class it ships - both match just as easily without proving real usage, hence "possible" and not "actionable"
     private function extractTokens(string $message): array
     {
         preg_match_all('/"([A-Za-z0-9_]+(?:\\\\[A-Za-z0-9_]+)+)"/', $message, $fqcnMatches);
         preg_match_all('/\b([a-z0-9_-]+\/[a-z0-9_-]+)\b/', $message, $pkgMatches);
 
         $tokens = [];
-        foreach (array_merge($fqcnMatches[1], $pkgMatches[1]) as $token) {
+        foreach ($fqcnMatches[1] as $token) {
             $tokens[$token] = true;
+        }
+        // Composer package names (e.g. "symfony/maker-bundle") are too generic to count as exact: a bundle mentioning the package name in a comment or composer.json, without actually using the deprecated class, matches just as easily
+        foreach ($pkgMatches[1] as $token) {
+            if (!isset($tokens[$token])) {
+                $tokens[$token] = false;
+            }
         }
 
         foreach ($fqcnMatches[1] as $fqcn) {

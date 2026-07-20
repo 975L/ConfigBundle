@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v5.8.3
+
+- Corrected Deprecations check (20/07/2026)
+
 ## v5.8.2
 
 - Added `ConfigSqlExporter`, reused by the Config SQL export and a new dashboard shortcut (20/07/2026)
