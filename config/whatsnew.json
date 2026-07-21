@@ -1,5 +1,15 @@
 [
     {
+        "date": "2026-07-21",
+        "description": [
+            {
+                "en": "Font-related settings are now chosen from a list instead of being typed in, so there's no more risk of a typo",
+                "fr": "Les réglages liés aux polices se choisissent désormais dans une liste au lieu d'être saisis à la main, il n'y a plus de risque de faute de frappe",
+                "es": "Los ajustes relacionados con las fuentes ahora se eligen de una lista en lugar de escribirse a mano, sin riesgo de errores tipográficos"
+            }
+        ]
+    },
+    {
         "date": "2026-07-20",
         "description": [
             {

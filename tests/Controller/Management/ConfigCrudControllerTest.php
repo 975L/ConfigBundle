@@ -18,6 +18,9 @@ use c975L\ConfigBundle\Service\Export\ConfigSqlExporter;
 use c975L\ConfigBundle\Service\Export\ExportFormat;
 use c975L\ConfigBundle\Service\Export\TableExporter;
 use c975L\ConfigBundle\Service\VaultEncryptor;
+use c975L\UiBundle\Contract\FontProviderInterface;
+use c975L\UiBundle\Form\FontChoiceType;
+use c975L\UiBundle\Registry\FontRegistry;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -38,6 +41,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Registry\AdminControllerRegistryIn
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Router\AdminRouteGeneratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use PHPUnit\Framework\TestCase;
@@ -98,6 +102,7 @@ class ConfigCrudControllerTest extends TestCase
         ?ConfigSqlExporter $configSqlExporter = null,
         ?ConfigRepository $configRepository = null,
         ?AdminUrlGenerator $adminUrlGenerator = null,
+        ?FontRegistry $fontRegistry = null,
     ): ConfigCrudController {
         $translator = $this->createStub(TranslatorInterface::class);
         $translator->method('trans')->willReturnArgument(0);
@@ -114,7 +119,21 @@ class ConfigCrudControllerTest extends TestCase
             $this->createStub(ConfigAlertProvider::class),
             $configRepository ?? $this->createStub(ConfigRepository::class),
             $adminUrlGenerator ?? $this->createAdminUrlGenerator(),
+            $fontRegistry ?? new FontRegistry(),
         );
+    }
+
+    // Builds a FontRegistry pre-populated with a single stub provider returning $fonts, mirroring what
+    // FontProviderPass would wire in a real app that has a font-declaring bundle (e.g. SiteBundle) installed
+    private function createFontRegistry(array $fonts): FontRegistry
+    {
+        $provider = $this->createStub(FontProviderInterface::class);
+        $provider->method('getFonts')->willReturn($fonts);
+
+        $registry = new FontRegistry();
+        $registry->addProvider($provider);
+
+        return $registry;
     }
 
     private function createConfigService(): ConfigServiceInterface
@@ -418,6 +437,7 @@ class ConfigCrudControllerTest extends TestCase
             $this->createStub(ConfigAlertProvider::class),
             $this->createStub(ConfigRepository::class),
             $this->createAdminUrlGenerator(),
+            new FontRegistry(),
         );
         $controller->setContainer($this->createContainer([
             EntityRepositoryInterface::class => $repository,
@@ -736,6 +756,59 @@ class ConfigCrudControllerTest extends TestCase
         $formatted = ($valueField->getAsDto()->getFormatValueCallable())($config->getValue());
 
         $this->assertSame("{\n    \"token\": \"abc\"\n}", $formatted);
+    }
+
+    // Font kind renders a ChoiceField built from FontChoiceType/FontRegistry, always topped up with the 3 CSS generics
+    public function testConfigureFieldsRendersChoiceFieldForFontKindWhenRegistryHasFonts(): void
+    {
+        $config = (new Config())->setSlug('theme-font-family-title')->setKind(Config::TYPE_FONT)->setValue('Georgia');
+
+        $controller = $this->createController(fontRegistry: $this->createFontRegistry(['Georgia', 'Roboto']));
+        $this->setContextEntity($controller, $config);
+
+        $valueField = $this->findField($controller->configureFields('edit'), 'value');
+
+        $this->assertInstanceOf(ChoiceField::class, $valueField);
+        $this->assertSame(FontChoiceType::class, $valueField->getAsDto()->getFormType());
+        $this->assertSame(
+            ['Georgia' => 'Georgia', 'Roboto' => 'Roboto', 'serif' => 'serif', 'sans-serif' => 'sans-serif', 'monospace' => 'monospace'],
+            $valueField->getAsDto()->getFormTypeOptions()['choices'],
+        );
+    }
+
+    // With no font declared anywhere (no FontProviderInterface registered, or its file is empty/missing), the select
+    // still offers the 3 CSS generics - never an empty, unusable <select>
+    public function testConfigureFieldsOffersOnlyGenericFontFamiliesWhenRegistryIsEmpty(): void
+    {
+        $config = (new Config())->setSlug('theme-font-family-title')->setKind(Config::TYPE_FONT)->setValue(null);
+
+        $controller = $this->createController();
+        $this->setContextEntity($controller, $config);
+
+        $valueField = $this->findField($controller->configureFields('edit'), 'value');
+
+        $this->assertInstanceOf(ChoiceField::class, $valueField);
+        $this->assertSame(
+            ['serif' => 'serif', 'sans-serif' => 'sans-serif', 'monospace' => 'monospace'],
+            $valueField->getAsDto()->getFormTypeOptions()['choices'],
+        );
+    }
+
+    // A value no longer declared in the font file (e.g. removed from the @font-face CSS) must stay selectable,
+    // otherwise re-saving the form unchanged would silently wipe it
+    public function testConfigureFieldsKeepsStaleFontValueSelectableWhenNoLongerInRegistry(): void
+    {
+        $config = (new Config())->setSlug('theme-font-family-title')->setKind(Config::TYPE_FONT)->setValue('Old Font');
+
+        $controller = $this->createController(fontRegistry: $this->createFontRegistry(['Georgia', 'Roboto']));
+        $this->setContextEntity($controller, $config);
+
+        $valueField = $this->findField($controller->configureFields('edit'), 'value');
+
+        $this->assertSame(
+            ['Old Font' => 'Old Font', 'Georgia' => 'Georgia', 'Roboto' => 'Roboto', 'serif' => 'serif', 'sans-serif' => 'sans-serif', 'monospace' => 'monospace'],
+            $valueField->getAsDto()->getFormTypeOptions()['choices'],
+        );
     }
 
     // --- prettyJson (private) ---------------------------------------------------------------------------

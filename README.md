@@ -66,8 +66,9 @@ Create a `config/configs.json` file in your bundle. Each entry will be inserted 
 ]
 ```
 
-Supported `kind` values: `text`, `html`, `int`, `bool`, `date`, `json`.
+Supported `kind` values: `text`, `html`, `int`, `bool`, `date`, `json`, `font`.
 `text` is edited as a plain textarea (URLs, ids, emails...); `html` is for rare configs needing rich content and is edited with EasyAdmin's own rich text editor (same widget as UiBundle blocks).
+`font` renders a `<select>` (UiBundle's `FontChoiceType`/`FontRegistry`) combining `Config::GENERIC_FONT_FAMILIES` (`serif`, `sans-serif`, `monospace`, always offered) with whatever custom font-family names a registered `FontProviderInterface` knows about (e.g. SiteBundle's `FontService`, parsed from a CSS file's `@font-face` declarations) — falls back to only the 3 generics when no provider is registered. A value no longer offered by either source (e.g. removed from `@font-face`) is kept selectable instead of being silently dropped on the next save.
 For `json`, `value` is the raw JSON-encoded string (e.g. `"[\"ROLE_ADMIN\",\"ROLE_EDITOR\"]"`); `ConfigService::get()` returns it already decoded into a PHP array (`[]` if empty/invalid).
 Set `sensitive: true` for any entry that holds secrets (API keys, passwords, etc.) — the value is encrypted at rest and masked in the admin list.
 Set `restricted: true` on top of that for secrets shared across the whole install rather than per-site data — see [Restricting configs to ROLE_SUPER_ADMIN](#restricting-configs-to-role_super_admin).

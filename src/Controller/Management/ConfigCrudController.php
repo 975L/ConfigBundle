@@ -20,6 +20,8 @@ use c975L\ConfigBundle\Service\Export\ConfigSqlExporter;
 use c975L\ConfigBundle\Service\Export\ExportFormat;
 use c975L\ConfigBundle\Service\Export\TableExporter;
 use c975L\ConfigBundle\Service\VaultEncryptor;
+use c975L\UiBundle\Form\FontChoiceType;
+use c975L\UiBundle\Registry\FontRegistry;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
@@ -33,6 +35,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
@@ -68,6 +71,7 @@ class ConfigCrudController extends AbstractCrudController
         private readonly ConfigAlertProvider $configAlertProvider,
         private readonly ConfigRepository $configRepository,
         private readonly AdminUrlGenerator $adminUrlGenerator,
+        private readonly FontRegistry $fontRegistry,
     ) {
     }
 
@@ -203,6 +207,10 @@ class ConfigCrudController extends AbstractCrudController
                 Config::TYPE_HTML => TextEditorField::new('value')
                     ->setLabel(t('label.value', [], 'config'))
                     ->setRequired(false),
+                // Font kind offers a <select> built from FontRegistry (see FontChoiceType) instead of free text. Falls
+                // back to a plain TextField when no FontProviderInterface is registered (e.g. no SiteBundle) or it
+                // returns no font - an unusable empty <select> would be worse than free text in that case
+                Config::TYPE_FONT => $this->buildFontField($rawValue),
                 // Text kind is plain string (URLs, ids, emails...), a rich editor would wrap it in a <div>
                 default => TextField::new('value')
                     ->setLabel(t('label.value', [], 'config'))
@@ -622,6 +630,25 @@ class ConfigCrudController extends AbstractCrudController
         } catch (\Exception) {
             return null;
         }
+    }
+
+    // Builds the "font" kind field: a <select> combining the 3 CSS generics (Config::GENERIC_FONT_FAMILIES, always
+    // available even with no FontProviderInterface registered) with whatever custom font-family names FontRegistry
+    // knows about (see FontChoiceType). A raw value no longer present in either (e.g. removed from the @font-face
+    // file) is kept as a choice so saving the form again doesn't silently wipe it
+    private function buildFontField(?string $rawValue): FieldInterface
+    {
+        $fonts = array_merge($this->fontRegistry->getFonts(), Config::GENERIC_FONT_FAMILIES);
+        $choices = array_combine($fonts, $fonts);
+        if (null !== $rawValue && '' !== $rawValue && !isset($choices[$rawValue])) {
+            $choices = [$rawValue => $rawValue] + $choices;
+        }
+
+        return ChoiceField::new('value')
+            ->setLabel(t('label.value', [], 'config'))
+            ->setFormType(FontChoiceType::class)
+            ->setFormTypeOptions(['choices' => $choices])
+            ->setRequired(false);
     }
 
     // Defines the user for the config

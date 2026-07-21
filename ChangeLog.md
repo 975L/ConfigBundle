@@ -1,5 +1,10 @@
 # ChangeLog
 
+## v5.8.5
+
+- Added a `font` config kind, rendering a `<select>` built from UiBundle's `FontRegistry` instead of free text (21/07/2026)
+- Added `Config::GENERIC_FONT_FAMILIES` (`serif`/`sans-serif`/`monospace`), always offered alongside custom fonts (21/07/2026)
+
 ## v5.8.4
 
 - Added `ProcedureProviderInterface`, `ProcedureBuilder` and `ProcedureJsonReader` for bundles to contribute admin procedures to the consuming app's AI assistant (21/07/2026)

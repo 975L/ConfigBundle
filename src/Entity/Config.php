@@ -27,6 +27,12 @@ class Config
     public const TYPE_INT  = 'int';
     public const TYPE_DATE  = 'date';
     public const TYPE_JSON = 'json';
+    public const TYPE_FONT = 'font';
+
+    // Always offered alongside whatever custom fonts FontRegistry knows about (see ConfigCrudController::buildFontField()) -
+    // lets a site pick a plain generic without declaring any @font-face, and never needs a fallback suffix itself (see
+    // SiteBundle's ThemeVariablesCssListener)
+    public const GENERIC_FONT_FAMILIES = ['serif', 'sans-serif', 'monospace'];
 
     public const TYPES = [
         self::TYPE_TEXT,
@@ -35,6 +41,7 @@ class Config
         self::TYPE_INT,
         self::TYPE_DATE,
         self::TYPE_JSON,
+        self::TYPE_FONT,
     ];
 
     public const GROUP_SYSTEM = 'system';
