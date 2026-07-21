@@ -14,6 +14,7 @@ use c975L\ConfigBundle\DependencyInjection\Compiler\TaggedInterfacePass;
 use c975L\ConfigBundle\Management\AlertProviderInterface;
 use c975L\ConfigBundle\Management\LinkableRouteProviderInterface;
 use c975L\ConfigBundle\Management\MenuProviderInterface;
+use c975L\ConfigBundle\Management\ProcedureProviderInterface;
 use c975L\ConfigBundle\Management\ShortcutProviderInterface;
 use c975L\ConfigBundle\Management\ThemePresetProviderInterface;
 use c975L\ConfigBundle\Management\WhatsNewProviderInterface;
@@ -31,6 +32,7 @@ class c975LConfigBundleTest extends TestCase
         $container->register('whatsnew_provider', c975LConfigBundleTestWhatsNewProviderFixture::class);
         $container->register('alert_provider', c975LConfigBundleTestAlertProviderFixture::class);
         $container->register('shortcut_provider', c975LConfigBundleTestShortcutProviderFixture::class);
+        $container->register('procedure_provider', c975LConfigBundleTestProcedureProviderFixture::class);
         $container->register('linkable_route_provider', c975LConfigBundleTestLinkableRouteProviderFixture::class);
         $container->register('theme_preset_provider', c975LConfigBundleTestThemePresetProviderFixture::class);
 
@@ -46,6 +48,7 @@ class c975LConfigBundleTest extends TestCase
         $this->assertTrue($container->getDefinition('whatsnew_provider')->hasTag('c975l.whatsnew_provider'));
         $this->assertTrue($container->getDefinition('alert_provider')->hasTag('c975l.alert_provider'));
         $this->assertTrue($container->getDefinition('shortcut_provider')->hasTag('c975l.shortcut_provider'));
+        $this->assertTrue($container->getDefinition('procedure_provider')->hasTag('c975l.procedure_provider'));
         $this->assertTrue($container->getDefinition('linkable_route_provider')->hasTag('c975l.linkable_route_provider'));
         $this->assertTrue($container->getDefinition('theme_preset_provider')->hasTag('c975l.theme_preset_provider'));
     }
@@ -122,6 +125,14 @@ class c975LConfigBundleTestLinkableRouteProviderFixture implements LinkableRoute
 class c975LConfigBundleTestThemePresetProviderFixture implements ThemePresetProviderInterface
 {
     public function getPresets(): array
+    {
+        return [];
+    }
+}
+
+class c975LConfigBundleTestProcedureProviderFixture implements ProcedureProviderInterface
+{
+    public function getProcedures(): array
     {
         return [];
     }

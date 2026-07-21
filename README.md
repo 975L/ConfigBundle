@@ -510,6 +510,49 @@ Make sure your bundle's `services.yaml` includes the `Management/` folder in its
 
 **`stylesheet`** is meant to be the only config a preset ever writes (the `theme-stylesheet` entry, under the `theme` group) — colors and fonts are never touched, so a preset never overwrites values the admin has deliberately chosen. It's nullable: a preset that sets it to `null` is expected to leave the current stylesheet untouched rather than blanking it.
 
+## Contributing procedures for the dashboard AI assistant
+
+`ProcedureProviderInterface` lets a satellite bundle document its own admin workflows (e.g. "how do I create a page") for an AI assistant built into the consuming app's dashboard — ConfigBundle only collects and merges these entries, it doesn't ship the assistant itself.
+
+Satellite bundles contribute procedures by implementing `ProcedureProviderInterface` — no manual service tagging needed, `TaggedInterfacePass` auto-detects any class implementing it, same mechanism as `MenuProviderInterface` above:
+
+```php
+namespace c975L\MyBundle\Management;
+
+use c975L\ConfigBundle\Management\ProcedureJsonReader;
+use c975L\ConfigBundle\Management\ProcedureProviderInterface;
+
+class MyProcedureProvider implements ProcedureProviderInterface
+{
+    public function getProcedures(): array
+    {
+        return ProcedureJsonReader::read(\dirname(__DIR__, 2) . '/config/procedures.json');
+    }
+}
+```
+
+Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
+
+Declare your bundle's entries in a `config/procedures.json` file, `slug` unique across every bundle:
+
+```json
+[
+    {
+        "slug": "creer-page",
+        "title": {
+            "en": "Create a page",
+            "fr": "Créer une page"
+        },
+        "body": {
+            "en": "Go to Pages, click Add, fill in the title...",
+            "fr": "Allez dans Pages, cliquez sur Ajouter, renseignez le titre..."
+        }
+    }
+]
+```
+
+**Merging:** `ProcedureBuilder::getAll()` merges every provider's procedures, sorted by `slug` for a stable, deterministic order regardless of service registration order.
+
 ## Reading config values
 
 ### In PHP

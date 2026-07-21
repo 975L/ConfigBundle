@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v5.8.4
+
+- Added `ProcedureProviderInterface`, `ProcedureBuilder` and `ProcedureJsonReader` for bundles to contribute admin procedures to the consuming app's AI assistant (21/07/2026)
+
 ## v5.8.3
 
 - Corrected Deprecations check (20/07/2026)

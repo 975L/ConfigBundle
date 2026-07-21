@@ -24,6 +24,10 @@ services:
         arguments:
             $shortcutProviders: !tagged_iterator c975l.shortcut_provider
 
+    c975L\ConfigBundle\Management\ProcedureBuilder:
+        arguments:
+            $procedureProviders: !tagged_iterator c975l.procedure_provider
+
     c975L\ConfigBundle\Management\LinkableRouteRegistry:
         arguments:
             $providers: !tagged_iterator c975l.linkable_route_provider
