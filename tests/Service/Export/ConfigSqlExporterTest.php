@@ -13,12 +13,18 @@ use c975L\ConfigBundle\Service\Export\Encoder\SqlEncoder;
 use c975L\ConfigBundle\Service\Export\TableExporter;
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\SecurityBundle\Security;
 
 class ConfigSqlExporterTest extends TestCase
 {
-    private function createExporter(Connection $connection): ConfigSqlExporter
+    private function createExporter(Connection $connection, ?Security $security = null): ConfigSqlExporter
     {
-        return new ConfigSqlExporter($connection, new TableExporter(new SqlEncoder($connection)));
+        if (null === $security) {
+            $security = $this->createStub(Security::class);
+            $security->method('isGranted')->willReturn(true);
+        }
+
+        return new ConfigSqlExporter($connection, new TableExporter(new SqlEncoder($connection)), $security);
     }
 
     private function createConnection(array $rows): Connection
@@ -30,7 +36,7 @@ class ConfigSqlExporterTest extends TestCase
         return $connection;
     }
 
-    public function testExportQueriesEverySiteConfigColumnOrderedBySlugWithNoRestriction(): void
+    public function testExportQueriesEverySiteConfigColumnOrderedBySlugForSuperAdmin(): void
     {
         $connection = $this->createMock(Connection::class);
         $connection->expects($this->once())
@@ -42,6 +48,20 @@ class ConfigSqlExporterTest extends TestCase
             ->willReturn([]);
 
         $this->createExporter($connection)->export();
+    }
+
+    public function testExportExcludesRestrictedConfigsForNonSuperAdmin(): void
+    {
+        $security = $this->createStub(Security::class);
+        $security->method('isGranted')->willReturn(false);
+
+        $connection = $this->createMock(Connection::class);
+        $connection->expects($this->once())
+            ->method('fetchAllAssociative')
+            ->with($this->stringContains('WHERE `is_restricted` IS NULL OR `is_restricted` = 0'))
+            ->willReturn([]);
+
+        $this->createExporter($connection, $security)->export();
     }
 
     public function testExportUpsertsNonSensitiveRows(): void

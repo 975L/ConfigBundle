@@ -192,7 +192,7 @@
             </trans-unit>
             <trans-unit id="48">
                 <source>label.info_config</source>
-                <target>Site configuration; sensitive values are stored encrypted</target>
+                <target>Site configuration, organized by group. You can edit each entry's value from its edit page; proceed with care, an incorrect value can disrupt how the site works. Sensitive values are shown in clear text on the edit page, but stay stored encrypted in the database.</target>
             </trans-unit>
             <trans-unit id="49">
                 <source>label.whatsnew</source>
@@ -313,6 +313,50 @@
             <trans-unit id="83">
                 <source>label.config_export_sql</source>
                 <target>Export (SQL) the configuration</target>
+            </trans-unit>
+            <trans-unit id="84">
+                <source>label.content_import</source>
+                <target>Import content</target>
+            </trans-unit>
+            <trans-unit id="85">
+                <source>label.content_import_help</source>
+                <target>Upload a zip export produced by a bundle's own export action (eg. a page exported from the Pages screen).</target>
+            </trans-unit>
+            <trans-unit id="86">
+                <source>action.content_import</source>
+                <target>Import</target>
+            </trans-unit>
+            <trans-unit id="87">
+                <source>flash.content_import_invalid_token</source>
+                <target>Invalid security token, please try again</target>
+            </trans-unit>
+            <trans-unit id="88">
+                <source>flash.content_import_no_file</source>
+                <target>No file was uploaded</target>
+            </trans-unit>
+            <trans-unit id="89">
+                <source>flash.content_import_file_too_large</source>
+                <target>The uploaded file is too large</target>
+            </trans-unit>
+            <trans-unit id="90">
+                <source>flash.content_import_invalid_json</source>
+                <target>The uploaded file is not a valid export</target>
+            </trans-unit>
+            <trans-unit id="91">
+                <source>flash.content_import_unsupported_kind</source>
+                <target>No import provider is registered yet for "%kind%"</target>
+            </trans-unit>
+            <trans-unit id="92">
+                <source>flash.content_import_success</source>
+                <target>%created% created, %updated% updated</target>
+            </trans-unit>
+            <trans-unit id="93">
+                <source>action.export_for_sync</source>
+                <target>Sync</target>
+            </trans-unit>
+            <trans-unit id="94">
+                <source>flash.content_import_invalid_zip</source>
+                <target>The uploaded file is not a valid zip archive</target>
             </trans-unit>
         </body>
     </file>

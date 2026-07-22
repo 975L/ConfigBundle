@@ -11,6 +11,7 @@ namespace c975L\ConfigBundle;
 
 use c975L\ConfigBundle\DependencyInjection\Compiler\TaggedInterfacePass;
 use c975L\ConfigBundle\Management\AlertProviderInterface;
+use c975L\ConfigBundle\Management\ImportProviderInterface;
 use c975L\ConfigBundle\Management\LinkableRouteProviderInterface;
 use c975L\ConfigBundle\Management\MenuProviderInterface;
 use c975L\ConfigBundle\Management\ProcedureProviderInterface;
@@ -30,6 +31,7 @@ class c975LConfigBundle extends AbstractBundle
         $container->addCompilerPass(new TaggedInterfacePass(WhatsNewProviderInterface::class, 'c975l.whatsnew_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(AlertProviderInterface::class, 'c975l.alert_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(ShortcutProviderInterface::class, 'c975l.shortcut_provider'));
+        $container->addCompilerPass(new TaggedInterfacePass(ImportProviderInterface::class, 'c975l.import_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(LinkableRouteProviderInterface::class, 'c975l.linkable_route_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(ThemePresetProviderInterface::class, 'c975l.theme_preset_provider'));
     }

@@ -1,5 +1,30 @@
 [
     {
+        "date": "2026-07-22",
+        "description": [
+            {
+                "en": "The configuration page now explains what it's for and what to watch out for when editing values",
+                "fr": "La page de configuration explique désormais à quoi elle sert et les précautions à prendre en modifiant les valeurs",
+                "es": "La página de configuración ahora explica para qué sirve y qué precauciones tomar al modificar los valores"
+            },
+            {
+                "en": "Removed the separate view page for a configuration entry — edit now shows everything, including sensitive values",
+                "fr": "Suppression de la page de consultation séparée d'une configuration : la page de modification affiche désormais tout, y compris les valeurs sensibles",
+                "es": "Se eliminó la página de consulta independiente de una configuración: la página de edición ahora muestra todo, incluidos los valores sensibles"
+            },
+            {
+                "en": "Added a Cancel button when editing a configuration entry",
+                "fr": "Ajout d'un bouton Annuler lors de la modification d'une configuration",
+                "es": "Añadido un botón Cancelar al modificar una configuración"
+            },
+            {
+                "en": "You can now export the configuration as a file and re-import it on another site to keep them in sync",
+                "fr": "Vous pouvez désormais exporter la configuration dans un fichier et le réimporter sur un autre site pour les synchroniser",
+                "es": "Ahora puede exportar la configuración a un archivo y volver a importarlo en otro sitio para mantenerlos sincronizados"
+            }
+        ]
+    },
+    {
         "date": "2026-07-21",
         "description": [
             {

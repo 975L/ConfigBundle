@@ -1,0 +1,15 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block main %}
+    <h1>{{ 'label.content_import'|trans({}, 'config') }}</h1>
+
+    <p>{{ 'label.content_import_help'|trans({}, 'config') }}</p>
+
+    <form method="post" enctype="multipart/form-data">
+        <input type="hidden" name="_token" value="{{ csrf_token('management_content_import_index') }}">
+        <div class="form-group">
+            <input type="file" name="export" accept="application/zip,.zip" required>
+        </div>
+        <button type="submit" class="btn btn-primary">{{ 'action.content_import'|trans({}, 'config') }}</button>
+    </form>
+{% endblock main %}

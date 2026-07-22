@@ -49,7 +49,7 @@ class ConfigShortcutProviderTest extends TestCase
         $this->assertFalse($shortcuts[0]['active']);
         $this->assertSame(ConfigShortcutController::EXPORT_SQL_ROUTE, $shortcuts[1]['route']);
         $this->assertFalse($shortcuts[1]['active']);
-        $this->assertSame('ROLE_SUPER_ADMIN', $shortcuts[1]['role']);
+        $this->assertSame('ROLE_ADMIN', $shortcuts[1]['role']);
         $this->assertSame(MaintenanceShortcutController::TOGGLE_ROUTE_MAINTENANCE, $shortcuts[2]['route']);
         $this->assertFalse($shortcuts[2]['active']);
         $this->assertSame('label.maintenance_enable', $shortcuts[2]['label']);

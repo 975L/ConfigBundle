@@ -1,5 +1,15 @@
 # ChangeLog
 
+## v5.8.6
+
+- Expanded the Config index/edit explanatory text to describe the page and its sensitive-value handling (22/07/2026)
+- Removed the Config detail/view page (22/07/2026)
+- Added a Cancel action to the Config edit page (22/07/2026)
+- Added a "Sync" export producing a re-importable content zip, and an "Import content" dashboard screen to upload it (22/07/2026)
+- Added `ImportProviderInterface` for bundles to accept synced content on another environment (22/07/2026)
+- Lowered the SQL/JSON/Sync export permission from `ROLE_SUPER_ADMIN` to `site-role-admin` (22/07/2026)
+- SQL export now excludes restricted configs for non-`ROLE_SUPER_ADMIN` users, matching CSV/JSON (22/07/2026)
+
 ## v5.8.5
 
 - Added a `font` config kind, rendering a `<select>` built from UiBundle's `FontRegistry` instead of free text (21/07/2026)

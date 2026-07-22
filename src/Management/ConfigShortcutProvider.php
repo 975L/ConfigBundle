@@ -40,7 +40,7 @@ class ConfigShortcutProvider implements ShortcutProviderInterface
                 'icon' => 'fas fa-database',
                 'route' => ConfigShortcutController::EXPORT_SQL_ROUTE,
                 'active' => false,
-                'role' => 'ROLE_SUPER_ADMIN',
+                'role' => $this->configService->get('site-role-admin'),
             ],
             [
                 'label' => $this->translator->trans(

@@ -13,10 +13,12 @@ use c975L\ConfigBundle\Entity\Config;
 use c975L\ConfigBundle\Form\Type\ReadonlyTextType;
 use c975L\ConfigBundle\Management\AlertBuilder;
 use c975L\ConfigBundle\Management\ConfigAlertProvider;
+use c975L\ConfigBundle\Management\ConfigImportProvider;
 use c975L\ConfigBundle\Management\EasyAdminActionHelper;
 use c975L\ConfigBundle\Repository\ConfigRepository;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\ConfigBundle\Service\Export\ConfigSqlExporter;
+use c975L\ConfigBundle\Service\Export\ContentExporter;
 use c975L\ConfigBundle\Service\Export\ExportFormat;
 use c975L\ConfigBundle\Service\Export\TableExporter;
 use c975L\ConfigBundle\Service\VaultEncryptor;
@@ -68,6 +70,7 @@ class ConfigCrudController extends AbstractCrudController
         private readonly TranslatorInterface $translator,
         private readonly TableExporter $tableExporter,
         private readonly ConfigSqlExporter $configSqlExporter,
+        private readonly ContentExporter $contentExporter,
         private readonly ConfigAlertProvider $configAlertProvider,
         private readonly ConfigRepository $configRepository,
         private readonly AdminUrlGenerator $adminUrlGenerator,
@@ -152,7 +155,7 @@ class ConfigCrudController extends AbstractCrudController
                     $config->getIsSensitive() ? '••••••••' : ($value ?? '')
                 );
         } elseif ($isSensitive && Crud::PAGE_EDIT === $pageName) {
-            // Sensitive fields are pre-filled with the decrypted raw string value in edit (must stay the raw string, not configService->get()'s kind-cast value, otherwise a sensitive bool/int/date config like site-maintenance renders as "1"/"" instead of "true"/"false") (no need to mask with a password widget, the value is already shown in clear on the detail page)
+            // Sensitive fields are pre-filled with the decrypted raw string value in edit (must stay the raw string, not configService->get()'s kind-cast value, otherwise a sensitive bool/int/date config like site-maintenance renders as "1"/"" instead of "true"/"false") (no need to mask with a password widget, edit is the only page besides the masked index that ever shows this field)
             $decryptedValue = null;
             if (null !== $rawValue && '' !== $rawValue) {
                 $decryptedValue = $this->vaultEncryptor->decrypt($rawValue);
@@ -166,20 +169,6 @@ class ConfigCrudController extends AbstractCrudController
                     'data' => Config::TYPE_JSON === $kind ? $this->prettyJson($decryptedValue) : $decryptedValue,
                 ])
                 ->setRequired(false);
-        } elseif ($isSensitive) {
-            // Detail page: reveal the decrypted value
-            $valueField = TextareaField::new('value')
-                ->setLabel(t('label.value', [], 'config'))
-                ->setRequired(true)
-                ->formatValue(function (?string $value) use ($kind): string {
-                    if (null === $value || '' === $value) {
-                        return $value ?? '';
-                    }
-
-                    $decrypted = $this->vaultEncryptor->decrypt($value);
-
-                    return Config::TYPE_JSON === $kind ? ($this->prettyJson($decrypted) ?? '') : $decrypted;
-                });
         } else {
             // Non-sensitive fields use a widget matching the config kind
             $valueField = match ($kind) {
@@ -287,21 +276,21 @@ class ConfigCrudController extends AbstractCrudController
             // Severity
             $severityField,
 
-            // Content — widget depends on kind (bool/int/date/text); sensitive values are masked in list/detail
+            // Content — widget depends on kind (bool/int/date/text); sensitive values are masked on the index list, revealed only on edit
             $valueField,
 
             // Fixed by the import json, never editable through the admin
             $descriptionField,
 
-            // Dates
+            // Dates - shown read-only on edit rather than onlyOnDetail() now that the detail page is gone (see configureActions())
             DateTimeField::new('creation')
                 ->setLabel(t('label.creation', [], 'config'))
                 ->setFormTypeOption('disabled', 'disabled')
-                ->onlyOnDetail(),
+                ->hideOnIndex(),
             DateTimeField::new('modification')
                 ->setLabel(t('label.modification', [], 'config'))
                 ->setFormTypeOption('disabled', 'disabled')
-                ->onlyOnDetail(),
+                ->hideOnIndex(),
         ];
     }
 
@@ -312,6 +301,7 @@ class ConfigCrudController extends AbstractCrudController
             ->addAction(Action::new('exportSql', 'SQL')->linkToCrudAction('exportSql'))
             ->addAction(Action::new('exportCsv', 'CSV')->linkToCrudAction('exportCsv'))
             ->addAction(Action::new('exportJson', 'JSON')->linkToCrudAction('exportJson'))
+            ->addAction(Action::new('exportContent', t('action.export_for_sync', [], 'config'))->linkToCrudAction('exportContent'))
         ;
 
         $request = $this->requestStack->getCurrentRequest();
@@ -344,25 +334,26 @@ class ConfigCrudController extends AbstractCrudController
                 ->generateUrl())
             ->createAsGlobalAction();
 
+        // Lets the admin back out of an edit without saving - mirrors EasyAdmin's own built-in actions (linkToCrudAction targeting INDEX, same as Action::INDEX itself)
+        $cancelAction = Action::new('cancel', $this->translator->trans('action.cancel', [], 'EasyAdminBundle'), 'fa fa-times')
+            ->linkToCrudAction(Action::INDEX)
+            ->addCssClass('btn btn-secondary');
+
         return $actions
-            ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->add(Crud::PAGE_INDEX, $exportGroup)
             ->add(Crud::PAGE_INDEX, $toggleAction)
             ->add(Crud::PAGE_INDEX, $backToGroupsAction)
+            ->add(Crud::PAGE_EDIT, $cancelAction)
             ->update(Crud::PAGE_INDEX, Action::EDIT, fn (Action $action) => EasyAdminActionHelper::toIconOnly(
                 $action,
                 $this->translator->trans('action.edit', [], 'EasyAdminBundle'),
             ))
-            ->update(Crud::PAGE_INDEX, Action::DETAIL, fn (Action $action) => EasyAdminActionHelper::toIconOnly(
-                $action,
-                $this->translator->trans('action.detail', [], 'EasyAdminBundle'),
-            ))
             ->setPermission('exportCsv', $this->configService->get('site-role-admin'))
             ->setPermission('toggleSensitive', $this->configService->get('site-role-admin'))
-            ->setPermission('exportSql', 'ROLE_SUPER_ADMIN')
-            ->setPermission('exportJson', 'ROLE_SUPER_ADMIN')
-            // Configs are fixed by the bundles' import json: no manual creation, no deletion
-            ->disable(Action::NEW, Action::DELETE)
+            ->setPermission('exportSql', $this->configService->get('site-role-admin'))
+            ->setPermission('exportJson', $this->configService->get('site-role-admin'))
+            // Configs are fixed by the bundles' import json: no manual creation, no deletion; detail adds no information beyond what edit already shows (sensitive values are revealed in clear there too)
+            ->disable(Action::NEW, Action::DELETE, Action::DETAIL)
         ;
     }
 
@@ -371,6 +362,7 @@ class ConfigCrudController extends AbstractCrudController
         return $crud
             ->showEntityActionsInlined()
             ->overrideTemplate('crud/index', '@c975LConfig/management/config_crud_index.html.twig')
+            ->overrideTemplate('crud/edit', '@c975LConfig/management/config_crud_edit.html.twig')
             ->addFormTheme('@c975LConfig/management/form_theme.html.twig')
             ->setEntityLabelInSingular(t('label.config', [], 'config'))
             ->setEntityLabelInPlural(t('label.config', [], 'config'))
@@ -510,13 +502,6 @@ class ConfigCrudController extends AbstractCrudController
         }
     }
 
-    public function detail(AdminContext $context): KeyValueStore|Response
-    {
-        $this->denyAccessToRestrictedConfig($context);
-
-        return parent::detail($context);
-    }
-
     public function edit(AdminContext $context): KeyValueStore|Response
     {
         $this->denyAccessToRestrictedConfig($context);
@@ -571,7 +556,7 @@ class ConfigCrudController extends AbstractCrudController
     #[AdminRoute]
     public function exportSql(AdminContext $context): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
+        $this->denyAccessUnlessGranted($this->configService->get('site-role-admin'));
 
         return $this->configSqlExporter->export();
     }
@@ -587,9 +572,30 @@ class ConfigCrudController extends AbstractCrudController
     #[AdminRoute]
     public function exportJson(AdminContext $context): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
+        $this->denyAccessUnlessGranted($this->configService->get('site-role-admin'));
 
         return $this->tableExporter->export(ExportFormat::Json, 'site_config', $this->fetchExportRows());
+    }
+
+    // Same rows as exportJson, wrapped in the {kind, items} envelope ContentImportController/ConfigImportProvider expect - meant to be re-uploaded on another environment to sync configs the way exportSql already lets you do by hand, but without leaving SSH/phpMyAdmin
+    #[AdminRoute]
+    public function exportContent(AdminContext $context): Response
+    {
+        $this->denyAccessUnlessGranted($this->configService->get('site-role-admin'));
+
+        $items = array_map(static fn (array $row): array => [
+            'slug' => $row['slug'],
+            'label' => $row['label'],
+            'isSensitive' => (bool) $row['is_sensitive'],
+            'isRestricted' => (bool) $row['is_restricted'],
+            'value' => $row['value'],
+            'kind' => $row['kind'],
+            'group' => $row['group'],
+            'description' => $row['description'],
+            'severity' => $row['severity'],
+        ], $this->fetchExportRows());
+
+        return $this->contentExporter->export(ConfigImportProvider::KIND, $items);
     }
 
     // Sensitive values are kept as stored (encrypted), never decrypted for export. Restricted configs (backup DB credentials, payment API keys...) are excluded below ROLE_SUPER_ADMIN, same restriction as the CRUD itself; is_restricted is nullable, legacy rows must NOT be treated as restricted

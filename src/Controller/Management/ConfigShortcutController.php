@@ -56,7 +56,7 @@ class ConfigShortcutController extends AbstractController
     )]
     public function exportSql(Request $request): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
+        $this->denyAccessUnlessGranted($this->configService->get('site-role-admin'));
 
         if (!$this->isCsrfTokenValid(self::EXPORT_SQL_ROUTE, $request->request->get('_token'))) {
             return $this->redirectToRoute('management');

@@ -193,7 +193,7 @@
             </trans-unit>
             <trans-unit id="48">
                 <source>label.info_config</source>
-                <target>Configuration du site ; les valeurs sensibles sont chiffrées en base</target>
+                <target>Configuration du site, organisée par groupe. Vous pouvez modifier la valeur de chaque entrée depuis sa page d'édition ; procédez avec prudence, une valeur incorrecte peut perturber le fonctionnement du site. Les valeurs sensibles sont affichées en clair sur la page d'édition, mais restent stockées chiffrées en base de données.</target>
             </trans-unit>
             <trans-unit id="49">
                 <source>label.whatsnew</source>
@@ -314,6 +314,50 @@
             <trans-unit id="83">
                 <source>label.config_export_sql</source>
                 <target>Exporter (SQL) la configuration</target>
+            </trans-unit>
+            <trans-unit id="84">
+                <source>label.content_import</source>
+                <target>Importer du contenu</target>
+            </trans-unit>
+            <trans-unit id="85">
+                <source>label.content_import_help</source>
+                <target>Importez un export (zip) généré par l'action d'export d'un bundle (par exemple une page exportée depuis l'écran Pages).</target>
+            </trans-unit>
+            <trans-unit id="86">
+                <source>action.content_import</source>
+                <target>Importer</target>
+            </trans-unit>
+            <trans-unit id="87">
+                <source>flash.content_import_invalid_token</source>
+                <target>Jeton de sécurité invalide, merci de réessayer</target>
+            </trans-unit>
+            <trans-unit id="88">
+                <source>flash.content_import_no_file</source>
+                <target>Aucun fichier n'a été envoyé</target>
+            </trans-unit>
+            <trans-unit id="89">
+                <source>flash.content_import_file_too_large</source>
+                <target>Le fichier envoyé est trop volumineux</target>
+            </trans-unit>
+            <trans-unit id="90">
+                <source>flash.content_import_invalid_json</source>
+                <target>Le fichier envoyé n'est pas un export valide</target>
+            </trans-unit>
+            <trans-unit id="91">
+                <source>flash.content_import_unsupported_kind</source>
+                <target>Aucun fournisseur d'import n'est encore enregistré pour « %kind% »</target>
+            </trans-unit>
+            <trans-unit id="92">
+                <source>flash.content_import_success</source>
+                <target>%created% créé(s), %updated% mis à jour</target>
+            </trans-unit>
+            <trans-unit id="93">
+                <source>action.export_for_sync</source>
+                <target>Synchro</target>
+            </trans-unit>
+            <trans-unit id="94">
+                <source>flash.content_import_invalid_zip</source>
+                <target>Le fichier envoyé n'est pas une archive zip valide</target>
             </trans-unit>
         </body>
     </file>

@@ -6,11 +6,18 @@ A Symfony bundle that stores application configuration as key-value pairs in the
 [![Packagist Version](https://img.shields.io/packagist/v/c975l/config-bundle)](https://packagist.org/packages/c975l/config-bundle)
 [![PHP Version](https://img.shields.io/packagist/php-v/c975l/config-bundle)](https://packagist.org/packages/c975l/config-bundle)
 
+## Why ConfigBundle
+
+The root of the c975L ecosystem — every other bundle ([UiBundle](https://github.com/975L/UiBundle), [SiteBundle](https://github.com/975L/SiteBundle), [ShopBundle](https://github.com/975L/ShopBundle), [BookBundle](https://github.com/975L/BookBundle), [GalleryBundle](https://github.com/975L/GalleryBundle), [SocialBundle](https://github.com/975L/SocialBundle)...) depends on it, directly or through UiBundle. It's the single place for application configuration: no per-app `.env` for business config, no duplicated dashboard entry mechanism — a satellite bundle just implements `MenuProviderInterface` (or one of its siblings) and gets an EasyAdmin entry for free.
+
+---
+
 ## Features
 
 - Key-value config entries stored in the database (`site_config` table)
 - EasyAdmin CRUD interface to manage values
-- Export button (SQL/CSV/JSON) for production deployment, reusable from any bundle's CRUD controller
+- Export button (SQL/CSV/JSON/Sync-zip) for production deployment, reusable from any bundle's CRUD controller
+- Zip-based content import/export for syncing nested bundle content across environments, extensible via `ImportProviderInterface`
 - Twig and PHP service to read values anywhere
 - 1-hour cache with automatic invalidation on change
 - "What's new" dashboard section aggregating release notes declared by every c975L bundle
@@ -160,16 +167,18 @@ This means non-sensitive values (labels, descriptions, default content) are kept
 
 CSV and JSON exports are a straight dump of the table (no upsert logic) — useful for backups, audits, or feeding another tool.
 
-The SQL export is also available as a `/management` dashboard shortcut ("Export (SQL) the configuration", `ROLE_SUPER_ADMIN`), downloading the same file without opening **Config** first.
+The SQL export is also available as a `/management` dashboard shortcut ("Export (SQL) the configuration", `site-role-admin`), downloading the same file without opening **Config** first.
+
+A fourth **Sync** export produces a zip (`manifest.json` plus any referenced files) instead of a flat table dump — re-upload it on another environment via **Import content** to upsert the same rows there, matched by `slug` rather than by database id. See [Contributing import providers from other bundles](#contributing-import-providers-from-other-bundles) below.
 
 ## Restricting configs to ROLE_SUPER_ADMIN
 
 Some configs are secrets shared across the whole install rather than per-site application data —
 a database backup user, a payment provider's live API key. Anyone with `site-role-admin` access
 to the Config admin can normally see and edit every entry (encrypted `sensitive` values are masked
-in the list but still revealed in clear on the detail/edit page). Flagging an entry
+in the list but still revealed in clear on the edit page). Flagging an entry
 `"restricted": true` in its `configs.json` takes it a step further: that config disappears
-entirely — from the index list, the detail page, the edit page, and every export (SQL/CSV/JSON) —
+entirely — from the index list, the edit page, and every export (SQL/CSV/JSON) —
 for anyone who isn't granted `ROLE_SUPER_ADMIN`, regardless of what `site-role-admin` is set to.
 
 This is opt-in per entry (not per `group`), so a bundle only restricts the specific secrets that
@@ -249,6 +258,37 @@ reads it:
 | `primary_key` | `string` | Unique column; adds `ON DUPLICATE KEY UPDATE` on every other column. Omit for a plain `INSERT INTO` per row. |
 | `exclude_from_update` | `string[]` | Columns never rewritten by the `UPDATE` clause (e.g. an immutable `creation` date). |
 | `insert_ignore_when` | `callable(array $row): bool` | When true for a row, emits `INSERT IGNORE INTO` instead of the upsert — see `ConfigCrudController::exportSql()` for the sensitive-value use case. |
+
+## Contributing import providers from other bundles
+
+`c975L\ConfigBundle\Service\Export\ContentExporter` is the counterpart to `TableExporter` above, for content that doesn't fit a flat table dump — nested structures (e.g. a Page with its Blocks) and real files (e.g. a Block's Media), shipped as a zip (`manifest.json` plus any referenced files) instead of a single SQL/CSV/JSON payload. `ConfigCrudController::exportContent()` is the reference caller, producing the **Sync** export mentioned above.
+
+To accept that zip back on another environment, implement `ImportProviderInterface` — no manual service tagging needed, `TaggedInterfacePass` auto-detects any class implementing it, same mechanism as `MenuProviderInterface` above:
+
+```php
+namespace c975L\MyBundle\Management;
+
+use c975L\ConfigBundle\Management\ImportProviderInterface;
+
+class MyImportProvider implements ImportProviderInterface
+{
+    // $kind is the string embedded in the export payload (see ContentExporter::export()), stable across dev/prod (e.g. "site_page")
+    public function supportsImport(string $kind): bool
+    {
+        return 'my_entity' === $kind;
+    }
+
+    // $items are the payload's raw "items" array, one entry per exported entity. $filesDir is the directory the export's zip was extracted into — any 'file' reference inside $items is relative to it, null for a kind that never carries files. Match by a natural key (slug/name...), never a raw id: dev and prod ids never need to match. Returns ['created' => int, 'updated' => int]
+    public function import(array $items, ?string $filesDir = null): array
+    {
+        // ...
+    }
+}
+```
+
+Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
+
+Uploaded zips are accepted at the **Import content** dashboard link (`ROLE_SUPER_ADMIN` — it writes arbitrary content straight into the database, unlike the export side which stays at `site-role-admin`), which extracts the zip, reads `manifest.json`'s `kind`, and dispatches to whichever registered provider's `supportsImport()` matches it.
 
 ## Contributing menu items from other bundles
 

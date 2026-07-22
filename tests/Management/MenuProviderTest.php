@@ -54,4 +54,17 @@ class MenuProviderTest extends TestCase
         $this->assertSame('label.whatsnew', $links['whatsnew']['label']);
         $this->assertSame('config', $links['whatsnew']['translation_domain']);
     }
+
+    // Restricted to ROLE_SUPER_ADMIN since it writes arbitrary content straight into the database (see ContentImportController)
+    public function testGetLinksExposesTheContentImportLinkRestrictedToSuperAdmin(): void
+    {
+        $provider = new MenuProvider();
+
+        $links = $provider->getLinks();
+
+        $this->assertSame('management_content_import_index', $links['content_import']['name']);
+        $this->assertSame('label.content_import', $links['content_import']['label']);
+        $this->assertSame('config', $links['content_import']['translation_domain']);
+        $this->assertSame('ROLE_SUPER_ADMIN', $links['content_import']['role']);
+    }
 }

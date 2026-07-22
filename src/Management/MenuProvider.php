@@ -44,6 +44,13 @@ class MenuProvider implements MenuProviderInterface
                 'translation_domain' => 'config',
                 'icon' => 'fa fa-bullhorn',
             ],
+            'content_import' => [
+                'label' => 'label.content_import',
+                'name' => 'management_content_import_index',
+                'translation_domain' => 'config',
+                'icon' => 'fa fa-file-import',
+                'role' => 'ROLE_SUPER_ADMIN',
+            ],
         ];
     }
 }

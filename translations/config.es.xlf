@@ -192,7 +192,7 @@
             </trans-unit>
             <trans-unit id="48">
                 <source>label.info_config</source>
-                <target>Configuración del sitio; los valores sensibles se almacenan cifrados</target>
+                <target>Configuración del sitio, organizada por grupo. Puede modificar el valor de cada entrada desde su página de edición; proceda con precaución, un valor incorrecto puede afectar el funcionamiento del sitio. Los valores sensibles se muestran en texto claro en la página de edición, pero permanecen almacenados cifrados en la base de datos.</target>
             </trans-unit>
             <trans-unit id="49">
                 <source>label.whatsnew</source>
@@ -313,6 +313,50 @@
             <trans-unit id="83">
                 <source>label.config_export_sql</source>
                 <target>Exportar (SQL) la configuración</target>
+            </trans-unit>
+            <trans-unit id="84">
+                <source>label.content_import</source>
+                <target>Importar contenido</target>
+            </trans-unit>
+            <trans-unit id="85">
+                <source>label.content_import_help</source>
+                <target>Sube una exportación (zip) generada por la acción de exportación de un bundle (por ejemplo, una página exportada desde la pantalla Páginas).</target>
+            </trans-unit>
+            <trans-unit id="86">
+                <source>action.content_import</source>
+                <target>Importar</target>
+            </trans-unit>
+            <trans-unit id="87">
+                <source>flash.content_import_invalid_token</source>
+                <target>Token de seguridad no válido, inténtalo de nuevo</target>
+            </trans-unit>
+            <trans-unit id="88">
+                <source>flash.content_import_no_file</source>
+                <target>No se ha enviado ningún archivo</target>
+            </trans-unit>
+            <trans-unit id="89">
+                <source>flash.content_import_file_too_large</source>
+                <target>El archivo enviado es demasiado grande</target>
+            </trans-unit>
+            <trans-unit id="90">
+                <source>flash.content_import_invalid_json</source>
+                <target>El archivo enviado no es una exportación válida</target>
+            </trans-unit>
+            <trans-unit id="91">
+                <source>flash.content_import_unsupported_kind</source>
+                <target>Aún no hay ningún proveedor de importación registrado para «%kind%»</target>
+            </trans-unit>
+            <trans-unit id="92">
+                <source>flash.content_import_success</source>
+                <target>%created% creado(s), %updated% actualizado(s)</target>
+            </trans-unit>
+            <trans-unit id="93">
+                <source>action.export_for_sync</source>
+                <target>Sincronizar</target>
+            </trans-unit>
+            <trans-unit id="94">
+                <source>flash.content_import_invalid_zip</source>
+                <target>El archivo enviado no es un archivo zip válido</target>
             </trans-unit>
         </body>
     </file>

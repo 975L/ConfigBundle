@@ -15,6 +15,7 @@ use c975L\ConfigBundle\Management\ConfigAlertProvider;
 use c975L\ConfigBundle\Repository\ConfigRepository;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\ConfigBundle\Service\Export\ConfigSqlExporter;
+use c975L\ConfigBundle\Service\Export\ContentExporter;
 use c975L\ConfigBundle\Service\Export\ExportFormat;
 use c975L\ConfigBundle\Service\Export\TableExporter;
 use c975L\ConfigBundle\Service\VaultEncryptor;
@@ -49,6 +50,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -100,6 +102,7 @@ class ConfigCrudControllerTest extends TestCase
         ?RequestStack $requestStack = null,
         ?TableExporter $tableExporter = null,
         ?ConfigSqlExporter $configSqlExporter = null,
+        ?ContentExporter $contentExporter = null,
         ?ConfigRepository $configRepository = null,
         ?AdminUrlGenerator $adminUrlGenerator = null,
         ?FontRegistry $fontRegistry = null,
@@ -116,6 +119,7 @@ class ConfigCrudControllerTest extends TestCase
             $translator,
             $tableExporter ?? $this->createStub(TableExporter::class),
             $configSqlExporter ?? $this->createStub(ConfigSqlExporter::class),
+            $contentExporter ?? $this->createStub(ContentExporter::class),
             $this->createStub(ConfigAlertProvider::class),
             $configRepository ?? $this->createStub(ConfigRepository::class),
             $adminUrlGenerator ?? $this->createAdminUrlGenerator(),
@@ -434,6 +438,7 @@ class ConfigCrudControllerTest extends TestCase
             $translator,
             $this->createStub(TableExporter::class),
             $this->createStub(ConfigSqlExporter::class),
+            $this->createStub(ContentExporter::class),
             $this->createStub(ConfigAlertProvider::class),
             $this->createStub(ConfigRepository::class),
             $this->createAdminUrlGenerator(),
@@ -525,6 +530,49 @@ class ConfigCrudControllerTest extends TestCase
         $controller->exportCsv($this->createAdminContext());
     }
 
+    public function testExportContentMapsRowsIntoTheSiteConfigEnvelope(): void
+    {
+        $connection = $this->createStub(Connection::class);
+        $connection->method('fetchAllAssociative')->willReturn([[
+            'slug' => 'site-title',
+            'label' => 'Site title',
+            'is_sensitive' => 0,
+            'is_restricted' => 0,
+            'value' => 'My Site',
+            'kind' => 'text',
+            'group' => 'general',
+            'description' => null,
+            'severity' => null,
+            'creation' => '2026-01-01 00:00:00',
+            'modification' => '2026-01-01 00:00:00',
+        ]]);
+
+        $expectedItems = [[
+            'slug' => 'site-title',
+            'label' => 'Site title',
+            'isSensitive' => false,
+            'isRestricted' => false,
+            'value' => 'My Site',
+            'kind' => 'text',
+            'group' => 'general',
+            'description' => null,
+            'severity' => null,
+        ]];
+
+        $contentExporter = $this->createMock(ContentExporter::class);
+        $contentExporter->expects($this->once())
+            ->method('export')
+            ->with('site_config', $expectedItems)
+            ->willReturn(new BinaryFileResponse(tempnam(sys_get_temp_dir(), 'export_test_')));
+
+        $controller = $this->createController(connection: $connection, contentExporter: $contentExporter);
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+        ]));
+
+        $controller->exportContent($this->createAdminContext());
+    }
+
     public function testExportSqlDelegatesToConfigSqlExporter(): void
     {
         $exportResponse = new Response();
@@ -541,7 +589,7 @@ class ConfigCrudControllerTest extends TestCase
         $this->assertSame($exportResponse, $response);
     }
 
-    public function testExportSqlDeniesAccessBelowSuperAdmin(): void
+    public function testExportSqlDeniesAccessWithoutRoleAdmin(): void
     {
         $this->expectException(AccessDeniedException::class);
 
@@ -553,7 +601,7 @@ class ConfigCrudControllerTest extends TestCase
         $controller->exportSql($this->createAdminContext());
     }
 
-    public function testExportJsonDeniesAccessBelowSuperAdmin(): void
+    public function testExportJsonDeniesAccessWithoutRoleAdmin(): void
     {
         $this->expectException(AccessDeniedException::class);
 
@@ -574,7 +622,7 @@ class ConfigCrudControllerTest extends TestCase
 
         $controller = $this->createController(requestStack: $requestStack);
 
-        // A real EasyAdmin runtime pre-populates default actions (EDIT, DETAIL...) before calling configureActions() - update() below assumes EDIT/DETAIL already exist on PAGE_INDEX
+        // A real EasyAdmin runtime pre-populates default actions (EDIT...) before calling configureActions() - update() below assumes EDIT already exists on PAGE_INDEX
         $actions = $controller->configureActions(
             Actions::new()
                 ->add(Crud::PAGE_INDEX, Action::EDIT)
@@ -583,8 +631,8 @@ class ConfigCrudControllerTest extends TestCase
         $this->assertInstanceOf(Actions::class, $actions);
     }
 
-    // Index-page row actions become icon-only (see EasyAdminActionHelper::toIconOnly()), the label moving to the hover "title" instead
-    public function testConfigureActionsSetsEditAndDetailIconOnlyOnIndexPage(): void
+    // Index-page row action becomes icon-only (see EasyAdminActionHelper::toIconOnly()), the label moving to the hover "title" instead
+    public function testConfigureActionsSetsEditIconOnlyOnIndexPage(): void
     {
         $requestStack = new RequestStack();
         $requestStack->push(new Request());
@@ -598,12 +646,47 @@ class ConfigCrudControllerTest extends TestCase
 
         $actionConfigDto = $actions->getAsDto(Crud::PAGE_INDEX);
         $editAction = $actionConfigDto->getAction(Crud::PAGE_INDEX, Action::EDIT);
-        $detailAction = $actionConfigDto->getAction(Crud::PAGE_INDEX, Action::DETAIL);
 
         $this->assertFalse($editAction->getLabel());
         $this->assertSame(['title' => 'action.edit'], $editAction->getHtmlAttributes());
-        $this->assertFalse($detailAction->getLabel());
-        $this->assertSame(['title' => 'action.detail'], $detailAction->getHtmlAttributes());
+    }
+
+    // Detail adds no information beyond what edit already shows (sensitive values are revealed there too) - disabled entirely, alongside new/delete since configs are fixed by the bundles' import json
+    public function testConfigureActionsDisablesNewDeleteAndDetail(): void
+    {
+        $requestStack = new RequestStack();
+        $requestStack->push(new Request());
+
+        $controller = $this->createController(requestStack: $requestStack);
+
+        $actions = $controller->configureActions(
+            Actions::new()
+                ->add(Crud::PAGE_INDEX, Action::EDIT)
+        );
+
+        $this->assertSame(
+            [],
+            array_diff([Action::NEW, Action::DELETE, Action::DETAIL], $actions->getAsDto(null)->getDisabledActions())
+        );
+    }
+
+    // A "Cancel" action on the edit page lets the admin back out without saving, linking back to the index like EasyAdmin's own built-in actions do
+    public function testConfigureActionsAddsCancelActionOnEditPageLinkingToIndex(): void
+    {
+        $requestStack = new RequestStack();
+        $requestStack->push(new Request());
+
+        $controller = $this->createController(requestStack: $requestStack);
+
+        $actions = $controller->configureActions(
+            Actions::new()
+                ->add(Crud::PAGE_INDEX, Action::EDIT)
+        );
+
+        $cancelAction = $actions->getAsDto(Crud::PAGE_EDIT)->getAction(Crud::PAGE_EDIT, 'cancel');
+
+        $this->assertNotNull($cancelAction);
+        $this->assertSame(Action::INDEX, $cancelAction->getCrudActionName());
     }
 
     // --- configureFilters -----------------------------------------------------------------------------------
@@ -688,8 +771,8 @@ class ConfigCrudControllerTest extends TestCase
         $this->assertSame('secret-api-key', $valueField->getAsDto()->getFormTypeOptions()['data']);
     }
 
-    // Non-sensitive json kind is pre-filled with a re-indented value on edit, and shows the same re-indented value on detail via formatValue()
-    public function testConfigureFieldsPrettyPrintsNonSensitiveJsonValueOnEditAndDetailPages(): void
+    // Non-sensitive json kind is pre-filled with a re-indented value on edit
+    public function testConfigureFieldsPrettyPrintsNonSensitiveJsonValueOnEditPage(): void
     {
         $config = (new Config())->setSlug('ai-roles')->setKind(Config::TYPE_JSON)->setValue('{"role":"admin","active":true}');
         $expected = "{\n    \"role\": \"admin\",\n    \"active\": true\n}";
@@ -699,12 +782,6 @@ class ConfigCrudControllerTest extends TestCase
         $editField = $this->findField($controller->configureFields('edit'), 'value');
         $this->assertInstanceOf(TextareaField::class, $editField);
         $this->assertSame($expected, $editField->getAsDto()->getFormTypeOptions()['data']);
-
-        $controller = $this->createController();
-        $this->setContextEntity($controller, $config);
-        $detailField = $this->findField($controller->configureFields('detail'), 'value');
-        $formatted = ($detailField->getAsDto()->getFormatValueCallable())($config->getValue(), $config);
-        $this->assertSame($expected, $formatted);
     }
 
     // An invalid/malformed json value is kept as-is rather than dropped, so the admin can still see and fix it
@@ -737,25 +814,6 @@ class ConfigCrudControllerTest extends TestCase
 
         $this->assertInstanceOf(TextareaField::class, $valueField);
         $this->assertSame("{\n    \"token\": \"abc\"\n}", $valueField->getAsDto()->getFormTypeOptions()['data']);
-    }
-
-    // Detail page reveals the decrypted sensitive json value, re-indented like its non-sensitive counterpart
-    public function testConfigureFieldsPrettyPrintsDecryptedSensitiveJsonValueOnDetailPage(): void
-    {
-        $vaultEncryptor = new VaultEncryptor('a-test-vault-key');
-        $config = (new Config())
-            ->setSlug('ai-tokens')
-            ->setKind(Config::TYPE_JSON)
-            ->setIsSensitive(true)
-            ->setValue($vaultEncryptor->encrypt('{"token":"abc"}'));
-
-        $controller = $this->createController(vaultEncryptor: $vaultEncryptor);
-        $this->setContextEntity($controller, $config);
-
-        $valueField = $this->findField($controller->configureFields('detail'), 'value');
-        $formatted = ($valueField->getAsDto()->getFormatValueCallable())($config->getValue());
-
-        $this->assertSame("{\n    \"token\": \"abc\"\n}", $formatted);
     }
 
     // Font kind renders a ChoiceField built from FontChoiceType/FontRegistry, always topped up with the 3 CSS generics

@@ -9,11 +9,12 @@
 namespace c975L\ConfigBundle\Service\Export;
 
 use Doctrine\DBAL\Connection;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Builds the SQL export of site_config, shared by ConfigCrudController::exportSql and ConfigShortcutController.
- * Always exports every row (restricted included), since both callers require ROLE_SUPER_ADMIN.
+ * Restricted rows (backup DB credentials, payment API keys...) are excluded below ROLE_SUPER_ADMIN, same restriction as ConfigCrudController::fetchExportRows().
  * @author Laurent Marquet <laurent.marquet@laposte.net>
  * @copyright 2026 975L <contact@975l.com>
  */
@@ -22,6 +23,7 @@ class ConfigSqlExporter
     public function __construct(
         private readonly Connection $connection,
         private readonly TableExporter $tableExporter,
+        private readonly Security $security,
     ) {
     }
 
@@ -29,7 +31,11 @@ class ConfigSqlExporter
     public function export(): Response
     {
         $sql = 'SELECT `label`, `slug`, `is_sensitive`, `is_restricted`, `value`, `kind`, `group`, `description`, `severity`, `creation`, `modification` '
-            . 'FROM `site_config` ORDER BY `slug`';
+            . 'FROM `site_config`';
+        if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            $sql .= ' WHERE `is_restricted` IS NULL OR `is_restricted` = 0';
+        }
+        $sql .= ' ORDER BY `slug`';
 
         return $this->tableExporter->export(ExportFormat::Sql, 'site_config', $this->connection->fetchAllAssociative($sql), [
             'primary_key' => 'slug',
