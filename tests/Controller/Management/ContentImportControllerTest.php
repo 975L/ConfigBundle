@@ -254,4 +254,98 @@ class ContentImportControllerTest extends TestCase
         $this->assertDirectoryDoesNotExist($capturedFilesDir);
         unlink($file->getPathname());
     }
+
+    public function testIndexDispatchesEveryKindOfAMultiExportManifest(): void
+    {
+        [$requestStack, $session] = $this->createRequestStackWithSession();
+        $file = $this->createZipUpload(json_encode(['exports' => [
+            ['kind' => 'site_page', 'items' => [['slug' => 'home']]],
+            ['kind' => 'site_config', 'items' => [['slug' => 'site-title']]],
+        ]]));
+
+        $importDispatcher = $this->createMock(ImportDispatcher::class);
+        $importDispatcher->expects($this->exactly(2))
+            ->method('dispatch')
+            ->willReturnMap([
+                ['site_page', [['slug' => 'home']], $this->anything(), ['created' => 1, 'updated' => 0]],
+                ['site_config', [['slug' => 'site-title']], $this->anything(), ['created' => 0, 'updated' => 1]],
+            ]);
+
+        $controller = $this->createController($importDispatcher);
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+            'security.csrf.token_manager' => $this->createCsrfTokenManager(true),
+            'router' => $this->createRouter(),
+            'request_stack' => $requestStack,
+        ]));
+
+        $request = Request::create('/content-import', 'POST', ['_token' => 'valid']);
+        $request->files->set('export', $file);
+        $controller->index($request);
+
+        $this->assertSame(
+            ['flash.content_import_success_kind — flash.content_import_success_kind'],
+            $session->getFlashBag()->get('success'),
+        );
+        unlink($file->getPathname());
+    }
+
+    public function testIndexReportsAnUnsupportedKindInAMultiExportManifestWithoutAbortingTheOthers(): void
+    {
+        [$requestStack, $session] = $this->createRequestStackWithSession();
+        $file = $this->createZipUpload(json_encode(['exports' => [
+            ['kind' => 'unknown_kind', 'items' => []],
+            ['kind' => 'site_config', 'items' => [['slug' => 'site-title']]],
+        ]]));
+
+        $importDispatcher = $this->createMock(ImportDispatcher::class);
+        $importDispatcher->expects($this->exactly(2))
+            ->method('dispatch')
+            ->willReturnMap([
+                ['unknown_kind', [], $this->anything(), null],
+                ['site_config', [['slug' => 'site-title']], $this->anything(), ['created' => 0, 'updated' => 1]],
+            ]);
+
+        $controller = $this->createController($importDispatcher);
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+            'security.csrf.token_manager' => $this->createCsrfTokenManager(true),
+            'router' => $this->createRouter(),
+            'request_stack' => $requestStack,
+        ]));
+
+        $request = Request::create('/content-import', 'POST', ['_token' => 'valid']);
+        $request->files->set('export', $file);
+        $controller->index($request);
+
+        $this->assertSame(['flash.content_import_unsupported_kind'], $session->getFlashBag()->get('warning'));
+        $this->assertSame(['flash.content_import_success_kind'], $session->getFlashBag()->get('success'));
+        unlink($file->getPathname());
+    }
+
+    public function testIndexFlashesDangerWhenAMultiExportEntryIsMalformed(): void
+    {
+        [$requestStack, $session] = $this->createRequestStackWithSession();
+        $file = $this->createZipUpload(json_encode(['exports' => [
+            ['kind' => 'site_page'],
+        ]]));
+
+        $importDispatcher = $this->createMock(ImportDispatcher::class);
+        $importDispatcher->expects($this->never())->method('dispatch');
+
+        $controller = $this->createController($importDispatcher);
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+            'security.csrf.token_manager' => $this->createCsrfTokenManager(true),
+            'router' => $this->createRouter(),
+            'request_stack' => $requestStack,
+        ]));
+
+        $request = Request::create('/content-import', 'POST', ['_token' => 'valid']);
+        $request->files->set('export', $file);
+        $controller->index($request);
+
+        $this->assertSame(['flash.content_import_invalid_json'], $session->getFlashBag()->get('danger'));
+        unlink($file->getPathname());
+    }
 }

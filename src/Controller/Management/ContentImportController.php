@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-// Uploads a zip export produced by a bundle's own "export selection" action (see eg. SiteBundle's PageCrudController::exportSelection) and routes it to whichever ImportProvider declares support for its "kind" - restricted to ROLE_SUPER_ADMIN (not the configurable site-role-admin) since it writes arbitrary content straight into this environment's database, unlike the dev-only export side (see PageCrudController::configureActions())
+// Uploads a zip export produced by a bundle's own "export selection" action (see eg. SiteBundle's PageCrudController::exportSelection) and routes it to whichever ImportProvider declares support for its "kind" - restricted to ROLE_SUPER_ADMIN (not the configurable site-role-admin used by the export side, see PageCrudController::configureActions()) since it writes arbitrary content straight into this environment's database, in any environment including prod
 class ContentImportController extends AbstractController
 {
     // Real files, no base64 bloat (see ContentExporter) - still generous since a selection can bundle several images/fonts
@@ -76,6 +76,10 @@ class ContentImportController extends AbstractController
             $manifestPath = $extractDir . '/manifest.json';
             $payload = is_file($manifestPath) ? $this->decodeManifest($manifestPath) : null;
 
+            if (\is_array($payload) && isset($payload['exports']) && \is_array($payload['exports'])) {
+                return $this->handleMultiImport($payload['exports'], $extractDir);
+            }
+
             if (!\is_array($payload) || !isset($payload['kind'], $payload['items']) || !\is_string($payload['kind']) || !\is_array($payload['items'])) {
                 $this->addFlash('danger', $this->translator->trans('flash.content_import_invalid_json', [], 'config'));
 
@@ -98,6 +102,38 @@ class ContentImportController extends AbstractController
         } finally {
             $this->removeDirectory($extractDir);
         }
+    }
+
+    // A "sync all" export bundles several kinds in one payload (see ContentExporter::exportMultiple/SyncAllExporter) - a kind unsupported by this environment (eg. a bundle not installed yet) is flagged but doesn't abort the others
+    private function handleMultiImport(array $exports, string $extractDir): Response
+    {
+        $summaries = [];
+        foreach ($exports as $export) {
+            if (!\is_array($export) || !isset($export['kind'], $export['items']) || !\is_string($export['kind']) || !\is_array($export['items'])) {
+                $this->addFlash('danger', $this->translator->trans('flash.content_import_invalid_json', [], 'config'));
+
+                return $this->redirectToRoute(self::IMPORT_ROUTE);
+            }
+
+            $result = $this->importDispatcher->dispatch($export['kind'], $export['items'], $extractDir);
+            if (null === $result) {
+                $this->addFlash('warning', $this->translator->trans('flash.content_import_unsupported_kind', ['%kind%' => $export['kind']], 'config'));
+
+                continue;
+            }
+
+            $summaries[] = $this->translator->trans('flash.content_import_success_kind', [
+                '%kind%' => $export['kind'],
+                '%created%' => $result['created'],
+                '%updated%' => $result['updated'],
+            ], 'config');
+        }
+
+        if ([] !== $summaries) {
+            $this->addFlash('success', implode(' — ', $summaries));
+        }
+
+        return $this->redirectToRoute(self::IMPORT_ROUTE);
     }
 
     private function decodeManifest(string $path): ?array

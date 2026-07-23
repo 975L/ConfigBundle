@@ -12,6 +12,7 @@ namespace c975L\ConfigBundle\Tests\Controller\Management;
 use c975L\ConfigBundle\Controller\Management\ConfigCrudController;
 use c975L\ConfigBundle\Entity\Config;
 use c975L\ConfigBundle\Management\ConfigAlertProvider;
+use c975L\ConfigBundle\Management\ConfigExportProvider;
 use c975L\ConfigBundle\Repository\ConfigRepository;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\ConfigBundle\Service\Export\ConfigSqlExporter;
@@ -103,6 +104,7 @@ class ConfigCrudControllerTest extends TestCase
         ?TableExporter $tableExporter = null,
         ?ConfigSqlExporter $configSqlExporter = null,
         ?ContentExporter $contentExporter = null,
+        ?ConfigExportProvider $configExportProvider = null,
         ?ConfigRepository $configRepository = null,
         ?AdminUrlGenerator $adminUrlGenerator = null,
         ?FontRegistry $fontRegistry = null,
@@ -110,16 +112,20 @@ class ConfigCrudControllerTest extends TestCase
         $translator = $this->createStub(TranslatorInterface::class);
         $translator->method('trans')->willReturnArgument(0);
 
+        $security ??= $this->createStub(Security::class);
+        $connection ??= $this->createStub(Connection::class);
+
         return new ConfigCrudController(
-            $security ?? $this->createStub(Security::class),
+            $security,
             $configService ?? $this->createConfigService(),
             $vaultEncryptor ?? new VaultEncryptor(null),
-            $connection ?? $this->createStub(Connection::class),
+            $connection,
             $requestStack ?? new RequestStack(),
             $translator,
             $tableExporter ?? $this->createStub(TableExporter::class),
             $configSqlExporter ?? $this->createStub(ConfigSqlExporter::class),
             $contentExporter ?? $this->createStub(ContentExporter::class),
+            $configExportProvider ?? new ConfigExportProvider($connection, $security),
             $this->createStub(ConfigAlertProvider::class),
             $configRepository ?? $this->createStub(ConfigRepository::class),
             $adminUrlGenerator ?? $this->createAdminUrlGenerator(),
@@ -178,6 +184,46 @@ class ConfigCrudControllerTest extends TestCase
         $controller = $this->createController(requestStack: $this->createRequestStackWithGroup('legal'));
 
         $this->assertSame('legal', $this->invokePrivate($controller, 'currentGroup'));
+    }
+
+    // --- showGroupsScreen (private) ----------------------------------------------------------------------
+
+    public function testShowGroupsScreenIsTrueWithNoGroupAndNoQuery(): void
+    {
+        $requestStack = new RequestStack();
+        $requestStack->push(new Request());
+
+        $controller = $this->createController(requestStack: $requestStack);
+
+        $this->assertTrue($this->invokePrivate($controller, 'showGroupsScreen'));
+    }
+
+    public function testShowGroupsScreenIsFalseWhenAGroupIsSelected(): void
+    {
+        $controller = $this->createController(requestStack: $this->createRequestStackWithGroup('legal'));
+
+        $this->assertFalse($this->invokePrivate($controller, 'showGroupsScreen'));
+    }
+
+    // A search query typed on the "pick a group" screen (which displays the search box but previously never read it) now bypasses it, searching across every group at once
+    public function testShowGroupsScreenIsFalseWhenASearchQueryIsPresent(): void
+    {
+        $requestStack = new RequestStack();
+        $requestStack->push(new Request(['query' => 'ai-help']));
+
+        $controller = $this->createController(requestStack: $requestStack);
+
+        $this->assertFalse($this->invokePrivate($controller, 'showGroupsScreen'));
+    }
+
+    public function testShowGroupsScreenIsTrueWhenQueryParamIsBlank(): void
+    {
+        $requestStack = new RequestStack();
+        $requestStack->push(new Request(['query' => '']));
+
+        $controller = $this->createController(requestStack: $requestStack);
+
+        $this->assertTrue($this->invokePrivate($controller, 'showGroupsScreen'));
     }
 
     // --- index ------------------------------------------------------------------------------------------
@@ -439,6 +485,7 @@ class ConfigCrudControllerTest extends TestCase
             $this->createStub(TableExporter::class),
             $this->createStub(ConfigSqlExporter::class),
             $this->createStub(ContentExporter::class),
+            new ConfigExportProvider($connection, $security),
             $this->createStub(ConfigAlertProvider::class),
             $this->createStub(ConfigRepository::class),
             $this->createAdminUrlGenerator(),

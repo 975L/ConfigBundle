@@ -1,5 +1,20 @@
 [
     {
+        "date": "2026-07-23",
+        "description": [
+            {
+                "en": "Added an \"Export sync (everything)\" dashboard shortcut to download a single file with everything to keep another site in sync, instead of exporting each part separately",
+                "fr": "Ajout d'un raccourci « Exporter la synchro (tout) » sur le tableau de bord pour télécharger en un seul fichier tout ce qu'il faut pour synchroniser un autre site, au lieu d'exporter chaque partie séparément",
+                "es": "Añadido un atajo «Exportar la sincronización (todo)» en el panel de control para descargar en un solo archivo todo lo necesario para sincronizar otro sitio, en lugar de exportar cada parte por separado"
+            },
+            {
+                "en": "Fixed the back-office menu sometimes showing an extra bullet next to its items",
+                "fr": "Correction d'une puce superflue qui s'affichait parfois à côté des éléments du menu du back-office",
+                "es": "Corregida una viñeta adicional que a veces aparecía junto a los elementos del menú del back-office"
+            }
+        ]
+    },
+    {
         "date": "2026-07-22",
         "description": [
             {

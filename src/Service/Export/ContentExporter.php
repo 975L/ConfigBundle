@@ -42,4 +42,37 @@ class ContentExporter
 
         return $response;
     }
+
+    // Same archive shape as export(), but the manifest carries several {kind, items} blocks under "exports" instead of a single top-level kind - used by SyncAllExporter to bundle every registered ExportProvider's whole content in one zip. $exports is a list of ['kind' => string, 'items' => array, 'files' => array]; every $files map shares the same archive, safe since each entry's path is already unique (see the callers' bin2hex() naming)
+    public function exportMultiple(array $exports): BinaryFileResponse
+    {
+        $files = [];
+        $sections = [];
+        foreach ($exports as $export) {
+            $sections[] = ['kind' => $export['kind'], 'items' => $export['items']];
+            $files += $export['files'] ?? [];
+        }
+
+        $payload = [
+            'exportedAt' => (new \DateTimeImmutable())->format(\DATE_ATOM),
+            'exports' => $sections,
+        ];
+        $manifest = json_encode($payload, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
+
+        $archivePath = tempnam(sys_get_temp_dir(), 'content_export_') . '.zip';
+        $zip = new \ZipArchive();
+        $zip->open($archivePath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        $zip->addFromString('manifest.json', $manifest);
+        foreach ($files as $archiveRelativePath => $diskPath) {
+            $zip->addFile($diskPath, $archiveRelativePath);
+        }
+        $zip->close();
+
+        $filename = sprintf('sync_all_%s.zip', date('Ymd_His'));
+        $response = new BinaryFileResponse($archivePath, 200, ['Content-Type' => 'application/zip']);
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $filename);
+        $response->deleteFileAfterSend(true);
+
+        return $response;
+    }
 }

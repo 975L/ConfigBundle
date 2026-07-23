@@ -28,6 +28,13 @@ ul {
     list-style: url(/bundles/c975lsite/icons/angle-right.svg);
 }
 
+/* EasyAdmin's own sidebar menu is rendered as <ul><li> too, so the rule above would otherwise
+   give every dashboard menu item this content bullet, which doesn't belong on a nav list */
+.ea-sidebar-group-items,
+.ea-sidebar-submenu-items {
+    list-style: none;
+}
+
 /* A sidebar link leaving the admin entirely (see MenuBuilder/MenuProviderInterface's optional "target"
    link key) gets a small external-link glyph automatically - a plain Unicode character, not an icon-font
    glyph, so it doesn't depend on whichever icon set/version a menu item's own "icon" happens to use. */

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 160" width="640" height="160">
+  
+  <rect width="640" height="160" rx="20" fill="#EFE8DA"></rect>
+  <g transform="translate(40,34) scale(1.05)"><rect x="6" y="16" width="88" height="44" rx="8" fill="#26333F"></rect><g transform="translate(12,18)" color="#F4E7CE"><path d="M 34.00 20.00 L 33.40 24.05 L 29.68 23.52 L 27.89 26.62 L 30.72 29.00 L 27.67 31.71 L 25.15 28.92 L 21.79 30.14 L 22.43 33.79 L 18.34 33.90 L 18.21 30.14 L 14.85 28.92 L 13.00 32.12 L 9.79 29.58 L 12.11 26.62 L 10.32 23.52 L 6.84 24.79 L 6.02 20.78 L 9.70 20.00 L 10.32 16.48 L 6.84 15.21 L 8.79 11.61 L 12.11 13.38 L 14.85 11.08 L 13.00 7.88 L 16.80 6.37 L 18.21 9.86 L 21.79 9.86 L 22.43 6.21 L 26.31 7.50 L 25.15 11.08 L 27.89 13.38 L 30.72 11.00 L 32.87 14.48 L 29.68 16.48 L 30.30 20.00 L 34.00 20.00 Z" fill="currentColor" stroke="none"></path><circle cx="20" cy="20" r="4.3" fill="#26333F" stroke="none"></circle></g><text x="72" y="44" font-family="&#39;IBM Plex Mono&#39;,monospace" font-size="17" font-weight="600" fill="#F4E7CE" text-anchor="middle" letter-spacing="1">CFG</text></g>
+  <text x="180" y="66" font-family="&#39;Space Grotesk&#39;,sans-serif" font-size="34" font-weight="700" letter-spacing="-1"><tspan fill="#26333F">Config</tspan><tspan fill="#22303C">Bundle</tspan></text>
+  <text x="180" y="94" font-family="&#39;Space Grotesk&#39;,sans-serif" font-size="15" fill="#6B7480">The configuration common to the whole suite.</text>
+  <text x="180" y="122" font-family="&#39;IBM Plex Mono&#39;,monospace" font-size="13" fill="#8A8272">composer require c975l/config-bundle</text>
+</svg>

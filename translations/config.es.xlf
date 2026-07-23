@@ -358,6 +358,14 @@
                 <source>flash.content_import_invalid_zip</source>
                 <target>El archivo enviado no es un archivo zip válido</target>
             </trans-unit>
+            <trans-unit id="95">
+                <source>label.config_export_sync_all</source>
+                <target>Exportar la sincronización (todo)</target>
+            </trans-unit>
+            <trans-unit id="96">
+                <source>flash.content_import_success_kind</source>
+                <target>%kind%: %created% creado(s), %updated% actualizado(s)</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

@@ -11,6 +11,7 @@ namespace c975L\ConfigBundle\Controller\Management;
 
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\ConfigBundle\Service\Export\ConfigSqlExporter;
+use c975L\ConfigBundle\Service\Export\SyncAllExporter;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -23,10 +24,12 @@ class ConfigShortcutController extends AbstractController
     // EasyAdmin prefixes this with the Dashboard's own route name, giving management_config_clear_cache
     public const CLEAR_CACHE_ROUTE = 'management_config_clear_cache';
     public const EXPORT_SQL_ROUTE = 'management_config_export_sql_shortcut';
+    public const EXPORT_SYNC_ALL_ROUTE = 'management_config_export_sync_all_shortcut';
 
     public function __construct(
         private readonly ConfigServiceInterface $configService,
         private readonly ConfigSqlExporter $configSqlExporter,
+        private readonly SyncAllExporter $syncAllExporter,
         private readonly TranslatorInterface $translator,
     ) {
     }
@@ -63,5 +66,22 @@ class ConfigShortcutController extends AbstractController
         }
 
         return $this->configSqlExporter->export();
+    }
+
+    // Downloads a single re-importable zip bundling the whole content of every installed bundle contributing an ExportProvider (site_page, site_font, gallery_category, site_config...) - the "sync everything to prod in one click" shortcut, re-uploaded via ContentImportController the same way each bundle's own "export selection" already is
+    #[AdminRoute(
+        path: '/config/export-sync-all-shortcut',
+        name: 'config_export_sync_all_shortcut',
+        options: ['methods' => ['POST']]
+    )]
+    public function exportSyncAll(Request $request): Response
+    {
+        $this->denyAccessUnlessGranted($this->configService->get('site-role-admin'));
+
+        if (!$this->isCsrfTokenValid(self::EXPORT_SYNC_ALL_ROUTE, $request->request->get('_token'))) {
+            return $this->redirectToRoute('management');
+        }
+
+        return $this->syncAllExporter->export();
     }
 }

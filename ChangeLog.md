@@ -1,5 +1,14 @@
 # ChangeLog
 
+## v5.8.7
+
+- Added `ExportProviderInterface` for bundles to contribute content to an "export sync all" shortcut (23/07/2026)
+- Added `SyncAllExporter` and an "Export sync (everything)" dashboard shortcut bundling every registered export provider (23/07/2026)
+- Added `ConfigExportProvider`, single source of truth for Config's exports (23/07/2026)
+- `ContentImportController` now dispatches multi-kind "sync all" zips to their respective import providers (23/07/2026)
+- Fixed EasyAdmin's sidebar menu picking up the content-list bullet style meant for regular `<ul>` lists (23/07/2026)
+- Fixed the Config search bar being unusable on the "pick a group" screen (23/07/2026)
+
 ## v5.8.6
 
 - Expanded the Config index/edit explanatory text to describe the page and its sensitive-value handling (22/07/2026)

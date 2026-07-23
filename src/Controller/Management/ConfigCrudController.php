@@ -13,6 +13,7 @@ use c975L\ConfigBundle\Entity\Config;
 use c975L\ConfigBundle\Form\Type\ReadonlyTextType;
 use c975L\ConfigBundle\Management\AlertBuilder;
 use c975L\ConfigBundle\Management\ConfigAlertProvider;
+use c975L\ConfigBundle\Management\ConfigExportProvider;
 use c975L\ConfigBundle\Management\ConfigImportProvider;
 use c975L\ConfigBundle\Management\EasyAdminActionHelper;
 use c975L\ConfigBundle\Repository\ConfigRepository;
@@ -35,6 +36,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\ActionGroup;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
@@ -71,6 +73,7 @@ class ConfigCrudController extends AbstractCrudController
         private readonly TableExporter $tableExporter,
         private readonly ConfigSqlExporter $configSqlExporter,
         private readonly ContentExporter $contentExporter,
+        private readonly ConfigExportProvider $configExportProvider,
         private readonly ConfigAlertProvider $configAlertProvider,
         private readonly ConfigRepository $configRepository,
         private readonly AdminUrlGenerator $adminUrlGenerator,
@@ -83,10 +86,10 @@ class ConfigCrudController extends AbstractCrudController
         return Config::class;
     }
 
-    // Without a "group" to scope to, shows the intermediate "pick a group" screen instead of EasyAdmin's own grid - same reasoning/pattern as SiteBundle's CollectionItemCrudController: the flat list became unreadable once enough groups accumulated
+    // Without a "group" to scope to, shows the intermediate "pick a group" screen instead of EasyAdmin's own grid - same reasoning/pattern as SiteBundle's CollectionItemCrudController: the flat list became unreadable once enough groups accumulated. A search query typed from that screen bypasses it though: the search box is otherwise displayed but dead (nothing on the "pick a group" screen reads it), so a non-empty query instead falls through to the grid, unscoped by group (createIndexQueryBuilder() only filters by group when currentGroup() is set), searching across every group at once
     public function index(AdminContext $context): KeyValueStore|Response
     {
-        if (!$this->currentGroup()) {
+        if ($this->showGroupsScreen()) {
             $showSensitive = $this->requestStack->getCurrentRequest()?->query->getBoolean('showSensitive', false) ?? false;
 
             return $this->render('@c975LConfig/management/config_crud_groups.html.twig', [
@@ -325,12 +328,13 @@ class ConfigCrudController extends AbstractCrudController
             ->addCssClass($sensitiveCss)
             ->createAsGlobalAction();
 
-        // Only reachable once a group is selected (the "pick a group" screen replaces the grid entirely otherwise) - unsets "group" to go back to it
+        // Reachable once a group is selected, or once a cross-group search query has bypassed the "pick a group" screen (see index()) - unsets both "group" and "query" to go back to it cleanly
         $backToGroupsAction = Action::new('groups', t('label.config', [], 'config'), 'fas fa-layer-group')
             ->linkToUrl(fn () => $this->adminUrlGenerator
                 ->setController(self::class)
                 ->setAction(Action::INDEX)
                 ->unset('group')
+                ->unset(EA::QUERY)
                 ->generateUrl())
             ->createAsGlobalAction();
 
@@ -467,6 +471,14 @@ class ConfigCrudController extends AbstractCrudController
         return \is_string($group) && '' !== $group ? $group : null;
     }
 
+    // True when nothing scopes the grid yet: no group picked and no cross-group search query typed - see index() and configureActions()'s backToGroupsAction, which clears both to return here
+    private function showGroupsScreen(): bool
+    {
+        $query = $this->requestStack->getCurrentRequest()?->query->get(EA::QUERY);
+
+        return null === $this->currentGroup() && (!\is_string($query) || '' === $query);
+    }
+
     // Slugs whose slug/translated-label/translated-description contain $query (case-insensitive) - raw
     // SQL rather than the entity repository since this class already fetches this way (see
     // fetchExportRows()) and doesn't otherwise need Doctrine ORM here. A throwaway Config instance
@@ -583,31 +595,13 @@ class ConfigCrudController extends AbstractCrudController
     {
         $this->denyAccessUnlessGranted($this->configService->get('site-role-admin'));
 
-        $items = array_map(static fn (array $row): array => [
-            'slug' => $row['slug'],
-            'label' => $row['label'],
-            'isSensitive' => (bool) $row['is_sensitive'],
-            'isRestricted' => (bool) $row['is_restricted'],
-            'value' => $row['value'],
-            'kind' => $row['kind'],
-            'group' => $row['group'],
-            'description' => $row['description'],
-            'severity' => $row['severity'],
-        ], $this->fetchExportRows());
-
-        return $this->contentExporter->export(ConfigImportProvider::KIND, $items);
+        return $this->contentExporter->export(ConfigImportProvider::KIND, $this->configExportProvider->exportAll()['items']);
     }
 
-    // Sensitive values are kept as stored (encrypted), never decrypted for export. Restricted configs (backup DB credentials, payment API keys...) are excluded below ROLE_SUPER_ADMIN, same restriction as the CRUD itself; is_restricted is nullable, legacy rows must NOT be treated as restricted
+    // Sensitive values are kept as stored (encrypted), never decrypted for export - delegates to ConfigExportProvider, the single source of truth also used by the "export sync all" dashboard shortcut (see SyncAllExporter)
     private function fetchExportRows(): array
     {
-        $sql = 'SELECT `label`, `slug`, `is_sensitive`, `is_restricted`, `value`, `kind`, `group`, `description`, `severity`, `creation`, `modification` FROM `site_config`';
-        if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
-            $sql .= ' WHERE `is_restricted` IS NULL OR `is_restricted` = 0';
-        }
-        $sql .= ' ORDER BY `slug`';
-
-        return $this->connection->fetchAllAssociative($sql);
+        return $this->configExportProvider->fetchRows();
     }
 
     // Re-indents a stored json config value for readability; falls back to the raw string if it isn't valid JSON

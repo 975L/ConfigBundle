@@ -8,6 +8,8 @@ A Symfony bundle that stores application configuration as key-value pairs in the
 
 ## Why ConfigBundle
 
+![ConfigBundle](./.github/images/ConfigBundle.svg)
+
 The root of the c975L ecosystem — every other bundle ([UiBundle](https://github.com/975L/UiBundle), [SiteBundle](https://github.com/975L/SiteBundle), [ShopBundle](https://github.com/975L/ShopBundle), [BookBundle](https://github.com/975L/BookBundle), [GalleryBundle](https://github.com/975L/GalleryBundle), [SocialBundle](https://github.com/975L/SocialBundle)...) depends on it, directly or through UiBundle. It's the single place for application configuration: no per-app `.env` for business config, no duplicated dashboard entry mechanism — a satellite bundle just implements `MenuProviderInterface` (or one of its siblings) and gets an EasyAdmin entry for free.
 
 ---
@@ -17,7 +19,7 @@ The root of the c975L ecosystem — every other bundle ([UiBundle](https://githu
 - Key-value config entries stored in the database (`site_config` table)
 - EasyAdmin CRUD interface to manage values
 - Export button (SQL/CSV/JSON/Sync-zip) for production deployment, reusable from any bundle's CRUD controller
-- Zip-based content import/export for syncing nested bundle content across environments, extensible via `ImportProviderInterface`
+- Zip-based content import/export for syncing nested bundle content across environments, extensible via `ImportProviderInterface`/`ExportProviderInterface`
 - Twig and PHP service to read values anywhere
 - 1-hour cache with automatic invalidation on change
 - "What's new" dashboard section aggregating release notes declared by every c975L bundle
@@ -171,6 +173,8 @@ The SQL export is also available as a `/management` dashboard shortcut ("Export 
 
 A fourth **Sync** export produces a zip (`manifest.json` plus any referenced files) instead of a flat table dump — re-upload it on another environment via **Import content** to upsert the same rows there, matched by `slug` rather than by database id. See [Contributing import providers from other bundles](#contributing-import-providers-from-other-bundles) below.
 
+The `/management` dashboard also has an **Export sync (everything)** shortcut (`site-role-admin`), bundling every registered `ExportProviderInterface`'s whole content (Config plus whatever other bundles contribute, e.g. pages, fonts) into a single zip — the "sync everything to prod in one click" counterpart to the per-bundle **Sync** export above, re-uploaded via **Import content** the same way. See [Contributing export providers from other bundles](#contributing-export-providers-from-other-bundles) below.
+
 ## Restricting configs to ROLE_SUPER_ADMIN
 
 Some configs are secrets shared across the whole install rather than per-site application data —
@@ -289,6 +293,35 @@ class MyImportProvider implements ImportProviderInterface
 Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
 
 Uploaded zips are accepted at the **Import content** dashboard link (`ROLE_SUPER_ADMIN` — it writes arbitrary content straight into the database, unlike the export side which stays at `site-role-admin`), which extracts the zip, reads `manifest.json`'s `kind`, and dispatches to whichever registered provider's `supportsImport()` matches it.
+
+## Contributing export providers from other bundles
+
+`ExportProviderInterface` is the export-side mirror of `ImportProviderInterface` above — same "kind" values, same natural-key philosophy. Implementing it makes your bundle's content part of the **Export sync (everything)** dashboard shortcut, without touching that shortcut's own code:
+
+```php
+namespace c975L\MyBundle\Management;
+
+use c975L\ConfigBundle\Management\ExportProviderInterface;
+
+class MyExportProvider implements ExportProviderInterface
+{
+    // The string embedded in the export payload for this provider's items (see ContentExporter), stable across dev/prod (e.g. "my_entity")
+    public function getKind(): string
+    {
+        return 'my_entity';
+    }
+
+    // Same shapes ContentExporter::export() expects: 'items' (JSON-able array, one entry per exported entity) and 'files' (archive-relative path => disk path, empty for a kind that never carries files)
+    public function exportAll(): array
+    {
+        return ['items' => $this->fetchItems(), 'files' => []];
+    }
+}
+```
+
+Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered — no manual service tagging needed, `TaggedInterfacePass` auto-detects any class implementing it, same mechanism as `MenuProviderInterface` below.
+
+`SyncAllExporter` collects every registered `ExportProviderInterface` into a single zip (same `manifest.json`-plus-files shape as a single-kind **Sync** export, just with several `{kind, items}` blocks under `exports`) — a bundle that isn't installed simply doesn't contribute a section, no configuration needed on either side. On import, `ContentImportController` detects that multi-section shape automatically and dispatches each section to its own `ImportProviderInterface`, same as a single-kind zip.
 
 ## Contributing menu items from other bundles
 

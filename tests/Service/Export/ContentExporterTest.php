@@ -52,4 +52,53 @@ class ContentExporterTest extends TestCase
         unlink($sourcePath);
         unlink($path);
     }
+
+    public function testExportMultipleBundlesEverySectionUnderOneManifest(): void
+    {
+        $exports = [
+            ['kind' => 'site_page', 'items' => [['slug' => 'home']]],
+            ['kind' => 'site_config', 'items' => [['slug' => 'site-title']], 'files' => []],
+        ];
+
+        $response = (new ContentExporter())->exportMultiple($exports);
+
+        $this->assertSame('application/zip', $response->headers->get('Content-Type'));
+        $this->assertStringContainsString('filename=sync_all_', $response->headers->get('Content-Disposition'));
+
+        $path = $response->getFile()->getPathname();
+        $zip = new \ZipArchive();
+        $zip->open($path);
+        $manifest = json_decode($zip->getFromName('manifest.json'), true);
+        $zip->close();
+
+        $this->assertArrayHasKey('exportedAt', $manifest);
+        $this->assertSame([
+            ['kind' => 'site_page', 'items' => [['slug' => 'home']]],
+            ['kind' => 'site_config', 'items' => [['slug' => 'site-title']]],
+        ], $manifest['exports']);
+
+        unlink($path);
+    }
+
+    public function testExportMultipleEmbedsFilesFromEverySection(): void
+    {
+        $sourcePath = tempnam(sys_get_temp_dir(), 'content_exporter_test_');
+        file_put_contents($sourcePath, 'binary-content');
+
+        $exports = [
+            ['kind' => 'site_page', 'items' => [], 'files' => ['files/photo.jpg' => $sourcePath]],
+            ['kind' => 'site_font', 'items' => []],
+        ];
+
+        $response = (new ContentExporter())->exportMultiple($exports);
+
+        $path = $response->getFile()->getPathname();
+        $zip = new \ZipArchive();
+        $zip->open($path);
+        $this->assertSame('binary-content', $zip->getFromName('files/photo.jpg'));
+        $zip->close();
+
+        unlink($sourcePath);
+        unlink($path);
+    }
 }

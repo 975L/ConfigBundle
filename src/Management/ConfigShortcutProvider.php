@@ -43,6 +43,13 @@ class ConfigShortcutProvider implements ShortcutProviderInterface
                 'role' => $this->configService->get('site-role-admin'),
             ],
             [
+                'label' => $this->translator->trans('label.config_export_sync_all', [], 'config'),
+                'icon' => 'fas fa-cloud-download-alt',
+                'route' => ConfigShortcutController::EXPORT_SYNC_ALL_ROUTE,
+                'active' => false,
+                'role' => $this->configService->get('site-role-admin'),
+            ],
+            [
                 'label' => $this->translator->trans(
                     $maintenanceEnabled ? 'label.maintenance_disable' : 'label.maintenance_enable',
                     [],

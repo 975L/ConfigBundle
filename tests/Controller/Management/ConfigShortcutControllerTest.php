@@ -12,7 +12,9 @@ namespace c975L\ConfigBundle\Tests\Controller\Management;
 use c975L\ConfigBundle\Controller\Management\ConfigShortcutController;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\ConfigBundle\Service\Export\ConfigSqlExporter;
+use c975L\ConfigBundle\Service\Export\SyncAllExporter;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -25,6 +27,7 @@ class ConfigShortcutControllerTest extends TestCase
     private function createController(
         ConfigServiceInterface $configService,
         ?ConfigSqlExporter $configSqlExporter = null,
+        ?SyncAllExporter $syncAllExporter = null,
     ): ConfigShortcutController {
         $translator = $this->createStub(TranslatorInterface::class);
         $translator->method('trans')->willReturnArgument(0);
@@ -32,6 +35,7 @@ class ConfigShortcutControllerTest extends TestCase
         return new ConfigShortcutController(
             $configService,
             $configSqlExporter ?? $this->createStub(ConfigSqlExporter::class),
+            $syncAllExporter ?? $this->createStub(SyncAllExporter::class),
             $translator,
         );
     }
@@ -128,5 +132,51 @@ class ConfigShortcutControllerTest extends TestCase
         ]));
 
         $controller->exportSql(new Request());
+    }
+
+    public function testExportSyncAllReturnsSyncAllExporterResponseWhenTokenIsValid(): void
+    {
+        $exportResponse = new BinaryFileResponse(tempnam(sys_get_temp_dir(), 'export_test_'));
+        $syncAllExporter = $this->createMock(SyncAllExporter::class);
+        $syncAllExporter->expects($this->once())->method('export')->willReturn($exportResponse);
+
+        $controller = $this->createController($this->createStub(ConfigServiceInterface::class), null, $syncAllExporter);
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+            'security.csrf.token_manager' => $this->createCsrfTokenManager(true),
+        ]));
+
+        $response = $controller->exportSyncAll(new Request([], ['_token' => 'valid-token']));
+
+        $this->assertSame($exportResponse, $response);
+    }
+
+    public function testExportSyncAllRedirectsToManagementWhenCsrfTokenIsInvalid(): void
+    {
+        $syncAllExporter = $this->createMock(SyncAllExporter::class);
+        $syncAllExporter->expects($this->never())->method('export');
+
+        $controller = $this->createController($this->createStub(ConfigServiceInterface::class), null, $syncAllExporter);
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+            'security.csrf.token_manager' => $this->createCsrfTokenManager(false),
+            'router' => $this->createRouter(),
+        ]));
+
+        $response = $controller->exportSyncAll(new Request([], ['_token' => 'invalid-token']));
+
+        $this->assertSame('/management', $response->getTargetUrl());
+    }
+
+    public function testExportSyncAllDeniesAccessWhenNotGranted(): void
+    {
+        $this->expectException(AccessDeniedException::class);
+
+        $controller = $this->createController($this->createStub(ConfigServiceInterface::class));
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(false),
+        ]));
+
+        $controller->exportSyncAll(new Request());
     }
 }
