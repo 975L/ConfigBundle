@@ -34,6 +34,7 @@ class ConfigShortcutProvider implements ShortcutProviderInterface
                 'route' => ConfigShortcutController::CLEAR_CACHE_ROUTE,
                 'active' => false,
                 'role' => 'ROLE_SUPER_ADMIN',
+                'category' => ShortcutProviderInterface::CATEGORY_MAINTENANCE,
             ],
             [
                 'label' => $this->translator->trans('label.config_export_sql', [], 'config'),
@@ -41,6 +42,7 @@ class ConfigShortcutProvider implements ShortcutProviderInterface
                 'route' => ConfigShortcutController::EXPORT_SQL_ROUTE,
                 'active' => false,
                 'role' => $this->configService->get('site-role-admin'),
+                'category' => ShortcutProviderInterface::CATEGORY_EXPORT,
             ],
             [
                 'label' => $this->translator->trans('label.config_export_sync_all', [], 'config'),
@@ -48,6 +50,7 @@ class ConfigShortcutProvider implements ShortcutProviderInterface
                 'route' => ConfigShortcutController::EXPORT_SYNC_ALL_ROUTE,
                 'active' => false,
                 'role' => $this->configService->get('site-role-admin'),
+                'category' => ShortcutProviderInterface::CATEGORY_EXPORT,
             ],
             [
                 'label' => $this->translator->trans(
@@ -59,6 +62,7 @@ class ConfigShortcutProvider implements ShortcutProviderInterface
                 'route' => MaintenanceShortcutController::TOGGLE_ROUTE_MAINTENANCE,
                 'active' => $maintenanceEnabled,
                 'role' => $this->configService->get('site-role-admin'),
+                'category' => ShortcutProviderInterface::CATEGORY_MAINTENANCE,
             ],
         ];
     }

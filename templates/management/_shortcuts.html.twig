@@ -1,18 +1,21 @@
 {#
  # Renders the dashboard shortcuts (see c975L\ConfigBundle\Management\ShortcutBuilder) as a grid of small
  # tiles (icon on top, label below) rather than a row of pill buttons - reads as a "quick actions" panel
- # instead of a wall of buttons once several bundles each contribute a few.
+ # instead of a wall of buttons once several bundles each contribute a few. Ordered by category (e.g.
+ # "Export", "Maintenance") so themed shortcuts from different bundles sit next to each other, but rendered
+ # as one flat grid with no heading per category - keeps the panel compact.
  # Expects:
- #   - shortcuts: array of ['label', 'icon', 'route', 'active']
+ #   - shortcuts: flat array of ['label', 'icon', 'route', 'active', 'role'?], already ordered (see ShortcutBuilder)
  # Each shortcut is a POST form (not a plain link) since it triggers an action, protected by its own CSRF token
+ # 'role' is optional (see ShortcutProviderInterface) - a shortcut omitting it has no access restriction of its own
  # Caller is responsible for checking shortcuts|length > 0 (see management/index.html.twig)
  #}
 <div class="shortcuts-grid">
 {% for shortcut in shortcuts %}
-    {% if shortcut.role is defined and is_granted(shortcut.role) %}
+    {% if shortcut.role is not defined or is_granted(shortcut.role) %}
         <form method="post" action="{{ path(shortcut.route) }}">
             <input type="hidden" name="_token" value="{{ csrf_token(shortcut.route) }}">
-            <button type="submit" class="shortcut-tile{{ shortcut.active ? ' shortcut-tile-active' : '' }}">
+            <button type="submit" class="shortcut-tile">
                 <i class="{{ shortcut.icon }}"></i>
                 <span>{{ shortcut.label }}</span>
             </button>

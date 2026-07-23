@@ -26,6 +26,21 @@
                 "en": "The dashboard's quick actions are now shown as a tidy grid of tiles instead of a row of buttons",
                 "fr": "Les actions rapides du tableau de bord s'affichent désormais sous forme de vignettes bien rangées plutôt qu'en rangée de boutons",
                 "es": "Los accesos rápidos del panel de control ahora se muestran como una cuadrícula de fichas en lugar de una fila de botones"
+            },
+            {
+                "en": "Related dashboard quick actions (e.g. every export) are now grouped together in the tile grid",
+                "fr": "Les actions rapides du tableau de bord liées au même sujet (ex. les exports) sont désormais regroupées dans la grille",
+                "es": "Los accesos rápidos del panel de control relacionados (p. ej. las exportaciones) ahora se agrupan juntos en la cuadrícula"
+            },
+            {
+                "en": "Removed a red highlight that made some quick-action tiles look turned on",
+                "fr": "Suppression d'un surlignage rouge qui donnait à tort l'impression que certaines vignettes étaient activées",
+                "es": "Eliminado un resaltado rojo que hacía parecer que algunas fichas de acceso rápido estaban activadas"
+            },
+            {
+                "en": "Fixed a dashboard quick action that could stay invisible to everyone",
+                "fr": "Correction d'une vignette d'action rapide qui pouvait rester invisible pour tout le monde",
+                "es": "Corregida una ficha de acceso rápido que podía permanecer invisible para todos"
             }
         ]
     },

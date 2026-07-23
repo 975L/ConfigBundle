@@ -512,7 +512,7 @@ Make sure your bundle's `services.yaml` includes the `Management/` folder in its
 
 ## Contributing dashboard shortcuts from other bundles
 
-The `/management` dashboard shows a row of quick-action buttons (e.g. clearing a cache, toggling maintenance mode) contributed by any bundle.
+The `/management` dashboard shows a grid of quick-action tiles (e.g. clearing a cache, toggling maintenance mode) contributed by any bundle.
 
 Satellite bundles contribute shortcuts by implementing `ShortcutProviderInterface` — no manual service tagging needed, `ShortcutProviderPass` auto-detects any class implementing it (same pattern as `MenuProviderInterface`):
 
@@ -538,6 +538,8 @@ class MyShortcutProvider implements ShortcutProviderInterface
                 'icon' => 'fas fa-wrench',
                 'route' => MyShortcutController::TOGGLE_MAINTENANCE_ROUTE,
                 'active' => $this->isMaintenanceOn(),
+                'role' => 'ROLE_SUPER_ADMIN',
+                'category' => ShortcutProviderInterface::CATEGORY_MAINTENANCE,
             ],
         ];
     }
@@ -548,9 +550,13 @@ Make sure your bundle's `services.yaml` includes the `Management/` folder in its
 
 **Unlike menus/links, shortcuts trigger an action, not just navigation.** `route` must accept a `POST` request and validate its own CSRF token (`csrf_token(route)` is the token id used by the shared template) — see `ConfigShortcutController::clearCache()` for a one-shot reference implementation that clears the config cache.
 
-**`active`:** styles the button (`btn-danger` when `true`, `btn-outline-secondary` otherwise) to reflect an on/off state. See `MaintenanceShortcutController::toggle()` for a toggle reference implementation flipping the `site-maintenance` config used by `MaintenanceListener`, with `ConfigShortcutProvider::getShortcuts()` reading that same config to decide `active` and pick the right label ("Enable"/"Disable"). One-shot actions with no on/off state can always return `false`.
+**`active`:** reflects an on/off state (e.g. a toggled maintenance mode) — one-shot actions with no on/off state can always return `false`. See `MaintenanceShortcutController::toggle()` for a toggle reference implementation flipping the `site-maintenance` config used by `MaintenanceListener`, with `ConfigShortcutProvider::getShortcuts()` reading that same config to decide `active` and pick the right label ("Enable"/"Disable"). It carries no styling of its own — every tile looks the same regardless of state, so a tile never reads as "currently pressed".
 
-**Rendering:** shortcuts are merged across every provider by `ShortcutBuilder::getShortcuts()` and rendered with the shared `templates/management/_shortcuts.html.twig` partial, each one as its own small `<form method="post">`.
+**`role`:** optional — omit it for a shortcut with no access restriction of its own, set it (e.g. `'ROLE_SUPER_ADMIN'`) to hide the tile from users lacking it.
+
+**`category`:** optional too — one of `ShortcutProviderInterface`'s `CATEGORY_EXPORT`/`CATEGORY_MAINTENANCE`/`CATEGORY_SITE` constants, or a custom `['label' => string, 'translation_domain' => string]` pair. Shortcuts sharing the same category (across bundles) are ordered next to each other in the grid — e.g. every export-related shortcut ends up adjacent — though the grid itself stays a single flat panel with no heading per category. Omit it to fall into the generic "Other" category.
+
+**Rendering:** shortcuts are merged across every provider and ordered by category then by label by `ShortcutBuilder::getShortcuts()`, then rendered with the shared `templates/management/_shortcuts.html.twig` partial as one flat grid, each tile its own small `<form method="post">`.
 
 ## Contributing essential actions from other bundles
 

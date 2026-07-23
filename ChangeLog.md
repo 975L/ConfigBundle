@@ -1,5 +1,11 @@
 # ChangeLog
 
+## v5.8.9
+
+- Added shortcut categories (`ShortcutProviderInterface::CATEGORY_*`) ordering same-themed dashboard shortcut tiles next to each other (23/07/2026)
+- Removed the red "active" dashboard shortcut tile styling (23/07/2026)
+- Fixed a dashboard shortcut with no `role` key never being shown, regardless of the user's role (23/07/2026)
+
 ## v5.8.8
 
 - Added `EssentialActionProviderInterface`, `EssentialActionBuilder` and a dashboard "Essential actions" checklist (23/07/2026)

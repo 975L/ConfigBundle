@@ -410,6 +410,22 @@
                 <source>label.menu_advanced</source>
                 <target>Advanced</target>
             </trans-unit>
+            <trans-unit id="108">
+                <source>label.shortcuts_category_export</source>
+                <target>Export</target>
+            </trans-unit>
+            <trans-unit id="109">
+                <source>label.shortcuts_category_maintenance</source>
+                <target>Maintenance</target>
+            </trans-unit>
+            <trans-unit id="110">
+                <source>label.shortcuts_category_site</source>
+                <target>Site</target>
+            </trans-unit>
+            <trans-unit id="111">
+                <source>label.shortcuts_category_other</source>
+                <target>Other</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

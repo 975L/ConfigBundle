@@ -11,6 +11,7 @@ namespace c975L\ConfigBundle\Tests\Management;
 use c975L\ConfigBundle\Controller\Management\ConfigShortcutController;
 use c975L\ConfigBundle\Controller\Management\MaintenanceShortcutController;
 use c975L\ConfigBundle\Management\ConfigShortcutProvider;
+use c975L\ConfigBundle\Management\ShortcutProviderInterface;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -47,16 +48,20 @@ class ConfigShortcutProviderTest extends TestCase
 
         $this->assertSame(ConfigShortcutController::CLEAR_CACHE_ROUTE, $shortcuts[0]['route']);
         $this->assertFalse($shortcuts[0]['active']);
+        $this->assertSame(ShortcutProviderInterface::CATEGORY_MAINTENANCE, $shortcuts[0]['category']);
         $this->assertSame(ConfigShortcutController::EXPORT_SQL_ROUTE, $shortcuts[1]['route']);
         $this->assertFalse($shortcuts[1]['active']);
         $this->assertSame('ROLE_ADMIN', $shortcuts[1]['role']);
+        $this->assertSame(ShortcutProviderInterface::CATEGORY_EXPORT, $shortcuts[1]['category']);
         $this->assertSame(ConfigShortcutController::EXPORT_SYNC_ALL_ROUTE, $shortcuts[2]['route']);
         $this->assertFalse($shortcuts[2]['active']);
         $this->assertSame('ROLE_ADMIN', $shortcuts[2]['role']);
+        $this->assertSame(ShortcutProviderInterface::CATEGORY_EXPORT, $shortcuts[2]['category']);
         $this->assertSame(MaintenanceShortcutController::TOGGLE_ROUTE_MAINTENANCE, $shortcuts[3]['route']);
         $this->assertFalse($shortcuts[3]['active']);
         $this->assertSame('label.maintenance_enable', $shortcuts[3]['label']);
         $this->assertSame('ROLE_ADMIN', $shortcuts[3]['role']);
+        $this->assertSame(ShortcutProviderInterface::CATEGORY_MAINTENANCE, $shortcuts[3]['category']);
     }
 
     public function testGetShortcutsReflectsMaintenanceEnabledState(): void

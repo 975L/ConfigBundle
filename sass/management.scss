@@ -89,9 +89,3 @@ a.menu-item-contents[target="_blank"]::after {
 .shortcut-tile i {
     font-size: 1.25rem;
 }
-
-/* A shortcut currently "on" (e.g. maintenance mode enabled) - matches the red .btn-danger state it replaces */
-.shortcut-tile-active {
-    border-color: var(--bs-danger);
-    color: var(--bs-danger);
-}
