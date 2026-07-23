@@ -21,6 +21,10 @@ class MenuBuilder
     private const LINKS_SECTION_LABEL = 'label.links';
     private const LINKS_SECTION_TRANSLATION_DOMAIN = 'config';
 
+    // Fixed label for the single, merged "Avancé" submenu, regardless of which bundle contributes an advanced-tier section
+    private const ADVANCED_SUBMENU_LABEL = 'label.menu_advanced';
+    private const ADVANCED_SUBMENU_TRANSLATION_DOMAIN = 'config';
+
     public function __construct(
         private readonly iterable $menuProviders,
         private readonly ConfigServiceInterface $configService,
@@ -29,15 +33,39 @@ class MenuBuilder
     ) {
     }
 
-    // Yields the EasyAdmin menu items, grouped by section and sorted alphabetically
+    // Yields the EasyAdmin menu items, grouped by section and sorted alphabetically - items opting into
+    // the 'advanced' tier (see MenuProviderInterface::getMenus()/getMenuSection()) are collected into one
+    // collapsed submenu instead of staying under their own section, rendered once every essential section
+    // is done. Tier is resolved per item first, falling back to the section's own default - several
+    // providers commonly share one section (e.g. Config/Site/UiBundle all merge into "management"), so an
+    // item can move to "Avancé" without dragging every other item sharing that same section along with it.
     public function getMenuItems(): iterable
     {
-        foreach ($this->getGroupedMenus() as $section) {
-            yield MenuItem::section(new TranslatableMessage($section['label'], [], $section['translation_domain']));
+        $advancedItems = [];
 
+        foreach ($this->getGroupedMenus() as $section) {
+            $essentialItems = [];
             foreach ($section['items'] as $menu) {
-                yield MenuItem::linkTo($menu['controller'], new TranslatableMessage($menu['label'], [], $menu['translation_domain']), $menu['icon'])->setPermission($this->configService->get('site-role-admin'));
+                $item = MenuItem::linkTo($menu['controller'], new TranslatableMessage($menu['label'], [], $menu['translation_domain']), $menu['icon'])->setPermission($this->configService->get('site-role-admin'));
+
+                if ('advanced' === ($menu['tier'] ?? $section['tier'] ?? 'essential')) {
+                    $advancedItems[] = $item;
+                } else {
+                    $essentialItems[] = $item;
+                }
             }
+
+            // Skip a section header that would sit above zero items - every one of its items moved to "Avancé" (a section contributing no items at all still gets its header, unchanged from before - see getMenuItemsOnlyAppendsALinksSectionWhenLinksExist)
+            if ([] === $essentialItems && [] !== $section['items']) {
+                continue;
+            }
+
+            yield MenuItem::section(new TranslatableMessage($section['label'], [], $section['translation_domain']));
+            yield from $essentialItems;
+        }
+
+        if ([] !== $advancedItems) {
+            yield MenuItem::subMenu(new TranslatableMessage(self::ADVANCED_SUBMENU_LABEL, [], self::ADVANCED_SUBMENU_TRANSLATION_DOMAIN))->setSubItems($advancedItems);
         }
 
         $links = $this->getLinks();

@@ -367,6 +367,50 @@
                 <source>flash.content_import_success_kind</source>
                 <target>%kind% : %created% créé(s), %updated% mis à jour</target>
             </trans-unit>
+            <trans-unit id="97">
+                <source>label.essential_actions_title</source>
+                <target>Actions essentielles</target>
+            </trans-unit>
+            <trans-unit id="98">
+                <source>label.essential_actions_subtitle</source>
+                <target>%done%/%total% configurées</target>
+            </trans-unit>
+            <trans-unit id="99">
+                <source>label.essential_action_identity</source>
+                <target>Identité du site</target>
+            </trans-unit>
+            <trans-unit id="100">
+                <source>description.essential_action_identity</source>
+                <target>Nom, slogan, logo et favicon</target>
+            </trans-unit>
+            <trans-unit id="101">
+                <source>label.essential_action_legal</source>
+                <target>Coordonnées &amp; mentions légales</target>
+            </trans-unit>
+            <trans-unit id="102">
+                <source>description.essential_action_legal</source>
+                <target>Email de contact et directeur de publication</target>
+            </trans-unit>
+            <trans-unit id="103">
+                <source>label.essential_action_email</source>
+                <target>Emails sortants</target>
+            </trans-unit>
+            <trans-unit id="104">
+                <source>description.essential_action_email</source>
+                <target>Qui envoie et qui reçoit les notifications du site</target>
+            </trans-unit>
+            <trans-unit id="105">
+                <source>label.essential_action_roles</source>
+                <target>Rôles &amp; accès</target>
+            </trans-unit>
+            <trans-unit id="106">
+                <source>description.essential_action_roles</source>
+                <target>Qui peut faire quoi dans le back-office</target>
+            </trans-unit>
+            <trans-unit id="107">
+                <source>label.menu_advanced</source>
+                <target>Avancé</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

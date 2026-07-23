@@ -366,6 +366,50 @@
                 <source>flash.content_import_success_kind</source>
                 <target>%kind%: %created% creado(s), %updated% actualizado(s)</target>
             </trans-unit>
+            <trans-unit id="97">
+                <source>label.essential_actions_title</source>
+                <target>Acciones esenciales</target>
+            </trans-unit>
+            <trans-unit id="98">
+                <source>label.essential_actions_subtitle</source>
+                <target>%done%/%total% configuradas</target>
+            </trans-unit>
+            <trans-unit id="99">
+                <source>label.essential_action_identity</source>
+                <target>Identidad del sitio</target>
+            </trans-unit>
+            <trans-unit id="100">
+                <source>description.essential_action_identity</source>
+                <target>Nombre, eslogan, logo y favicon</target>
+            </trans-unit>
+            <trans-unit id="101">
+                <source>label.essential_action_legal</source>
+                <target>Contacto y aviso legal</target>
+            </trans-unit>
+            <trans-unit id="102">
+                <source>description.essential_action_legal</source>
+                <target>Email de contacto y director de publicación</target>
+            </trans-unit>
+            <trans-unit id="103">
+                <source>label.essential_action_email</source>
+                <target>Correos salientes</target>
+            </trans-unit>
+            <trans-unit id="104">
+                <source>description.essential_action_email</source>
+                <target>Quién envía y quién recibe las notificaciones del sitio</target>
+            </trans-unit>
+            <trans-unit id="105">
+                <source>label.essential_action_roles</source>
+                <target>Roles y accesos</target>
+            </trans-unit>
+            <trans-unit id="106">
+                <source>description.essential_action_roles</source>
+                <target>Quién puede hacer qué en el panel de administración</target>
+            </trans-unit>
+            <trans-unit id="107">
+                <source>label.menu_advanced</source>
+                <target>Avanzado</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

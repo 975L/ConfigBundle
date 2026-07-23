@@ -24,6 +24,8 @@ The root of the c975L ecosystem — every other bundle ([UiBundle](https://githu
 - 1-hour cache with automatic invalidation on change
 - "What's new" dashboard section aggregating release notes declared by every c975L bundle
 - Dashboard alerts (danger/warning/info) aggregating what needs attention, declared by every c975L bundle
+- Dashboard "Essential actions" checklist, a permanent quick-access entry point to the handful of settings every site needs
+- Dashboard widgets contributed by other bundles (e.g. UiBundle's Donovan card)
 
 ## Installation
 
@@ -369,6 +371,8 @@ Make sure your bundle's `services.yaml` includes the `Management/` folder in its
 
 **Alphabetical ordering:** within a section, menu items are always sorted alphabetically by their translated label.
 
+**Advanced tier:** both `getMenuSection()` and each entry in `getMenus()` accept an optional `'tier' => 'advanced'` key (default `'essential'`). Items opting into it are pulled out of their section and collected into one collapsed "Advanced" submenu at the bottom of the sidebar, instead of staying under their own section header — set it on `getMenuSection()` to move every item of that provider's section, or on an individual entry in `getMenus()` to move just that one (its section keeps its other items at the top level). Several providers commonly share one section (e.g. Config/Site/UiBundle all merge into "management"), so an item's own `tier` never drags along another provider's items sharing that same section.
+
 **Links section:** `getLinks()` exposes links to plain routes (e.g. a public page), each entry shaped like:
 
 ```php
@@ -547,6 +551,68 @@ Make sure your bundle's `services.yaml` includes the `Management/` folder in its
 **`active`:** styles the button (`btn-danger` when `true`, `btn-outline-secondary` otherwise) to reflect an on/off state. See `MaintenanceShortcutController::toggle()` for a toggle reference implementation flipping the `site-maintenance` config used by `MaintenanceListener`, with `ConfigShortcutProvider::getShortcuts()` reading that same config to decide `active` and pick the right label ("Enable"/"Disable"). One-shot actions with no on/off state can always return `false`.
 
 **Rendering:** shortcuts are merged across every provider by `ShortcutBuilder::getShortcuts()` and rendered with the shared `templates/management/_shortcuts.html.twig` partial, each one as its own small `<form method="post">`.
+
+## Contributing essential actions from other bundles
+
+The `/management` dashboard shows an "Essential actions" checklist — not a one-time onboarding wizard, but a permanent quick-access entry point to the handful of settings every site needs, always linking straight to the relevant Config screen so a value can be reviewed or redone at any time.
+
+Satellite bundles contribute their own actions by implementing `EssentialActionProviderInterface` — no manual service tagging needed, `TaggedInterfacePass` auto-detects any class implementing it, same mechanism as `MenuProviderInterface` above:
+
+```php
+namespace c975L\MyBundle\Management;
+
+use c975L\ConfigBundle\Management\EssentialActionProviderInterface;
+
+class MyEssentialActionProvider implements EssentialActionProviderInterface
+{
+    public function getEssentialActions(): array
+    {
+        return [
+            [
+                'slug' => 'my-action',
+                'label' => 'label.my_essential_action',
+                'description' => 'description.my_essential_action',
+                'translation_domain' => 'my_bundle',
+                'url' => '/management/my-entity',
+                'isDone' => $this->isConfigured(),
+                'order' => 50,
+            ],
+        ];
+    }
+}
+```
+
+Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
+
+`isDone` only drives the status icon (a checkmark once true) — the link itself is always shown, even once done. `order` decides the checklist's display order across every provider (low to high), unlike menus/alerts which sort alphabetically. `EssentialActionBuilder::getProgress()` (`{done, total}`) drives the panel's "X/Y configured" subtitle.
+
+## Contributing dashboard widgets from other bundles
+
+Any bundle can render an arbitrary block on the `/management` dashboard (e.g. UiBundle's Donovan card) by implementing `DashboardWidgetProviderInterface` — no manual service tagging needed, `TaggedInterfacePass` auto-detects any class implementing it, same mechanism as `MenuProviderInterface` above:
+
+```php
+namespace c975L\MyBundle\Management;
+
+use c975L\ConfigBundle\Management\DashboardWidgetProviderInterface;
+
+class MyDashboardWidgetProvider implements DashboardWidgetProviderInterface
+{
+    public function getDashboardWidgets(): array
+    {
+        if (!$this->isEnabled()) {
+            return [];
+        }
+
+        return [
+            ['template' => '@MyBundle/management/_my_widget.html.twig', 'context' => ['foo' => 'bar']],
+        ];
+    }
+}
+```
+
+Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
+
+The dashboard template only loops and includes each widget's own `template` with its own `context` — it never contains business logic about what a widget is. Return `[]` when there's nothing to show (e.g. an unconfigured feature) so it stays entirely absent rather than showing a disabled placeholder.
 
 ## Contributing theme presets from other bundles
 

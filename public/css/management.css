@@ -50,3 +50,48 @@ a.menu-item-contents[target=_blank]::after {
 .datagrid td.actions {
   white-space: nowrap;
 }
+
+/* SHORTCUTS (management/_shortcuts.html.twig, ShortcutBuilder) - a grid of tiles instead of a row of
+   pill buttons, so it stays readable as more bundles each contribute a shortcut. Uses Bootstrap's own
+   CSS variables (shipped by EasyAdmin) rather than hardcoded colors, so it follows EasyAdmin's light/dark
+   theme automatically. */
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  /* Every tile in a row otherwise stretches to its own column's height, so a longer 2-line label makes just that one tile taller than its neighbors - forcing every implicit row to the tallest tile's height keeps them all equal */
+  grid-auto-rows: 1fr;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.shortcut-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  width: 100%;
+  height: 100%;
+  padding: 0.75rem 0.4rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background: var(--bs-body-bg);
+  color: inherit;
+  font-size: 0.76rem;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.shortcut-tile:hover {
+  background: var(--bs-tertiary-bg);
+}
+
+.shortcut-tile i {
+  font-size: 1.25rem;
+}
+
+/* A shortcut currently "on" (e.g. maintenance mode enabled) - matches the red .btn-danger state it replaces */
+.shortcut-tile-active {
+  border-color: var(--bs-danger);
+  color: var(--bs-danger);
+}

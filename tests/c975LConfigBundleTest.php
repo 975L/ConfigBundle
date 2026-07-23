@@ -12,6 +12,8 @@ namespace c975L\ConfigBundle\Tests;
 use c975L\ConfigBundle\c975LConfigBundle;
 use c975L\ConfigBundle\DependencyInjection\Compiler\TaggedInterfacePass;
 use c975L\ConfigBundle\Management\AlertProviderInterface;
+use c975L\ConfigBundle\Management\DashboardWidgetProviderInterface;
+use c975L\ConfigBundle\Management\EssentialActionProviderInterface;
 use c975L\ConfigBundle\Management\ExportProviderInterface;
 use c975L\ConfigBundle\Management\ImportProviderInterface;
 use c975L\ConfigBundle\Management\LinkableRouteProviderInterface;
@@ -39,6 +41,8 @@ class c975LConfigBundleTest extends TestCase
         $container->register('procedure_provider', c975LConfigBundleTestProcedureProviderFixture::class);
         $container->register('linkable_route_provider', c975LConfigBundleTestLinkableRouteProviderFixture::class);
         $container->register('theme_preset_provider', c975LConfigBundleTestThemePresetProviderFixture::class);
+        $container->register('essential_action_provider', c975LConfigBundleTestEssentialActionProviderFixture::class);
+        $container->register('dashboard_widget_provider', c975LConfigBundleTestDashboardWidgetProviderFixture::class);
 
         (new c975LConfigBundle())->build($container);
 
@@ -57,6 +61,8 @@ class c975LConfigBundleTest extends TestCase
         $this->assertTrue($container->getDefinition('procedure_provider')->hasTag('c975l.procedure_provider'));
         $this->assertTrue($container->getDefinition('linkable_route_provider')->hasTag('c975l.linkable_route_provider'));
         $this->assertTrue($container->getDefinition('theme_preset_provider')->hasTag('c975l.theme_preset_provider'));
+        $this->assertTrue($container->getDefinition('essential_action_provider')->hasTag('c975l.essential_action_provider'));
+        $this->assertTrue($container->getDefinition('dashboard_widget_provider')->hasTag('c975l.dashboard_widget_provider'));
     }
 
     // Mirrors how Symfony's own kernel invokes it (BundleExtension::load() builds the ContainerConfigurator and calls loadExtension() for us), so this also validates that config/services.yaml itself parses and wires without error
@@ -165,6 +171,22 @@ class c975LConfigBundleTestThemePresetProviderFixture implements ThemePresetProv
 class c975LConfigBundleTestProcedureProviderFixture implements ProcedureProviderInterface
 {
     public function getProcedures(): array
+    {
+        return [];
+    }
+}
+
+class c975LConfigBundleTestEssentialActionProviderFixture implements EssentialActionProviderInterface
+{
+    public function getEssentialActions(): array
+    {
+        return [];
+    }
+}
+
+class c975LConfigBundleTestDashboardWidgetProviderFixture implements DashboardWidgetProviderInterface
+{
+    public function getDashboardWidgets(): array
     {
         return [];
     }

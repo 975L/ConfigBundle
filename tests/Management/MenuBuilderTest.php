@@ -214,6 +214,77 @@ class MenuBuilderTest extends TestCase
         $this->assertSame('/shop_index', $items[3]->getAsDto()->getLinkUrl());
     }
 
+    // A section opting into 'advanced' (see MenuProviderInterface::getMenuSection()) doesn't get its own top-level section header - its items are collected into one collapsed "Avancé" submenu instead, appended after every essential section
+    public function testGetMenuItemsGroupsAdvancedTierSectionsIntoOneCollapsedSubmenu(): void
+    {
+        $essential = $this->createProvider(
+            ['label' => 'label.essential', 'translation_domain' => 'site'],
+            ['config' => ['controller' => 'ConfigCrudController', 'label' => 'label.config', 'translation_domain' => 'config', 'icon' => 'fa fa-cog']],
+        );
+        $advanced = $this->createProvider(
+            ['label' => 'label.seo', 'translation_domain' => 'ui', 'tier' => 'advanced'],
+            ['seo' => ['controller' => 'SeoCrudController', 'label' => 'label.seo_settings', 'translation_domain' => 'ui', 'icon' => 'fa fa-search']],
+        );
+        $builder = new MenuBuilder([$essential, $advanced], $this->createConfigService(), $this->createTranslator(), $this->createUrlGenerator());
+
+        $items = iterator_to_array($builder->getMenuItems(), false);
+
+        // Essential section header + its item, then one submenu (no separate "seo" section header)
+        $this->assertCount(3, $items);
+        $this->assertSame('label.essential', $items[0]->getAsDto()->getLabel()->getMessage());
+        $this->assertSame('label.config', $items[1]->getAsDto()->getLabel()->getMessage());
+
+        $submenuDto = $items[2]->getAsDto();
+        $this->assertSame('label.menu_advanced', $submenuDto->getLabel()->getMessage());
+        $this->assertCount(1, $submenuDto->getSubItems());
+        $this->assertSame('label.seo_settings', $submenuDto->getSubItems()[0]->getLabel()->getMessage());
+    }
+
+    // Real-world case: several providers share the same section (e.g. Config/Site/UiBundle all merge into
+    // "management") - an individual item's own 'tier' must move just that item to "Avancé" without
+    // dragging the rest of that shared section (from the same or another provider) along with it
+    public function testGetMenuItemsMovesOnlyTheItemsThatOptInWithinASharedSection(): void
+    {
+        $section = ['label' => 'label.management', 'translation_domain' => 'site'];
+        $providerA = $this->createProvider($section, [
+            'page' => ['controller' => 'PageCrudController', 'label' => 'label.pages', 'translation_domain' => 'site', 'icon' => 'fa fa-file'],
+            'redirect' => ['controller' => 'RedirectCrudController', 'label' => 'label.redirects', 'translation_domain' => 'site', 'icon' => 'fa fa-arrow-right', 'tier' => 'advanced'],
+        ]);
+        $providerB = $this->createProvider($section, [
+            'config' => ['controller' => 'ConfigCrudController', 'label' => 'label.config', 'translation_domain' => 'config', 'icon' => 'fa fa-cog'],
+        ]);
+        $builder = new MenuBuilder([$providerA, $providerB], $this->createConfigService(), $this->createTranslator(), $this->createUrlGenerator());
+
+        $items = iterator_to_array($builder->getMenuItems(), false);
+
+        // One section header, its 2 essential items (config, page - alphabetical), then one submenu holding "redirect" alone
+        $this->assertCount(4, $items);
+        $this->assertSame('label.management', $items[0]->getAsDto()->getLabel()->getMessage());
+        $this->assertSame(['label.config', 'label.pages'], [$items[1]->getAsDto()->getLabel()->getMessage(), $items[2]->getAsDto()->getLabel()->getMessage()]);
+
+        $submenuDto = $items[3]->getAsDto();
+        $this->assertSame('label.menu_advanced', $submenuDto->getLabel()->getMessage());
+        $this->assertCount(1, $submenuDto->getSubItems());
+        $this->assertSame('label.redirects', $submenuDto->getSubItems()[0]->getLabel()->getMessage());
+    }
+
+    // A section without a 'tier' key (or explicitly 'essential') keeps today's behavior - no submenu is created when nothing opts into 'advanced'
+    public function testGetMenuItemsOmitsTheAdvancedSubmenuWhenNoSectionOptsIn(): void
+    {
+        $section = ['label' => 'label.management', 'translation_domain' => 'site'];
+        $provider = $this->createProvider($section, [
+            'config' => ['controller' => 'ConfigCrudController', 'label' => 'label.config', 'translation_domain' => 'config', 'icon' => 'fa fa-cog'],
+        ]);
+        $builder = new MenuBuilder([$provider], $this->createConfigService(), $this->createTranslator(), $this->createUrlGenerator());
+
+        $items = iterator_to_array($builder->getMenuItems(), false);
+
+        $this->assertCount(2, $items);
+        foreach ($items as $item) {
+            $this->assertNotSame('label.menu_advanced', $item->getAsDto()->getLabel()?->getMessage());
+        }
+    }
+
     // An explicit "url" (a literal, already-absolute URL) is used as-is, bypassing route resolution entirely - for a provider that wants a link fixed/directly editable rather than derived from a route (e.g. 975l.com's own MenuProvider pinning its "vitrine des blocks" link to the real production domain on purpose, see App\Management\MenuProvider)
     public function testGetMenuItemsUsesAnExplicitUrlAsIsWithoutRouteResolution(): void
     {

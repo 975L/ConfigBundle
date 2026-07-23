@@ -19,19 +19,23 @@ class WhatsNewBuilder
     ) {
     }
 
-    // Returns the most recent dates, capped at $maxItems total description lines (always includes at least one date, even if it alone exceeds the cap, to avoid an empty dashboard widget)
-    public function getLatest(int $maxItems = 8): array
+    // Returns the most recent entries, hard-capped at $maxItems total description lines - always visible
+    // on the dashboard now (see management/index.html.twig), so this stays a short, fixed-size list rather
+    // than growing with whichever date happens to have the most changes; a date exceeding what's left is
+    // truncated rather than included in full, the full history stays one click away (management_whatsnew_index)
+    public function getLatest(int $maxItems = 5): array
     {
         $latest = [];
-        $count = 0;
+        $remaining = $maxItems;
 
         foreach ($this->getAll() as $entry) {
-            if ($count > 0 && $count + \count($entry['description']) > $maxItems) {
+            if ($remaining <= 0) {
                 break;
             }
 
-            $latest[] = $entry;
-            $count += \count($entry['description']);
+            $descriptions = \array_slice($entry['description'], 0, $remaining);
+            $latest[] = ['date' => $entry['date'], 'description' => $descriptions];
+            $remaining -= \count($descriptions);
         }
 
         return $latest;

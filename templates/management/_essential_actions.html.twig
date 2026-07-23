@@ -1,0 +1,27 @@
+{#
+ # Renders the essential-actions panel (see c975L\ConfigBundle\Management\EssentialActionBuilder).
+ # Expects:
+ #   - actions: array of ['slug', 'label', 'description', 'translation_domain', 'url', 'isDone', 'order'], already sorted
+ #   - progress: ['done' => int, 'total' => int]
+ # Not a one-time onboarding wizard that goes away once done - a permanent, always-visible quick-access
+ # entry point, so every action stays a real link even once done (to review/redo it), only the icon
+ # reflects its status.
+ #}
+<h2>
+    {{ 'label.essential_actions_title'|trans({}, 'config') }}
+    <small class="text-muted">{{ 'label.essential_actions_subtitle'|trans({ '%done%': progress.done, '%total%': progress.total }, 'config') }}</small>
+</h2>
+
+<div class="progress my-2" style="height: .5rem;">
+    <div class="progress-bar" role="progressbar" style="width: {{ progress.total > 0 ? (100 * progress.done / progress.total) : 0 }}%"></div>
+</div>
+
+<ul class="list-unstyled">
+    {% for action in actions %}
+        <li>
+            <i class="fa {{ action.isDone ? 'fa-check-circle text-success' : 'fa-circle-o' }}"></i>
+            <a href="{{ action.url }}" class="{{ action.isDone ? 'text-muted' : '' }}">{{ action.label|trans({}, action.translation_domain) }}</a>
+            {%- if action.description %} — <span class="text-muted small">{{ action.description|trans({}, action.translation_domain) }}</span>{% endif %}
+        </li>
+    {% endfor %}
+</ul>

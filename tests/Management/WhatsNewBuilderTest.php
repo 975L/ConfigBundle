@@ -63,7 +63,8 @@ class WhatsNewBuilderTest extends TestCase
         $this->assertSame(['from-ui', 'from-provider'], $all[0]['description']);
     }
 
-    public function testGetLatestCapsTotalDescriptionLinesButAlwaysIncludesAtLeastOneEntry(): void
+    // Always visible on the dashboard now (see management/index.html.twig) - a hard cap, not the "at least one full date" leniency this used to have, so a single verbose date can't flood the panel
+    public function testGetLatestTruncatesADateExceedingTheCapInsteadOfIncludingItInFull(): void
     {
         $provider = $this->createProvider([
             $this->createEntry('2026-06-01', ['1', '2', '3', '4', '5', '6', '7', '8', '9']),
@@ -73,9 +74,24 @@ class WhatsNewBuilderTest extends TestCase
 
         $latest = $builder->getLatest(8);
 
-        // The first entry alone (9 lines) already exceeds the cap of 8, but is still included alone
         $this->assertCount(1, $latest);
         $this->assertSame('2026-06-01', $latest[0]['date']->format('Y-m-d'));
+        $this->assertSame(['1', '2', '3', '4', '5', '6', '7', '8'], $latest[0]['description']);
+    }
+
+    // The dashboard's own default (no explicit $maxItems) stays a short, fixed-size list
+    public function testGetLatestDefaultsToFiveLines(): void
+    {
+        $provider = $this->createProvider([
+            $this->createEntry('2026-06-01', ['1', '2', '3']),
+            $this->createEntry('2026-05-01', ['4', '5', '6']),
+        ]);
+        $builder = new WhatsNewBuilder([$provider], $this->createUiRegistry());
+
+        $latest = $builder->getLatest();
+
+        $this->assertSame(['1', '2', '3'], $latest[0]['description']);
+        $this->assertSame(['4', '5'], $latest[1]['description']);
     }
 
     public function testGetLatestIncludesFurtherEntriesUntilTheCapIsReached(): void

@@ -11,6 +11,8 @@ namespace c975L\ConfigBundle;
 
 use c975L\ConfigBundle\DependencyInjection\Compiler\TaggedInterfacePass;
 use c975L\ConfigBundle\Management\AlertProviderInterface;
+use c975L\ConfigBundle\Management\DashboardWidgetProviderInterface;
+use c975L\ConfigBundle\Management\EssentialActionProviderInterface;
 use c975L\ConfigBundle\Management\ExportProviderInterface;
 use c975L\ConfigBundle\Management\ImportProviderInterface;
 use c975L\ConfigBundle\Management\LinkableRouteProviderInterface;
@@ -36,6 +38,8 @@ class c975LConfigBundle extends AbstractBundle
         $container->addCompilerPass(new TaggedInterfacePass(ExportProviderInterface::class, 'c975l.export_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(LinkableRouteProviderInterface::class, 'c975l.linkable_route_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(ThemePresetProviderInterface::class, 'c975l.theme_preset_provider'));
+        $container->addCompilerPass(new TaggedInterfacePass(EssentialActionProviderInterface::class, 'c975l.essential_action_provider'));
+        $container->addCompilerPass(new TaggedInterfacePass(DashboardWidgetProviderInterface::class, 'c975l.dashboard_widget_provider'));
     }
 
     public function loadExtension(array $config, ContainerConfigurator $containerConfigurator, ContainerBuilder $containerBuilder): void

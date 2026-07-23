@@ -1,5 +1,14 @@
 # ChangeLog
 
+## v5.8.8
+
+- Added `EssentialActionProviderInterface`, `EssentialActionBuilder` and a dashboard "Essential actions" checklist (23/07/2026)
+- Added `ConfigEssentialActionProvider`, ConfigBundle's own core essential actions (23/07/2026)
+- Added `DashboardWidgetProviderInterface` and `DashboardWidgetBuilder` for bundles to contribute dashboard widgets (23/07/2026)
+- Added an `advanced` menu tier collapsing opted-in items into one "Avancé" submenu (23/07/2026)
+- Lowered `WhatsNewBuilder`'s default cap to 5 entries and made the dashboard section always visible (23/07/2026)
+- Redesigned dashboard shortcuts as a tile grid instead of pill buttons (23/07/2026)
+
 ## v5.8.7
 
 - Added `ExportProviderInterface` for bundles to contribute content to an "export sync all" shortcut (23/07/2026)

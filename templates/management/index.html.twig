@@ -7,11 +7,19 @@
         <p>{{ app.user.roles|join(', ') }}</p>
     </section>
 
+    {# Dashboard widgets merged across every bundle's DashboardWidgetProvider (e.g. UiBundle's Donovan card) #}
+    {% for widget in widgets %}
+        {{ include(widget.template, widget.context) }}
+    {% endfor %}
+
     {# Shortcuts merged across every bundle's ShortcutProvider #}
     {% if shortcuts|length > 0 %}
         <h2>{{ ('label.shortcuts'|trans({}, 'config')) }}</h2>
         {{ include('@c975LConfig/management/_shortcuts.html.twig', { shortcuts: shortcuts }) }}
     {% endif %}
+
+    {# Essential-actions entry point, merged across every bundle's EssentialActionProvider - always visible, functional (every action stays a link, even once done) #}
+    {{ include('@c975LConfig/management/_essential_actions.html.twig', { actions: essentialActions, progress: essentialActionsProgress }) }}
 
     {# Alerts merged across every bundle's AlertProvider - generic title since it mixes several kinds of items #}
     {{ include('@c975LConfig/management/_alerts.html.twig', {
@@ -19,7 +27,7 @@
         title: 'label.items_not_filled'|trans({}, 'config'),
     }) }}
 
-    {# Latest release notes merged from every c975L bundle #}
+    {# Latest release notes merged from every c975L bundle - always visible, hard-capped to 5 lines (see WhatsNewBuilder::getLatest()) so it can't dwarf everything else above #}
     {% if whatsNew|length > 0 %}
         <h2>{{ ('label.whatsnew'|trans({}, 'config')) }}</h2>
         {{ include('@c975LConfig/management/whatsnew/_table.html.twig', { entries: whatsNew }) }}

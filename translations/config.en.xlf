@@ -366,6 +366,50 @@
                 <source>flash.content_import_success_kind</source>
                 <target>%kind%: %created% created, %updated% updated</target>
             </trans-unit>
+            <trans-unit id="97">
+                <source>label.essential_actions_title</source>
+                <target>Essential actions</target>
+            </trans-unit>
+            <trans-unit id="98">
+                <source>label.essential_actions_subtitle</source>
+                <target>%done%/%total% configured</target>
+            </trans-unit>
+            <trans-unit id="99">
+                <source>label.essential_action_identity</source>
+                <target>Site identity</target>
+            </trans-unit>
+            <trans-unit id="100">
+                <source>description.essential_action_identity</source>
+                <target>Name, tagline, logo and favicon</target>
+            </trans-unit>
+            <trans-unit id="101">
+                <source>label.essential_action_legal</source>
+                <target>Contact &amp; legal notice</target>
+            </trans-unit>
+            <trans-unit id="102">
+                <source>description.essential_action_legal</source>
+                <target>Contact email and publication director</target>
+            </trans-unit>
+            <trans-unit id="103">
+                <source>label.essential_action_email</source>
+                <target>Outgoing emails</target>
+            </trans-unit>
+            <trans-unit id="104">
+                <source>description.essential_action_email</source>
+                <target>Who sends and who receives the site's notifications</target>
+            </trans-unit>
+            <trans-unit id="105">
+                <source>label.essential_action_roles</source>
+                <target>Roles &amp; access</target>
+            </trans-unit>
+            <trans-unit id="106">
+                <source>description.essential_action_roles</source>
+                <target>Who can do what in the back office</target>
+            </trans-unit>
+            <trans-unit id="107">
+                <source>label.menu_advanced</source>
+                <target>Advanced</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

@@ -44,6 +44,14 @@ services:
         arguments:
             $providers: !tagged_iterator c975l.theme_preset_provider
 
+    c975L\ConfigBundle\Management\EssentialActionBuilder:
+        arguments:
+            $essentialActionProviders: !tagged_iterator c975l.essential_action_provider
+
+    c975L\ConfigBundle\Management\DashboardWidgetBuilder:
+        arguments:
+            $dashboardWidgetProviders: !tagged_iterator c975l.dashboard_widget_provider
+
     c975L\ConfigBundle\Controller\Management\DashboardController:
         tags: ['controller.service_arguments']
 

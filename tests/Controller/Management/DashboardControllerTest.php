@@ -12,6 +12,8 @@ namespace c975L\ConfigBundle\Tests\Controller\Management;
 
 use c975L\ConfigBundle\Controller\Management\DashboardController;
 use c975L\ConfigBundle\Management\AlertBuilder;
+use c975L\ConfigBundle\Management\DashboardWidgetBuilder;
+use c975L\ConfigBundle\Management\EssentialActionBuilder;
 use c975L\ConfigBundle\Management\MenuBuilder;
 use c975L\ConfigBundle\Management\ShortcutBuilder;
 use c975L\ConfigBundle\Management\WhatsNewBuilder;
@@ -34,6 +36,8 @@ class DashboardControllerTest extends TestCase
             $this->createStub(WhatsNewBuilder::class),
             $this->createStub(AlertBuilder::class),
             $this->createStub(ShortcutBuilder::class),
+            $this->createStub(EssentialActionBuilder::class),
+            $this->createStub(DashboardWidgetBuilder::class),
             $this->createStub(ConfigServiceInterface::class),
             $this->createStub(ScriptAdminRegistry::class),
             $stylesheetManagementRegistry,

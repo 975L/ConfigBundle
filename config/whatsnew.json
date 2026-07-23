@@ -11,6 +11,21 @@
                 "en": "Fixed the back-office menu sometimes showing an extra bullet next to its items",
                 "fr": "Correction d'une puce superflue qui s'affichait parfois à côté des éléments du menu du back-office",
                 "es": "Corregida una viñeta adicional que a veces aparecía junto a los elementos del menú del back-office"
+            },
+            {
+                "en": "The dashboard now shows an essential-actions checklist, linking straight to the handful of settings every site needs",
+                "fr": "Le tableau de bord affiche désormais une liste des actions essentielles, avec un lien direct vers les quelques réglages indispensables à tout site",
+                "es": "El panel de control ahora muestra una lista de acciones esenciales, con un enlace directo a los pocos ajustes que todo sitio necesita"
+            },
+            {
+                "en": "The back-office menu now tucks less-used sections into a collapsible \"Advanced\" menu, keeping the main menu focused",
+                "fr": "Le menu du back-office regroupe désormais les sections les moins utilisées dans un menu « Avancé » repliable, pour garder le menu principal épuré",
+                "es": "El menú del back-office ahora agrupa las secciones menos usadas en un menú «Avanzado» plegable, manteniendo el menú principal despejado"
+            },
+            {
+                "en": "The dashboard's quick actions are now shown as a tidy grid of tiles instead of a row of buttons",
+                "fr": "Les actions rapides du tableau de bord s'affichent désormais sous forme de vignettes bien rangées plutôt qu'en rangée de boutons",
+                "es": "Los accesos rápidos del panel de control ahora se muestran como una cuadrícula de fichas en lugar de una fila de botones"
             }
         ]
     },
