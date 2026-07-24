@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v5.9.1.1
+
+- Added link in readme (24/07/2026)
+
 ## v5.9.1
 
 - Added `ImportmapProviderInterface`/`ImportmapRegistry` and `c975l:config:check-importmap` command, auto-adding bundle-contributed importmap.php entries on `composer update` (24/07/2026)
