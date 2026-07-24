@@ -1,5 +1,11 @@
 # ChangeLog
 
+## v5.9.1
+
+- Added `ImportmapProviderInterface`/`ImportmapRegistry` and `c975l:config:check-importmap` command, auto-adding bundle-contributed importmap.php entries on `composer update` (24/07/2026)
+- ConfigBundle's own admin.js importmap entry is now contributed via `ImportmapProviderInterface`, no longer a manual `importmap.php` edit (24/07/2026)
+- `ImportmapProviderInterface` now splits `getAdminImportmapEntries()`/`getImportmapEntries()`, mirroring UiBundle's admin/non-admin script contracts (24/07/2026)
+
 ## v5.9
 
 - Fixed the Health check trend chart summing every run of the day instead of just the latest (24/07/2026)

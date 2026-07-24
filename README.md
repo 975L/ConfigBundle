@@ -153,16 +153,9 @@ Any entry with a `severity` and an empty `value` shows up as a colored alert (da
 
 The `/management` dashboard loads dedicated AssetMapper entries (not your site's main `app` entry), so that satellite bundles needing Stimulus controllers in the back-office don't drag your site's front-end stylesheet into EasyAdmin. `c975l/ui-bundle` contributes one for its block editor — see the [UiBundle README](https://github.com/975L/UiBundle#installation) for how to define that entry.
 
-ConfigBundle contributes its own, `@c975l/config-bundle/controllers-admin.js`, for the dashboard's guided tour (see [Contributing menu items from other bundles](#contributing-menu-items-from-other-bundles) below for how a bundle's own menu entries feed into it) and its Health check trend chart (see below). **Add one entry to `importmap.php`** (one-time, at installation):
+ConfigBundle contributes its own, `@c975l/config-bundle/controllers-admin.js`, for the dashboard's guided tour (see [Contributing menu items from other bundles](#contributing-menu-items-from-other-bundles) below for how a bundle's own menu entries feed into it) and its Health check trend chart (see below). This entry (and any other c975L bundle's own admin JS) is added to your `importmap.php` automatically — see [Contributing importmap entries from other bundles](#contributing-importmap-entries-from-other-bundles) below, nothing to add by hand.
 
-```php
-'@c975l/config-bundle/controllers-admin.js' => [
-    'path' => './vendor/c975l/config-bundle/assets/controllers-admin.js',
-    'entrypoint' => true,
-],
-```
-
-**`symfony/ux-chartjs`** is a regular Composer dependency (not something to add manually) - Symfony Flex registers `ChartjsBundle` and its own `importmap.php`/`chart.js` entries automatically the first time you `composer update` after installing/upgrading ConfigBundle. Nothing to do here, unlike the entry above - that one is specifically for ConfigBundle's *own* admin.js, which Flex has no recipe for.
+**`symfony/ux-chartjs`** is a regular Composer dependency (not something to add manually) - Symfony Flex registers `ChartjsBundle` and its own `importmap.php`/`chart.js` entries automatically the first time you `composer update` after installing/upgrading ConfigBundle.
 
 ### Deploying to production — Export
 
@@ -444,6 +437,52 @@ class LinkableRouteProvider implements LinkableRouteProviderInterface
 Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
 
 Routes are checked live: if the contributing bundle is later removed (or its provider stops returning that route), any menu item pointing to it simply disappears from the rendered menu instead of producing a broken link.
+
+## Contributing importmap entries from other bundles
+
+If your bundle ships its own Stimulus controller for the `/management` dashboard (or any other AssetMapper entry the consuming app needs in its `importmap.php`), implement `ImportmapProviderInterface` — no manual service tagging needed, same `TaggedInterfacePass` mechanism as `MenuProviderInterface` above.
+
+The interface has two methods, mirroring `c975l/ui-bundle`'s own `BundleScriptAdminProviderInterface`/`BundleScriptProviderInterface` admin/non-admin split: `getAdminImportmapEntries()` for scripts loaded on the `/management` dashboard only, `getImportmapEntries()` for anything else (a front-end Stimulus controller, or any other AssetMapper dependency). Both end up in the same `importmap.php` — the split only matters to keep each entry's purpose explicit at the declaration site. Return `[]` from whichever one doesn't apply.
+
+```php
+namespace c975L\MyBundle\Management;
+
+use c975L\ConfigBundle\Management\ImportmapProviderInterface;
+
+class ImportmapProvider implements ImportmapProviderInterface
+{
+    // Import name => ['path' => string, 'entrypoint' => bool]. 'path' is relative to the project root, exactly as it should appear in importmap.php
+    public function getAdminImportmapEntries(): array
+    {
+        return [
+            '@c975l/my-bundle/controllers-admin.js' => [
+                'path' => './vendor/c975l/my-bundle/assets/controllers-admin.js',
+                'entrypoint' => true,
+            ],
+        ];
+    }
+
+    public function getImportmapEntries(): array
+    {
+        return [];
+    }
+}
+```
+
+Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
+
+Entries contributed this way aren't written to `importmap.php` on their own — nothing hooks into Composer from inside a bundle. Wire the collecting command into each consuming app's `composer.json`, in the same `auto-scripts` block that already runs `importmap:install`:
+
+```json
+"auto-scripts": {
+    "cache:clear": "symfony-cmd",
+    "assets:install %PUBLIC_DIR%": "symfony-cmd",
+    "importmap:install": "symfony-cmd",
+    "c975l:config:check-importmap": "symfony-cmd"
+}
+```
+
+`c975l:config:check-importmap` then runs on every `composer install`/`composer update`: it adds any entry contributed by an `ImportmapProviderInterface` that's missing from `importmap.php`, and never touches one that's already there (so a manually customized `path` survives). This is a one-time addition per app — after that, a new bundle (or a new provider in an existing one) picks up its `importmap.php` entry on the next `composer update` with no further action.
 
 ## Contributing "What's new" entries from other bundles
 

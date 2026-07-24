@@ -23,6 +23,7 @@
         "doctrine/orm": "*",
         "easycorp/easyadmin-bundle": "^5.1",
         "sensiolabs/minify-bundle": "*",
+        "symfony/asset-mapper": "*",
         "symfony/form": "*",
         "symfony/serializer": "*",
         "symfony/ux-chartjs": "^3.3",

@@ -1,0 +1,69 @@
+<?php
+/*
+ * (c) 2026: 975L <contact@975l.com>
+ * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+namespace c975L\ConfigBundle\Command;
+
+use c975L\ConfigBundle\Management\ImportmapRegistry;
+use Symfony\Component\AssetMapper\ImportMap\ImportMapConfigReader;
+use Symfony\Component\AssetMapper\ImportMap\ImportMapEntry;
+use Symfony\Component\AssetMapper\ImportMap\ImportMapType;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+#[AsCommand(
+    name: 'c975l:config:check-importmap',
+    description: 'Adds any importmap.php entry contributed by an ImportmapProviderInterface (see readme) that is missing from the app - safe to run on every composer update, never touches an entry already present'
+)]
+class CheckImportmapCommand extends Command
+{
+    public function __construct(
+        private readonly ImportmapRegistry $importmapRegistry,
+        #[Autowire(service: 'asset_mapper.importmap.config_reader')]
+        private readonly ImportMapConfigReader $configReader,
+    ) {
+        parent::__construct();
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $io = new SymfonyStyle($input, $output);
+        $entries = $this->configReader->getEntries();
+
+        $added = [];
+        foreach ($this->importmapRegistry->all() as $importName => $data) {
+            if ($entries->has($importName)) {
+                continue;
+            }
+
+            $entries->add(ImportMapEntry::createLocal(
+                $importName,
+                ImportMapType::from($data['type'] ?? 'js'),
+                $data['path'],
+                $data['entrypoint'] ?? false,
+            ));
+            $added[] = $importName;
+        }
+
+        if (!$added) {
+            $io->success('importmap.php est déjà à jour.');
+
+            return Command::SUCCESS;
+        }
+
+        $this->configReader->writeEntries($entries);
+
+        $io->success(sprintf('%d entrée(s) ajoutée(s) à importmap.php :', count($added)));
+        $io->listing($added);
+
+        return Command::SUCCESS;
+    }
+}

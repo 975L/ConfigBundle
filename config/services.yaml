@@ -60,6 +60,10 @@ services:
         arguments:
             $healthCheckAdviceProviders: !tagged_iterator c975l.health_check_advice_provider
 
+    c975L\ConfigBundle\Management\ImportmapRegistry:
+        arguments:
+            $providers: !tagged_iterator c975l.importmap_provider
+
     c975L\ConfigBundle\Controller\Management\DashboardController:
         tags: ['controller.service_arguments']
 
