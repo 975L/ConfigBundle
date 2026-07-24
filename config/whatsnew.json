@@ -1,7 +1,67 @@
 [
     {
+        "date": "2026-07-24",
+        "description": [
+            {
+                "en": "Added a trend chart and an \"Export (CSV)\" button on the Health check page, plus click-to-sort and search/status/kind filters on its table",
+                "fr": "Ajout d'un graphique de tendance et d'un bouton « Exporter (CSV) » sur la page Bilan de santé, ainsi que d'un tri au clic et de filtres recherche/statut/type sur son tableau",
+                "es": "Añadido un gráfico de tendencia y un botón «Exportar (CSV)» en la página de Estado de salud, además de ordenación al hacer clic y filtros de búsqueda/estado/tipo en su tabla"
+            },
+            {
+                "en": "The Health check table now shows Lighthouse-style colored score gauges for PageSpeed results, instead of a raw technical details dump",
+                "fr": "Le tableau du Bilan de santé affiche désormais des jauges de score colorées façon Lighthouse pour les résultats PageSpeed, au lieu d'un pavé de détails techniques brut",
+                "es": "La tabla de Estado de salud ahora muestra medidores de puntuación en color al estilo Lighthouse para los resultados de PageSpeed, en lugar de un volcado de detalles técnicos en bruto"
+            },
+            {
+                "en": "The Health check table now shows a single \"last checked\" date instead of repeating it on every row, and shows the site-wide security headers result on its own line instead of mixed in with per-page results",
+                "fr": "Le tableau du Bilan de santé affiche désormais une seule date de « dernière vérification » au lieu de la répéter sur chaque ligne, et affiche le résultat des en-têtes de sécurité (valable pour tout le site) sur sa propre ligne plutôt que mélangé aux résultats par page",
+                "es": "La tabla de Estado de salud ahora muestra una única fecha de «última comprobación» en lugar de repetirla en cada fila, y muestra el resultado de los encabezados de seguridad (válido para todo el sitio) en su propia línea en lugar de mezclado con los resultados por página"
+            },
+            {
+                "en": "The Health check page now groups every site-wide check (security headers, TLS certificate, robots.txt/sitemap, redirects) into its own \"Site\" section, separate from the per-page results",
+                "fr": "La page Bilan de santé regroupe désormais toutes les vérifications valables pour tout le site (en-têtes de sécurité, certificat TLS, robots.txt/sitemap, redirections) dans une section « Site » distincte des résultats par page",
+                "es": "La página de Estado de salud agrupa ahora todas las comprobaciones válidas para todo el sitio (encabezados de seguridad, certificado TLS, robots.txt/sitemap, redirecciones) en una sección «Sitio» distinta de los resultados por página"
+            },
+            {
+                "en": "The guided tour panel is now centered on screen instead of anchored to the bottom-right corner, and now opens the collapsed \"Advanced\" menu itself when a step points inside it",
+                "fr": "Le panneau de la visite guidée est désormais centré à l'écran au lieu d'être ancré en bas à droite, et ouvre désormais lui-même le menu replié « Avancé » quand une étape s'y trouve",
+                "es": "El panel del recorrido guiado ahora está centrado en la pantalla en lugar de anclado en la esquina inferior derecha, y ahora abre por sí mismo el menú plegado «Avanzado» cuando un paso se encuentra dentro"
+            },
+            {
+                "en": "The guided tour now follows the sidebar's own order (top to bottom, then the collapsed \"Advanced\" menu) instead of a flat alphabetical order, and the \"Import content\" and \"site\" steps now have a description",
+                "fr": "La visite guidée suit désormais l'ordre du menu latéral lui-même (de haut en bas, puis le menu replié « Avancé ») au lieu d'un ordre alphabétique global, et les étapes « Importer du contenu » et « site » ont désormais une description",
+                "es": "El recorrido guiado ahora sigue el propio orden del menú lateral (de arriba a abajo, luego el menú plegado «Avanzado») en lugar de un orden alfabético global, y los pasos «Importar contenido» y «sitio» ahora tienen una descripción"
+            },
+            {
+                "en": "Added a \"Visit the site\" link at the bottom of the dashboard's Links section",
+                "fr": "Ajout d'un lien « Voir le site » en bas de la section Liens du tableau de bord",
+                "es": "Añadido un enlace «Ver el sitio» en la parte inferior de la sección Enlaces del panel de control"
+            },
+            {
+                "en": "Health check results can now show a direct edit link to the checked page, and tips on how to fix what's wrong",
+                "fr": "Les résultats du Bilan de santé peuvent désormais afficher un lien direct pour modifier la page vérifiée, ainsi que des conseils pour corriger ce qui ne va pas",
+                "es": "Los resultados del Estado de salud ahora pueden mostrar un enlace directo para editar la página comprobada, así como consejos para corregir lo que falla"
+            }
+        ]
+    },
+    {
         "date": "2026-07-23",
         "description": [
+            {
+                "en": "Added a \"Health check\" dashboard page showing the latest Lighthouse scores and console errors for every published page, with a button to run it on demand",
+                "fr": "Ajout d'une page « Bilan de santé » sur le tableau de bord affichant les derniers scores Lighthouse et erreurs console de chaque page publiée, avec un bouton pour le lancer à la demande",
+                "es": "Añadida una página de «Estado de salud» en el panel de control que muestra las últimas puntuaciones de Lighthouse y errores de consola de cada página publicada, con un botón para ejecutarlo bajo demanda"
+            },
+            {
+                "en": "Added a \"Guided tour\" button on the dashboard, explaining each menu item in turn",
+                "fr": "Ajout d'un bouton « Visite guidée » sur le tableau de bord, expliquant chaque élément de menu l'un après l'autre",
+                "es": "Añadido un botón de «Visita guiada» en el panel de control, que explica cada elemento del menú uno por uno"
+            },
+            {
+                "en": "The Health check page now also shows what needs attention, not just the dashboard",
+                "fr": "La page Bilan de santé affiche désormais elle aussi ce qui nécessite votre attention, et pas seulement le tableau de bord",
+                "es": "La página de Estado de salud ahora también muestra lo que requiere atención, no solo el panel de control"
+            },
             {
                 "en": "Added an \"Export sync (everything)\" dashboard shortcut to download a single file with everything to keep another site in sync, instead of exporting each part separately",
                 "fr": "Ajout d'un raccourci « Exporter la synchro (tout) » sur le tableau de bord pour télécharger en un seul fichier tout ce qu'il faut pour synchroniser un autre site, au lieu d'exporter chaque partie séparément",

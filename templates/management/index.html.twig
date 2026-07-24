@@ -5,6 +5,7 @@
         <h1>{{ ('label.management'|trans({}, 'config')) }}</h1>
         <p>{{ ('label.management_interface'|trans({}, 'config')) }}</p>
         <p>{{ app.user.roles|join(', ') }}</p>
+        {{ include('@c975LConfig/management/_onboarding_tour.html.twig', { steps: onboardingSteps }) }}
     </section>
 
     {# Dashboard widgets merged across every bundle's DashboardWidgetProvider (e.g. UiBundle's Donovan card) #}

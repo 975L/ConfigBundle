@@ -2,6 +2,7 @@
 
 {% block main %}
     <h1>{{ ('label.whatsnew'|trans({}, 'config')) }}</h1>
+    <p>{{ ('description.whatsnew'|trans({}, 'config')) }}</p>
 
     {{ include('@c975LConfig/management/whatsnew/_table.html.twig', { entries: entries }) }}
 {% endblock main %}

@@ -15,6 +15,7 @@ use c975L\ConfigBundle\Management\AlertBuilder;
 use c975L\ConfigBundle\Management\DashboardWidgetBuilder;
 use c975L\ConfigBundle\Management\EssentialActionBuilder;
 use c975L\ConfigBundle\Management\MenuBuilder;
+use c975L\ConfigBundle\Management\OnboardingStepBuilder;
 use c975L\ConfigBundle\Management\ShortcutBuilder;
 use c975L\ConfigBundle\Management\WhatsNewBuilder;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
@@ -38,6 +39,7 @@ class DashboardControllerTest extends TestCase
             $this->createStub(ShortcutBuilder::class),
             $this->createStub(EssentialActionBuilder::class),
             $this->createStub(DashboardWidgetBuilder::class),
+            $this->createStub(OnboardingStepBuilder::class),
             $this->createStub(ConfigServiceInterface::class),
             $this->createStub(ScriptAdminRegistry::class),
             $stylesheetManagementRegistry,

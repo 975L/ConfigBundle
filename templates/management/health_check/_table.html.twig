@@ -1,0 +1,87 @@
+{% import '@c975LConfig/management/health_check/_macros.html.twig' as health_check %}
+{% set advice = advice|default({}) %}
+
+{# Client-side sort/filter (see assets/js/health-check-table.js) - each row carries its own raw status/kind
+   and a lowercased "search text" blob (url+label+summary) as data-* attributes, read directly by the JS
+   rather than re-deriving them from rendered markup #}
+{# group ?? true: off for the "Site" section (see index.html.twig) - its rows are site-wide checks, not tied to any one page, so grouping/highlighting them by url doesn't make sense there #}
+<div data-controller="health-check-table" data-health-check-table-group-value="{{ (group ?? true) ? 'true' : 'false' }}">
+    {# Not |default(true): Twig's default filter falls back whenever the value is "empty", and false counts as empty - it would silently turn a real showFilters:false back into true #}
+    {% if showFilters ?? true %}
+        <div class="mb-3 d-flex gap-2 flex-wrap">
+            <input type="search" class="form-control health-check-filter"
+                placeholder="{{ 'label.health_check_filter_placeholder'|trans({}, 'config') }}"
+                data-health-check-table-target="filter" data-action="input->health-check-table#filterRows">
+            <select class="form-select health-check-select" data-health-check-table-target="status" data-action="change->health-check-table#filterRows">
+                <option value="">{{ 'label.health_check_status'|trans({}, 'config') }}</option>
+                <option value="ok">{{ 'label.health_check_status_ok'|trans({}, 'config') }}</option>
+                <option value="warning">{{ 'label.health_check_status_warning'|trans({}, 'config') }}</option>
+                <option value="error">{{ 'label.health_check_status_error'|trans({}, 'config') }}</option>
+                <option value="skipped">{{ 'label.health_check_status_skipped'|trans({}, 'config') }}</option>
+            </select>
+            <select class="form-select health-check-select" data-health-check-table-target="kind" data-action="change->health-check-table#filterRows">
+                <option value="">{{ 'label.health_check_kind'|trans({}, 'config') }}</option>
+                {% for kind in kinds %}
+                    <option value="{{ kind }}">{{ kind }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    {% endif %}
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th class="health-check-sortable" data-health-check-table-target="header" data-action="click->health-check-table#sort">{{ ('label.url'|trans({}, 'config')) }}</th>
+                <th class="health-check-sortable" data-health-check-table-target="header" data-action="click->health-check-table#sort">{{ ('label.health_check_kind'|trans({}, 'config')) }}</th>
+                <th class="health-check-sortable" data-health-check-table-target="header" data-action="click->health-check-table#sort">{{ ('label.health_check_status'|trans({}, 'config')) }}</th>
+                <th>{{ ('label.health_check_summary'|trans({}, 'config')) }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+                <tr data-health-check-table-target="row"
+                    data-status="{{ result.status }}"
+                    data-kind="{{ result.kind }}"
+                    data-url="{{ result.url }}"
+                    data-search-text="{{ (result.url ~ ' ' ~ result.label ~ ' ' ~ result.summary)|lower }}"
+                >
+                    {# The inner span (not the <td> itself) is what JS toggles (health-check-table.js#updateGrouping) when this row's url repeats the previous visible row's - keeps the <td> itself always present so the table's column alignment survives, and re-evaluated after every sort/filter since rowspan can't survive the table's client-side row reordering #}
+                    <td>
+                        <span data-health-check-table-target="label">
+                            <a href="{{ result.url }}" target="_blank" rel="noopener">{{ result.label ?: result.url }}</a>
+                            {% if result.editUrl %}
+                                <a href="{{ result.editUrl }}" class="health-check-edit-link" title="{{ 'label.health_check_edit_page'|trans({}, 'config') }}"><i class="fa fa-pencil"></i></a>
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td>{{ result.kind }}</td>
+                    <td>{{ health_check.status_badge(result.status) }}</td>
+                    <td>
+                        {% if 'pagespeed' == result.kind and result.details.scores is defined %}
+                            {{ health_check.pagespeed_gauges(result.details.scores) }}
+                        {% else %}
+                            {{ result.summary }}
+                        {% endif %}
+                        {# Per-kind actionable advice (eg. SiteBundle's PageHealthCheckAdviceBuilder), shown directly below this row's own summary rather than as a separate block above the table #}
+                        {% if advice[result.kind] is defined %}
+                            <ul class="health-check-advice small mb-0 ps-3">
+                                {% for item in advice[result.kind] %}
+                                    <li>
+                                        {{ item.text }}
+                                        {% if item.url %}
+                                            <a href="{{ item.url }}" target="_blank" rel="noopener">{{ 'label.health_check_advice_link'|trans({}, 'config') }}</a>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4">{{ ('label.no_health_check'|trans({}, 'config')) }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

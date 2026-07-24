@@ -1,6 +1,6 @@
 # c975L ConfigBundle
 
-A Symfony bundle that stores application configuration as key-value pairs in the database, with an EasyAdmin management interface, Twig/PHP accessors, and production deployment tooling.
+Symfony bundle providing the EasyAdmin dashboard and database-backed configuration at the root of the c975L ecosystem — the shared hub every satellite bundle plugs into for menus, exports/imports, alerts, and other cross-bundle dashboard contributions.
 
 [![GitHub](https://img.shields.io/github/license/975L/ConfigBundle)](https://github.com/975L/ConfigBundle/blob/master/LICENSE)
 [![Packagist Version](https://img.shields.io/packagist/v/c975l/config-bundle)](https://packagist.org/packages/c975l/config-bundle)
@@ -26,6 +26,8 @@ The root of the c975L ecosystem — every other bundle ([UiBundle](https://githu
 - Dashboard alerts (danger/warning/info) aggregating what needs attention, declared by every c975L bundle
 - Dashboard "Essential actions" checklist, a permanent quick-access entry point to the handful of settings every site needs
 - Dashboard widgets contributed by other bundles (e.g. UiBundle's Donovan card)
+- Dashboard "Guided tour" walking through every sidebar item that declares a `description`
+- "Health check" dashboard page (Lighthouse scores, security headers, W3C/accessibility checks...) with history, a trend chart, and CSV export, extensible via `HealthCheckProviderInterface`/`HealthCheckAdviceProviderInterface`
 
 ## Installation
 
@@ -149,7 +151,18 @@ Any entry with a `severity` and an empty `value` shows up as a colored alert (da
 
 ### JS assets loaded on the dashboard
 
-The `/management` dashboard loads a dedicated AssetMapper entry, `@c975l/ui-bundle/admin.js` (not your site's main `app` entry), so that satellite bundles needing Stimulus controllers in the back-office (e.g. `c975l/ui-bundle`'s block editor) don't drag your site's front-end stylesheet into EasyAdmin. See the [UiBundle README](https://github.com/975L/UiBundle#installation) for how to define this entry.
+The `/management` dashboard loads dedicated AssetMapper entries (not your site's main `app` entry), so that satellite bundles needing Stimulus controllers in the back-office don't drag your site's front-end stylesheet into EasyAdmin. `c975l/ui-bundle` contributes one for its block editor — see the [UiBundle README](https://github.com/975L/UiBundle#installation) for how to define that entry.
+
+ConfigBundle contributes its own, `@c975l/config-bundle/controllers-admin.js`, for the dashboard's guided tour (see [Contributing menu items from other bundles](#contributing-menu-items-from-other-bundles) below for how a bundle's own menu entries feed into it) and its Health check trend chart (see below). **Add one entry to `importmap.php`** (one-time, at installation):
+
+```php
+'@c975l/config-bundle/controllers-admin.js' => [
+    'path' => './vendor/c975l/config-bundle/assets/controllers-admin.js',
+    'entrypoint' => true,
+],
+```
+
+**`symfony/ux-chartjs`** is a regular Composer dependency (not something to add manually) - Symfony Flex registers `ChartjsBundle` and its own `importmap.php`/`chart.js` entries automatically the first time you `composer update` after installing/upgrading ConfigBundle. Nothing to do here, unlike the entry above - that one is specifically for ConfigBundle's *own* admin.js, which Flex has no recipe for.
 
 ### Deploying to production — Export
 
@@ -400,7 +413,9 @@ Links from every bundle are merged into a single "Links" section, sorted alphabe
 ],
 ```
 
-Two more optional keys: `role` (e.g. `'ROLE_EDITOR'`) hides the link from users lacking it — omit it for links with no access restriction of their own; `target` (e.g. `'_blank'`) is for a link leaving the admin entirely — it gets an external-link glyph automatically, and (for a `name`-based link) resolves to a full absolute URL instead of a relative path.
+A few more optional keys: `role` (e.g. `'ROLE_EDITOR'`) hides the link from users lacking it — omit it for links with no access restriction of their own; `target` (e.g. `'_blank'`) is for a link leaving the admin entirely — it gets an external-link glyph automatically, and (for a `name`-based link) resolves to a full absolute URL instead of a relative path; `pinned` (bool) sorts the link after every non-pinned one regardless of its label — ConfigBundle's own "Visit the site" link (using the `site-url`/`site-name` configs) uses it to always stay at the very bottom of the links section; `label_parameters` (array) is passed through to the translator alongside `label`, for a translated label embedding a runtime value (e.g. `['%name%' => $siteName]`) — omit it for a plain translation key with no placeholder, the usual case.
+
+**Guided tour:** any entry in `getMenus()`/`getLinks()` can add an optional `'description'` key — a one-line "what is this for" sentence, same `translation_domain` — to feed the `/management` dashboard's "Guided tour" button. It highlights every described item in turn with a short explanation, matched against the sidebar's own rendered link (see `OnboardingStepBuilder`), so there's nothing else to wire up. It's entirely optional and can be filled in bundle by bundle: an entry without a `description` is simply skipped, it never breaks anything.
 
 ## Contributing linkable routes for SiteBundle menus
 
@@ -619,6 +634,94 @@ class MyDashboardWidgetProvider implements DashboardWidgetProviderInterface
 Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
 
 The dashboard template only loops and includes each widget's own `template` with its own `context` — it never contains business logic about what a widget is. Return `[]` when there's nothing to show (e.g. an unconfigured feature) so it stays entirely absent rather than showing a disabled placeholder.
+
+## Health check
+
+`/management/health-check` gives a per-page technical health snapshot of the site — Lighthouse scores, security headers, W3C markup validation, WCAG accessibility issues (whichever `HealthCheckProviderInterface` implementations are installed; `c975l/site-bundle` contributes four, see its own README) — without needing Node/Lighthouse-CLI or any other JS tooling: everything runs server-side over plain HTTP calls.
+
+**Refreshing results**: `php bin/console c975l:health-check:run` runs every registered provider and appends their results (never triggers a live check from a page load). It accepts a repeatable `--kind=` option to run only specific providers — e.g. `--kind=wave` on its own, less frequent cron entry for a paid/credit-based provider, separately from the free ones:
+
+```bash
+php bin/console c975l:health-check:run                                    # every provider
+php bin/console c975l:health-check:run --kind=pagespeed --kind=w3c        # only these two
+```
+
+There's also a **"Run health check now"** button directly on the page, calling the exact same `HealthCheckRunner` synchronously — expect to wait, a full run can take a while (PageSpeed Insights alone is ~10-30s per page, though `PageSpeedInsightsClient::request()`/`read()` fire every page's request up front to let Symfony HttpClient run them concurrently rather than serially).
+
+**History, not just a snapshot**: every run appends new `HealthCheckResult` rows rather than overwriting — the page itself only shows the latest one per (url, kind), but the full history feeds a trend chart (ok/warning/error counts over time, via `symfony/ux-chartjs` — a regular Composer dependency, Flex wires it up automatically) and an **Export (CSV)** button producing a dated snapshot, useful as an audit-trail artefact (e.g. accessibility declarations). No pruning is done automatically — weekly/monthly runs across a site's pages stay a modest row count for years; add your own cleanup if that assumption stops holding for a particular site.
+
+The table itself can be sorted (click a column) and filtered (free-text search, status, kind) client-side — hand-rolled (`assets/js/health-check-table.js`), no DataTables/jQuery dependency.
+
+The page also shows the same dashboard-wide alerts as `/management` (e.g. a health check provider's own missing API key, flagged via its config's `severity`), so anything blocking a full check is visible without leaving the page.
+
+## Contributing health check providers from other bundles
+
+Any bundle can contribute a check by implementing `HealthCheckProviderInterface` — no manual service tagging needed, `TaggedInterfacePass` auto-detects any class implementing it, same mechanism as `MenuProviderInterface` above:
+
+```php
+namespace c975L\MyBundle\Management;
+
+use c975L\ConfigBundle\Entity\HealthCheckResult;
+use c975L\ConfigBundle\Management\HealthCheckProviderInterface;
+
+class MyHealthCheckProvider implements HealthCheckProviderInterface
+{
+    // Stable identifier for this provider's rows (eg. "my-check") - used for --kind= filtering and stored on every HealthCheckResult
+    public function getKind(): string
+    {
+        return 'my-check';
+    }
+
+    // One entry per checked url: ['url', 'label', 'status' => HealthCheckResult::STATUS_*, 'summary', 'details' => array, 'editUrl']
+    public function runChecks(): array
+    {
+        return [
+            [
+                'url' => 'https://example.com/pages/home/',
+                'label' => 'Home',
+                'status' => HealthCheckResult::STATUS_OK,
+                'summary' => 'Everything checks out',
+                'details' => null,
+                'editUrl' => '/management/my-entity/1/edit',
+            ],
+        ];
+    }
+}
+```
+
+Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
+
+**Never call a slow/paid API from a controller** — `runChecks()` is only ever invoked from `c975l:health-check:run` (via `HealthCheckRunner`), so a page load never blocks on it. If your check needs an API key, read it via `ConfigServiceInterface` like any other config (see [Defining config entries for your bundle](#defining-config-entries-for-your-bundle) above) and degrade gracefully without one — either skip entirely (return `[]`) or, if the check is otherwise expected to be configured (see `c975l/site-bundle`'s own PageSpeed/WAVE providers), return a single explanatory row instead of one per page.
+
+`editUrl` is optional (omit or `null` for a row with no admin CRUD counterpart, e.g. a site-wide check) — the admin edit screen for the entity behind that row (e.g. SiteBundle's Page edit screen), shown on the Health check table as a pencil link next to the tested url.
+
+## Contributing health check advice from other bundles
+
+Any bundle can attach actionable advice under a Health check table row (e.g. "this page is missing an H1" linking to its edit screen) by implementing `HealthCheckAdviceProviderInterface` — no manual service tagging needed, `TaggedInterfacePass` auto-detects any class implementing it, same mechanism as `MenuProviderInterface` above:
+
+```php
+namespace c975L\MyBundle\Management;
+
+use c975L\ConfigBundle\Entity\HealthCheckResult;
+use c975L\ConfigBundle\Management\HealthCheckAdviceProviderInterface;
+
+class MyHealthCheckAdviceProvider implements HealthCheckAdviceProviderInterface
+{
+    // Grouped by kind (only kinds this provider actually has something to say about) - $results is the same HealthCheckResult[] the current screen renders (dashboard "Health check" page or a CRUD's own scoped tab)
+    public function buildAdvice(array $results): array
+    {
+        return [
+            'my-check' => [
+                ['text' => 'This page is missing an H1', 'url' => '/management/my-entity/1/edit'],
+            ],
+        ];
+    }
+}
+```
+
+Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
+
+`HealthCheckAdviceBuilder::build()` merges every registered provider's advice keyed by kind. It's shared by the dashboard "Health check" page and any CRUD's own "Health check" tab (both render through the same `health_check/_table.html.twig`), so advice reads identically everywhere.
 
 ## Contributing theme presets from other bundles
 

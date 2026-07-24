@@ -88,7 +88,7 @@
             </trans-unit>
             <trans-unit id="22">
                 <source>label.date</source>
-                <target>Date (YYYY-MM-DD)</target>
+                <target>Date</target>
             </trans-unit>
             <trans-unit id="23">
                 <source>label.true</source>
@@ -191,7 +191,7 @@
                 <target>Items not filled in yet</target>
             </trans-unit>
             <trans-unit id="48">
-                <source>label.info_config</source>
+                <source>description.config</source>
                 <target>Site configuration, organized by group. You can edit each entry's value from its edit page; proceed with care, an incorrect value can disrupt how the site works. Sensitive values are shown in clear text on the edit page, but stay stored encrypted in the database.</target>
             </trans-unit>
             <trans-unit id="49">
@@ -425,6 +425,150 @@
             <trans-unit id="111">
                 <source>label.shortcuts_category_other</source>
                 <target>Other</target>
+            </trans-unit>
+            <trans-unit id="112">
+                <source>label.health_check</source>
+                <target>Health check</target>
+            </trans-unit>
+            <trans-unit id="113">
+                <source>description.health_check</source>
+                <target>Lighthouse scores, accessibility issues and console errors for every published page, refreshed periodically or on demand.</target>
+            </trans-unit>
+            <trans-unit id="114">
+                <source>label.url</source>
+                <target>URL</target>
+            </trans-unit>
+            <trans-unit id="115">
+                <source>label.health_check_kind</source>
+                <target>Check</target>
+            </trans-unit>
+            <trans-unit id="116">
+                <source>label.health_check_status</source>
+                <target>Status</target>
+            </trans-unit>
+            <trans-unit id="117">
+                <source>label.health_check_summary</source>
+                <target>Summary</target>
+            </trans-unit>
+            <trans-unit id="118">
+                <source>label.health_check_last_checked_at</source>
+                <target>Last checked: %date%</target>
+            </trans-unit>
+            <trans-unit id="119">
+                <source>label.health_check_details</source>
+                <target>Details</target>
+            </trans-unit>
+            <trans-unit id="120">
+                <source>label.health_check_status_ok</source>
+                <target>OK</target>
+            </trans-unit>
+            <trans-unit id="121">
+                <source>label.health_check_status_warning</source>
+                <target>Warning</target>
+            </trans-unit>
+            <trans-unit id="122">
+                <source>label.health_check_status_error</source>
+                <target>Error</target>
+            </trans-unit>
+            <trans-unit id="123">
+                <source>label.no_health_check</source>
+                <target>No health check results yet</target>
+            </trans-unit>
+            <trans-unit id="124">
+                <source>action.health_check_run</source>
+                <target>Run health check now</target>
+            </trans-unit>
+            <trans-unit id="125">
+                <source>flash.health_check_run_success</source>
+                <target>Health check completed: %count% result(s) recorded.</target>
+            </trans-unit>
+            <trans-unit id="126">
+                <source>label.onboarding_start</source>
+                <target>Guided tour</target>
+            </trans-unit>
+            <trans-unit id="127">
+                <source>label.onboarding_previous</source>
+                <target>Previous</target>
+            </trans-unit>
+            <trans-unit id="128">
+                <source>label.onboarding_next</source>
+                <target>Next</target>
+            </trans-unit>
+            <trans-unit id="129">
+                <source>label.onboarding_finish</source>
+                <target>Finish</target>
+            </trans-unit>
+            <trans-unit id="130">
+                <source>label.onboarding_close</source>
+                <target>Close</target>
+            </trans-unit>
+            <trans-unit id="131">
+                <source>description.whatsnew</source>
+                <target>What changed recently on this dashboard and across every installed bundle.</target>
+            </trans-unit>
+            <trans-unit id="135">
+                <source>action.health_check_export</source>
+                <target>Export (CSV)</target>
+            </trans-unit>
+            <trans-unit id="136">
+                <source>label.health_check_trend</source>
+                <target>Trend</target>
+            </trans-unit>
+            <trans-unit id="137">
+                <source>label.health_check_filter_placeholder</source>
+                <target>Search url, label, summary...</target>
+            </trans-unit>
+            <trans-unit id="138">
+                <source>label.health_check_gauge_performance</source>
+                <target>Performance</target>
+            </trans-unit>
+            <trans-unit id="139">
+                <source>label.health_check_gauge_accessibility</source>
+                <target>Accessibility</target>
+            </trans-unit>
+            <trans-unit id="140">
+                <source>label.health_check_gauge_best_practices</source>
+                <target>Best practices</target>
+            </trans-unit>
+            <trans-unit id="141">
+                <source>label.health_check_gauge_seo</source>
+                <target>SEO</target>
+            </trans-unit>
+            <trans-unit id="142">
+                <source>label.site_link</source>
+                <target>Site: %name%</target>
+            </trans-unit>
+            <trans-unit id="143">
+                <source>label.health_check_site_heading</source>
+                <target>Site</target>
+            </trans-unit>
+            <trans-unit id="144">
+                <source>label.health_check_status_skipped</source>
+                <target>Not tested</target>
+            </trans-unit>
+            <trans-unit id="145">
+                <source>flash.health_check_run_invalid_token</source>
+                <target>Invalid security token, please try again</target>
+            </trans-unit>
+            <trans-unit id="146">
+                <source>label.health_check_pages_heading</source>
+                <target>Pages</target>
+            </trans-unit>
+            <trans-unit id="147">
+                <source>label.health_check_advice_link</source>
+                <target>See full report</target>
+            </trans-unit>
+            <trans-unit id="148">
+                <source>label.health_check_view_url</source>
+                <target>Open tested page</target>
+            </trans-unit>
+            <trans-unit id="149">
+                <source>label.health_check_edit_page</source>
+                <target>Edit in CRUD</target>
+            </trans-unit>
+            <trans-unit id="150">
+                <source>description.site_link</source>
+                <target>Opens your site in a new tab, exactly as your visitors see it</target>
             </trans-unit>
         </body>
     </file>

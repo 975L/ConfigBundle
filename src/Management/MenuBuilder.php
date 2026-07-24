@@ -83,7 +83,7 @@ class MenuBuilder
                     $linkUrl = $this->urlGenerator->generate($link['name'], [], $referenceType);
                 }
                 $item = MenuItem::linkToUrl(
-                    new TranslatableMessage($link['label'], [], $link['translation_domain']),
+                    new TranslatableMessage($link['label'], $link['label_parameters'] ?? [], $link['translation_domain']),
                     $link['icon'],
                     $linkUrl
                 );
@@ -115,6 +115,25 @@ class MenuBuilder
         return $this->sortAlphabetically(ProviderMerger::merge($this->menuProviders, fn (MenuProviderInterface $provider) => $provider->getLinks()));
     }
 
+    // Every menu, flattened into the same essential-then-advanced-across-sections order the sidebar itself renders (see getMenuItems()) - every section's essential items first (in provider/section order, alphabetical within each), then every section's advanced items grouped together at the end (the collapsed "Avancé" submenu), rather than getMenus()'s plain alphabetical merge across all of them. Used by OnboardingStepBuilder so tour steps walk the sidebar in the order a user actually sees it
+    public function getOrderedMenus(): array
+    {
+        $essential = [];
+        $advanced = [];
+
+        foreach ($this->getGroupedMenus() as $section) {
+            foreach ($section['items'] as $key => $menu) {
+                if ('advanced' === ($menu['tier'] ?? $section['tier'] ?? 'essential')) {
+                    $advanced[$key] = $menu;
+                } else {
+                    $essential[$key] = $menu;
+                }
+            }
+        }
+
+        return $essential + $advanced;
+    }
+
     // Groups the menus by section, so providers sharing the same section (label + translation_domain) are merged
     private function getGroupedMenus(): array
     {
@@ -133,13 +152,21 @@ class MenuBuilder
         return $sections;
     }
 
-    // Sorts an array of menus/links by their translated label, keeping their keys
+    // Sorts an array of menus/links by their translated label, keeping their keys - an item can set 'pinned' => true (links only, see MenuProviderInterface::getLinks()) to always sort after every non-pinned item, regardless of label (e.g. a "visit the site" link meant to stay at the very bottom of the links section)
     private function sortAlphabetically(array $items): array
     {
-        uasort($items, fn (array $a, array $b) => strcasecmp(
-            $this->translator->trans($a['label'], [], $a['translation_domain']),
-            $this->translator->trans($b['label'], [], $b['translation_domain']),
-        ));
+        uasort($items, function (array $a, array $b) {
+            $pinnedA = $a['pinned'] ?? false;
+            $pinnedB = $b['pinned'] ?? false;
+            if ($pinnedA !== $pinnedB) {
+                return $pinnedA <=> $pinnedB;
+            }
+
+            return strcasecmp(
+                $this->translator->trans($a['label'], [], $a['translation_domain']),
+                $this->translator->trans($b['label'], [], $b['translation_domain']),
+            );
+        });
 
         return $items;
     }

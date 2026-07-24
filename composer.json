@@ -1,7 +1,7 @@
 {
     "name": "c975l/config-bundle",
     "type": "symfony-bundle",
-    "description": "A Symfony bundle that stores application configuration as key-value pairs in the database, with an EasyAdmin management interface, Twig/PHP accessors, and production deployment tooling.",
+    "description": "Symfony bundle providing the EasyAdmin dashboard and database-backed configuration at the root of the c975L ecosystem — the shared hub every satellite bundle plugs into for menus, exports/imports, alerts, and other cross-bundle dashboard contributions.",
     "keywords": ["symfony", "bundle", "config"],
     "homepage": "https://github.com/975L/ConfigBundle",
     "license": "MIT",
@@ -19,12 +19,13 @@
     ],
     "require": {
         "php": ">=8.0",
-        "doctrine/orm": "*",
         "c975l/ui-bundle": "*",
+        "doctrine/orm": "*",
         "easycorp/easyadmin-bundle": "^5.1",
         "sensiolabs/minify-bundle": "*",
         "symfony/form": "*",
         "symfony/serializer": "*",
+        "symfony/ux-chartjs": "^3.3",
         "symfony/yaml": "*"
     },
     "require-dev": {

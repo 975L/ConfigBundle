@@ -1,0 +1,16 @@
+{# Guided tour trigger + chrome (see assets/js/onboarding-tour.js) - only rendered once the sidebar has at least one menu/link to walk through (see OnboardingStepBuilder). Styling lives in sass/management.scss (compiled to public/css/management.css/.min.css) rather than an inline <style> here - a strict style-src CSP with a nonce present makes 'unsafe-inline' a no-op, and a nonce doesn't cover inline <style>/style="" the way it covers <script> #}
+{% if steps|length > 0 %}
+    <div data-controller="onboarding-tour"
+        data-onboarding-tour-steps-value="{{ steps|json_encode }}"
+        data-onboarding-tour-labels-value="{{ {
+            previous: 'label.onboarding_previous'|trans({}, 'config'),
+            next: 'label.onboarding_next'|trans({}, 'config'),
+            finish: 'label.onboarding_finish'|trans({}, 'config'),
+            close: 'label.onboarding_close'|trans({}, 'config'),
+        }|json_encode }}"
+    >
+        <button type="button" class="btn btn-secondary mb-3" data-action="click->onboarding-tour#start">
+            <i class="fa fa-route"></i> {{ 'label.onboarding_start'|trans({}, 'config') }}
+        </button>
+    </div>
+{% endif %}

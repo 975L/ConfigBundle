@@ -8,12 +8,12 @@
  */
 /* MADE BY (Controller/Management/DashboardController.php) */
 .menu-item-made-by {
-  /* EasyAdmin's own #main-menu .menu .menu-item-contents rule only sets align-items,
+  /* EasyAdmin's own .ea-sidebar-item-link rule only sets align-items,
      so justify-content is free to center this single-child link without a specificity fight */
   justify-content: center;
 }
 
-.menu-item-made-by .menu-item-label {
+.menu-item-made-by .ea-sidebar-item-label {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -28,6 +28,81 @@ ul {
   list-style: url(/bundles/c975lsite/icons/angle-right.svg);
 }
 
+/* HEALTH CHECK TABLE (management/health_check/_table.html.twig) */
+.health-check-filter {
+  max-width: 20rem;
+}
+
+.health-check-select {
+  max-width: 12rem;
+}
+
+.health-check-sortable {
+  cursor: pointer;
+}
+
+.health-check-edit-link {
+  margin-left: 0.5rem;
+}
+
+/* Marks the row that carries a group's page name/links (health-check-table.js#updateGrouping) - a background
+   tint (not the <tr> itself: Bootstrap's .table uses border-collapse: collapse, under which a <tr>'s own
+   background/border never renders, only its cells') so groups of rows for the same page stay visually separated.
+   !important needed: Bootstrap's own ".table > :not(caption) > * > *" cell background rule has the same
+   specificity and comes later in the cascade, so it otherwise wins the tie. Pale blue rather than yellow -
+   yellow reads as "warning", clashing with the status column's own ok/warning/error colors */
+tr.health-check-row-first > td {
+  background-color: #cfe2ff !important;
+}
+
+/* PAGESPEED GAUGES (management/health_check/_table.html.twig, pagespeed_gauges macro) - same red/orange/green
+   thresholds and colors as Lighthouse's own report. stroke-dasharray/-dashoffset are set as plain SVG
+   attributes in the template (not inline style=""), so this needed no CSP allowance */
+.lh-gauges {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.lh-gauge-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.lh-gauge-caption {
+  font-size: 0.7rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.lh-gauge-base {
+  fill: none;
+  stroke: var(--bs-border-color, #e0e0e0);
+  stroke-width: 5;
+}
+
+.lh-gauge-arc {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+.lh-gauge--ok .lh-gauge-arc {
+  stroke: #0cce6b;
+}
+
+.lh-gauge--warning .lh-gauge-arc {
+  stroke: #ffa400;
+}
+
+.lh-gauge--error .lh-gauge-arc {
+  stroke: #ff4e42;
+}
+
 /* EasyAdmin's own sidebar menu is rendered as <ul><li> too, so the rule above would otherwise
    give every dashboard menu item this content bullet, which doesn't belong on a nav list */
 .ea-sidebar-group-items,
@@ -35,10 +110,18 @@ ul {
   list-style: none;
 }
 
+/* Same issue for EasyAdmin's crud form tabs (e.g. SiteBundle's Page edit form), also a plain
+   <ul class="nav nav-tabs"><li class="nav-item"> - see vendor/easycorp/.../crud/form_theme.html.twig */
+.nav-tabs {
+  list-style: none;
+}
+
 /* A sidebar link leaving the admin entirely (see MenuBuilder/MenuProviderInterface's optional "target"
    link key) gets a small external-link glyph automatically - a plain Unicode character, not an icon-font
-   glyph, so it doesn't depend on whichever icon set/version a menu item's own "icon" happens to use. */
-a.menu-item-contents[target=_blank]::after {
+   glyph, so it doesn't depend on whichever icon set/version a menu item's own "icon" happens to use.
+   Targets EasyAdmin 5's own .ea-sidebar-item-link class (see vendor/easycorp/.../Sidebar/Item.html.twig) -
+   the old .menu-item-contents class this rule used to target no longer exists in that template. */
+a.ea-sidebar-item-link[target=_blank]::after {
   content: "↗";
   margin-left: 0.35em;
   opacity: 0.6;
@@ -89,3 +172,73 @@ a.menu-item-contents[target=_blank]::after {
 .shortcut-tile i {
   font-size: 1.25rem;
 }
+
+/* GUIDED TOUR (management/_onboarding_tour.html.twig, assets/js/onboarding-tour.js) - built through the
+   compiled stylesheet rather than an inline <style> tag: a strict style-src CSP with a nonce present makes
+   'unsafe-inline' a no-op (per spec), and a nonce doesn't cover style="" attributes/inline <style> blocks
+   the way it covers <script>, so this is the only reliably CSP-compatible way to ship it */
+.onboarding-tour-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+}
+
+.onboarding-tour-highlight {
+  position: relative;
+  z-index: 2001;
+  outline: 3px solid #ffc107;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.onboarding-tour-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% - 2rem);
+  max-width: 22rem;
+  background: #fff;
+  color: #212529;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.3);
+  padding: 1.25rem;
+  z-index: 2002;
+}
+
+.onboarding-tour-panel h3 {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.onboarding-tour-panel p {
+  margin: 0 0 1rem;
+}
+
+.onboarding-tour-progress {
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
+.onboarding-tour-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.onboarding-tour-actions button {
+  border: 1px solid #ced4da;
+  background: #f8f9fa;
+  border-radius: 0.25rem;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+}
+
+.onboarding-tour-actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/*# sourceMappingURL=management.css.map */

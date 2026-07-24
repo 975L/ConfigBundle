@@ -14,6 +14,7 @@ use c975L\ConfigBundle\Management\AlertBuilder;
 use c975L\ConfigBundle\Management\DashboardWidgetBuilder;
 use c975L\ConfigBundle\Management\EssentialActionBuilder;
 use c975L\ConfigBundle\Management\MenuBuilder;
+use c975L\ConfigBundle\Management\OnboardingStepBuilder;
 use c975L\ConfigBundle\Management\ShortcutBuilder;
 use c975L\ConfigBundle\Management\WhatsNewBuilder;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
@@ -41,6 +42,7 @@ class DashboardController extends AbstractDashboardController
         private readonly ShortcutBuilder $shortcutBuilder,
         private readonly EssentialActionBuilder $essentialActionBuilder,
         private readonly DashboardWidgetBuilder $dashboardWidgetBuilder,
+        private readonly OnboardingStepBuilder $onboardingStepBuilder,
         private readonly ConfigServiceInterface $configService,
         private readonly ScriptAdminRegistry $scriptAdminRegistry,
         private readonly StylesheetManagementRegistry $stylesheetManagementRegistry,
@@ -65,6 +67,7 @@ class DashboardController extends AbstractDashboardController
                 'essentialActions' => $this->essentialActionBuilder->getActions(),
                 'essentialActionsProgress' => $this->essentialActionBuilder->getProgress(),
                 'widgets' => $this->dashboardWidgetBuilder->getWidgets(),
+                'onboardingSteps' => $this->onboardingStepBuilder->getSteps(),
             ]
         );
     }

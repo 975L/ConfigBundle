@@ -6,7 +6,7 @@
 {% block main %}
     <h1>{{ ('label.config'|trans({}, 'config')) }}</h1>
 
-    <p>{{ ('label.info_config'|trans({}, 'config')) }}</p>
+    <p>{{ ('description.config'|trans({}, 'config')) }}</p>
 
     {{ include('@c975LConfig/management/_alerts.html.twig', {
         alerts: alerts|default([]),

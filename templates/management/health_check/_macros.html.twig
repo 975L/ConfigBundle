@@ -1,0 +1,32 @@
+{# Shared by the global Health check page (_table.html.twig, index.html.twig) and any other bundle/screen embedding a scoped subset of results (e.g. c975l/site-bundle's per-page health check tab) - keep this the single place these render, rather than reimplementing them per screen #}
+
+{# Status pill: HealthCheckResult::STATUS_OK/WARNING/ERROR/SKIPPED mapped to EasyAdmin's Badge variants (success/warning/danger/secondary) - "skipped" (the check never ran, eg. the page doesn't resolve yet) stays neutral rather than reading as a warning/error #}
+{% macro status_badge(status) %}
+    {% set variant = status == 'ok' ? 'success' : (status == 'warning' ? 'warning' : (status == 'skipped' ? 'secondary' : 'danger')) %}
+    <twig:ea:Badge variant="{{ variant }}">{{ ('label.health_check_status_' ~ status)|trans({}, 'config') }}</twig:ea:Badge>
+{% endmacro %}
+
+{# One SVG ring per Lighthouse category (performance/accessibility/best-practices/seo) - same red/orange/green thresholds and colors as Lighthouse's own report (score>=90 green, >=50 orange, else red). Hollow center (no fill, no in-ring number) with only the 5px outer stroke colored, so the ring itself reads clearly instead of looking like a solid disc - the category name and score are spelled out as text underneath instead. SVG stroke-dasharray/-dashoffset are plain attributes, not inline CSS, so this stays compatible with a strict style-src CSP (no style="" needed) - see sass/management.scss for the .lh-gauge-* rules #}
+{% macro pagespeed_gauges(scores) %}
+    {% set circumference = 125.6 %}
+    <div class="lh-gauges">
+        {% for key, label in {
+            'performance': 'label.health_check_gauge_performance',
+            'accessibility': 'label.health_check_gauge_accessibility',
+            'best-practices': 'label.health_check_gauge_best_practices',
+            'seo': 'label.health_check_gauge_seo',
+        } %}
+            {% set score = scores[key] ?? null %}
+            {% if score is not null %}
+                {% set status = score >= 90 ? 'ok' : (score >= 50 ? 'warning' : 'error') %}
+                <div class="lh-gauge-item">
+                    <svg viewBox="0 0 48 48" width="44" height="44" class="lh-gauge lh-gauge--{{ status }}" role="img" aria-label="{{ (label|trans({}, 'config')) ~ ': ' ~ score }}">
+                        <circle cx="24" cy="24" r="20" class="lh-gauge-base"></circle>
+                        <circle cx="24" cy="24" r="20" class="lh-gauge-arc" stroke-dasharray="{{ circumference }}" stroke-dashoffset="{{ (1 - score / 100) * circumference }}"></circle>
+                    </svg>
+                    <span class="lh-gauge-caption">{{ label|trans({}, 'config') }} : {{ score }}</span>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endmacro %}

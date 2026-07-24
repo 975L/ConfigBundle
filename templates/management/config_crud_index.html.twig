@@ -1,7 +1,7 @@
 {% extends '@EasyAdmin/crud/index.html.twig' %}
 
 {% block main %}
-    <p>{{ ('label.info_config'|trans({}, 'config')) }}</p>
+    <p>{{ ('description.config'|trans({}, 'config')) }}</p>
 
     {{ include('@c975LConfig/management/_alerts.html.twig', {
         alerts: alerts|default([]),

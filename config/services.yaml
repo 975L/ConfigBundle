@@ -52,10 +52,22 @@ services:
         arguments:
             $dashboardWidgetProviders: !tagged_iterator c975l.dashboard_widget_provider
 
+    c975L\ConfigBundle\Management\HealthCheckRunner:
+        arguments:
+            $healthCheckProviders: !tagged_iterator c975l.health_check_provider
+
+    c975L\ConfigBundle\Management\HealthCheckAdviceBuilder:
+        arguments:
+            $healthCheckAdviceProviders: !tagged_iterator c975l.health_check_advice_provider
+
     c975L\ConfigBundle\Controller\Management\DashboardController:
         tags: ['controller.service_arguments']
 
     c975L\ConfigBundle\Service\StylesheetProvider:
         tags:
             - { name: 'ui.management_stylesheet' }
+
+    c975L\ConfigBundle\Service\ScriptProvider:
+        tags:
+            - { name: 'ui.admin_script' }
 

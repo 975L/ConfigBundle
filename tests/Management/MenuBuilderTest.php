@@ -72,6 +72,38 @@ class MenuBuilderTest extends TestCase
         $this->assertSame(['apple', 'zebra'], array_keys($menus));
     }
 
+    // getOrderedMenus() must match the sidebar's own visual order (see getMenuItems()): every essential item first (section order, alphabetical within a section), then every advanced item grouped together at the end - not getMenus()'s plain alphabetical merge across everything
+    public function testGetOrderedMenusPutsEveryAdvancedItemAfterEveryEssentialItem(): void
+    {
+        $section = ['label' => 'label.management', 'translation_domain' => 'site'];
+        $provider = $this->createProvider($section, [
+            'zebra' => ['controller' => 'ZebraController', 'label' => 'label.zebra', 'translation_domain' => 'config', 'icon' => 'fa fa-z'],
+            'redirect' => ['controller' => 'RedirectController', 'label' => 'label.redirects', 'translation_domain' => 'config', 'icon' => 'fa fa-r', 'tier' => 'advanced'],
+            'apple' => ['controller' => 'AppleController', 'label' => 'label.apple', 'translation_domain' => 'config', 'icon' => 'fa fa-a'],
+        ]);
+        $builder = new MenuBuilder([$provider], $this->createConfigService(), $this->createTranslator(), $this->createUrlGenerator());
+
+        $menus = $builder->getOrderedMenus();
+
+        $this->assertSame(['apple', 'zebra', 'redirect'], array_keys($menus));
+    }
+
+    // A whole section opting into 'advanced' via getMenuSection() (rather than a per-item 'tier') still lands after every essential item, same as getMenuItems()'s own submenu grouping
+    public function testGetOrderedMenusHonorsASectionsOwnAdvancedTierDefault(): void
+    {
+        $essential = $this->createProvider(
+            ['label' => 'label.essential', 'translation_domain' => 'site'],
+            ['config' => ['controller' => 'ConfigCrudController', 'label' => 'label.config', 'translation_domain' => 'config', 'icon' => 'fa fa-cog']],
+        );
+        $advanced = $this->createProvider(
+            ['label' => 'label.seo', 'translation_domain' => 'ui', 'tier' => 'advanced'],
+            ['seo' => ['controller' => 'SeoCrudController', 'label' => 'label.seo_settings', 'translation_domain' => 'ui', 'icon' => 'fa fa-search']],
+        );
+        $builder = new MenuBuilder([$essential, $advanced], $this->createConfigService(), $this->createTranslator(), $this->createUrlGenerator());
+
+        $this->assertSame(['config', 'seo'], array_keys($builder->getOrderedMenus()));
+    }
+
     public function testGetLinksMergesAndSortsAcrossProviders(): void
     {
         $providerA = $this->createProvider(
@@ -283,6 +315,42 @@ class MenuBuilderTest extends TestCase
         foreach ($items as $item) {
             $this->assertNotSame('label.menu_advanced', $item->getAsDto()->getLabel()?->getMessage());
         }
+    }
+
+    // An optional "label_parameters" array (e.g. ['%name%' => $siteName]) is passed through to the label's TranslatableMessage, so a link's translated label can embed a runtime value (e.g. "Site : %name%")
+    public function testGetMenuItemsPassesLabelParametersThroughToTheTranslatableMessage(): void
+    {
+        $section = ['label' => 'label.management', 'translation_domain' => 'site'];
+        $provider = $this->createProvider($section, [], [
+            'site' => [
+                'label' => 'label.site_link',
+                'label_parameters' => ['%name%' => 'My Site'],
+                'url' => 'https://example.test/',
+                'translation_domain' => 'config',
+                'icon' => 'fa fa-globe',
+            ],
+        ]);
+        $builder = new MenuBuilder([$provider], $this->createConfigService(), $this->createTranslator(), $this->createUrlGenerator());
+
+        $items = iterator_to_array($builder->getMenuItems(), false);
+
+        $this->assertSame(['%name%' => 'My Site'], $items[2]->getAsDto()->getLabel()->getParameters());
+    }
+
+    // A "pinned" link (e.g. a "visit the site" link) always sorts after every non-pinned link, even one that would otherwise sort first alphabetically
+    public function testGetLinksSortsPinnedLinksAfterNonPinnedOnesRegardlessOfLabel(): void
+    {
+        $provider = $this->createProvider(
+            ['label' => 'label.management', 'translation_domain' => 'site'],
+            [],
+            [
+                'site' => ['label' => 'label.aaa_site', 'url' => 'https://example.test/', 'translation_domain' => 'config', 'icon' => 'fa fa-globe', 'pinned' => true],
+                'whatsnew' => ['label' => 'label.zzz_whatsnew', 'name' => 'management_whatsnew_index', 'translation_domain' => 'config', 'icon' => 'fa fa-bullhorn'],
+            ],
+        );
+        $builder = new MenuBuilder([$provider], $this->createConfigService(), $this->createTranslator(), $this->createUrlGenerator());
+
+        $this->assertSame(['whatsnew', 'site'], array_keys($builder->getLinks()));
     }
 
     // An explicit "url" (a literal, already-absolute URL) is used as-is, bypassing route resolution entirely - for a provider that wants a link fixed/directly editable rather than derived from a route (e.g. 975l.com's own MenuProvider pinning its "vitrine des blocks" link to the real production domain on purpose, see App\Management\MenuProvider)

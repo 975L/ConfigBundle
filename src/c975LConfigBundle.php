@@ -14,6 +14,8 @@ use c975L\ConfigBundle\Management\AlertProviderInterface;
 use c975L\ConfigBundle\Management\DashboardWidgetProviderInterface;
 use c975L\ConfigBundle\Management\EssentialActionProviderInterface;
 use c975L\ConfigBundle\Management\ExportProviderInterface;
+use c975L\ConfigBundle\Management\HealthCheckAdviceProviderInterface;
+use c975L\ConfigBundle\Management\HealthCheckProviderInterface;
 use c975L\ConfigBundle\Management\ImportProviderInterface;
 use c975L\ConfigBundle\Management\LinkableRouteProviderInterface;
 use c975L\ConfigBundle\Management\MenuProviderInterface;
@@ -27,6 +29,18 @@ use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 class c975LConfigBundle extends AbstractBundle
 {
+    public function prependExtension(ContainerConfigurator $containerConfigurator, ContainerBuilder $container): void
+    {
+        // First JS/CSS ConfigBundle ships itself (the onboarding tour, see assets/controllers-admin.js) - mirrors UiBundle's own asset_mapper path registration
+        $container->prependExtensionConfig('framework', [
+            'asset_mapper' => [
+                'paths' => [
+                    __DIR__ . '/../assets' => '@c975l/config-bundle',
+                ],
+            ],
+        ]);
+    }
+
     public function build(ContainerBuilder $container): void
     {
         $container->addCompilerPass(new TaggedInterfacePass(MenuProviderInterface::class, 'c975l.management_menu_provider'));
@@ -40,6 +54,8 @@ class c975LConfigBundle extends AbstractBundle
         $container->addCompilerPass(new TaggedInterfacePass(ThemePresetProviderInterface::class, 'c975l.theme_preset_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(EssentialActionProviderInterface::class, 'c975l.essential_action_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(DashboardWidgetProviderInterface::class, 'c975l.dashboard_widget_provider'));
+        $container->addCompilerPass(new TaggedInterfacePass(HealthCheckProviderInterface::class, 'c975l.health_check_provider'));
+        $container->addCompilerPass(new TaggedInterfacePass(HealthCheckAdviceProviderInterface::class, 'c975l.health_check_advice_provider'));
     }
 
     public function loadExtension(array $config, ContainerConfigurator $containerConfigurator, ContainerBuilder $containerBuilder): void
