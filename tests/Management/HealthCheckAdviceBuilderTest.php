@@ -25,14 +25,32 @@ class HealthCheckAdviceBuilderTest extends TestCase
 
     public function testBuildMergesAcrossProviders(): void
     {
-        $providerA = $this->createProvider(['pagespeed' => [['text' => 'slow', 'url' => null]]]);
-        $providerB = $this->createProvider(['w3c-html' => [['text' => 'invalid', 'url' => null]]]);
+        $providerA = $this->createProvider(['pagespeed|https://example.com/' => [['text' => 'slow', 'url' => null]]]);
+        $providerB = $this->createProvider(['w3c-html|https://example.com/' => [['text' => 'invalid', 'url' => null]]]);
         $builder = new HealthCheckAdviceBuilder([$providerA, $providerB]);
 
         $this->assertSame(
-            ['pagespeed' => [['text' => 'slow', 'url' => null]], 'w3c-html' => [['text' => 'invalid', 'url' => null]]],
+            ['pagespeed|https://example.com/' => [['text' => 'slow', 'url' => null]], 'w3c-html|https://example.com/' => [['text' => 'invalid', 'url' => null]]],
             $builder->build([]),
         );
+    }
+
+    // Two providers with something to say about the same result have their lines appended, not one silently overwriting the other
+    public function testBuildAppendsLinesFromTwoProvidersOnTheSameResult(): void
+    {
+        $providerA = $this->createProvider(['pagespeed|https://example.com/' => [['text' => 'slow', 'url' => null]]]);
+        $providerB = $this->createProvider(['pagespeed|https://example.com/' => [['text' => 'heavy images', 'url' => null]]]);
+        $builder = new HealthCheckAdviceBuilder([$providerA, $providerB]);
+
+        $this->assertCount(2, $builder->build([])['pagespeed|https://example.com/']);
+    }
+
+    // Kind alone isn't enough: the Health check page lists one row per url *and* per kind
+    public function testKeyCombinesKindAndUrl(): void
+    {
+        $result = (new HealthCheckResult())->setKind('content-quality')->setUrl('https://example.com/pages/contact/');
+
+        $this->assertSame('content-quality|https://example.com/pages/contact/', HealthCheckAdviceBuilder::key($result));
     }
 
     public function testBuildIsEmptyWhenNoProviderContributesAnything(): void

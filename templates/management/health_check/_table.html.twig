@@ -62,14 +62,33 @@
                         {% else %}
                             {{ result.summary }}
                         {% endif %}
-                        {# Per-kind actionable advice (eg. SiteBundle's PageHealthCheckAdviceBuilder), shown directly below this row's own summary rather than as a separate block above the table #}
-                        {% if advice[result.kind] is defined %}
+                        {# Per-result actionable advice (eg. SiteBundle's PageHealthCheckAdviceBuilder), shown directly below this row's own summary rather than as a separate block above the table. "kind|url" is HealthCheckAdviceBuilder::key()'s own format - this page lists one row per url *and* per kind, so kind alone had every url's row showing the last checked url's advice #}
+                        {% set adviceKey = result.kind ~ '|' ~ result.url %}
+                        {% if advice[adviceKey] is defined %}
                             <ul class="health-check-advice small mb-0 ps-3">
-                                {% for item in advice[result.kind] %}
+                                {% for item in advice[adviceKey] %}
                                     <li>
                                         {{ item.text }}
                                         {% if item.url %}
                                             <a href="{{ item.url }}" target="_blank" rel="noopener">{{ 'label.health_check_advice_link'|trans({}, 'config') }}</a>
+                                        {% endif %}
+                                        {# The individual offenders behind a "%count% of them" line (each image without alt text, each broken link...), collapsed: a page with a dozen of them would otherwise push every following row off screen. Each carries its own optional link - for SiteBundle, straight to the block holding it #}
+                                        {% if item.items|default([]) is not empty %}
+                                            <details class="health-check-advice-items">
+                                                <summary>{{ 'label.health_check_advice_details'|trans({'%count%': item.items|length}, 'config') }}</summary>
+                                                <ul>
+                                                    {% for detail in item.items %}
+                                                        {# "url"/"label" are documented as optional, hence |default: under strict_variables (dev's own default) a provider omitting either would otherwise 500 the whole page #}
+                                                        {% set detailLabel = detail.label|default('') %}
+                                                        <li>
+                                                            {{ detail.text }}
+                                                            {% if detail.url|default(null) %}
+                                                                <a href="{{ detail.url }}" class="health-check-edit-link" title="{{ detailLabel ?: 'label.health_check_edit_page'|trans({}, 'config') }}"><i class="fa fa-pencil"></i> {{ detailLabel }}</a>
+                                                            {% endif %}
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </details>
                                         {% endif %}
                                     </li>
                                 {% endfor %}

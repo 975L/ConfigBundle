@@ -159,6 +159,26 @@ ConfigBundle contributes its own, `@c975l/config-bundle/controllers-admin.js`, f
 
 **`symfony/ux-chartjs`** is a regular Composer dependency (not something to add manually) - Symfony Flex registers `ChartjsBundle` and its own `importmap.php`/`chart.js` entries automatically the first time you `composer update` after installing/upgrading ConfigBundle.
 
+That same Flex recipe also writes an **eager** entry into your app's `assets/controllers.json`, which you should turn off:
+
+```json
+{
+    "controllers": {
+        "@symfony/ux-chartjs": {
+            "chart": {
+                "enabled": false,
+                "fetch": "eager"
+            }
+        }
+    },
+    "entrypoints": []
+}
+```
+
+`startStimulusApp()` statically imports every `enabled`+`eager` controller listed there, so leaving it on has two costs. On the **front-end**, your `app.js` pulls `chart.js` (~66 KiB transferred) onto every public page, where no chart is ever rendered. On the **`/management` dashboard**, each admin entry starts its own independent Stimulus app (see `DashboardController::configureAssets()`) and each one registers the chart controller again — with four c975L bundles installed, four applications call `new Chart()` on the same `<canvas>`, which Chart.js rejects with *"Canvas is already in use"*.
+
+On the dashboard, disabling it costs nothing: `controllers-admin.js` registers the chart controller explicitly, once. Use `"enabled": false` rather than `"fetch": "lazy"` — lazy fixes the front-end bytes but still lets every admin Stimulus app register the controller on its own. `c975l:config:check-importmap` warns when it finds the entry still enabled — the warning is about the dashboard, so ignore it if your app calls `render_chart()` on a public page too (that page does need the front-end controller, and `"fetch": "lazy"` is then the right trade-off).
+
 ### Deploying to production — Export
 
 On the config list page, click the **Export** dropdown and pick **SQL**, **CSV**, or **JSON**. The browser downloads a `site_config_YYYYMMDD_HHMMSS.{sql,csv,json}` file — nothing is written to disk or version control.
@@ -744,25 +764,45 @@ Any bundle can attach actionable advice under a Health check table row (e.g. "th
 namespace c975L\MyBundle\Management;
 
 use c975L\ConfigBundle\Entity\HealthCheckResult;
+use c975L\ConfigBundle\Management\HealthCheckAdviceBuilder;
 use c975L\ConfigBundle\Management\HealthCheckAdviceProviderInterface;
 
 class MyHealthCheckAdviceProvider implements HealthCheckAdviceProviderInterface
 {
-    // Grouped by kind (only kinds this provider actually has something to say about) - $results is the same HealthCheckResult[] the current screen renders (dashboard "Health check" page or a CRUD's own scoped tab)
+    // Keyed per result, via HealthCheckAdviceBuilder::key() (only the results this provider actually has something to say about) - $results is the same HealthCheckResult[] the current screen renders (dashboard "Health check" page or a CRUD's own scoped tab)
     public function buildAdvice(array $results): array
     {
-        return [
-            'my-check' => [
-                ['text' => 'This page is missing an H1', 'url' => '/management/my-entity/1/edit'],
-            ],
-        ];
+        $advice = [];
+
+        foreach ($results as $result) {
+            if ('my-check' !== $result->getKind()) {
+                continue;
+            }
+
+            $advice[HealthCheckAdviceBuilder::key($result)] = [
+                [
+                    'text' => '3 images are missing an alt text',
+                    'url' => '/management/my-entity/1/edit',
+                    // Optional - the individual offenders behind that line, rendered as a collapsed list under it
+                    'items' => [
+                        ['text' => 'banner.jpg', 'url' => '/management/my-entity/1/edit#block-4', 'label' => 'Edit the block'],
+                    ],
+                ],
+            ];
+        }
+
+        return $advice;
     }
 }
 ```
 
 Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
 
-`HealthCheckAdviceBuilder::build()` merges every registered provider's advice keyed by kind. It's shared by the dashboard "Health check" page and any CRUD's own "Health check" tab (both render through the same `health_check/_table.html.twig`), so advice reads identically everywhere.
+Always build the key with `HealthCheckAdviceBuilder::key()` rather than concatenating it yourself — the table looks each row's advice up under that exact key, and a mismatch shows no advice at all rather than raising an error. Keying by `kind` alone isn't enough: the Health check page lists one row per url *and* per kind.
+
+Each line needs a `text`, and may carry a `url` (rendered as a link next to the text) and an `items` list. `items` is for a line that summarizes several offenders ("3 images are missing an alt text") — each entry needs its own `text`, and may carry a `url` plus the `label` for that link (falling back to a pencil icon alone), so a dozen offenders stay collapsed instead of pushing the following rows off screen.
+
+`HealthCheckAdviceBuilder::build()` merges every registered provider's advice; two providers with something to say about the same result have their lines appended, neither overwrites the other. It's shared by the dashboard "Health check" page and any CRUD's own "Health check" tab (both render through the same `health_check/_table.html.twig`), so advice reads identically everywhere.
 
 ## Contributing theme presets from other bundles
 

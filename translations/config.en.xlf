@@ -570,6 +570,10 @@
                 <source>description.site_link</source>
                 <target>Opens your site in a new tab, exactly as your visitors see it</target>
             </trans-unit>
+            <trans-unit id="151">
+                <source>label.health_check_advice_details</source>
+                <target>See the detail (%count%)</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

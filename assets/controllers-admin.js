@@ -20,12 +20,12 @@ if (!window.__c975lConfigAdminStarted) {
     // app's own assets/bootstrap.js (which the /management dashboard deliberately doesn't load, see README)
     app.register('symfony--ux-chartjs--chart', ChartjsController);
 
-    // EasyAdmin sets data-turbo="false" on <html> (see its own layout.html.twig), so Turbo Drive never
-    // intercepts navigation here - whatever causes Stimulus to call connect() a second time on the same
-    // <canvas> without an intervening disconnect() isn't a Turbo caching/morph issue. Rather than chase that
-    // exact trigger, this destroys any chart already attached to a canvas right before ux-chartjs's own
-    // controller creates a new one on it - "chartjs:pre-connect" is ux-chartjs's own public event, dispatched
-    // on the canvas itself right before its `new Chart()` call, see vendor/symfony/ux-chartjs's controller.js
+    // Safety net for "Canvas is already in use": every bundle's controllers-admin.js starts its own Stimulus
+    // app, and each startStimulusApp() eagerly registers whatever assets/controllers.json enables - so an app
+    // leaving ux-chartjs enabled there gets one `new Chart()` per admin entry on the same <canvas>. The fix is
+    // "enabled": false in the app's controllers.json (see readme, and c975l:config:check-importmap warns about
+    // it), this only keeps an app that hasn't done it yet from crashing. "chartjs:pre-connect" is ux-chartjs's
+    // own public event, dispatched on the canvas right before its `new Chart()` call, see its controller.js
     document.addEventListener('chartjs:pre-connect', (event) => {
         Chart.getChart(event.target)?.destroy();
     });

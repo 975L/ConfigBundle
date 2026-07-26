@@ -8,6 +8,8 @@
  */
 namespace c975L\ConfigBundle\Management;
 
+use c975L\ConfigBundle\Entity\HealthCheckResult;
+
 // Merges the health check advice contributed by every HealthCheckAdviceProvider (eg. SiteBundle's PageHealthCheckAdviceBuilder) - shared by the dashboard "Health check" page and any CRUD's own "Health check" tab, so both render advice through the exact same table (see health_check/_table.html.twig)
 class HealthCheckAdviceBuilder
 {
@@ -16,10 +18,24 @@ class HealthCheckAdviceBuilder
     ) {
     }
 
-    // @param \c975L\ConfigBundle\Entity\HealthCheckResult[] $results
-    // @return array<string, array{text: string, url: ?string}[]>
+    // The key advice is grouped under, one per checked row - kind alone isn't enough, the dashboard's Health check page lists one row per url *and* per kind, so keying by kind had every url's row showing the last checked url's advice. Not the result's id: a result that hasn't been persisted yet has none. The same format is rebuilt inline by health_check/_table.html.twig to look each row's own advice up
+    public static function key(HealthCheckResult $result): string
+    {
+        return $result->getKind() . '|' . $result->getUrl();
+    }
+
+    // Not ProviderMerger::merge(): two providers with something to say about the same result have their lines appended, not one overwriting the other
+    // @param HealthCheckResult[] $results
+    // @return array<string, array{text: string, url: ?string, items?: array{text: string, url: ?string, label: ?string}[]}[]>
     public function build(array $results): array
     {
-        return ProviderMerger::merge($this->healthCheckAdviceProviders, fn (HealthCheckAdviceProviderInterface $provider) => $provider->buildAdvice($results));
+        $advice = [];
+        foreach ($this->healthCheckAdviceProviders as $provider) {
+            foreach ($provider->buildAdvice($results) as $key => $lines) {
+                $advice[$key] = array_merge($advice[$key] ?? [], $lines);
+            }
+        }
+
+        return $advice;
     }
 }

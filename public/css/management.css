@@ -45,6 +45,20 @@ ul {
   margin-left: 0.5rem;
 }
 
+/* Collapsed list of the individual offenders behind an advice line (each image without alt text, each broken
+   link...) - a page with a dozen of them would otherwise push every following row off screen. Own list marker
+   removed: the parent advice <ul> sets an svg one that reads oddly nested, and urls get their own break rule
+   so a long one wraps inside the cell instead of widening the whole table */
+.health-check-advice-items > summary {
+  cursor: pointer;
+}
+
+.health-check-advice-items ul {
+  list-style: none;
+  padding-left: 0.75rem;
+  word-break: break-word;
+}
+
 /* Marks the row that carries a group's page name/links (health-check-table.js#updateGrouping) - a background
    tint (not the <tr> itself: Bootstrap's .table uses border-collapse: collapse, under which a <tr>'s own
    background/border never renders, only its cells') so groups of rows for the same page stay visually separated.

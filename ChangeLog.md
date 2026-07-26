@@ -1,5 +1,17 @@
 # ChangeLog
 
+## v5.9.2
+
+- `site-made-by-logo` now accepts a relative AssetMapper path, not only an absolute URL (26/07/2026)
+- `c975l:config:check-importmap` now warns when `assets/controllers.json` still enables `@symfony/ux-chartjs` (26/07/2026)
+- Added a readme section on disabling ux-chartjs in `assets/controllers.json` (26/07/2026)
+- Added `HealthCheckAdviceBuilder::key()`; `HealthCheckAdviceProviderInterface::buildAdvice()` is now keyed by it instead of by kind (26/07/2026) [BC-Break]
+- Fixed every url's Health check row showing the last checked url's advice (26/07/2026)
+- Added an optional `items` key on an advice line, listing the individual offenders behind it as a collapsed list (26/07/2026)
+- `HealthCheckAdviceBuilder::build()` now appends two providers' lines for the same result instead of overwriting (26/07/2026)
+- Fixed the readme's health check advice example, still keyed by kind (26/07/2026)
+- Fixed the Health check table crashing under `strict_variables` on an advice item omitting its optional `url`/`label` (26/07/2026)
+
 ## v5.9.1.1
 
 - Added link in readme (24/07/2026)

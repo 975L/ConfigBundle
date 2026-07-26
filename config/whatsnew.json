@@ -1,5 +1,25 @@
 [
     {
+        "date": "2026-07-26",
+        "description": [
+            {
+                "en": "The Health check tips are now the ones for the page they sit under, instead of repeating the last checked page's ones on every row",
+                "fr": "Les conseils du Bilan de santé correspondent désormais bien à la page sous laquelle ils s'affichent, au lieu de répéter sur chaque ligne ceux de la dernière page vérifiée",
+                "es": "Los consejos del Estado de salud corresponden ahora a la página bajo la que aparecen, en lugar de repetir en cada fila los de la última página comprobada"
+            },
+            {
+                "en": "A Health check tip covering several items (e.g. images missing an alt text) can now be unfolded to see each one, with a link straight to it",
+                "fr": "Un conseil du Bilan de santé qui porte sur plusieurs éléments (ex. des images sans texte alternatif) peut désormais être déplié pour voir chacun d'eux, avec un lien direct vers celui-ci",
+                "es": "Un consejo del Estado de salud que afecta a varios elementos (p. ej. imágenes sin texto alternativo) ahora puede desplegarse para ver cada uno, con un enlace directo a él"
+            },
+            {
+                "en": "The dashboard's \"Made by\" logo now also shows when its path points to a file of your own site rather than to a full address",
+                "fr": "Le logo « Réalisé par » du tableau de bord s'affiche désormais aussi quand son chemin pointe vers un fichier de votre propre site plutôt que vers une adresse complète",
+                "es": "El logotipo «Realizado por» del panel de control ahora también se muestra cuando su ruta apunta a un archivo de su propio sitio en lugar de a una dirección completa"
+            }
+        ]
+    },
+    {
         "date": "2026-07-24",
         "description": [
             {

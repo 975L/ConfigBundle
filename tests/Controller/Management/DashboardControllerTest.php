@@ -23,14 +23,26 @@ use c975L\UiBundle\Registry\FormThemeRegistry;
 use c975L\UiBundle\Registry\ScriptAdminRegistry;
 use c975L\UiBundle\Registry\StylesheetManagementRegistry;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Asset\Packages;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class DashboardControllerTest extends TestCase
 {
-    private function createController(bool $debug, array $managementStylesheets): DashboardController
+    private function createController(bool $debug, array $managementStylesheets, array $configs = []): DashboardController
     {
         $stylesheetManagementRegistry = $this->createStub(StylesheetManagementRegistry::class);
         $stylesheetManagementRegistry->method('all')->willReturn($managementStylesheets);
+
+        // site-role-admin is always set: configureMenuItems() passes it straight to setPermission(), which rejects null
+        $configs += ['site-role-admin' => 'ROLE_ADMIN'];
+        $configService = $this->createStub(ConfigServiceInterface::class);
+        $configService->method('get')->willReturnCallback(fn(string $key) => $configs[$key] ?? null);
+
+        // Stands in for the real asset packages, which turn a logical path into its digested public URL
+        $packages = $this->createStub(Packages::class);
+        $packages->method('getUrl')->willReturnCallback(
+            fn(string $path) => str_starts_with($path, 'http') ? $path : '/assets/' . $path . '?digest'
+        );
 
         return new DashboardController(
             $this->createStub(MenuBuilder::class),
@@ -40,13 +52,26 @@ class DashboardControllerTest extends TestCase
             $this->createStub(EssentialActionBuilder::class),
             $this->createStub(DashboardWidgetBuilder::class),
             $this->createStub(OnboardingStepBuilder::class),
-            $this->createStub(ConfigServiceInterface::class),
+            $configService,
             $this->createStub(ScriptAdminRegistry::class),
             $stylesheetManagementRegistry,
             $this->createStub(FormThemeRegistry::class),
             $this->createStub(TranslatorInterface::class),
+            $packages,
             $debug,
         );
+    }
+
+    private function getMadeByLogoSrc(DashboardController $controller): ?string
+    {
+        foreach ($controller->configureMenuItems() as $item) {
+            $label = $item->getAsDto()->getLabel();
+            if (is_string($label) && preg_match('/<img src="([^"]*)"/', $label, $match)) {
+                return $match[1];
+            }
+        }
+
+        return null;
     }
 
     // In dev, each bundle-contributed management stylesheet is added separately, for instant reload on every CSS edit
@@ -69,5 +94,35 @@ class DashboardControllerTest extends TestCase
 
         $this->assertContains('bundles/build/admin.css', $cssPaths);
         $this->assertNotContains('bundles/c975lconfig/css/management.min.css', $cssPaths);
+    }
+
+    // The menu label is raw HTML, not a template, so a relative path has to go through the asset packages here -
+    // left as-is it would resolve against the current /management/... URL instead of the site root
+    public function testMadeByLogoPathIsResolvedThroughTheAssetPackages(): void
+    {
+        $controller = $this->createController(false, [], [
+            'site-made-by-logo' => 'images/logo-975l.svg',
+            'site-made-by-url' => 'https://975l.com',
+        ]);
+
+        $this->assertSame('/assets/images/logo-975l.svg?digest', $this->getMadeByLogoSrc($controller));
+    }
+
+    // A config still holding the absolute URL used before must keep working
+    public function testMadeByLogoAbsoluteUrlIsLeftUntouched(): void
+    {
+        $controller = $this->createController(false, [], [
+            'site-made-by-logo' => 'https://975l.com/images/logo-975l.svg',
+            'site-made-by-url' => 'https://975l.com',
+        ]);
+
+        $this->assertSame('https://975l.com/images/logo-975l.svg', $this->getMadeByLogoSrc($controller));
+    }
+
+    public function testNoMadeByMenuItemWhenEitherConfigIsEmpty(): void
+    {
+        $controller = $this->createController(false, [], ['site-made-by-logo' => 'images/logo-975l.svg']);
+
+        $this->assertNull($this->getMadeByLogoSrc($controller));
     }
 }

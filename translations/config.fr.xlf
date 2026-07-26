@@ -571,6 +571,10 @@
                 <source>description.site_link</source>
                 <target>Ouvre votre site dans un nouvel onglet, exactement comme vos visiteurs le voient</target>
             </trans-unit>
+            <trans-unit id="151">
+                <source>label.health_check_advice_details</source>
+                <target>Voir le détail (%count%)</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

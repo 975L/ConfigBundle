@@ -28,6 +28,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
+use Symfony\Component\Asset\Packages;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -48,6 +49,7 @@ class DashboardController extends AbstractDashboardController
         private readonly StylesheetManagementRegistry $stylesheetManagementRegistry,
         private readonly FormThemeRegistry $formThemeRegistry,
         private readonly TranslatorInterface $translator,
+        private readonly Packages $packages,
         #[Autowire('%kernel.debug%')]
         private readonly bool $debug,
     ) {}
@@ -131,11 +133,15 @@ class DashboardController extends AbstractDashboardController
         $madeByUrl = $this->configService->get('site-made-by-url');
         if ($madeByLogo && $madeByUrl) {
             $madeByLabel = htmlspecialchars($this->translator->trans('label.made_by', [], 'site'), ENT_QUOTES);
+            // Resolved through the asset packages, like the site-side MadeBy/HostedBy components do with asset():
+            // the label is raw HTML, not a template, so a relative path stored in the config would otherwise be
+            // resolved against the current /management/... URL. An absolute URL is returned unchanged, so a config
+            // still holding one keeps working
             yield MenuItem::linkToUrl(
                 sprintf(
                     '<span>%s</span><img src="%s" alt="" class="config-made-by-logo">',
                     $madeByLabel,
-                    htmlspecialchars($madeByLogo, ENT_QUOTES),
+                    htmlspecialchars($this->packages->getUrl($madeByLogo), ENT_QUOTES),
                 ),
                 null,
                 $madeByUrl,

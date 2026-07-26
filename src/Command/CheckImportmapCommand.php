@@ -29,6 +29,8 @@ class CheckImportmapCommand extends Command
         private readonly ImportmapRegistry $importmapRegistry,
         #[Autowire(service: 'asset_mapper.importmap.config_reader')]
         private readonly ImportMapConfigReader $configReader,
+        #[Autowire('%kernel.project_dir%')]
+        private readonly string $projectDir,
     ) {
         parent::__construct();
     }
@@ -36,6 +38,7 @@ class CheckImportmapCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+        $this->warnOnEagerChartjs($io);
         $entries = $this->configReader->getEntries();
 
         $added = [];
@@ -65,5 +68,21 @@ class CheckImportmapCommand extends Command
         $io->listing($added);
 
         return Command::SUCCESS;
+    }
+
+    // symfony/ux-chartjs' Flex recipe enables its chart controller eagerly in assets/controllers.json, which makes startStimulusApp() import chart.js on every front-end page and makes every admin Stimulus app register the controller a second time (see readme). Only warns - rewriting the app's controllers.json isn't this command's job
+    private function warnOnEagerChartjs(SymfonyStyle $io): void
+    {
+        $file = $this->projectDir . '/assets/controllers.json';
+        if (!is_file($file)) {
+            return;
+        }
+
+        $config = json_decode((string) file_get_contents($file), true);
+        if (!is_array($config) || true !== ($config['controllers']['@symfony/ux-chartjs']['chart']['enabled'] ?? false)) {
+            return;
+        }
+
+        $io->warning('assets/controllers.json active "@symfony/ux-chartjs" : chart.js est chargé sur toutes les pages du site et enregistré plusieurs fois sur le dashboard. Passez "enabled" à false - ConfigBundle enregistre lui-même ce contrôleur (voir readme).');
     }
 }

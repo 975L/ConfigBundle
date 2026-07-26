@@ -22,14 +22,18 @@ class CheckImportmapCommandTest extends TestCase
 {
     private string $importmapFile;
 
+    private string $projectDir;
+
     protected function setUp(): void
     {
         $this->importmapFile = sys_get_temp_dir() . '/check-importmap-test-' . uniqid() . '.php';
+        $this->projectDir = sys_get_temp_dir() . '/check-importmap-project-' . uniqid();
+        (new Filesystem())->mkdir($this->projectDir);
     }
 
     protected function tearDown(): void
     {
-        (new Filesystem())->remove($this->importmapFile);
+        (new Filesystem())->remove([$this->importmapFile, $this->projectDir]);
     }
 
     private function createProvider(array $adminEntries): ImportmapProviderInterface
@@ -45,7 +49,17 @@ class CheckImportmapCommandTest extends TestCase
     {
         $configReader = new ImportMapConfigReader($this->importmapFile, new RemotePackageStorage(sys_get_temp_dir()));
 
-        return new CommandTester(new CheckImportmapCommand(new ImportmapRegistry($providers), $configReader));
+        return new CommandTester(new CheckImportmapCommand(new ImportmapRegistry($providers), $configReader, $this->projectDir));
+    }
+
+    private function writeControllersJson(bool $chartjsEnabled): void
+    {
+        (new Filesystem())->dumpFile($this->projectDir . '/assets/controllers.json', json_encode([
+            'controllers' => [
+                '@symfony/ux-chartjs' => ['chart' => ['enabled' => $chartjsEnabled, 'fetch' => 'eager']],
+            ],
+            'entrypoints' => [],
+        ]));
     }
 
     public function testExecuteAddsMissingEntryToEmptyImportmap(): void
@@ -103,5 +117,65 @@ class CheckImportmapCommandTest extends TestCase
         $secondTester->execute([]);
 
         $this->assertStringContainsString('déjà à jour', $secondTester->getDisplay());
+    }
+
+    public function testExecuteWarnsWhenControllersJsonEnablesChartjs(): void
+    {
+        (new Filesystem())->dumpFile($this->importmapFile, "<?php\n\nreturn [];\n");
+        $this->writeControllersJson(true);
+
+        $tester = $this->createTester([]);
+        $tester->execute([]);
+
+        $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
+        $this->assertStringContainsString('@symfony/ux-chartjs', $tester->getDisplay());
+    }
+
+    public function testExecuteDoesNotWarnWhenControllersJsonDisablesChartjs(): void
+    {
+        (new Filesystem())->dumpFile($this->importmapFile, "<?php\n\nreturn [];\n");
+        $this->writeControllersJson(false);
+
+        $tester = $this->createTester([]);
+        $tester->execute([]);
+
+        $this->assertStringNotContainsString('@symfony/ux-chartjs', $tester->getDisplay());
+    }
+
+    public function testExecuteDoesNotWarnWhenControllersJsonIsMissing(): void
+    {
+        (new Filesystem())->dumpFile($this->importmapFile, "<?php\n\nreturn [];\n");
+
+        $tester = $this->createTester([]);
+        $tester->execute([]);
+
+        $this->assertStringNotContainsString('@symfony/ux-chartjs', $tester->getDisplay());
+    }
+
+    // An unreadable controllers.json is the app's own problem to report, not this command's job to fail on
+    public function testExecuteStillSucceedsOnMalformedControllersJson(): void
+    {
+        (new Filesystem())->dumpFile($this->importmapFile, "<?php\n\nreturn [];\n");
+        (new Filesystem())->dumpFile($this->projectDir . '/assets/controllers.json', '{ not json');
+
+        $tester = $this->createTester([]);
+        $tester->execute([]);
+
+        $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
+        $this->assertStringNotContainsString('@symfony/ux-chartjs', $tester->getDisplay());
+    }
+
+    // The entry sits under a "controllers" key - a flat file (or one enabling something else entirely) must not trigger the warning
+    public function testExecuteDoesNotWarnWhenChartjsIsNotUnderTheControllersKey(): void
+    {
+        (new Filesystem())->dumpFile($this->importmapFile, "<?php\n\nreturn [];\n");
+        (new Filesystem())->dumpFile($this->projectDir . '/assets/controllers.json', json_encode([
+            '@symfony/ux-chartjs' => ['chart' => ['enabled' => true]],
+        ]));
+
+        $tester = $this->createTester([]);
+        $tester->execute([]);
+
+        $this->assertStringNotContainsString('@symfony/ux-chartjs', $tester->getDisplay());
     }
 }

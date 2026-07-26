@@ -13,8 +13,9 @@ use c975L\ConfigBundle\Entity\HealthCheckResult;
 // To add advice for one or more HealthCheckProviderInterface kinds, implement this interface (eg. SiteBundle's PageHealthCheckAdviceBuilder) - ConfigBundle merges every registered provider's advice (see HealthCheckAdviceBuilder) so the dashboard "Health check" page and any CRUD's own "Health check" tab (eg. SiteBundle's Page edit screen) render advice through the exact same shared table (health_check/_table.html.twig)
 interface HealthCheckAdviceProviderInterface
 {
-    // Grouped by kind (only kinds this provider actually has something to say about)
+    // Keyed by HealthCheckAdviceBuilder::key() (only the results this provider actually has something to say about) - a same-kind result exists per checked url, so keying by kind would have every url's row show the same advice
+    // Optional "items" on a line: the individual offenders behind a "%count% of them" line (eg. each image without alt text), rendered as a collapsed list under the line, each with its own optional link and that link's label
     // @param HealthCheckResult[] $results
-    // @return array<string, array{text: string, url: ?string}[]>
+    // @return array<string, array{text: string, url: ?string, items?: array{text: string, url: ?string, label: ?string}[]}[]>
     public function buildAdvice(array $results): array;
 }
