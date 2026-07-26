@@ -1,5 +1,15 @@
 # ChangeLog
 
+## v5.10
+
+- Added `DevProfilePathProviderInterface`/`DevProfileCollector`/`DevProfileAnalyzer`/`DevProfileRunner` and the `c975l:dev-profile:run` command, listing what the dev toolbar would flag on every declared page (26/07/2026)
+- `c975l:dev-profile:run` and everything behind it are marked `#[When('dev')]` (26/07/2026)
+- `c975l:dev-profile:run` takes `--path` (repeatable) and `--all` (26/07/2026)
+- `c975l:dev-profile:run` accepts a `--path` no provider declares (26/07/2026)
+- `c975l:dev-profile:run` exits non-zero on an error-level offence (26/07/2026)
+- Added the readme sections on the dev profile and on contributing dev profile paths (26/07/2026)
+- `c975l:dev-profile:run` reports the missing profiler instead of a clean page on a dev environment without `symfony/profiler-pack` (26/07/2026)
+
 ## v5.9.3
 
 - Added `SitemapProviderInterface`/`SitemapWriter` and the `c975l:sitemaps:create` command, writing every bundle's sub-sitemap plus the sitemap index (26/07/2026)

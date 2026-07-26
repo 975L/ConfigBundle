@@ -31,6 +31,7 @@ See it in action at [975l.com/pages/config-bundle](https://975l.com/pages/config
 - Dashboard "Guided tour" walking through every sidebar item that declares a `description`
 - "Health check" dashboard page (Lighthouse scores, security headers, W3C/accessibility checks...) with history, a trend chart, and CSV export, extensible via `HealthCheckProviderInterface`/`HealthCheckAdviceProviderInterface`
 - Sitemap generation (one sub-sitemap per bundle plus the sitemap index), extensible via `SitemapProviderInterface`
+- `c975l:dev-profile:run`, a dev-only command listing what the Symfony dev toolbar would flag on every page (n+1 queries, deprecations, missing translations...), extensible via `DevProfilePathProviderInterface`
 
 ## Installation
 
@@ -843,6 +844,99 @@ Always build the key with `HealthCheckAdviceBuilder::key()` rather than concaten
 Each line needs a `text`, and may carry a `url` (rendered as a link next to the text) and an `items` list. `items` is for a line that summarizes several offenders ("3 images are missing an alt text") — each entry needs its own `text`, and may carry a `url` plus the `label` for that link (falling back to a pencil icon alone), so a dozen offenders stay collapsed instead of pushing the following rows off screen.
 
 `HealthCheckAdviceBuilder::build()` merges every registered provider's advice; two providers with something to say about the same result have their lines appended, neither overwrites the other. It's shared by the dashboard "Health check" page and any CRUD's own "Health check" tab (both render through the same `health_check/_table.html.twig`), so advice reads identically everywhere.
+
+## Dev profile — automating what the dev toolbar shows
+
+`php bin/console c975l:dev-profile:run` renders every page your bundles declare **through the local kernel**, with the profiler on, and prints the list of what the Symfony dev toolbar would flag on each: n+1 queries, deprecations, missing translations, external HTTP calls made while rendering, and so on. It's the automation of "open every page in dev and look at the toolbar".
+
+Everything about it is dev-only: the command, the runner, the collector and every path provider are marked `#[When('dev')]`, so none of those services even exist in prod (where the `profiler` service doesn't either). Nothing is persisted — no entity, no dashboard page, no trend chart. The output *is* the deliverable: a list to fix.
+
+It reads its numbers from the profiler, so `symfony/profiler-pack` has to be installed (it is by default in a `symfony/skeleton` dev environment); without it the command says so on every page rather than reporting them clean.
+
+**Why it doesn't reuse the health check**: [Health check](#health-check) fetches the *live* site over HTTP at `site-url`, which points at production even when run from a dev machine — exactly what you want to judge a deployed site, and exactly what you don't want when profiling the code you're editing. This command never builds a URL at all: providers declare local paths (`/`, `/pages/contact`), each is handed straight to the kernel like a functional test does, so what's measured is your local code against your local database.
+
+```bash
+php bin/console c975l:dev-profile:run                        # every declared page, problems only
+php bin/console c975l:dev-profile:run --path=/pages/contact  # one page, repeatable
+php bin/console c975l:dev-profile:run --all                  # also list the clean pages, with their numbers
+```
+
+Sample output:
+
+```text
+/ — Accueil
+  HTTP 200 · 47 requêtes (31.2 ms) · 68 templates (44.1 ms) · 2 dépréciations · cache 12/40 · 240 ms · 14.2 Mo
+  ERREUR Doctrine       31 requêtes identiques répétées (n+1), dont 32 fois : SELECT t0.id FROM site_block t0 WHERE t0.page_id = ?
+  ALERTE Dépréciations  2 dépréciation(s) : Since symfony/framework-bundle 7.3: ...
+```
+
+The command exits non-zero as soon as one page has an **error**-level offence, so it can gate a pre-push hook the same way `c975l:site:smoke-test` gates a deployment — or your app's `composer test`, as the last entry so it runs once the test suite is green:
+
+```json
+"scripts": {
+    "test": [
+        "@php bin/console cache:warmup --env=test",
+        "phpunit",
+        "@php bin/console cache:pool:clear cache.app --env=dev",
+        "@php bin/console c975l:dev-profile:run --env=dev"
+    ]
+}
+```
+
+`--env=dev` is not optional there: the command is `#[When('dev')]`, so it doesn't exist in the `test` environment — and the dev database is the one holding the pages you actually want profiled, where a test database would only hold fixtures.
+
+### What's measured, and what counts as an offence
+
+| Area | Read from | Reported when |
+| --- | --- | --- |
+| Doctrine | `db` collector | more than `MAX_QUERIES` (30) queries — error past 60 — or more than `MAX_DUPLICATE_QUERIES` (2) identical queries repeated, error past 9. The worst offender's SQL is quoted |
+| Deprecations | `logger` collector | any deprecation (warning) — the cheapest way to see what a Symfony major bump will require |
+| Logs | `logger` collector | any error-level log written while rendering |
+| Translations | `translation` collector | any key with no translation (error, the keys are listed) or served from the fallback locale (warning) |
+| HttpClient | `http_client` collector | **any** call to an external API while rendering (error): that belongs in a command writing to the database, or at worst behind a cache |
+| Twig | `twig` collector | more than `MAX_TEMPLATES` (150) templates rendered — deliberately high, a block-based theme legitimately renders dozens of small templates per page |
+| Response | status code | a non-200: a redirect is a warning (usually the firewall, nothing was profiled), anything else an error |
+
+Timings, memory and cache hits/misses are printed as context but are **never** an offence: `APP_DEBUG`, no opcache and no preloading make a dev machine's milliseconds say nothing about production, and the misses only say how warm the pools happened to be when the run started — whereas the counts above are the same numbers production would produce. The thresholds are constants on `DevProfileAnalyzer` — a site needing different ones overrides that service.
+
+**Clear the app cache pool first** (`php bin/console cache:pool:clear cache.app`). Anything a cached block hides — a missing translation inside it, a Twig syntax error, the queries it would run — stays hidden as long as its cache entry is there, and the run reports the page as clean. It's the single biggest way to get a falsely reassuring report.
+
+Two deliberate behaviours worth knowing: the first declared path is profiled **twice** and its first result dropped (the kernel stays booted from one path to the next, so that one would otherwise carry every warm-up cost — config read from the database, templates compiled, cache pools filled — that none of the following ones show); and `services_resetter` is called after each path, exactly as a messenger worker does between two messages, without which every page would be reported carrying the previous ones' numbers.
+
+## Contributing dev profile paths from other bundles
+
+Any bundle can declare the pages it owns by implementing `DevProfilePathProviderInterface` — no manual service tagging needed, `TaggedInterfacePass` auto-detects any class implementing it, same mechanism as `MenuProviderInterface` above. Mark it `#[When('dev')]`, so it never reaches a production container:
+
+```php
+namespace App\Management;
+
+use c975L\ConfigBundle\Management\DevProfilePathProviderInterface;
+use Symfony\Component\DependencyInjection\Attribute\When;
+
+#[When('dev')]
+class MyDevProfilePathProvider implements DevProfilePathProviderInterface
+{
+    public function __construct(
+        private readonly MyRepository $myRepository,
+    ) {
+    }
+
+    // One entry per path to profile: ['path' => local absolute path, 'label' => ?string]
+    public function getPaths(): array
+    {
+        $paths = [];
+        foreach ($this->myRepository->findAllPublished() as $item) {
+            $paths[] = ['path' => '/shop/' . $item->getSlug(), 'label' => $item->getName()];
+        }
+
+        return $paths;
+    }
+}
+```
+
+Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
+
+**Local paths only** — `/pages/contact`, never `https://example.com/pages/contact`: the path is handed to the kernel, no HTTP request and no host involved. Two bundles declaring the same path is fine, it's profiled once. `c975l/site-bundle` already contributes `PageDevProfilePathProvider` (every published `Page`), so an app installing it has nothing to write for its own pages.
 
 ## Contributing theme presets from other bundles
 

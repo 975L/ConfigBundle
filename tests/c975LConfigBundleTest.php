@@ -13,6 +13,7 @@ use c975L\ConfigBundle\c975LConfigBundle;
 use c975L\ConfigBundle\DependencyInjection\Compiler\TaggedInterfacePass;
 use c975L\ConfigBundle\Management\AlertProviderInterface;
 use c975L\ConfigBundle\Management\DashboardWidgetProviderInterface;
+use c975L\ConfigBundle\Management\DevProfilePathProviderInterface;
 use c975L\ConfigBundle\Management\EssentialActionProviderInterface;
 use c975L\ConfigBundle\Management\ExportProviderInterface;
 use c975L\ConfigBundle\Management\ImportProviderInterface;
@@ -45,6 +46,7 @@ class c975LConfigBundleTest extends TestCase
         $container->register('essential_action_provider', c975LConfigBundleTestEssentialActionProviderFixture::class);
         $container->register('dashboard_widget_provider', c975LConfigBundleTestDashboardWidgetProviderFixture::class);
         $container->register('sitemap_provider', c975LConfigBundleTestSitemapProviderFixture::class);
+        $container->register('dev_profile_path_provider', c975LConfigBundleTestDevProfilePathProviderFixture::class);
 
         (new c975LConfigBundle())->build($container);
 
@@ -66,6 +68,8 @@ class c975LConfigBundleTest extends TestCase
         $this->assertTrue($container->getDefinition('essential_action_provider')->hasTag('c975l.essential_action_provider'));
         $this->assertTrue($container->getDefinition('dashboard_widget_provider')->hasTag('c975l.dashboard_widget_provider'));
         $this->assertTrue($container->getDefinition('sitemap_provider')->hasTag('c975l.sitemap_provider'));
+        // Registered in every environment even though every implementation is #[When('dev')], the pass simply having nothing to tag in prod
+        $this->assertTrue($container->getDefinition('dev_profile_path_provider')->hasTag('c975l.dev_profile_path_provider'));
     }
 
     // Mirrors how Symfony's own kernel invokes it (BundleExtension::load() builds the ContainerConfigurator and calls loadExtension() for us), so this also validates that config/services.yaml itself parses and wires without error
@@ -203,6 +207,14 @@ class c975LConfigBundleTestSitemapProviderFixture implements SitemapProviderInte
     }
 
     public function getUrls(): array
+    {
+        return [];
+    }
+}
+
+class c975LConfigBundleTestDevProfilePathProviderFixture implements DevProfilePathProviderInterface
+{
+    public function getPaths(): array
     {
         return [];
     }

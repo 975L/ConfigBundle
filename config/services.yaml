@@ -79,3 +79,21 @@ services:
         tags:
             - { name: 'ui.admin_script' }
 
+# Wiring for c975l:dev-profile:run, kept under when@dev on purpose: its classes are all marked #[When('dev')], and an entry in the block above would put them back in every environment, prod included, where the "profiler" service doesn't exist. _defaults has to be repeated, a when@ block being parsed as its own root
+when@dev:
+    services:
+        _defaults:
+            autowire: true
+            autoconfigure: true
+            public: true
+
+        c975L\ConfigBundle\Management\DevProfileRunner:
+            arguments:
+                $devProfilePathProviders: !tagged_iterator c975l.dev_profile_path_provider
+
+        c975L\ConfigBundle\Management\DevProfileCollector:
+            arguments:
+                # Neither has an autowiring alias. "@?profiler" rather than "@profiler": a dev environment set up without symfony/profiler-pack must get the command's own message, not a container that won't compile
+                $profiler: '@?profiler'
+                $servicesResetter: '@services_resetter'
+
