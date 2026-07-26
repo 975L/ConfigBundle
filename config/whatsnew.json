@@ -16,6 +16,11 @@
                 "en": "The dashboard's \"Made by\" logo now also shows when its path points to a file of your own site rather than to a full address",
                 "fr": "Le logo « Réalisé par » du tableau de bord s'affiche désormais aussi quand son chemin pointe vers un fichier de votre propre site plutôt que vers une adresse complète",
                 "es": "El logotipo «Realizado por» del panel de control ahora también se muestra cuando su ruta apunta a un archivo de su propio sitio en lugar de a una dirección completa"
+            },
+            {
+                "en": "A new \"Create sitemaps\" button on the dashboard rebuilds the sitemaps search engines read, covering everything published on your site, without waiting for the nightly refresh",
+                "fr": "Un nouveau bouton « Créer les sitemaps » sur le tableau de bord régénère les sitemaps que lisent les moteurs de recherche, pour tout ce qui est publié sur votre site, sans attendre la mise à jour de la nuit",
+                "es": "Un nuevo botón «Crear sitemaps» en el panel de control regenera los sitemaps que leen los motores de búsqueda, con todo lo publicado en su sitio, sin esperar la actualización nocturna"
             }
         ]
     },

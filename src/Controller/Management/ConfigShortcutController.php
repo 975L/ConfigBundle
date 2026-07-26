@@ -9,11 +9,13 @@
 
 namespace c975L\ConfigBundle\Controller\Management;
 
+use c975L\ConfigBundle\Management\SitemapWriter;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\ConfigBundle\Service\Export\ConfigSqlExporter;
 use c975L\ConfigBundle\Service\Export\SyncAllExporter;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,11 +27,13 @@ class ConfigShortcutController extends AbstractController
     public const CLEAR_CACHE_ROUTE = 'management_config_clear_cache';
     public const EXPORT_SQL_ROUTE = 'management_config_export_sql_shortcut';
     public const EXPORT_SYNC_ALL_ROUTE = 'management_config_export_sync_all_shortcut';
+    public const SITEMAPS_CREATE_ROUTE = 'management_config_sitemaps_create';
 
     public function __construct(
         private readonly ConfigServiceInterface $configService,
         private readonly ConfigSqlExporter $configSqlExporter,
         private readonly SyncAllExporter $syncAllExporter,
+        private readonly SitemapWriter $sitemapWriter,
         private readonly TranslatorInterface $translator,
     ) {
     }
@@ -83,5 +87,28 @@ class ConfigShortcutController extends AbstractController
         }
 
         return $this->syncAllExporter->export();
+    }
+
+    // Regenerates every registered SitemapProvider's own sitemap plus the index, same job as the c975l:sitemaps:create command - so it doesn't have to wait for the next scheduler run after publishing something
+    #[AdminRoute(
+        path: '/config/sitemaps-create',
+        name: 'config_sitemaps_create',
+        options: ['methods' => ['POST']]
+    )]
+    public function createSitemaps(Request $request): RedirectResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
+
+        if ($this->isCsrfTokenValid(self::SITEMAPS_CREATE_ROUTE, $request->request->get('_token'))) {
+            // An unwritable public/ folder or two providers sharing a name must be reported, not turned into a 500 nor hidden behind a success flash
+            try {
+                $this->sitemapWriter->write();
+                $this->addFlash('success', $this->translator->trans('flash.config_sitemaps_created', [], 'config'));
+            } catch (IOExceptionInterface | \LogicException $e) {
+                $this->addFlash('error', $this->translator->trans('flash.config_sitemaps_error', ['%error%' => $e->getMessage()], 'config'));
+            }
+        }
+
+        return $this->redirectToRoute('management');
     }
 }

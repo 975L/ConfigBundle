@@ -10,10 +10,12 @@
 namespace c975L\ConfigBundle\Tests\Controller\Management;
 
 use c975L\ConfigBundle\Controller\Management\ConfigShortcutController;
+use c975L\ConfigBundle\Management\SitemapWriter;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\ConfigBundle\Service\Export\ConfigSqlExporter;
 use c975L\ConfigBundle\Service\Export\SyncAllExporter;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,6 +30,7 @@ class ConfigShortcutControllerTest extends TestCase
         ConfigServiceInterface $configService,
         ?ConfigSqlExporter $configSqlExporter = null,
         ?SyncAllExporter $syncAllExporter = null,
+        ?SitemapWriter $sitemapWriter = null,
     ): ConfigShortcutController {
         $translator = $this->createStub(TranslatorInterface::class);
         $translator->method('trans')->willReturnArgument(0);
@@ -36,6 +39,7 @@ class ConfigShortcutControllerTest extends TestCase
             $configService,
             $configSqlExporter ?? $this->createStub(ConfigSqlExporter::class),
             $syncAllExporter ?? $this->createStub(SyncAllExporter::class),
+            $sitemapWriter ?? $this->createStub(SitemapWriter::class),
             $translator,
         );
     }
@@ -178,5 +182,76 @@ class ConfigShortcutControllerTest extends TestCase
         ]));
 
         $controller->exportSyncAll(new Request());
+    }
+
+    public function testCreateSitemapsWritesThemAndAddsFlashWhenTokenIsValid(): void
+    {
+        $sitemapWriter = $this->createMock(SitemapWriter::class);
+        $sitemapWriter->expects($this->once())->method('write')->willReturn(['site']);
+
+        $controller = $this->createController($this->createStub(ConfigServiceInterface::class), null, null, $sitemapWriter);
+        [$requestStack, $session] = $this->createRequestStackWithSession();
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+            'security.csrf.token_manager' => $this->createCsrfTokenManager(true),
+            'router' => $this->createRouter(),
+            'request_stack' => $requestStack,
+        ]));
+
+        $response = $controller->createSitemaps(new Request([], ['_token' => 'valid-token']));
+
+        $this->assertSame(['flash.config_sitemaps_created'], $session->getFlashBag()->get('success'));
+        $this->assertSame('/management', $response->getTargetUrl());
+    }
+
+    public function testCreateSitemapsDoesNothingWhenCsrfTokenIsInvalid(): void
+    {
+        $sitemapWriter = $this->createMock(SitemapWriter::class);
+        $sitemapWriter->expects($this->never())->method('write');
+
+        $controller = $this->createController($this->createStub(ConfigServiceInterface::class), null, null, $sitemapWriter);
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+            'security.csrf.token_manager' => $this->createCsrfTokenManager(false),
+            'router' => $this->createRouter(),
+            'request_stack' => $this->createRequestStackWithSession()[0],
+        ]));
+
+        $controller->createSitemaps(new Request([], ['_token' => 'invalid-token']));
+    }
+
+    // An unwritable public/ folder must be shown as an error flash, and never as the success one nor as a 500
+    public function testCreateSitemapsAddsErrorFlashWhenWritingFails(): void
+    {
+        $sitemapWriter = $this->createStub(SitemapWriter::class);
+        $sitemapWriter->method('write')->willThrowException(new IOException('Failed to write file'));
+
+        $controller = $this->createController($this->createStub(ConfigServiceInterface::class), null, null, $sitemapWriter);
+        [$requestStack, $session] = $this->createRequestStackWithSession();
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+            'security.csrf.token_manager' => $this->createCsrfTokenManager(true),
+            'router' => $this->createRouter(),
+            'request_stack' => $requestStack,
+        ]));
+
+        $response = $controller->createSitemaps(new Request([], ['_token' => 'valid-token']));
+
+        $this->assertSame(['flash.config_sitemaps_error'], $session->getFlashBag()->get('error'));
+        $this->assertSame([], $session->getFlashBag()->get('success'));
+        $this->assertSame('/management', $response->getTargetUrl());
+    }
+
+    // Writing files into public/ stays ROLE_SUPER_ADMIN, unlike the read-only export shortcuts
+    public function testCreateSitemapsDeniesAccessWhenNotGranted(): void
+    {
+        $this->expectException(AccessDeniedException::class);
+
+        $controller = $this->createController($this->createStub(ConfigServiceInterface::class));
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(false),
+        ]));
+
+        $controller->createSitemaps(new Request());
     }
 }

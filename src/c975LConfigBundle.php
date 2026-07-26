@@ -22,6 +22,7 @@ use c975L\ConfigBundle\Management\LinkableRouteProviderInterface;
 use c975L\ConfigBundle\Management\MenuProviderInterface;
 use c975L\ConfigBundle\Management\ProcedureProviderInterface;
 use c975L\ConfigBundle\Management\ShortcutProviderInterface;
+use c975L\ConfigBundle\Management\SitemapProviderInterface;
 use c975L\ConfigBundle\Management\ThemePresetProviderInterface;
 use c975L\ConfigBundle\Management\WhatsNewProviderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -58,6 +59,7 @@ class c975LConfigBundle extends AbstractBundle
         $container->addCompilerPass(new TaggedInterfacePass(HealthCheckProviderInterface::class, 'c975l.health_check_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(HealthCheckAdviceProviderInterface::class, 'c975l.health_check_advice_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(ImportmapProviderInterface::class, 'c975l.importmap_provider'));
+        $container->addCompilerPass(new TaggedInterfacePass(SitemapProviderInterface::class, 'c975l.sitemap_provider'));
     }
 
     public function loadExtension(array $config, ContainerConfigurator $containerConfigurator, ContainerBuilder $containerBuilder): void

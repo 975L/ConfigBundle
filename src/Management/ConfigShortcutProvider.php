@@ -53,6 +53,14 @@ class ConfigShortcutProvider implements ShortcutProviderInterface
                 'category' => ShortcutProviderInterface::CATEGORY_EXPORT,
             ],
             [
+                'label' => $this->translator->trans('label.config_sitemaps_create', [], 'config'),
+                'icon' => 'fas fa-sitemap',
+                'route' => ConfigShortcutController::SITEMAPS_CREATE_ROUTE,
+                'active' => false,
+                'role' => 'ROLE_SUPER_ADMIN',
+                'category' => ShortcutProviderInterface::CATEGORY_SITE,
+            ],
+            [
                 'label' => $this->translator->trans(
                     $maintenanceEnabled ? 'label.maintenance_disable' : 'label.maintenance_enable',
                     [],

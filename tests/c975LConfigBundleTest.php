@@ -20,6 +20,7 @@ use c975L\ConfigBundle\Management\LinkableRouteProviderInterface;
 use c975L\ConfigBundle\Management\MenuProviderInterface;
 use c975L\ConfigBundle\Management\ProcedureProviderInterface;
 use c975L\ConfigBundle\Management\ShortcutProviderInterface;
+use c975L\ConfigBundle\Management\SitemapProviderInterface;
 use c975L\ConfigBundle\Management\ThemePresetProviderInterface;
 use c975L\ConfigBundle\Management\WhatsNewProviderInterface;
 use c975L\ConfigBundle\Service\ConfigService;
@@ -43,6 +44,7 @@ class c975LConfigBundleTest extends TestCase
         $container->register('theme_preset_provider', c975LConfigBundleTestThemePresetProviderFixture::class);
         $container->register('essential_action_provider', c975LConfigBundleTestEssentialActionProviderFixture::class);
         $container->register('dashboard_widget_provider', c975LConfigBundleTestDashboardWidgetProviderFixture::class);
+        $container->register('sitemap_provider', c975LConfigBundleTestSitemapProviderFixture::class);
 
         (new c975LConfigBundle())->build($container);
 
@@ -63,6 +65,7 @@ class c975LConfigBundleTest extends TestCase
         $this->assertTrue($container->getDefinition('theme_preset_provider')->hasTag('c975l.theme_preset_provider'));
         $this->assertTrue($container->getDefinition('essential_action_provider')->hasTag('c975l.essential_action_provider'));
         $this->assertTrue($container->getDefinition('dashboard_widget_provider')->hasTag('c975l.dashboard_widget_provider'));
+        $this->assertTrue($container->getDefinition('sitemap_provider')->hasTag('c975l.sitemap_provider'));
     }
 
     // Mirrors how Symfony's own kernel invokes it (BundleExtension::load() builds the ContainerConfigurator and calls loadExtension() for us), so this also validates that config/services.yaml itself parses and wires without error
@@ -187,6 +190,19 @@ class c975LConfigBundleTestEssentialActionProviderFixture implements EssentialAc
 class c975LConfigBundleTestDashboardWidgetProviderFixture implements DashboardWidgetProviderInterface
 {
     public function getDashboardWidgets(): array
+    {
+        return [];
+    }
+}
+
+class c975LConfigBundleTestSitemapProviderFixture implements SitemapProviderInterface
+{
+    public function getSitemapName(): string
+    {
+        return 'test';
+    }
+
+    public function getUrls(): array
     {
         return [];
     }

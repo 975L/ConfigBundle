@@ -30,6 +30,7 @@ See it in action at [975l.com/pages/config-bundle](https://975l.com/pages/config
 - Dashboard widgets contributed by other bundles (e.g. UiBundle's Donovan card)
 - Dashboard "Guided tour" walking through every sidebar item that declares a `description`
 - "Health check" dashboard page (Lighthouse scores, security headers, W3C/accessibility checks...) with history, a trend chart, and CSV export, extensible via `HealthCheckProviderInterface`/`HealthCheckAdviceProviderInterface`
+- Sitemap generation (one sub-sitemap per bundle plus the sitemap index), extensible via `SitemapProviderInterface`
 
 ## Installation
 
@@ -505,6 +506,45 @@ Entries contributed this way aren't written to `importmap.php` on their own — 
 ```
 
 `c975l:config:check-importmap` then runs on every `composer install`/`composer update`: it adds any entry contributed by an `ImportmapProviderInterface` that's missing from `importmap.php`, and never touches one that's already there (so a manually customized `path` survives). This is a one-time addition per app — after that, a new bundle (or a new provider in an existing one) picks up its `importmap.php` entry on the next `composer update` with no further action.
+
+## Contributing a sitemap from other bundles
+
+If your bundle has public urls of its own (a book catalogue, a shop, a gallery…), implement `SitemapProviderInterface` — no manual service tagging needed, same `TaggedInterfacePass` mechanism as `MenuProviderInterface` above.
+
+`SitemapWriter` then writes one `public/sitemap-<getSitemapName()>.xml` per provider **and** the `public/sitemap-index.xml` declaring them all, so a bundle never renders or writes a sitemap itself, and the consuming app has nothing to list by hand. It runs from the `c975l:sitemaps:create` command (schedule it, see `c975l/site-bundle`'s scheduler section) and from the "Create sitemaps" dashboard shortcut. Both the writer and the two Twig templates live here rather than in SiteBundle, so any combination of bundles gets its sitemaps and its index, SiteBundle installed or not.
+
+```php
+namespace c975L\MyBundle\Management;
+
+use c975L\ConfigBundle\Management\SitemapProviderInterface;
+
+class MySitemapProvider implements SitemapProviderInterface
+{
+    // Gives public/sitemap-my-bundle.xml - keep it short and stable, it ends up in a public url
+    public function getSitemapName(): string
+    {
+        return 'my-bundle';
+    }
+
+    public function getUrls(): array
+    {
+        return [[
+            'loc' => 'https://example.com/my-thing/some-slug',
+            'lastmod' => '2026-07-26',
+            'changefreq' => 'monthly',
+            'priority' => 8,
+        ]];
+    }
+}
+```
+
+Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
+
+`priority` is an integer on the admin's own `0`-`10` scale (the same one as a page's priority), converted by `SitemapWriter` to the `0.0`-`1.0` the sitemap protocol accepts — so a provider never does that conversion itself. A value outside the scale is bounded, and a missing `lastmod`/`changefreq`/`priority` is defaulted (today, `weekly`, `5`), so an incomplete url degrades instead of producing an invalid sitemap. `getSitemapName()` has to be unique across every installed bundle: two providers sharing it would overwrite each other's file, so it throws a `LogicException` instead.
+
+Return `[]` when there's nothing to declare (a bundle installed but with nothing published yet): no file is written and nothing is added to the index — an indexed empty `urlset` is just a crawl error, and any file left by a previous run is removed so nothing stale keeps being served. Same when `site-url` isn't configured, since a sitemap only accepts absolute urls: no provider can build one, so no index is written either.
+
+Point Google Search Console at `sitemap-index.xml` only, never at the sub-sitemaps — installing or removing a bundle then changes what's crawled with nothing to update on Google's side. Both templates are overridable: `@c975LConfig/sitemaps/sitemap.xml.twig` (a sub-sitemap, gets `urls`) and `@c975LConfig/sitemaps/sitemap-index.xml.twig` (the index, gets `sitemaps`).
 
 ## Contributing "What's new" entries from other bundles
 

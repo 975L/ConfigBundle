@@ -575,6 +575,18 @@
                 <source>label.health_check_advice_details</source>
                 <target>Voir le détail (%count%)</target>
             </trans-unit>
+            <trans-unit id="152">
+                <source>label.config_sitemaps_create</source>
+                <target>Créer les sitemaps</target>
+            </trans-unit>
+            <trans-unit id="153">
+                <source>flash.config_sitemaps_created</source>
+                <target>Sitemaps créées avec succès</target>
+            </trans-unit>
+            <trans-unit id="154">
+                <source>flash.config_sitemaps_error</source>
+                <target>Les sitemaps n'ont pas pu être créées : %error%</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

@@ -24,6 +24,7 @@
         "easycorp/easyadmin-bundle": "^5.1",
         "sensiolabs/minify-bundle": "*",
         "symfony/asset-mapper": "*",
+        "symfony/filesystem": "*",
         "symfony/form": "*",
         "symfony/serializer": "*",
         "symfony/ux-chartjs": "^3.3",

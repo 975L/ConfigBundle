@@ -1,5 +1,16 @@
 # ChangeLog
 
+## v5.9.3
+
+- Added `SitemapProviderInterface`/`SitemapWriter` and the `c975l:sitemaps:create` command, writing every bundle's sub-sitemap plus the sitemap index (26/07/2026)
+- Added a "Create sitemaps" dashboard shortcut, and the `@c975LConfig/sitemaps/` sitemap templates, both moved over from SiteBundle (26/07/2026)
+- `SitemapWriter` now writes through `symfony/filesystem`, no longer failing silently on an unwritable `public/` (26/07/2026)
+- `SitemapWriter` now defaults a missing `lastmod`/`changefreq`/`priority` (26/07/2026)
+- `SitemapProviderInterface`'s `priority` is now an integer on the 0-10 scale, converted and bounded to the protocol's 0.0-1.0 by `SitemapWriter` (26/07/2026)
+- `SitemapWriter` now removes the file of a provider that no longer has any url (26/07/2026)
+- `SitemapWriter` now throws when two providers declare the same `getSitemapName()` (26/07/2026)
+- The "Create sitemaps" shortcut now shows an error flash instead of a success one when writing fails (26/07/2026)
+
 ## v5.9.2
 
 - `site-made-by-logo` now accepts a relative AssetMapper path, not only an absolute URL (26/07/2026)

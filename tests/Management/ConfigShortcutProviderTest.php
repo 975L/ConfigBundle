@@ -57,11 +57,15 @@ class ConfigShortcutProviderTest extends TestCase
         $this->assertFalse($shortcuts[2]['active']);
         $this->assertSame('ROLE_ADMIN', $shortcuts[2]['role']);
         $this->assertSame(ShortcutProviderInterface::CATEGORY_EXPORT, $shortcuts[2]['category']);
-        $this->assertSame(MaintenanceShortcutController::TOGGLE_ROUTE_MAINTENANCE, $shortcuts[3]['route']);
+        $this->assertSame(ConfigShortcutController::SITEMAPS_CREATE_ROUTE, $shortcuts[3]['route']);
         $this->assertFalse($shortcuts[3]['active']);
-        $this->assertSame('label.maintenance_enable', $shortcuts[3]['label']);
-        $this->assertSame('ROLE_ADMIN', $shortcuts[3]['role']);
-        $this->assertSame(ShortcutProviderInterface::CATEGORY_MAINTENANCE, $shortcuts[3]['category']);
+        $this->assertSame('ROLE_SUPER_ADMIN', $shortcuts[3]['role']);
+        $this->assertSame(ShortcutProviderInterface::CATEGORY_SITE, $shortcuts[3]['category']);
+        $this->assertSame(MaintenanceShortcutController::TOGGLE_ROUTE_MAINTENANCE, $shortcuts[4]['route']);
+        $this->assertFalse($shortcuts[4]['active']);
+        $this->assertSame('label.maintenance_enable', $shortcuts[4]['label']);
+        $this->assertSame('ROLE_ADMIN', $shortcuts[4]['role']);
+        $this->assertSame(ShortcutProviderInterface::CATEGORY_MAINTENANCE, $shortcuts[4]['category']);
     }
 
     public function testGetShortcutsReflectsMaintenanceEnabledState(): void
@@ -74,7 +78,7 @@ class ConfigShortcutProviderTest extends TestCase
 
         $shortcuts = $provider->getShortcuts();
 
-        $this->assertTrue($shortcuts[3]['active']);
-        $this->assertSame('label.maintenance_disable', $shortcuts[3]['label']);
+        $this->assertTrue($shortcuts[4]['active']);
+        $this->assertSame('label.maintenance_disable', $shortcuts[4]['label']);
     }
 }
