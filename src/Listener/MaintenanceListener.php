@@ -11,6 +11,7 @@ namespace c975L\ConfigBundle\Listener;
 
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Twig\Environment;
@@ -37,44 +38,54 @@ class MaintenanceListener
              return;
         }
 
-        // /management, /login and /m (its shortcut, see ManagementShortcutController) stay reachable so an admin can always log in and lift maintenance
-        $request = $event->getRequest();
-        $path = $request->getPathInfo();
-        if (str_starts_with($path, '/management') || str_starts_with($path, '/login') || '/m' === $path) {
-            return;
-        }
-
-        // Symfony's own dev-tool routes (web debug toolbar, profiler) are only registered in dev/test, so this never opens anything in prod
-        foreach (['/_wdt', '/_profiler', '/_error', '/_fragment'] as $devToolPrefix) {
-            if (str_starts_with($path, $devToolPrefix)) {
-                return;
-            }
-        }
-
-        // Access already granted to an authenticated admin, so maintenance never locks them out
-        if ($this->security->isGranted($this->configService->get('site-role-admin'))) {
-            return;
-        }
-
-        // Access via token in URL : ?t=secret_token
-        if ($request->query->get('t') === $this->configService->get("site-maintenance-hash")) {
-            $maintenance = [
-                'access' => true,
-                'access_time' => time() + 6 * 60 * 60,
-            ];
-            $request->getSession()->set('site-maintenance', $maintenance);
-
-            return;
-        }
-
-        // Access via session (valid token)
-        $maintenance = $request->getSession()->get('site-maintenance');
-        if ($maintenance && $maintenance['access'] && $maintenance['access_time'] > time()) {
+        if ($this->isExempt($event->getRequest())) {
             return;
         }
 
         // Otherwise maintenance page
         $html = $this->twig->render('@c975LConfig/maintenance/index.html.twig');
         $event->setResponse(new Response($html, 503));
+    }
+
+    // Everything that keeps working while the site is down: the admin's own way back in, Symfony's dev tools, an already-authenticated admin, and the maintenance token
+    private function isExempt(Request $request): bool
+    {
+        $path = $request->getPathInfo();
+
+        // /management, /login and /m (its shortcut, see ManagementShortcutController) stay reachable so an admin can always log in and lift maintenance
+        if (str_starts_with($path, '/management') || str_starts_with($path, '/login') || '/m' === $path) {
+            return true;
+        }
+
+        // Symfony's own dev-tool routes (web debug toolbar, profiler) are only registered in dev/test, so this never opens anything in prod
+        foreach (['/_wdt', '/_profiler', '/_error', '/_fragment'] as $devToolPrefix) {
+            if (str_starts_with($path, $devToolPrefix)) {
+                return true;
+            }
+        }
+
+        // Access already granted to an authenticated admin, so maintenance never locks them out
+        if ($this->security->isGranted($this->configService->get('site-role-admin'))) {
+            return true;
+        }
+
+        return $this->hasMaintenanceAccess($request);
+    }
+
+    // Access via token in URL (?t=secret_token), which then opens a 6-hour session for the rest of the visit
+    private function hasMaintenanceAccess(Request $request): bool
+    {
+        if ($request->query->get('t') === $this->configService->get('site-maintenance-hash')) {
+            $request->getSession()->set('site-maintenance', [
+                'access' => true,
+                'access_time' => time() + 6 * 60 * 60,
+            ]);
+
+            return true;
+        }
+
+        $maintenance = $request->getSession()->get('site-maintenance');
+
+        return $maintenance && $maintenance['access'] && $maintenance['access_time'] > time();
     }
 }

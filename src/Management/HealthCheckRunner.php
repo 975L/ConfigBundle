@@ -35,16 +35,7 @@ class HealthCheckRunner
             $rows = $provider->runChecks();
 
             foreach ($rows as $row) {
-                $result = (new HealthCheckResult())
-                    ->setKind($kind)
-                    ->setUrl($row['url'])
-                    ->setLabel($row['label'] ?? null)
-                    ->setStatus($row['status'])
-                    ->setSummary($row['summary'])
-                    ->setDetails($row['details'] ?? null)
-                    ->setEditUrl($row['editUrl'] ?? null)
-                    ->setCheckedAt($checkedAt);
-                $this->entityManager->persist($result);
+                $this->entityManager->persist($this->buildResult($kind, $row, $checkedAt));
             }
 
             $counts[$kind] = \count($rows);
@@ -56,5 +47,31 @@ class HealthCheckRunner
         }
 
         return $counts;
+    }
+
+    // One row as its provider returned it (see HealthCheckProviderInterface::runChecks()), turned into the entity persisted for it - only url/status/summary are required, the rest is what the Health check panel shows when the provider can supply it
+    private function buildResult(string $kind, array $row, \DateTime $checkedAt): HealthCheckResult
+    {
+        return (new HealthCheckResult())
+            ->setKind($kind)
+            ->setUrl($row['url'])
+            ->setLabel($row['label'] ?? null)
+            ->setStatus($row['status'])
+            ->setSummary($row['summary'])
+            ->setDetails($row['details'] ?? null)
+            ->setEditUrl($row['editUrl'] ?? null)
+            ->setCheckedAt($checkedAt);
+    }
+
+    // Every registered provider's kind, deduplicated and in registration order - lets a caller queue one job per kind (see HealthCheckController::run()) rather than one job running them all, so a bundle declaring thousands of urls doesn't drag the free, fast checks down with it, nor take them with it when it fails
+    public function getKinds(): array
+    {
+        $kinds = [];
+
+        foreach ($this->healthCheckProviders as $provider) {
+            $kinds[$provider->getKind()] = true;
+        }
+
+        return array_keys($kinds);
     }
 }

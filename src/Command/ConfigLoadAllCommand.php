@@ -51,15 +51,7 @@ class ConfigLoadAllCommand extends Command
             $bundle = $this->declarationLocator->describe($file);
 
             // Warn if sensitive settings with values are found but no vault key is configured
-            if (!$this->vaultEncryptor->isKeyDefined()) {
-                $configs = json_decode(file_get_contents($file), true) ?? [];
-                foreach ($configs as $configData) {
-                    if (($configData['sensitive'] ?? false) && !empty($configData['value'])) {
-                        $hasSensitiveValues = true;
-                        break;
-                    }
-                }
-            }
+            $hasSensitiveValues = $hasSensitiveValues || $this->hasUnencryptableValues($file);
 
             try {
                 $this->configService->loadDefaultConfig($file);
@@ -83,6 +75,22 @@ class ConfigLoadAllCommand extends Command
         $io->success(sprintf('%d config file(s) processed.', count($files)));
 
         return Command::SUCCESS;
+    }
+
+    // Whether the file declares a sensitive setting carrying a value that can't be encrypted for want of a vault key - always false once one is defined, there's nothing to warn about then
+    private function hasUnencryptableValues(string $file): bool
+    {
+        if ($this->vaultEncryptor->isKeyDefined()) {
+            return false;
+        }
+
+        foreach (json_decode(file_get_contents($file), true) ?? [] as $configData) {
+            if (($configData['sensitive'] ?? false) && !empty($configData['value'])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // Lists the entries left in database that no configs*.json declares anymore (e.g. a setting a bundle dropped), and points at the dashboard page removing them - never deletes anything here, as this command runs unattended on every deployment

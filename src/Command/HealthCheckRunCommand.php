@@ -17,11 +17,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'c975l:health-check:run',
+    name: HealthCheckRunCommand::NAME,
     description: 'Runs every registered HealthCheckProvider (PageSpeed Insights, W3C validator...) and persists the results for the "Health check" dashboard page'
 )]
 class HealthCheckRunCommand extends Command
 {
+    // Named here rather than in the attribute alone so the dashboard's "Run health check now" button can queue this very command (see HealthCheckController::run()) without repeating the string
+    public const NAME = 'c975l:health-check:run';
+
     public function __construct(
         private readonly HealthCheckRunner $healthCheckRunner,
     ) {

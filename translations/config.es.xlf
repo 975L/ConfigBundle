@@ -479,8 +479,8 @@
                 <target>Ejecutar el chequeo de salud ahora</target>
             </trans-unit>
             <trans-unit id="125">
-                <source>flash.health_check_run_success</source>
-                <target>Chequeo de salud completado: %count% resultado(s) registrado(s).</target>
+                <source>flash.health_check_queued</source>
+                <target>Chequeo de salud iniciado en segundo plano: %count% comprobación(es) en cola. Los resultados aparecerán aquí a medida que se completen.</target>
             </trans-unit>
             <trans-unit id="126">
                 <source>label.onboarding_start</source>
@@ -625,6 +625,18 @@
             <trans-unit id="164">
                 <source>label.config_prune_unreadable</source>
                 <target>Los siguientes configs*.json no se pueden leer, por lo que todo lo que declaran aparecería erróneamente como obsoleto. Corríjalos y vuelva a cargar esta página.</target>
+            </trans-unit>
+            <trans-unit id="165">
+                <source>label.health_check_alert_errors</source>
+                <target>Chequeo de salud: %count% resultado(s) con error</target>
+            </trans-unit>
+            <trans-unit id="166">
+                <source>label.health_check_alert_warnings</source>
+                <target>Chequeo de salud: %count% resultado(s) a vigilar</target>
+            </trans-unit>
+            <trans-unit id="167">
+                <source>description.health_check_alert</source>
+                <target>Última ejecución el %date%</target>
             </trans-unit>
         </body>
     </file>

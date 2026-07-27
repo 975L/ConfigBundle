@@ -21,6 +21,16 @@
                 "en": "The deployment checks now appear once in the Health check's \"Site\" section, instead of being repeated on every page",
                 "fr": "Les vérifications de déploiement apparaissent désormais une seule fois dans la section \"Site\" du Bilan de santé, au lieu d'être répétées sur chaque page",
                 "es": "Las comprobaciones de despliegue aparecen ahora una sola vez en la sección \"Sitio\" del Estado de salud, en lugar de repetirse en cada página"
+            },
+            {
+                "en": "\"Run health check now\" no longer keeps you waiting: the checks run in the background and their results show up on the page as they complete",
+                "fr": "\"Lancer le bilan de santé maintenant\" ne vous fait plus attendre : les vérifications tournent en arrière-plan et leurs résultats s'affichent sur la page au fur et à mesure",
+                "es": "\"Ejecutar el estado de salud ahora\" ya no le hace esperar: las comprobaciones se ejecutan en segundo plano y sus resultados aparecen en la página a medida que terminan"
+            },
+            {
+                "en": "The dashboard now alerts you when the last health check left errors or points to keep an eye on, with the date it ran",
+                "fr": "Le tableau de bord vous signale désormais les erreurs et les points à surveiller laissés par le dernier bilan de santé, avec sa date",
+                "es": "El panel le avisa ahora de los errores y los puntos a vigilar que dejó el último estado de salud, con su fecha"
             }
         ]
     },

@@ -44,10 +44,6 @@ services:
         arguments:
             $providers: !tagged_iterator c975l.linkable_route_provider
 
-    c975L\ConfigBundle\Management\ThemePresetRegistry:
-        arguments:
-            $providers: !tagged_iterator c975l.theme_preset_provider
-
     c975L\ConfigBundle\Management\EssentialActionBuilder:
         arguments:
             $essentialActionProviders: !tagged_iterator c975l.essential_action_provider

@@ -21,6 +21,15 @@ class ConfigService implements ConfigServiceInterface
 {
     private const CACHE_KEY = 'site_configs_all';
 
+    // Every optional metadata key a configs.json entry can declare, with what it means when left out ("label" and "slug" are required, so they're not in here)
+    private const METADATA_DEFAULTS = [
+        'kind' => 'text',
+        'group' => null,
+        'description' => null,
+        'severity' => null,
+        'restricted' => false,
+    ];
+
     private ?array $configs = null;
 
     public function __construct(
@@ -141,34 +150,44 @@ class ConfigService implements ConfigServiceInterface
     // Label/kind/group/description/severity/isRestricted/isSensitive are metadata fixed by the bundle author (not user data), so they're kept in sync even on existing configs; only the value carries production state and is never overwritten here - except when the sensitive flag itself changes, see syncSensitive()
     private function syncMetadata(Config $config, array $configData): void
     {
-        $kind = $configData['kind'] ?? 'text';
-        $group = $configData['group'] ?? null;
-        $description = $configData['description'] ?? null;
-        $severity = $configData['severity'] ?? null;
-        $isRestricted = $configData['restricted'] ?? false;
-
+        $metadata = $this->declaredMetadata($configData);
         $sensitiveChanged = $this->syncSensitive($config, $configData);
 
-        if (!$sensitiveChanged
-            && $config->getLabel() === $configData['label']
-            && $config->getKind() === $kind
-            && $config->getGroup() === $group
-            && $config->getDescription() === $description
-            && $config->getSeverity() === $severity
-            && $config->getIsRestricted() === $isRestricted
-        ) {
+        if (!$sensitiveChanged && !$this->metadataDiffers($config, $metadata)) {
             return;
         }
 
-        $config->setLabel($configData['label']);
-        $config->setKind($kind);
-        $config->setGroup($group);
-        $config->setDescription($description);
-        $config->setSeverity($severity);
-        $config->setIsRestricted($isRestricted);
+        $config->setLabel($metadata['label']);
+        $config->setKind($metadata['kind']);
+        $config->setGroup($metadata['group']);
+        $config->setDescription($metadata['description']);
+        $config->setSeverity($metadata['severity']);
+        $config->setIsRestricted($metadata['restricted']);
         $config->setModification(new \DateTime());
 
         $this->manager->persist($config);
+    }
+
+    // The metadata a configs.json entry fixes, defaults applied - the value itself never comes from here
+    private function declaredMetadata(array $configData): array
+    {
+        $metadata = ['label' => $configData['label']];
+        foreach (self::METADATA_DEFAULTS as $key => $default) {
+            $metadata[$key] = $configData[$key] ?? $default;
+        }
+
+        return $metadata;
+    }
+
+    // Nothing is written back when the row already matches its declaration - saves a persist()/modification date on every single entry of every c975l:config:load-all run
+    private function metadataDiffers(Config $config, array $metadata): bool
+    {
+        return $config->getLabel() !== $metadata['label']
+            || $config->getKind() !== $metadata['kind']
+            || $config->getGroup() !== $metadata['group']
+            || $config->getDescription() !== $metadata['description']
+            || $config->getSeverity() !== $metadata['severity']
+            || $config->getIsRestricted() !== $metadata['restricted'];
     }
 
     // Aligns the stored sensitive flag on the declaration - the admin form disables that field, so the json is its only source. The value is converted in the same move (encrypted when it becomes sensitive, decrypted when it stops being), otherwise a flag flip would leave an unreadable "C975L:..." string in a plain-text setting. When the conversion can't be done (no vault key, value encrypted with another one), the flag is left untouched rather than storing something unusable. Returns true when something changed
@@ -180,28 +199,10 @@ class ConfigService implements ConfigServiceInterface
             return false;
         }
 
+        // An empty value has nothing to convert - the flag alone flips
         $value = $config->getValue();
-
-        if (null === $value || '' === $value) {
-            $config->setIsSensitive($declared);
-
-            return true;
-        }
-
-        if ($declared) {
-            if (!$this->vaultEncryptor->isKeyDefined()) {
-                return false;
-            }
-
-            if (!$this->vaultEncryptor->isEncrypted($value)) {
-                $config->setValue($this->vaultEncryptor->encrypt($value));
-            }
-        } elseif ($this->vaultEncryptor->isEncrypted($value)) {
-            try {
-                $config->setValue($this->vaultEncryptor->decrypt($value));
-            } catch (\RuntimeException) {
-                return false;
-            }
+        if (null !== $value && '' !== $value && !$this->convertValue($config, $value, $declared)) {
+            return false;
         }
 
         $config->setIsSensitive($declared);
@@ -209,20 +210,49 @@ class ConfigService implements ConfigServiceInterface
         return true;
     }
 
+    // Encrypts the stored value as the setting becomes sensitive, decrypts it as it stops being - false when that can't be done (no vault key, value encrypted with another one), which is what leaves the flag untouched rather than storing something unusable
+    private function convertValue(Config $config, string $value, bool $declared): bool
+    {
+        if (!$declared) {
+            if (!$this->vaultEncryptor->isEncrypted($value)) {
+                return true;
+            }
+
+            try {
+                $config->setValue($this->vaultEncryptor->decrypt($value));
+            } catch (\RuntimeException) {
+                return false;
+            }
+
+            return true;
+        }
+
+        if (!$this->vaultEncryptor->isKeyDefined()) {
+            return false;
+        }
+
+        if (!$this->vaultEncryptor->isEncrypted($value)) {
+            $config->setValue($this->vaultEncryptor->encrypt($value));
+        }
+
+        return true;
+    }
+
     private function createConfig(array $configData): void
     {
+        $metadata = $this->declaredMetadata($configData);
         $isSensitive = $configData['sensitive'] ?? false;
         $rawValue    = $configData['value'] ?? null;
 
         $config = new Config();
-        $config->setLabel($configData['label']);
+        $config->setLabel($metadata['label']);
         $config->setSlug($configData['slug']);
         $config->setIsSensitive($isSensitive);
-        $config->setIsRestricted($configData['restricted'] ?? false);
-        $config->setKind($configData['kind'] ?? 'text');
-        $config->setGroup($configData['group'] ?? null);
-        $config->setDescription($configData['description'] ?? null);
-        $config->setSeverity($configData['severity'] ?? null);
+        $config->setIsRestricted($metadata['restricted']);
+        $config->setKind($metadata['kind']);
+        $config->setGroup($metadata['group']);
+        $config->setDescription($metadata['description']);
+        $config->setSeverity($metadata['severity']);
         $config->setCreation(new \DateTime());
         $config->setModification(new \DateTime());
 

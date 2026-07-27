@@ -51,29 +51,16 @@ class CheckDeprecationsCommand extends Command
             return Command::SUCCESS;
         }
 
-        // Extracts the human-readable message from each Monolog line, ignoring the trailing JSON context
-        $messages = [];
-        foreach (file($logFile) as $line) {
-            if (!preg_match('/^\[[^\]]+\]\s+deprecation\.\w+:\s+(.+?)\s+\{"exception"/', $line, $m)) {
-                continue;
-            }
-            $message = trim($m[1]);
-            $messages[$message] = ($messages[$message] ?? 0) + 1;
-        }
-
+        $messages = $this->countMessages($logFile);
         if (!$messages) {
             $io->success('Aucune dépréciation trouvée dans ' . $logFile . '.');
 
             return Command::SUCCESS;
         }
 
-        $sourceDirs = ['app' => $this->projectDir . '/src'];
-        foreach (array_filter(glob($this->projectDir . '/vendor/c975l/*') ?: [], 'is_dir') as $dir) {
-            $sourceDirs[basename($dir)] = $dir . '/src';
-        }
         // Only messages tied to app/c975L source (confirmed or possible) are worth surfacing - one with neither is surely a third-party package's own concern, nothing we can act on
         $report = array_values(array_filter(
-            $this->buildReport($messages, $sourceDirs),
+            $this->buildReport($messages, $this->sourceDirs()),
             fn (array $entry) => $entry['hits'] || $entry['possibleHits']
         ));
 
@@ -83,6 +70,46 @@ class CheckDeprecationsCommand extends Command
             return Command::SUCCESS;
         }
 
+        $this->renderReport($io, $report);
+
+        $io->success(sprintf(
+            '%d dépréciation(s) actionnable(s), %d occurrence(s) au total.',
+            count($report),
+            array_sum(array_column($report, 'count'))
+        ));
+
+        return Command::SUCCESS;
+    }
+
+    // Extracts the human-readable message from each Monolog line, ignoring the trailing JSON context - the same deprecation logged a hundred times is one entry with its count
+    private function countMessages(string $logFile): array
+    {
+        $messages = [];
+        foreach (file($logFile) as $line) {
+            if (!preg_match('/^\[[^\]]+\]\s+deprecation\.\w+:\s+(.+?)\s+\{"exception"/', $line, $m)) {
+                continue;
+            }
+
+            $message = trim($m[1]);
+            $messages[$message] = ($messages[$message] ?? 0) + 1;
+        }
+
+        return $messages;
+    }
+
+    // Where a deprecation is worth looking for: the app's own code, plus every installed c975L bundle
+    private function sourceDirs(): array
+    {
+        $sourceDirs = ['app' => $this->projectDir . '/src'];
+        foreach (array_filter(glob($this->projectDir . '/vendor/c975l/*') ?: [], 'is_dir') as $dir) {
+            $sourceDirs[basename($dir)] = $dir . '/src';
+        }
+
+        return $sourceDirs;
+    }
+
+    private function renderReport(SymfonyStyle $io, array $report): void
+    {
         foreach ($report as $entry) {
             $io->section(sprintf('[%dx] %s', $entry['count'], $entry['message']));
             if ($entry['hits']) {
@@ -94,14 +121,6 @@ class CheckDeprecationsCommand extends Command
                 $io->listing($entry['possibleHits']);
             }
         }
-
-        $io->success(sprintf(
-            '%d dépréciation(s) actionnable(s), %d occurrence(s) au total.',
-            count($report),
-            array_sum(array_column($report, 'count'))
-        ));
-
-        return Command::SUCCESS;
     }
 
     // Cross-references each unique deprecation message against the app's own src/ and the installed c975L bundles' source, sorted actionable-first then by frequency

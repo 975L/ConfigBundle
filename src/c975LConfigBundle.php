@@ -24,7 +24,6 @@ use c975L\ConfigBundle\Management\MenuProviderInterface;
 use c975L\ConfigBundle\Management\ProcedureProviderInterface;
 use c975L\ConfigBundle\Management\ShortcutProviderInterface;
 use c975L\ConfigBundle\Management\SitemapProviderInterface;
-use c975L\ConfigBundle\Management\ThemePresetProviderInterface;
 use c975L\ConfigBundle\Management\WhatsNewProviderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -54,7 +53,6 @@ class c975LConfigBundle extends AbstractBundle
         $container->addCompilerPass(new TaggedInterfacePass(ImportProviderInterface::class, 'c975l.import_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(ExportProviderInterface::class, 'c975l.export_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(LinkableRouteProviderInterface::class, 'c975l.linkable_route_provider'));
-        $container->addCompilerPass(new TaggedInterfacePass(ThemePresetProviderInterface::class, 'c975l.theme_preset_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(EssentialActionProviderInterface::class, 'c975l.essential_action_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(DashboardWidgetProviderInterface::class, 'c975l.dashboard_widget_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(HealthCheckProviderInterface::class, 'c975l.health_check_provider'));

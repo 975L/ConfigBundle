@@ -22,6 +22,8 @@ use c975L\ConfigBundle\Service\Export\TableExporter;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
@@ -67,6 +69,14 @@ class HealthCheckControllerTest extends TestCase
         return $this->createStub(TableExporter::class);
     }
 
+    private function createMessageBus(): MessageBusInterface
+    {
+        $messageBus = $this->createStub(MessageBusInterface::class);
+        $messageBus->method('dispatch')->willReturnCallback(static fn (object $message): Envelope => new Envelope($message));
+
+        return $messageBus;
+    }
+
     private function createTrendChartBuilder(): HealthCheckTrendChartBuilder
     {
         $builder = $this->createStub(HealthCheckTrendChartBuilder::class);
@@ -110,6 +120,7 @@ class HealthCheckControllerTest extends TestCase
             $this->createTrendChartBuilder(),
             $this->createConfigService(),
             $this->createTranslator(),
+            $this->createMessageBus(),
         );
         $controller->setContainer($this->createContainer([
             'security.authorization_checker' => $this->createAuthorizationChecker(true),
@@ -160,6 +171,7 @@ class HealthCheckControllerTest extends TestCase
             $this->createTrendChartBuilder(),
             $this->createConfigService(),
             $this->createTranslator(),
+            $this->createMessageBus(),
         );
         $controller->setContainer($this->createContainer([
             'security.authorization_checker' => $this->createAuthorizationChecker(true),
@@ -201,6 +213,7 @@ class HealthCheckControllerTest extends TestCase
             $this->createTrendChartBuilder(),
             $this->createConfigService(),
             $this->createTranslator(),
+            $this->createMessageBus(),
         );
         $controller->setContainer($this->createContainer([
             'security.authorization_checker' => $this->createAuthorizationChecker(true),
@@ -223,6 +236,7 @@ class HealthCheckControllerTest extends TestCase
             $this->createTrendChartBuilder(),
             $this->createConfigService(),
             $this->createTranslator(),
+            $this->createMessageBus(),
         );
         $controller->setContainer($this->createContainer([
             'security.authorization_checker' => $this->createAuthorizationChecker(false),
@@ -231,10 +245,22 @@ class HealthCheckControllerTest extends TestCase
         $controller->index();
     }
 
-    public function testRunCallsHealthCheckRunnerAndAddsFlashWhenTokenIsValid(): void
+    // One job per kind, and the very command the scheduler already runs - never the run itself, which no admin request can wait for
+    public function testRunQueuesOneCommandPerKindAndAddsFlashWhenTokenIsValid(): void
     {
         $healthCheckRunner = $this->createMock(HealthCheckRunner::class);
-        $healthCheckRunner->expects($this->once())->method('run')->willReturn(['pagespeed' => 3]);
+        $healthCheckRunner->expects($this->never())->method('run');
+        $healthCheckRunner->method('getKinds')->willReturn(['pagespeed', 'urls-gallery']);
+
+        $dispatched = [];
+        $messageBus = $this->createMock(MessageBusInterface::class);
+        $messageBus->expects($this->exactly(2))
+            ->method('dispatch')
+            ->willReturnCallback(static function (object $message) use (&$dispatched): Envelope {
+                $dispatched[] = (string) $message;
+
+                return new Envelope($message);
+            });
 
         $controller = new HealthCheckController(
             $this->createStub(HealthCheckResultRepository::class),
@@ -245,6 +271,7 @@ class HealthCheckControllerTest extends TestCase
             $this->createTrendChartBuilder(),
             $this->createConfigService(),
             $this->createTranslator(),
+            $messageBus,
         );
         [$requestStack, $session] = $this->createRequestStackWithSession();
         $controller->setContainer($this->createContainer([
@@ -256,14 +283,21 @@ class HealthCheckControllerTest extends TestCase
 
         $response = $controller->run(new Request([], ['_token' => 'valid-token']));
 
-        $this->assertSame(['flash.health_check_run_success'], $session->getFlashBag()->get('success'));
+        $this->assertSame(
+            ['c975l:health-check:run --kind=pagespeed', 'c975l:health-check:run --kind=urls-gallery'],
+            $dispatched,
+        );
+        $this->assertSame(['flash.health_check_queued'], $session->getFlashBag()->get('success'));
         $this->assertSame('/management', $response->getTargetUrl());
     }
 
-    public function testRunAddsAnErrorFlashAndSkipsTheRunWhenCsrfTokenIsInvalid(): void
+    public function testRunAddsAnErrorFlashAndQueuesNothingWhenCsrfTokenIsInvalid(): void
     {
         $healthCheckRunner = $this->createMock(HealthCheckRunner::class);
         $healthCheckRunner->expects($this->never())->method('run');
+
+        $messageBus = $this->createMock(MessageBusInterface::class);
+        $messageBus->expects($this->never())->method('dispatch');
 
         $controller = new HealthCheckController(
             $this->createStub(HealthCheckResultRepository::class),
@@ -274,6 +308,7 @@ class HealthCheckControllerTest extends TestCase
             $this->createTrendChartBuilder(),
             $this->createConfigService(),
             $this->createTranslator(),
+            $messageBus,
         );
         [$requestStack, $session] = $this->createRequestStackWithSession();
         $controller->setContainer($this->createContainer([
@@ -302,6 +337,7 @@ class HealthCheckControllerTest extends TestCase
             $this->createTrendChartBuilder(),
             $this->createConfigService(),
             $this->createTranslator(),
+            $this->createMessageBus(),
         );
         $controller->setContainer($this->createContainer([
             'security.authorization_checker' => $this->createAuthorizationChecker(false),
@@ -346,6 +382,7 @@ class HealthCheckControllerTest extends TestCase
             $this->createTrendChartBuilder(),
             $this->createConfigService(),
             $this->createTranslator(),
+            $this->createMessageBus(),
         );
         $controller->setContainer($this->createContainer([
             'security.authorization_checker' => $this->createAuthorizationChecker(true),
@@ -367,6 +404,7 @@ class HealthCheckControllerTest extends TestCase
             $this->createTrendChartBuilder(),
             $this->createConfigService(),
             $this->createTranslator(),
+            $this->createMessageBus(),
         );
         $controller->setContainer($this->createContainer([
             'security.authorization_checker' => $this->createAuthorizationChecker(false),

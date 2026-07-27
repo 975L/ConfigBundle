@@ -480,8 +480,8 @@
                 <target>Lancer le bilan de santé</target>
             </trans-unit>
             <trans-unit id="125">
-                <source>flash.health_check_run_success</source>
-                <target>Bilan de santé terminé : %count% résultat(s) enregistré(s).</target>
+                <source>flash.health_check_queued</source>
+                <target>Bilan de santé lancé en arrière-plan : %count% contrôle(s) mis en file. Les résultats apparaîtront ici au fur et à mesure.</target>
             </trans-unit>
             <trans-unit id="126">
                 <source>label.onboarding_start</source>
@@ -626,6 +626,18 @@
             <trans-unit id="164">
                 <source>label.config_prune_unreadable</source>
                 <target>Les configs*.json suivants sont illisibles, tout ce qu'ils déclarent apparaîtrait donc à tort comme obsolète. Corrigez-les, puis rechargez cette page.</target>
+            </trans-unit>
+            <trans-unit id="165">
+                <source>label.health_check_alert_errors</source>
+                <target>Bilan de santé : %count% résultat(s) en erreur</target>
+            </trans-unit>
+            <trans-unit id="166">
+                <source>label.health_check_alert_warnings</source>
+                <target>Bilan de santé : %count% résultat(s) à surveiller</target>
+            </trans-unit>
+            <trans-unit id="167">
+                <source>description.health_check_alert</source>
+                <target>Dernière exécution le %date%</target>
             </trans-unit>
         </body>
     </file>

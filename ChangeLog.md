@@ -1,5 +1,22 @@
 # ChangeLog
 
+## v5.11.1
+
+- Removed `ThemePresetProviderInterface`, `ThemePresetRegistry` and the `c975l.theme_preset_provider` tag (27/07/2026) [BC-Break]
+- `c975l:config:check-importmap` now also adds the third-party packages the c975L bundles' JS imports by bare specifier (27/07/2026)
+- `c975l:config:check-importmap` reports a bare specifier it can't resolve under `vendor/` instead of guessing at it (27/07/2026)
+- Added `ImportmapSpecifierLocator`, resolving a bare specifier from the package's own `assets/package.json` (27/07/2026)
+- The "Run health check now" button now queues one `c975l:health-check:run --kind=…` job per kind, instead of running every provider in the admin's own request (27/07/2026)
+- `HealthCheckController` gained a `MessageBusInterface` constructor argument (27/07/2026) [BC-Break]
+- Added `symfony/messenger` to the requirements (27/07/2026)
+- Added `HealthCheckRunner::getKinds()` and `HealthCheckRunCommand::NAME` (27/07/2026)
+- Added `HealthCheckAlertProvider`, alerting on the last run's errors and warnings, with its date (27/07/2026)
+- Replaced the `flash.health_check_run_success` translation by `flash.health_check_queued` (27/07/2026) [BC-Break]
+- Added the readme section on routing `RunCommandMessage` for the on-demand runs (27/07/2026)
+- Split the long methods of the commands, controllers and services into single-purpose private ones, without behaviour change (27/07/2026)
+- Added `HealthCheckAlertProviderTest` (27/07/2026)
+- Added `ImportmapSpecifierLocatorTest` (27/07/2026)
+
 ## v5.11
 
 - Added the `c975l:config:set` command, setting one entry from the command line or several from a JSON file (27/07/2026)
@@ -378,13 +395,13 @@
 
 - Re-added ConfigParamExtension (24/06/2026)
 
-## v5.2.1
+## v5.2.1
 
 - Added Route possibility to Dashboard (22/06/2026)
 - Renamed methods (22/06/2026)
 - Added translated messages (22/06/2026)
 
-## v5.2
+## v5.2
 
 - Removed use of Fixtures to load default values and replaced by a Command (22/06/2026)
 
@@ -416,7 +433,7 @@
 - Removed use of`c975L/ServicesBundle` (09/03/2025)
 - Removed use of`c975L/IncludeLibraryBundle` (09/03/2025)
 
-## v4.3.1
+## v4.3.1
 
 - Added ? to avoid deprecation (09/03/2025)
 
@@ -517,144 +534,144 @@ Upgrading from v2.x? **Check UPGRADE.md**
 - Corrected unneded config in DependencyInjection (04/03/2020)
 - Removed switch function to reduce Cyclomatic complexity (05/03/2020)
 
-## v2.4.2
+## v2.4.2
 
 - Cosmetic changes dur to Codacy review (04/03/2020)
 
-## v2.4.1
+## v2.4.1
 
 - Removed composer.lock from Git (19/02/2020)
 
-## v2.4
+## v2.4
 
 - Made use of apply spaceless (05/08/2019)
 
-## v2.3.6.1
+## v2.3.6.1
 
 - Changed Github's author reference url (08/04/2019)
 
-## v2.3.6
+## v2.3.6
 
 - Made use of Twig namespace (11/03/2019)
 - Added declaration of $formFactory (11/03/2019)
 
-## v2.3.5
+## v2.3.5
 
 - Removed deprecations for @Method in `README.md` example (13/02/2019)
 - Implemented AstractController instead of Controller in `README.md` example (13/02/2019)
 - Modified Dependencyinjection rootNode to be not empty (13/02/2019)
 
-## v2.3.4
+## v2.3.4
 
 - Modified required versions in `composer.json` (25/12/2018)
 
-## v2.3.3
+## v2.3.3
 
 - Added missing use (25/12/2018)
 
-## v2.3.2
+## v2.3.2
 
 - Added rector to composer dev part (23/12/2018)
 - Modified required versions in composer (23/12/2018)
 
-## v2.3.1
+## v2.3.1
 
 - Corrected error message when config file is not created (04/12/2018)
 
-## v2.3
+## v2.3
 
 - Suppressed `ConfigFirstUseCommand` and replaced by `ConfigCreateCommand` (03/12/2018)
 
-## v2.2.5
+## v2.2.5
 
 - Modified versions in `composer.json` (03/12/2018)
 
-## v2.2.4
+## v2.2.4
 
 - Added information in README.md (28/10/2018)
 - Added method `getContainerParameter()` (+Twig extension) as a shortcut to avoid injecting container when `ConfigService` is already injected (31/10/2018)
 
-## v2.2.3
+## v2.2.3
 
 - Changed location for config folder for SF4 (18/10/2018)
 
-## v2.2.2
+## v2.2.2
 
 - Fixed `getConfig()` that was setting all defined properties found instead of setting only those defined in bundle (03/09/2018)
 
-## v2.2.1
+## v2.2.1
 
 - Added `date` field (02/09/2018)
 - Changed behaviour of `ConfigFirstUseCommand` to also define fields not linked to root and not already defined (to not erase) (02/09/2018)
 
-## v2.2
+## v2.2
 
 - Added possibility to define multiple roots in bundle.yaml (02/09/2018)
 - Fixed `ConfigFirstUseCommand` to use `setConfig()` method (02/09/2018)
 
-## v2.1.4
+## v2.1.4
 
 - Fixed exportation of arrays (01/09/2018)
 
-## v2.1.3
+## v2.1.3
 
 - Updated composer.json (01/09/2018)
 - Added root display in Command (01/09/2018)
 - Fixed Twig extension (01/09/2018)
 
-## v2.1.2
+## v2.1.2
 
 - Simplified `getConfigFolder()` (31/08/2018)
 - Added `hasParameter()` method (31/08/2018)
 - Fixed `getParameter()` (31/08/2018)
 
-## v2.1.1
+## v2.1.1
 
 - Replaced `isset()` by `array_key_exists()` in `getParameter()` (31/08/2018)
 
-## v2.1
+## v2.1
 
 - Updated `README.md` (30/08/2018)
 - Added console Command to create the config from defaut values, to be used before first use (30/08/2018)
 
-## v2.0.1
+## v2.0.1
 
 - Fixed missing returns of $parameters (30/08/2018)
 
-## v2.0
+## v2.0
 
 - Created branch 1.x (30/08/2018)
 - Modified files to use own sytem of key-value for config (30/08/2018)
 
 Upgrading from v1.x? **Check UPGRADE.md**
 
-## v1.2.2
+## v1.2.2
 
 - Updated `README.md` (30/08/2018)
 
-## v1.2.1.1
+## v1.2.1.1
 
 - Updated `README.md` (29/08/2018)
 
-## v1.2.1
+## v1.2.1
 
 - Fixed typo in `README.md` (29/08/2018)
 - Added folder for SF4 (29/08/2018)
 
-## v1.2
+## v1.2
 
 - Added the info field as title for label + field (29/08/2018)
 - Re-designed `ConfigType` in a cleaner way (29/08/2018)
 
-## v1.1.1
+## v1.1.1
 
 - Added test to check if the root node is already defined in the yaml file (28/08/2018)
 - Updated `README.md`` (29/08/2018)
 
-## v1.1
+## v1.1
 
 - Added core files (27/08/2018)
 
-## v1.0
+## v1.0
 
 - Creation of bundle (26/08/2018)

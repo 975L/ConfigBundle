@@ -75,78 +75,86 @@ class ConfigSetCommand extends Command
         $isDryRun = (bool) $input->getOption('dry-run');
         $onlyIfEmpty = (bool) $input->getOption('if-empty');
 
-        $set = 0;
-        $skipped = 0;
-        $hasError = false;
-
+        $counts = ['set' => 0, 'skipped' => 0, 'error' => 0];
         foreach ($values as $slug => $value) {
-            $config = $this->configRepository->findOneBy(['slug' => $slug]);
-
-            // Entries are declared by the bundles' configs.json, never created here: an unknown slug is a typo
-            if (null === $config) {
-                $io->warning('UNKNOWN: ' . $slug . ' (run c975l:config:load-all first if the bundle was just installed)');
-                $hasError = true;
-
-                continue;
-            }
-
-            $value = $this->normalizeValue($value);
-
-            if ('' === $value) {
-                $skipped++;
-                $io->text('  SKIP (empty value): ' . $slug);
-
-                continue;
-            }
-
-            if ($onlyIfEmpty && !$this->isEmpty($config)) {
-                $skipped++;
-                $io->text('  SKIP (already set): ' . $slug);
-
-                continue;
-            }
-
-            $error = $this->validate($config, $value);
-            if (null !== $error) {
-                $io->warning('INVALID: ' . $slug . ' - ' . $error);
-                $hasError = true;
-
-                continue;
-            }
-
-            if ($value === $this->getPlainValue($config)) {
-                $skipped++;
-                $io->text('  SKIP (unchanged): ' . $slug);
-
-                continue;
-            }
-
-            // A sensitive value must never be stored in plain text, so a missing key is an error, not a fallback
-            if ($config->getIsSensitive() && !$this->vaultEncryptor->isKeyDefined()) {
-                $io->warning('SKIP (sensitive, C975L_VAULT_KEY is not defined): ' . $slug);
-                $hasError = true;
-
-                continue;
-            }
-
-            if (!$isDryRun) {
-                $config->setValue($config->getIsSensitive() ? $this->vaultEncryptor->encrypt($value) : $value);
-                $config->setModification(new \DateTime());
-                $this->manager->persist($config);
-            }
-
-            $set++;
-            $io->text(sprintf('  %s: %s = %s', $isDryRun ? 'WOULD SET' : 'SET', $slug, $this->display($config, $value)));
+            $counts[$this->applyValue($slug, $value, $io, $isDryRun, $onlyIfEmpty)]++;
         }
 
-        if (!$isDryRun && $set > 0) {
+        if (!$isDryRun && $counts['set'] > 0) {
             $this->manager->flush();
             $this->configService->invalidateCache();
         }
 
-        $io->success(sprintf('%d %s, %d skipped.', $set, $isDryRun ? 'to set' : 'set', $skipped));
+        $io->success(sprintf('%d %s, %d skipped.', $counts['set'], $isDryRun ? 'to set' : 'set', $counts['skipped']));
 
-        return $hasError ? Command::FAILURE : Command::SUCCESS;
+        return $counts['error'] > 0 ? Command::FAILURE : Command::SUCCESS;
+    }
+
+    // One slug's outcome - 'set', 'skipped' or 'error', each reported to $io as it's decided
+    private function applyValue(string $slug, mixed $value, SymfonyStyle $io, bool $isDryRun, bool $onlyIfEmpty): string
+    {
+        $config = $this->configRepository->findOneBy(['slug' => $slug]);
+
+        // Entries are declared by the bundles' configs.json, never created here: an unknown slug is a typo
+        if (null === $config) {
+            $io->warning('UNKNOWN: ' . $slug . ' (run c975l:config:load-all first if the bundle was just installed)');
+
+            return 'error';
+        }
+
+        $value = $this->normalizeValue($value);
+
+        $skipReason = $this->skipReason($config, $value, $onlyIfEmpty);
+        if (null !== $skipReason) {
+            $io->text('  SKIP (' . $skipReason . '): ' . $slug);
+
+            return 'skipped';
+        }
+
+        $error = $this->validate($config, $value);
+        if (null !== $error) {
+            $io->warning('INVALID: ' . $slug . ' - ' . $error);
+
+            return 'error';
+        }
+
+        if ($value === $this->getPlainValue($config)) {
+            $io->text('  SKIP (unchanged): ' . $slug);
+
+            return 'skipped';
+        }
+
+        // A sensitive value must never be stored in plain text, so a missing key is an error, not a fallback
+        if ($config->getIsSensitive() && !$this->vaultEncryptor->isKeyDefined()) {
+            $io->warning('SKIP (sensitive, C975L_VAULT_KEY is not defined): ' . $slug);
+
+            return 'error';
+        }
+
+        if (!$isDryRun) {
+            $this->writeValue($config, $value);
+        }
+
+        $io->text(sprintf('  %s: %s = %s', $isDryRun ? 'WOULD SET' : 'SET', $slug, $this->display($config, $value)));
+
+        return 'set';
+    }
+
+    // Why a value isn't worth writing, before it's even validated - an incomplete file never blanks out a live setting, and --if-empty only ever fills in what's still missing
+    private function skipReason(Config $config, string $value, bool $onlyIfEmpty): ?string
+    {
+        if ('' === $value) {
+            return 'empty value';
+        }
+
+        return $onlyIfEmpty && !$this->isEmpty($config) ? 'already set' : null;
+    }
+
+    private function writeValue(Config $config, string $value): void
+    {
+        $config->setValue($config->getIsSensitive() ? $this->vaultEncryptor->encrypt($value) : $value);
+        $config->setModification(new \DateTime());
+        $this->manager->persist($config);
     }
 
     // Returns the slug => value pairs to apply, either from the arguments or from the JSON file

@@ -116,4 +116,33 @@ class HealthCheckRunnerTest extends TestCase
 
         $this->assertSame(['pagespeed' => 0, 'wave' => 0], $counts);
     }
+
+    // What the dashboard's "Run health check now" button queues one job from (see HealthCheckController::run())
+    public function testGetKindsListsEveryRegisteredKind(): void
+    {
+        $runner = new HealthCheckRunner(
+            [$this->createProvider('pagespeed', []), $this->createProvider('wave', [])],
+            $this->createStub(EntityManagerInterface::class),
+        );
+
+        $this->assertSame(['pagespeed', 'wave'], $runner->getKinds());
+    }
+
+    // Two providers of the same kind is one job to queue, not two identical ones
+    public function testGetKindsDeduplicates(): void
+    {
+        $runner = new HealthCheckRunner(
+            [$this->createProvider('urls-book', []), $this->createProvider('urls-book', [])],
+            $this->createStub(EntityManagerInterface::class),
+        );
+
+        $this->assertSame(['urls-book'], $runner->getKinds());
+    }
+
+    public function testGetKindsIsEmptyWithoutAnyProvider(): void
+    {
+        $runner = new HealthCheckRunner([], $this->createStub(EntityManagerInterface::class));
+
+        $this->assertSame([], $runner->getKinds());
+    }
 }

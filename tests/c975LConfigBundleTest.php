@@ -22,7 +22,6 @@ use c975L\ConfigBundle\Management\MenuProviderInterface;
 use c975L\ConfigBundle\Management\ProcedureProviderInterface;
 use c975L\ConfigBundle\Management\ShortcutProviderInterface;
 use c975L\ConfigBundle\Management\SitemapProviderInterface;
-use c975L\ConfigBundle\Management\ThemePresetProviderInterface;
 use c975L\ConfigBundle\Management\WhatsNewProviderInterface;
 use c975L\ConfigBundle\Service\ConfigService;
 use PHPUnit\Framework\TestCase;
@@ -42,7 +41,6 @@ class c975LConfigBundleTest extends TestCase
         $container->register('export_provider', c975LConfigBundleTestExportProviderFixture::class);
         $container->register('procedure_provider', c975LConfigBundleTestProcedureProviderFixture::class);
         $container->register('linkable_route_provider', c975LConfigBundleTestLinkableRouteProviderFixture::class);
-        $container->register('theme_preset_provider', c975LConfigBundleTestThemePresetProviderFixture::class);
         $container->register('essential_action_provider', c975LConfigBundleTestEssentialActionProviderFixture::class);
         $container->register('dashboard_widget_provider', c975LConfigBundleTestDashboardWidgetProviderFixture::class);
         $container->register('sitemap_provider', c975LConfigBundleTestSitemapProviderFixture::class);
@@ -64,7 +62,6 @@ class c975LConfigBundleTest extends TestCase
         $this->assertTrue($container->getDefinition('export_provider')->hasTag('c975l.export_provider'));
         $this->assertTrue($container->getDefinition('procedure_provider')->hasTag('c975l.procedure_provider'));
         $this->assertTrue($container->getDefinition('linkable_route_provider')->hasTag('c975l.linkable_route_provider'));
-        $this->assertTrue($container->getDefinition('theme_preset_provider')->hasTag('c975l.theme_preset_provider'));
         $this->assertTrue($container->getDefinition('essential_action_provider')->hasTag('c975l.essential_action_provider'));
         $this->assertTrue($container->getDefinition('dashboard_widget_provider')->hasTag('c975l.dashboard_widget_provider'));
         $this->assertTrue($container->getDefinition('sitemap_provider')->hasTag('c975l.sitemap_provider'));
@@ -162,14 +159,6 @@ class c975LConfigBundleTestExportProviderFixture implements ExportProviderInterf
 class c975LConfigBundleTestLinkableRouteProviderFixture implements LinkableRouteProviderInterface
 {
     public function getLinkableRoutes(): array
-    {
-        return [];
-    }
-}
-
-class c975LConfigBundleTestThemePresetProviderFixture implements ThemePresetProviderInterface
-{
-    public function getPresets(): array
     {
         return [];
     }

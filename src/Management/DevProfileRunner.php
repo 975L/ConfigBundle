@@ -46,21 +46,9 @@ class DevProfileRunner
         return $report;
     }
 
-    // Every provider's paths, deduplicated: two bundles declaring the same path (a page reachable through both) must not be profiled twice
     private function collectPaths(array $onlyPaths): array
     {
-        $paths = [];
-        foreach ($this->devProfilePathProviders as $provider) {
-            foreach ($provider->getPaths() as $entry) {
-                $path = $entry['path'] ?? null;
-                if (!$path || isset($paths[$path])) {
-                    continue;
-                }
-
-                $paths[$path] = ['path' => $path, 'label' => $entry['label'] ?? null];
-            }
-        }
-
+        $paths = $this->declaredPaths();
         if (!$onlyPaths) {
             return $paths;
         }
@@ -72,5 +60,21 @@ class DevProfileRunner
         }
 
         return $selected;
+    }
+
+    // Every provider's paths, deduplicated: two bundles declaring the same path (a page reachable through both) must not be profiled twice
+    private function declaredPaths(): array
+    {
+        $paths = [];
+        foreach ($this->devProfilePathProviders as $provider) {
+            foreach ($provider->getPaths() as $entry) {
+                $path = $entry['path'] ?? null;
+                if ($path && !isset($paths[$path])) {
+                    $paths[$path] = ['path' => $path, 'label' => $entry['label'] ?? null];
+                }
+            }
+        }
+
+        return $paths;
     }
 }

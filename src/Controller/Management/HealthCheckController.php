@@ -9,6 +9,7 @@
 
 namespace c975L\ConfigBundle\Controller\Management;
 
+use c975L\ConfigBundle\Command\HealthCheckRunCommand;
 use c975L\ConfigBundle\Entity\HealthCheckResult;
 use c975L\ConfigBundle\Management\AlertBuilder;
 use c975L\ConfigBundle\Management\HealthCheckAdviceBuilder;
@@ -20,9 +21,11 @@ use c975L\ConfigBundle\Service\Export\ExportFormat;
 use c975L\ConfigBundle\Service\Export\TableExporter;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Console\Messenger\RunCommandMessage;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class HealthCheckController extends AbstractController
@@ -42,6 +45,7 @@ class HealthCheckController extends AbstractController
         private readonly HealthCheckTrendChartBuilder $healthCheckTrendChartBuilder,
         private readonly ConfigServiceInterface $configService,
         private readonly TranslatorInterface $translator,
+        private readonly MessageBusInterface $messageBus,
     ) {
     }
 
@@ -83,7 +87,7 @@ class HealthCheckController extends AbstractController
         );
     }
 
-    // Runs every HealthCheckProvider synchronously (same HealthCheckRunner as the console command) - can take a while (PageSpeed Insights calls one page at a time), the admin clicking it is expected to wait, same as the "Site backup" shortcut
+    // Queues the run instead of executing it, one job per provider kind: a single provider can hold thousands of urls (a gallery declares one per photo), which no admin request can wait for without timing out - and a run that times out persists nothing at all. The jobs are the very console command the scheduler already runs, so nothing new has to be wired beyond routing RunCommandMessage to an async transport (see the readme). Results land on this page as each job completes, and HealthCheckAlertProvider raises what needs attention on the dashboard
     #[AdminRoute(
         path: '/health-check/run',
         name: 'health_check_run',
@@ -94,10 +98,15 @@ class HealthCheckController extends AbstractController
         $this->denyAccessUnlessGranted($this->configService->get('site-role-admin'));
 
         if ($this->isCsrfTokenValid(self::RUN_ROUTE, $request->request->get('_token'))) {
-            $counts = $this->healthCheckRunner->run();
+            $kinds = $this->healthCheckRunner->getKinds();
+
+            foreach ($kinds as $kind) {
+                $this->messageBus->dispatch(new RunCommandMessage(HealthCheckRunCommand::NAME . ' --kind=' . $kind));
+            }
+
             $this->addFlash('success', $this->translator->trans(
-                'flash.health_check_run_success',
-                ['%count%' => array_sum($counts)],
+                'flash.health_check_queued',
+                ['%count%' => \count($kinds)],
                 'config',
             ));
         } else {

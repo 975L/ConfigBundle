@@ -110,149 +110,15 @@ class ConfigCrudController extends AbstractCrudController
     {
         $context = $this->getContext();
         $entity = null !== $context ? $context->getEntity()->getInstance() : null;
-        $isSensitive = $entity instanceof Config && true === $entity->getIsSensitive();
-
-        // Kind is fixed by the import json, never editable through the admin
-        $kindField = TextField::new('kind')
-            ->setLabel(t('label.kind', [], 'config'))
-            ->setFormTypeOption('disabled', true);
-
-        // Group is fixed by the import json, never editable through the admin. formatValue() only runs on index/detail (EasyAdmin skips it for disabled form fields), so the edit page's disabled input needs the translated text injected via form data instead
-        $groupField = TextField::new('group')
-            ->setLabel(t('label.group', [], 'config'))
-            ->setFormTypeOption('disabled', true)
-            ->formatValue(fn (?string $group): string =>
-                $group ? $this->translator->trans('label.group_' . $group, [], 'config') : ''
-            );
-        if (Crud::PAGE_EDIT === $pageName && $entity instanceof Config) {
-            $group = $entity->getGroup();
-            $groupField->setFormTypeOptions([
-                'data' => $group ? $this->translator->trans('label.group_' . $group, [], 'config') : '',
-            ]);
-        }
-
-        // Severity is fixed by the import json, never editable through the admin. Rendered as a colored badge so an empty mandatory config stands out in the list
-        $severityFieldChoices = [];
-        foreach (Config::SEVERITIES as $severity) {
-            $severityFieldChoices[$severity] = t('label.severity_' . $severity, [], 'config');
-        }
-
-        $severityField = ChoiceField::new('severity')
-            ->setLabel(t('label.severity', [], 'config'))
-            ->setTranslatableChoices($severityFieldChoices)
-            ->renderAsBadges([
-                Config::SEVERITY_DANGER => 'danger',
-                Config::SEVERITY_WARNING => 'warning',
-                Config::SEVERITY_INFO => 'info',
-            ])
-            ->setFormTypeOption('disabled', true);
-
-        $kind = $entity instanceof Config ? $entity->getKind() : Config::TYPE_TEXT;
-        $rawValue = $entity instanceof Config ? $entity->getValue() : null;
-
-        // Index lists every config in one column: kind/sensitivity vary per row and can't be resolved from the (null) top-level entity, so decide via the row's $config argument
-        if (Crud::PAGE_INDEX === $pageName) {
-            $valueField = TextareaField::new('value')
-                ->setLabel(t('label.value', [], 'config'))
-                // Only an actual secret is masked: an empty sensitive config must read as empty, otherwise the list shows "••••••••" for a setting nobody has filled in yet - and contradicts the dashboard alert telling you to fill it
-                ->formatValue(fn (?string $value, Config $config): string =>
-                    $config->getIsSensitive() && null !== $value && '' !== $value ? '••••••••' : ($value ?? '')
-                );
-        } elseif ($isSensitive && Crud::PAGE_EDIT === $pageName) {
-            // Sensitive fields are pre-filled with the decrypted raw string value in edit (must stay the raw string, not configService->get()'s kind-cast value, otherwise a sensitive bool/int/date config like site-maintenance renders as "1"/"" instead of "true"/"false") (no need to mask with a password widget, edit is the only page besides the masked index that ever shows this field)
-            $decryptedValue = null;
-            if (null !== $rawValue && '' !== $rawValue) {
-                $decryptedValue = $this->vaultEncryptor->decrypt($rawValue);
-            }
-
-            // A sensitive json config (e.g. an authorized-tokens map) still needs a multi-line widget -
-            // the single-line TextField below is fine for a sensitive string/key but unusable for json
-            $valueField = (Config::TYPE_JSON === $kind ? TextareaField::new('value') : TextField::new('value'))
-                ->setLabel(t('label.value_sensitive', [], 'config'))
-                ->setFormTypeOptions([
-                    'data' => Config::TYPE_JSON === $kind ? $this->prettyJson($decryptedValue) : $decryptedValue,
-                ])
-                ->setRequired(false);
-        } else {
-            // Non-sensitive fields use a widget matching the config kind
-            $valueField = match ($kind) {
-                // The raw string value must be overridden with a real bool/DateTime via setValue(), since EasyAdmin's boolean/date templates and formatters read the field's raw value directly
-                Config::TYPE_BOOL => BooleanField::new('value')
-                    ->setLabel(t('label.value', [], 'config'))
-                    ->setValue($this->configService->getBool($rawValue))
-                    ->setFormTypeOptions(['data' => $this->configService->getBool($rawValue)]),
-                Config::TYPE_INT => IntegerField::new('value')
-                    ->setLabel(t('label.value', [], 'config'))
-                    ->setFormTypeOptions(['data' => null !== $rawValue ? (int) $rawValue : null])
-                    ->setRequired(false),
-                Config::TYPE_DATE => DateField::new('value')
-                    ->setLabel(t('label.value', [], 'config'))
-                    ->setValue($this->toDate($rawValue))
-                    ->setFormTypeOptions(['data' => $this->toDate($rawValue)])
-                    ->setRequired(false),
-                Config::TYPE_JSON => TextareaField::new('value')
-                    ->setLabel(t('label.value', [], 'config'))
-                    ->setHelp(t('help.value_json', [], 'config'))
-                    ->setFormTypeOptions(['data' => $this->prettyJson($rawValue)])
-                    ->formatValue(fn (?string $value): string => $this->prettyJson($value) ?? '')
-                    ->setRequired(false),
-                // Html kind is for the rare configs needing rich content, reuses EasyAdmin's own rich text editor (same widget as blocks)
-                Config::TYPE_HTML => TextEditorField::new('value')
-                    ->setLabel(t('label.value', [], 'config'))
-                    ->setRequired(false),
-                // Font kind offers a <select> built from FontRegistry (see FontChoiceType) instead of free text. Falls
-                // back to a plain TextField when no FontProviderInterface is registered (e.g. no SiteBundle) or it
-                // returns no font - an unusable empty <select> would be worse than free text in that case
-                Config::TYPE_FONT => $this->buildFontField($rawValue),
-                // Text kind is plain string (URLs, ids, emails...), a rich editor would wrap it in a <div>
-                default => TextField::new('value')
-                    ->setLabel(t('label.value', [], 'config'))
-                    ->setRequired(false),
-            };
-        }
-
-        // Edit form renders field help as plain text below the widget (unlike detail/index, which use a tooltip/popover). The json kind keeps its own dedicated help instead, since it needs to explain the expected format
-        if (Crud::PAGE_EDIT === $pageName) {
-            $valueField = $valueField->setHelp(Config::TYPE_JSON === $kind
-                ? t('help.value_json', [], 'config')
-                : t('help.value', [], 'config'));
-        }
-
-        // Description holds a 'site_config' translation key (description.xxx) once a bundle has migrated to it; trans() safely falls back to the raw text unchanged for bundles that haven't yet. formatValue() only runs on index/detail (EasyAdmin skips it for disabled form fields), so the edit page's disabled input needs the translated text injected via form data instead. ReadonlyTextType renders a <p> instead of an <input> - see form_theme.html.twig
-        $descriptionField = TextField::new('description')
-            ->setLabel(t('label.description', [], 'config'))
-            ->setFormType(ReadonlyTextType::class)
-            ->setFormTypeOption('disabled', true)
-            ->hideOnIndex()
-            ->formatValue(fn (?string $description): string =>
-                $description ? $this->translator->trans($description, [], 'site_config') : ''
-            );
-        if (Crud::PAGE_EDIT === $pageName && $entity instanceof Config) {
-            $description = $entity->getDescription();
-            $descriptionField->setFormTypeOptions([
-                'data' => $description ? $this->translator->trans($description, [], 'site_config') : '',
-            ]);
-        }
-
-        // Label uses a 'site_config' translation key derived from the slug (label.xxx), mirroring description's key format; trans() falls back to the raw key unchanged if not translated. formatValue() only runs on index/detail (EasyAdmin skips it for disabled form fields), so the edit page's disabled input needs the translated text injected via form data instead
-        $labelField = TextField::new('label')
-            ->setLabel(t('label.label', [], 'config'))
-            ->setFormTypeOption('disabled', true)
-            ->formatValue(fn (string $label, Config $config): string =>
-                $this->translator->trans($config->getLabelTranslationKey(), [], 'site_config')
-            );
-        if (Crud::PAGE_EDIT === $pageName && $entity instanceof Config) {
-            $labelField->setFormTypeOptions([
-                'data' => $this->translator->trans($entity->getLabelTranslationKey(), [], 'site_config'),
-            ]);
-        }
+        $config = $entity instanceof Config ? $entity : null;
+        $isEdit = Crud::PAGE_EDIT === $pageName;
 
         return [
             IdField::new('id')
                 ->setLabel(false)
                 ->onlyOnIndex(),
             // Label/slug are fixed by the import json, never editable through the admin
-            $labelField,
+            $this->labelField($isEdit, $config),
             TextField::new('slug')
                 ->setLabel(t('label.slug', [], 'config'))
                 ->setFormTypeOption('disabled', true),
@@ -271,20 +137,22 @@ class ConfigCrudController extends AbstractCrudController
                 ->setFormTypeOption('disabled', true)
                 ->setHelp(t('label.is_restricted_help', [], 'config')),
 
-            // Kind
-            $kindField,
+            // Kind is fixed by the import json, never editable through the admin
+            TextField::new('kind')
+                ->setLabel(t('label.kind', [], 'config'))
+                ->setFormTypeOption('disabled', true),
 
             // Group
-            $groupField,
+            $this->groupField($isEdit, $config),
 
             // Severity
-            $severityField,
+            $this->severityField(),
 
             // Content — widget depends on kind (bool/int/date/text); sensitive values are masked on the index list, revealed only on edit
-            $valueField,
+            $this->valueField($pageName, $config),
 
             // Fixed by the import json, never editable through the admin
-            $descriptionField,
+            $this->descriptionField($isEdit, $config),
 
             // Dates - shown read-only on edit rather than onlyOnDetail() now that the detail page is gone (see configureActions())
             DateTimeField::new('creation')
@@ -296,6 +164,175 @@ class ConfigCrudController extends AbstractCrudController
                 ->setFormTypeOption('disabled', 'disabled')
                 ->hideOnIndex(),
         ];
+    }
+
+    // Label uses a 'site_config' translation key derived from the slug (label.xxx), mirroring description's key format; trans() falls back to the raw key unchanged if not translated. formatValue() only runs on index/detail (EasyAdmin skips it for disabled form fields), so the edit page's disabled input needs the translated text injected via form data instead
+    private function labelField(bool $isEdit, ?Config $config): TextField
+    {
+        $field = TextField::new('label')
+            ->setLabel(t('label.label', [], 'config'))
+            ->setFormTypeOption('disabled', true)
+            ->formatValue(fn (string $label, Config $rowConfig): string =>
+                $this->translator->trans($rowConfig->getLabelTranslationKey(), [], 'site_config')
+            );
+
+        if ($isEdit && null !== $config) {
+            $field->setFormTypeOptions([
+                'data' => $this->translator->trans($config->getLabelTranslationKey(), [], 'site_config'),
+            ]);
+        }
+
+        return $field;
+    }
+
+    // Group is fixed by the import json, never editable through the admin. formatValue() only runs on index/detail (EasyAdmin skips it for disabled form fields), so the edit page's disabled input needs the translated text injected via form data instead
+    private function groupField(bool $isEdit, ?Config $config): TextField
+    {
+        $field = TextField::new('group')
+            ->setLabel(t('label.group', [], 'config'))
+            ->setFormTypeOption('disabled', true)
+            ->formatValue(fn (?string $group): string => $this->groupLabel($group));
+
+        if ($isEdit && null !== $config) {
+            $field->setFormTypeOptions(['data' => $this->groupLabel($config->getGroup())]);
+        }
+
+        return $field;
+    }
+
+    private function groupLabel(?string $group): string
+    {
+        return $group ? $this->translator->trans('label.group_' . $group, [], 'config') : '';
+    }
+
+    // Description holds a 'site_config' translation key (description.xxx) once a bundle has migrated to it; trans() safely falls back to the raw text unchanged for bundles that haven't yet. formatValue() only runs on index/detail (EasyAdmin skips it for disabled form fields), so the edit page's disabled input needs the translated text injected via form data instead. ReadonlyTextType renders a <p> instead of an <input> - see form_theme.html.twig
+    private function descriptionField(bool $isEdit, ?Config $config): TextField
+    {
+        $field = TextField::new('description')
+            ->setLabel(t('label.description', [], 'config'))
+            ->setFormType(ReadonlyTextType::class)
+            ->setFormTypeOption('disabled', true)
+            ->hideOnIndex()
+            ->formatValue(fn (?string $description): string => $this->descriptionLabel($description));
+
+        if ($isEdit && null !== $config) {
+            $field->setFormTypeOptions(['data' => $this->descriptionLabel($config->getDescription())]);
+        }
+
+        return $field;
+    }
+
+    private function descriptionLabel(?string $description): string
+    {
+        return $description ? $this->translator->trans($description, [], 'site_config') : '';
+    }
+
+    // Severity is fixed by the import json, never editable through the admin. Rendered as a colored badge so an empty mandatory config stands out in the list
+    private function severityField(): ChoiceField
+    {
+        $choices = [];
+        foreach (Config::SEVERITIES as $severity) {
+            $choices[$severity] = t('label.severity_' . $severity, [], 'config');
+        }
+
+        return ChoiceField::new('severity')
+            ->setLabel(t('label.severity', [], 'config'))
+            ->setTranslatableChoices($choices)
+            ->renderAsBadges([
+                Config::SEVERITY_DANGER => 'danger',
+                Config::SEVERITY_WARNING => 'warning',
+                Config::SEVERITY_INFO => 'info',
+            ])
+            ->setFormTypeOption('disabled', true);
+    }
+
+    // Three different widgets behind one column: masked on the index, revealed (decrypted) on a sensitive entry's edit form, and matching the entry's own kind otherwise
+    private function valueField(string $pageName, ?Config $config): FieldInterface
+    {
+        $kind = null !== $config ? $config->getKind() : Config::TYPE_TEXT;
+        $rawValue = $config?->getValue();
+        $isEdit = Crud::PAGE_EDIT === $pageName;
+
+        $field = match (true) {
+            Crud::PAGE_INDEX === $pageName => $this->maskedValueField(),
+            $isEdit && true === $config?->getIsSensitive() => $this->sensitiveValueField($kind, $rawValue),
+            default => $this->kindValueField($kind, $rawValue),
+        };
+
+        // Edit form renders field help as plain text below the widget (unlike detail/index, which use a tooltip/popover). The json kind keeps its own dedicated help instead, since it needs to explain the expected format
+        if ($isEdit) {
+            $field = $field->setHelp(Config::TYPE_JSON === $kind
+                ? t('help.value_json', [], 'config')
+                : t('help.value', [], 'config'));
+        }
+
+        return $field;
+    }
+
+    // Index lists every config in one column: kind/sensitivity vary per row and can't be resolved from the (null) top-level entity, so it's decided from the row's own $config argument
+    private function maskedValueField(): FieldInterface
+    {
+        return TextareaField::new('value')
+            ->setLabel(t('label.value', [], 'config'))
+            // Only an actual secret is masked: an empty sensitive config must read as empty, otherwise the list shows "••••••••" for a setting nobody has filled in yet - and contradicts the dashboard alert telling you to fill it
+            ->formatValue(fn (?string $value, Config $config): string =>
+                $config->getIsSensitive() && null !== $value && '' !== $value ? '••••••••' : ($value ?? '')
+            );
+    }
+
+    // Sensitive fields are pre-filled with the decrypted raw string value in edit (must stay the raw string, not configService->get()'s kind-cast value, otherwise a sensitive bool/int/date config like site-maintenance renders as "1"/"" instead of "true"/"false") (no need to mask with a password widget, edit is the only page besides the masked index that ever shows this field). A sensitive json config (e.g. an authorized-tokens map) still needs a multi-line widget - the single-line TextField is fine for a sensitive string/key but unusable for json
+    private function sensitiveValueField(string $kind, ?string $rawValue): FieldInterface
+    {
+        $isJson = Config::TYPE_JSON === $kind;
+
+        $decryptedValue = null;
+        if (null !== $rawValue && '' !== $rawValue) {
+            $decryptedValue = $this->vaultEncryptor->decrypt($rawValue);
+        }
+
+        return ($isJson ? TextareaField::new('value') : TextField::new('value'))
+            ->setLabel(t('label.value_sensitive', [], 'config'))
+            ->setFormTypeOptions(['data' => $isJson ? $this->prettyJson($decryptedValue) : $decryptedValue])
+            ->setRequired(false);
+    }
+
+    // Non-sensitive fields use a widget matching the config kind
+    private function kindValueField(string $kind, ?string $rawValue): FieldInterface
+    {
+        return match ($kind) {
+            // The raw string value must be overridden with a real bool/DateTime via setValue(), since EasyAdmin's boolean/date templates and formatters read the field's raw value directly
+            Config::TYPE_BOOL => BooleanField::new('value')
+                ->setLabel(t('label.value', [], 'config'))
+                ->setValue($this->configService->getBool($rawValue))
+                ->setFormTypeOptions(['data' => $this->configService->getBool($rawValue)]),
+            Config::TYPE_INT => IntegerField::new('value')
+                ->setLabel(t('label.value', [], 'config'))
+                ->setFormTypeOptions(['data' => null !== $rawValue ? (int) $rawValue : null])
+                ->setRequired(false),
+            Config::TYPE_DATE => DateField::new('value')
+                ->setLabel(t('label.value', [], 'config'))
+                ->setValue($this->toDate($rawValue))
+                ->setFormTypeOptions(['data' => $this->toDate($rawValue)])
+                ->setRequired(false),
+            Config::TYPE_JSON => TextareaField::new('value')
+                ->setLabel(t('label.value', [], 'config'))
+                ->setHelp(t('help.value_json', [], 'config'))
+                ->setFormTypeOptions(['data' => $this->prettyJson($rawValue)])
+                ->formatValue(fn (?string $value): string => $this->prettyJson($value) ?? '')
+                ->setRequired(false),
+            // Html kind is for the rare configs needing rich content, reuses EasyAdmin's own rich text editor (same widget as blocks)
+            Config::TYPE_HTML => TextEditorField::new('value')
+                ->setLabel(t('label.value', [], 'config'))
+                ->setRequired(false),
+            // Font kind offers a <select> built from FontRegistry (see FontChoiceType) instead of free text. Falls
+            // back to a plain TextField when no FontProviderInterface is registered (e.g. no SiteBundle) or it
+            // returns no font - an unusable empty <select> would be worse than free text in that case
+            Config::TYPE_FONT => $this->buildFontField($rawValue),
+            // Text kind is plain string (URLs, ids, emails...), a rich editor would wrap it in a <div>
+            default => TextField::new('value')
+                ->setLabel(t('label.value', [], 'config'))
+                ->setRequired(false),
+        };
     }
 
     public function configureActions(Actions $actions): Actions

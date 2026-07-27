@@ -572,6 +572,8 @@ Entries contributed this way aren't written to `importmap.php` on their own — 
 
 `c975l:config:check-importmap` then runs on every `composer install`/`composer update`: it adds any entry contributed by an `ImportmapProviderInterface` that's missing from `importmap.php`, and never touches one that's already there (so a manually customized `path` survives). This is a one-time addition per app — after that, a new bundle (or a new provider in an existing one) picks up its `importmap.php` entry on the next `composer update` with no further action.
 
+It also covers the **third-party packages the c975L bundles' own JS imports by bare specifier** — `@symfony/ux-chartjs`, imported by this bundle's `controllers-admin.js` for the health check trend chart, being the one that actually bites. That entry is normally written by the package's own Flex recipe, which doesn't always run; when it's missing, the browser can't resolve the specifier, the **whole module fails**, and every Stimulus controller it was going to register is silently lost — back-office block drag-and-drop and duplication included, with nothing but a console error to show for it. The command scans each installed c975L bundle's `assets/**/*.js`, and for any bare specifier with no entry it resolves the path from the package's own `assets/package.json` (`name` + `main`, the Symfony UX convention) and adds it as a non-entrypoint. A specifier it can't find under `vendor/` is reported instead of guessed at — install the package, or add the entry by hand.
+
 ## Contributing a sitemap from other bundles
 
 If your bundle has public urls of its own (a book catalogue, a shop, a gallery…), implement `SitemapProviderInterface` — no manual service tagging needed, same `TaggedInterfacePass` mechanism as `MenuProviderInterface` above.
@@ -817,7 +819,23 @@ php bin/console c975l:health-check:run                                    # ever
 php bin/console c975l:health-check:run --kind=pagespeed --kind=w3c        # only these two
 ```
 
-There's also a **"Run health check now"** button directly on the page, calling the exact same `HealthCheckRunner` synchronously — expect to wait, a full run can take a while (PageSpeed Insights alone is ~10-30s per page, though `PageSpeedInsightsClient::request()`/`read()` fire every page's request up front to let Symfony HttpClient run them concurrently rather than serially).
+There's also a **"Run health check now"** button directly on the page. It doesn't run the check in your request: it dispatches one `RunCommandMessage` per registered kind (`c975l:health-check:run --kind=…`, the very command above) and returns immediately. A single provider can hold thousands of urls — a gallery declares one per photo — and a run that times out mid-way persists nothing at all.
+
+This needs `RunCommandMessage` routed to an asynchronous transport, and a worker consuming it:
+
+```yaml
+# config/packages/messenger.yaml
+framework:
+    messenger:
+        routing:
+            Symfony\Component\Console\Messenger\RunCommandMessage: async
+```
+
+```bash
+php bin/console messenger:consume async scheduler_site
+```
+
+If it isn't routed, Messenger handles the message synchronously — the button then behaves as it did before, blocking the request. Results appear on the page as each job completes, and `HealthCheckAlertProvider` raises what needs attention (errors, then warnings, with the date of the last run) on the dashboard and on this page, which is what tells you a queued run is done.
 
 **History, not just a snapshot**: every run appends new `HealthCheckResult` rows rather than overwriting — the page itself only shows the latest one per (url, kind), but the full history feeds a trend chart (ok/warning/error counts over time, via `symfony/ux-chartjs` — a regular Composer dependency, Flex wires it up automatically) and an **Export (CSV)** button producing a dated snapshot, useful as an audit-trail artefact (e.g. accessibility declarations). No pruning is done automatically — weekly/monthly runs across a site's pages stay a modest row count for years; add your own cleanup if that assumption stops holding for a particular site.
 
@@ -1006,42 +1024,6 @@ class MyDevProfilePathProvider implements DevProfilePathProviderInterface
 Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
 
 **Local paths only** — `/pages/contact`, never `https://example.com/pages/contact`: the path is handed to the kernel, no HTTP request and no host involved. Two bundles declaring the same path is fine, it's profiled once. `c975l/site-bundle` already contributes `PageDevProfilePathProvider` (every published `Page`), so an app installing it has nothing to write for its own pages.
-
-## Contributing theme presets from other bundles
-
-`ThemePresetProviderInterface` lets a satellite bundle contribute named presets — a vetted set of values (currently just the site's visual shape: rounded corners, shadows, navigation/footer layout...) an admin could switch to in one click, without touching colors/fonts (those stay entirely admin-owned, a preset never overwrites them). There is currently no admin UI applying a preset from the Config screen itself (the former **Theme** page's "Presets" action group was removed along with that dedicated page — theme entries are now just the `theme` group on the regular Config screen, see above); the interface still exists for any bundle-owned feature that reads presets directly (e.g. SiteBundle's own `?preset=<slug>` per-page preview).
-
-Satellite bundles contribute presets by implementing `ThemePresetProviderInterface` — no manual service tagging needed, `TaggedInterfacePass` auto-detects any class implementing it, same mechanism as `MenuProviderInterface` above:
-
-```php
-namespace c975L\MyBundle\Management;
-
-use c975L\ConfigBundle\Management\ThemePresetProviderInterface;
-
-class MyThemePresetProvider implements ThemePresetProviderInterface
-{
-    // id => ['label' => translation key, 'domain' => translation domain, 'stylesheet' => Config::GROUP_THEME's "theme-stylesheet" value, 'previewUrl' => optional callable(): string]
-    public function getPresets(): array
-    {
-        return [
-            'my-preset' => [
-                'label' => 'label.my_preset',
-                'domain' => 'my_bundle',
-                'stylesheet' => 'my-preset',
-                'previewUrl' => fn () => $this->router->generate('my_bundle_preview', ['preset' => 'my-preset']),
-            ],
-        ];
-    }
-}
-```
-
-Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
-
-**`domain`** is the translation domain owning `label` — your own bundle's, not necessarily `config` (which is only the fallback for a provider that doesn't declare one).
-
-**`previewUrl`** must be a lazy callable, not an already-generated string: `ThemePresetRegistry` is built as a constructor dependency while EasyAdmin is still enumerating routes, so eagerly calling the router at that point deadlocks.
-
-**`stylesheet`** is meant to be the only config a preset ever writes (the `theme-stylesheet` entry, under the `theme` group) — colors and fonts are never touched, so a preset never overwrites values the admin has deliberately chosen. It's nullable: a preset that sets it to `null` is expected to leave the current stylesheet untouched rather than blanking it.
 
 ## Contributing procedures for the dashboard AI assistant
 

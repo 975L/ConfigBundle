@@ -46,21 +46,11 @@ class ContentImportController extends AbstractController
 
     private function handleImport(Request $request): Response
     {
-        if (!$this->isCsrfTokenValid(self::IMPORT_ROUTE, $request->request->get('_token'))) {
-            $this->addFlash('danger', $this->translator->trans('flash.content_import_invalid_token', [], 'config'));
-
-            return $this->redirectToRoute(self::IMPORT_ROUTE);
-        }
-
         $file = $request->files->get('export');
-        if (null === $file || !$file->isValid()) {
-            $this->addFlash('danger', $this->translator->trans('flash.content_import_no_file', [], 'config'));
 
-            return $this->redirectToRoute(self::IMPORT_ROUTE);
-        }
-
-        if ($file->getSize() > self::MAX_FILE_SIZE) {
-            $this->addFlash('danger', $this->translator->trans('flash.content_import_file_too_large', [], 'config'));
+        $error = $this->uploadError($request, $file);
+        if (null !== $error) {
+            $this->addFlash('danger', $this->translator->trans($error, [], 'config'));
 
             return $this->redirectToRoute(self::IMPORT_ROUTE);
         }
@@ -73,35 +63,55 @@ class ContentImportController extends AbstractController
         }
 
         try {
-            $manifestPath = $extractDir . '/manifest.json';
-            $payload = is_file($manifestPath) ? $this->decodeManifest($manifestPath) : null;
-
-            if (\is_array($payload) && isset($payload['exports']) && \is_array($payload['exports'])) {
-                return $this->handleMultiImport($payload['exports'], $extractDir);
-            }
-
-            if (!\is_array($payload) || !isset($payload['kind'], $payload['items']) || !\is_string($payload['kind']) || !\is_array($payload['items'])) {
-                $this->addFlash('danger', $this->translator->trans('flash.content_import_invalid_json', [], 'config'));
-
-                return $this->redirectToRoute(self::IMPORT_ROUTE);
-            }
-
-            $result = $this->importDispatcher->dispatch($payload['kind'], $payload['items'], $extractDir);
-            if (null === $result) {
-                $this->addFlash('danger', $this->translator->trans('flash.content_import_unsupported_kind', ['%kind%' => $payload['kind']], 'config'));
-
-                return $this->redirectToRoute(self::IMPORT_ROUTE);
-            }
-
-            $this->addFlash('success', $this->translator->trans('flash.content_import_success', [
-                '%created%' => $result['created'],
-                '%updated%' => $result['updated'],
-            ], 'config'));
-
-            return $this->redirectToRoute(self::IMPORT_ROUTE);
+            return $this->importPayload($extractDir);
         } finally {
             $this->removeDirectory($extractDir);
         }
+    }
+
+    // The translation id of whatever is wrong with the upload, null once it's worth extracting
+    private function uploadError(Request $request, mixed $file): ?string
+    {
+        if (!$this->isCsrfTokenValid(self::IMPORT_ROUTE, $request->request->get('_token'))) {
+            return 'flash.content_import_invalid_token';
+        }
+
+        if (null === $file || !$file->isValid()) {
+            return 'flash.content_import_no_file';
+        }
+
+        return $file->getSize() > self::MAX_FILE_SIZE ? 'flash.content_import_file_too_large' : null;
+    }
+
+    // The extracted archive's own manifest, dispatched to whichever ImportProviderInterface claims its kind - a "sync all" payload carries several of them at once (see handleMultiImport())
+    private function importPayload(string $extractDir): Response
+    {
+        $manifestPath = $extractDir . '/manifest.json';
+        $payload = is_file($manifestPath) ? $this->decodeManifest($manifestPath) : null;
+
+        if (\is_array($payload) && isset($payload['exports']) && \is_array($payload['exports'])) {
+            return $this->handleMultiImport($payload['exports'], $extractDir);
+        }
+
+        if (!\is_array($payload) || !isset($payload['kind'], $payload['items']) || !\is_string($payload['kind']) || !\is_array($payload['items'])) {
+            $this->addFlash('danger', $this->translator->trans('flash.content_import_invalid_json', [], 'config'));
+
+            return $this->redirectToRoute(self::IMPORT_ROUTE);
+        }
+
+        $result = $this->importDispatcher->dispatch($payload['kind'], $payload['items'], $extractDir);
+        if (null === $result) {
+            $this->addFlash('danger', $this->translator->trans('flash.content_import_unsupported_kind', ['%kind%' => $payload['kind']], 'config'));
+
+            return $this->redirectToRoute(self::IMPORT_ROUTE);
+        }
+
+        $this->addFlash('success', $this->translator->trans('flash.content_import_success', [
+            '%created%' => $result['created'],
+            '%updated%' => $result['updated'],
+        ], 'config'));
+
+        return $this->redirectToRoute(self::IMPORT_ROUTE);
     }
 
     // A "sync all" export bundles several kinds in one payload (see ContentExporter::exportMultiple/SyncAllExporter) - a kind unsupported by this environment (eg. a bundle not installed yet) is flagged but doesn't abort the others
