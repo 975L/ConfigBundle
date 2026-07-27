@@ -105,7 +105,7 @@ class ConfigEssentialActionProviderTest extends TestCase
     public function testEmailActionRequiresBothFromAndTo(): void
     {
         $provider = new ConfigEssentialActionProvider(
-            $this->createConfigService(['email-from' => 'noreply@x.com', 'email-to' => 'admin@x.com']),
+            $this->createConfigService(['email-from' => 'noreply@example.com', 'email-to' => 'admin@example.com']),
             $this->createAdminUrlGenerator(),
         );
 

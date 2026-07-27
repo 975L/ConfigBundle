@@ -20,6 +20,8 @@ See it in action at [975l.com/pages/config-bundle](https://975l.com/pages/config
 
 - Key-value config entries stored in the database (`site_config` table)
 - EasyAdmin CRUD interface to manage values
+- `c975l:config:set` to fill values from the command line or a JSON file, for provisioning, deployment and tests
+- "Obsolete configs" dashboard page and `c975l:config:prune` to delete entries no `configs*.json` declares anymore, reported on every `load-all`
 - Export button (SQL/CSV/JSON/Sync-zip) for production deployment, reusable from any bundle's CRUD controller
 - Zip-based content import/export for syncing nested bundle content across environments, extensible via `ImportProviderInterface`/`ExportProviderInterface`
 - Twig and PHP service to read values anywhere
@@ -115,13 +117,72 @@ This list is closed on purpose so filtering stays useful; if none fits, leave `g
 
 ## Loading config entries into the database
 
-Auto-discovers every `vendor/c975l/*/config/configs*.json` file and loads them in one shot — a bundle can ship several files (e.g. `configs.json` plus `configs-css.json` for theme variables), each loaded independently:
+Auto-discovers every `vendor/c975l/*/config/configs*.json` file **plus the application's own `config/configs*.json`**, and loads them in one shot — a bundle can ship several files (e.g. `configs.json` plus `configs-css.json` for theme variables), each loaded independently:
 
 ```bash
 php bin/console c975l:config:load-all
 ```
 
-New entries (new `slug`) are inserted with their `value` from the JSON. For entries that already exist, only the metadata fixed by the bundle author — `label`, `kind`, `group`, `severity`, `description`, `restricted` — is re-synced from the JSON on every run; `value` and `sensitive` carry production state and are never touched, so editing a `configs.json` file (e.g. moving a config to a new group, fixing a typo in a label) and re-running `load-all` is enough to propagate the change, without risking an admin-set value.
+The application file is loaded exactly like a bundle's one, so an app needing a setting no bundle declares (its own API keys, feature flags...) just drops a `config/configs.json` at its root and gets it in the dashboard, with no command of its own to write.
+
+New entries (new `slug`) are inserted with their `value` from the JSON. For entries that already exist, only the metadata fixed by the bundle author — `label`, `kind`, `group`, `severity`, `description`, `restricted`, `sensitive` — is re-synced from the JSON on every run; the `value` carries production state and is never overwritten, so editing a `configs.json` file (e.g. moving a config to a new group, fixing a typo in a label) and re-running `load-all` is enough to propagate the change, without risking an admin-set value.
+
+`sensitive` is the one flag whose change also touches the value, because the two can't be separated: an entry that becomes sensitive gets its value encrypted, one that stops being sensitive gets it decrypted. Without that, dropping `"sensitive": true` from a declaration would leave a `C975L:…` string sitting in what is now a plain-text setting. When the conversion can't be done — no `C975L_VAULT_KEY`, or a value encrypted with a different one — the flag is left as it was rather than storing something unusable, and the next run picks it up once the key is in place.
+
+## Pruning entries no longer declared
+
+An entry dropped from a `configs*.json` (a setting replaced by a proper entity, a bundle uninstalled) stays in database forever: `load-all` only ever inserts and syncs metadata, it never deletes. Those leftovers clutter the dashboard and confuse the next reader, so `load-all` ends by listing them:
+
+```text
+[WARNING] 2 config entrie(s) in database are no longer declared by any configs*.json:
+          site-favicon
+          site-logo
+          Review and remove them from the dashboard: "Obsolete configs" shortcut.
+          Or from the command line: php bin/console c975l:config:prune
+```
+
+Deleting is a separate, explicit step — never a side effect of a deployment, which is what `load-all` usually is. From the dashboard, the **Obsolete configs** shortcut (`ROLE_SUPER_ADMIN`) lists them with the value each deletion would take with it, and deletes the ones ticked. Or, without a browser:
+
+```bash
+php bin/console c975l:config:prune            # lists them, deletes nothing
+php bin/console c975l:config:prune --force    # deletes them, after confirmation
+```
+
+Both share the same safeguard, because "undeclared" is only meaningful when the declarations are all there: neither reports a single orphan when no `configs*.json` is found at all, an unfinished `composer install` otherwise making every entry look orphaned, nor when one exists but can't be parsed, a single misplaced comma otherwise turning everything that file declares into an orphan. `load-all` skips its own listing in that case too, rather than sending you here. The command adds a confirmation prompt in interactive mode, the page its list of what is about to go. Deletion takes the stored value with it — export your configs first if a bundle is only temporarily uninstalled.
+
+## Setting values from the command line
+
+`load-all` declares the entries, the EasyAdmin interface fills them in. To fill them in without a browser — provisioning a fresh environment, a deployment pipeline, a test fixture, restoring a site — use:
+
+```bash
+php bin/console c975l:config:set site-name "My Site"
+```
+
+Several entries at once, from a JSON file holding a `{"slug": "value"}` object:
+
+```bash
+php bin/console c975l:config:set --file=values.json
+```
+
+```json
+{
+    "site-name": "My Site",
+    "site-form-delay": 3,
+    "user-roles-available": ["ROLE_ADMIN", "ROLE_EDITOR"],
+    "stripe-secret": "sk_live_..."
+}
+```
+
+Booleans, numbers and arrays are converted to the string stored in database, and each value is checked against its entry `kind` (`bool` only accepts `true`/`false`, `int` an integer, `json` valid JSON, `date` a parsable date).
+
+| Option | Effect |
+| --- | --- |
+| `--if-empty` | Only fills entries whose value is still empty, never overwrites one already set |
+| `--dry-run` | Lists what would change without writing anything |
+
+The command is meant to be re-run: an empty value is always skipped (an incomplete file never blanks out a live setting), an unchanged value is skipped too (no pointless `modification` date), and `--if-empty` makes a whole file idempotent — which is what a deployment pipeline wants, filling in whatever new entry the last `composer update` brought in while leaving production values alone.
+
+Entries are never created here: an unknown slug is reported and the command exits non-zero, so a typo doesn't pass silently. Sensitive entries are encrypted with `C975L_VAULT_KEY` exactly as the back-office does, are masked in the output so no secret lands in a CI log, and are refused rather than stored in plain text when no key is defined.
 
 ## Encrypting sensitive values
 
@@ -197,7 +258,10 @@ mysql -u user -p dbname < site_config_20260626_120000.sql
 | --- | --- | --- |
 | `false` | `INSERT … ON DUPLICATE KEY UPDATE` | Creates or updates label, value, kind, group, description, severity |
 | `true` | `INSERT IGNORE INTO` | Creates if missing; **preserves existing production value** |
+
 This means non-sensitive values (labels, descriptions, default content) are kept in sync, while live API keys and secrets already set on production are never overwritten.
+
+A fifth **SQL + secrets** export (`ROLE_SUPER_ADMIN`) drops that last safeguard and upserts the sensitive rows too, so an environment where the secrets are already filled in can hand them over instead of having them typed again. The exported value stays encrypted — it is therefore only usable on a target sharing the **same `C975L_VAULT_KEY`**, and on any other target it would replace working secrets with strings that environment cannot decrypt. Use the plain **SQL** export whenever the keys differ. A sensitive entry left empty on the source keeps its `INSERT IGNORE` even there: it has nothing to hand over, and an upsert would only empty the secret filled on the target.
 
 CSV and JSON exports are a straight dump of the table (no upsert logic) — useful for backups, audits, or feeding another tool.
 
@@ -514,6 +578,9 @@ If your bundle has public urls of its own (a book catalogue, a shop, a gallery�
 
 `SitemapWriter` then writes one `public/sitemap-<getSitemapName()>.xml` per provider **and** the `public/sitemap-index.xml` declaring them all, so a bundle never renders or writes a sitemap itself, and the consuming app has nothing to list by hand. It runs from the `c975l:sitemaps:create` command (schedule it, see `c975l/site-bundle`'s scheduler section) and from the "Create sitemaps" dashboard shortcut. Both the writer and the two Twig templates live here rather than in SiteBundle, so any combination of bundles gets its sitemaps and its index, SiteBundle installed or not.
 
+> [!TIP]
+> Implementing this interface also gets your urls **health-checked**, at no extra cost: with `c975l/site-bundle` installed, its `DeclaredUrlsHealthCheckPass` registers one health check provider per `SitemapProviderInterface`, under its own `urls-<getSitemapName()>` kind (see [Health check](#health-check) and SiteBundle's own README). Nothing else to implement, and each bundle's urls stay schedulable on their own.
+
 ```php
 namespace c975L\MyBundle\Management;
 
@@ -673,7 +740,9 @@ Make sure your bundle's `services.yaml` includes the `Management/` folder in its
 
 **`category`:** optional too — one of `ShortcutProviderInterface`'s `CATEGORY_EXPORT`/`CATEGORY_MAINTENANCE`/`CATEGORY_SITE` constants, or a custom `['label' => string, 'translation_domain' => string]` pair. Shortcuts sharing the same category (across bundles) are ordered next to each other in the grid — e.g. every export-related shortcut ends up adjacent — though the grid itself stays a single flat panel with no heading per category. Omit it to fall into the generic "Other" category.
 
-**Rendering:** shortcuts are merged across every provider and ordered by category then by label by `ShortcutBuilder::getShortcuts()`, then rendered with the shared `templates/management/_shortcuts.html.twig` partial as one flat grid, each tile its own small `<form method="post">`.
+**`method`:** optional, `'POST'` by default. Set it to `'GET'` for the rare tile that opens a page instead of acting — it is then rendered as a plain link, with no form and no CSRF token, and its route must be a regular `GET` page. See `ConfigPruneController::index()`, the "Obsolete configs" listing, for the reference implementation. Anything that changes state stays `POST`.
+
+**Rendering:** shortcuts are merged across every provider and ordered by category then by label by `ShortcutBuilder::getShortcuts()`, then rendered with the shared `templates/management/_shortcuts.html.twig` partial as one flat grid, each tile its own small `<form method="post">` (or an `<a>` for a `GET` one).
 
 ## Contributing essential actions from other bundles
 
@@ -739,7 +808,7 @@ The dashboard template only loops and includes each widget's own `template` with
 
 ## Health check
 
-`/management/health-check` gives a per-page technical health snapshot of the site — Lighthouse scores, security headers, W3C markup validation, WCAG accessibility issues (whichever `HealthCheckProviderInterface` implementations are installed; `c975l/site-bundle` contributes four, see its own README) — without needing Node/Lighthouse-CLI or any other JS tooling: everything runs server-side over plain HTTP calls.
+`/management/health-check` gives a per-page technical health snapshot of the site — Lighthouse scores, security headers, W3C markup validation, WCAG accessibility issues (whichever `HealthCheckProviderInterface` implementations are installed; `c975l/site-bundle` contributes eleven, see its own README) — without needing Node/Lighthouse-CLI or any other JS tooling: everything runs server-side over plain HTTP calls.
 
 **Refreshing results**: `php bin/console c975l:health-check:run` runs every registered provider and appends their results (never triggers a live check from a page load). It accepts a repeatable `--kind=` option to run only specific providers — e.g. `--kind=wave` on its own, less frequent cron entry for a paid/credit-based provider, separately from the free ones:
 

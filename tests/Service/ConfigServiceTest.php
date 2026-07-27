@@ -208,4 +208,146 @@ class ConfigServiceTest extends TestCase
 
         $this->assertCount(2, $callLog);
     }
+
+    // findOneBySlug() is a magic EntityRepository method, hence a hand-written double rather than a PHPUnit stub
+    private function createRepositoryIndexedBySlug(Config $config): ConfigRepository
+    {
+        return new class ($config) extends ConfigRepository {
+            public function __construct(private readonly Config $config)
+            {
+            }
+
+            public function findOneBySlug(string $slug): ?Config
+            {
+                return $this->config->getSlug() === $slug ? $this->config : null;
+            }
+
+            public function findAll(): array
+            {
+                return [$this->config];
+            }
+        };
+    }
+
+    // Writes a one-entry configs.json the way a bundle ships it, and returns its path
+    private function createDeclarationFile(array $declaration): string
+    {
+        $file = tempnam(sys_get_temp_dir(), 'configs') . '.json';
+        file_put_contents($file, json_encode([$declaration]));
+        $this->declarationFiles[] = $file;
+
+        return $file;
+    }
+
+    private array $declarationFiles = [];
+
+    protected function tearDown(): void
+    {
+        foreach ($this->declarationFiles as $file) {
+            @unlink($file);
+        }
+
+        $this->declarationFiles = [];
+    }
+
+    public function testLoadDefaultConfigEncryptsValueWhenEntryBecomesSensitive(): void
+    {
+        $config = $this->createConfig('api-key', 'plain-secret', isSensitive: false);
+        $vaultEncryptor = new VaultEncryptor('a-test-vault-key');
+        $service = $this->createService($this->createRepositoryIndexedBySlug($config), vaultEncryptor: $vaultEncryptor);
+
+        $service->loadDefaultConfig($this->createDeclarationFile([
+            'slug' => 'api-key', 'label' => 'api-key', 'sensitive' => true,
+        ]));
+
+        $this->assertTrue($config->getIsSensitive());
+        $this->assertSame('plain-secret', $vaultEncryptor->decrypt($config->getValue()));
+    }
+
+    // Without this, dropping "sensitive" from a declaration would leave an unreadable "C975L:..." string in a plain-text setting
+    public function testLoadDefaultConfigDecryptsValueWhenEntryStopsBeingSensitive(): void
+    {
+        $vaultEncryptor = new VaultEncryptor('a-test-vault-key');
+        $config = $this->createConfig('site-matomo-id', $vaultEncryptor->encrypt('17'), isSensitive: true);
+        $service = $this->createService($this->createRepositoryIndexedBySlug($config), vaultEncryptor: $vaultEncryptor);
+
+        $service->loadDefaultConfig($this->createDeclarationFile([
+            'slug' => 'site-matomo-id', 'label' => 'site-matomo-id', 'sensitive' => false,
+        ]));
+
+        $this->assertFalse($config->getIsSensitive());
+        $this->assertSame('17', $config->getValue());
+    }
+
+    public function testLoadDefaultConfigKeepsSensitiveFlagWhenValueCannotBeDecrypted(): void
+    {
+        $config = $this->createConfig('api-key', (new VaultEncryptor('another-key'))->encrypt('secret'), isSensitive: true);
+        $service = $this->createService(
+            $this->createRepositoryIndexedBySlug($config),
+            vaultEncryptor: new VaultEncryptor('a-test-vault-key'),
+        );
+
+        $service->loadDefaultConfig($this->createDeclarationFile([
+            'slug' => 'api-key', 'label' => 'api-key', 'sensitive' => false,
+        ]));
+
+        $this->assertTrue($config->getIsSensitive());
+        $this->assertStringStartsWith('C975L:', $config->getValue());
+    }
+
+    public function testLoadDefaultConfigKeepsSensitiveFlagWhenNoVaultKeyIsDefined(): void
+    {
+        $config = $this->createConfig('api-key', 'plain-secret', isSensitive: false);
+        $service = $this->createService($this->createRepositoryIndexedBySlug($config), vaultEncryptor: new VaultEncryptor(null));
+
+        $service->loadDefaultConfig($this->createDeclarationFile([
+            'slug' => 'api-key', 'label' => 'api-key', 'sensitive' => true,
+        ]));
+
+        $this->assertFalse($config->getIsSensitive());
+        $this->assertSame('plain-secret', $config->getValue());
+    }
+
+    public function testLoadDefaultConfigFlipsSensitiveFlagOfAnEmptyValueWithoutVaultKey(): void
+    {
+        $config = $this->createConfig('api-key', null, isSensitive: false);
+        $service = $this->createService($this->createRepositoryIndexedBySlug($config), vaultEncryptor: new VaultEncryptor(null));
+
+        $service->loadDefaultConfig($this->createDeclarationFile([
+            'slug' => 'api-key', 'label' => 'api-key', 'sensitive' => true,
+        ]));
+
+        $this->assertTrue($config->getIsSensitive());
+        $this->assertNull($config->getValue());
+    }
+
+    public function testLoadDefaultConfigLeavesValueAloneWhenSensitiveFlagIsUnchanged(): void
+    {
+        $config = $this->createConfig('site-name', 'My Site', isSensitive: false);
+        $service = $this->createService(
+            $this->createRepositoryIndexedBySlug($config),
+            vaultEncryptor: new VaultEncryptor('a-test-vault-key'),
+        );
+
+        $service->loadDefaultConfig($this->createDeclarationFile([
+            'slug' => 'site-name', 'label' => 'Renamed', 'sensitive' => false,
+        ]));
+
+        $this->assertSame('My Site', $config->getValue());
+        $this->assertSame('Renamed', $config->getLabel());
+    }
+
+    // Silently skipping a malformed file would have c975l:config:load-all report the bundle as loaded, and c975l:config:prune take its entries for orphans
+    public function testLoadDefaultConfigThrowsOnMalformedFile(): void
+    {
+        $file = tempnam(sys_get_temp_dir(), 'configs') . '.json';
+        file_put_contents($file, '{ not json');
+        $this->declarationFiles[] = $file;
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage($file);
+
+        $this->createService($this->createRepositoryIndexedBySlug($this->createConfig('site-name', 'My Site')))
+            ->loadDefaultConfig($file);
+    }
 }

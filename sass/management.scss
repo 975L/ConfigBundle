@@ -177,6 +177,8 @@ a.ea-sidebar-item-link[target="_blank"]::after {
     font-size: .76rem;
     line-height: 1.15;
     text-align: center;
+    /* A tile opening a page is an <a>, not a <button> (see _shortcuts.html.twig) - it must not read as a link among buttons */
+    text-decoration: none;
 }
 
 .shortcut-tile:hover {

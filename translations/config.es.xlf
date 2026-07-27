@@ -586,6 +586,46 @@
                 <source>flash.config_sitemaps_error</source>
                 <target>No se han podido crear las sitemaps: %error%</target>
             </trans-unit>
+            <trans-unit id="155">
+                <source>action.export_sql_with_sensitive</source>
+                <target>SQL + secretos</target>
+            </trans-unit>
+            <trans-unit id="156">
+                <source>label.config_prune</source>
+                <target>Configuraciones obsoletas</target>
+            </trans-unit>
+            <trans-unit id="157">
+                <source>description.config_prune</source>
+                <target>Entradas que permanecen en la base de datos y que ningún configs*.json declara ya, por ejemplo un ajuste abandonado por un bundle, o un bundle desinstalado. No se elimina nada mientras no se valide el formulario de abajo.</target>
+            </trans-unit>
+            <trans-unit id="158">
+                <source>label.config_prune_none</source>
+                <target>Ninguna entrada de configuración obsoleta.</target>
+            </trans-unit>
+            <trans-unit id="159">
+                <source>label.config_prune_no_declaration</source>
+                <target>No se ha encontrado ningún configs*.json: nada declara entradas de configuración aquí, por lo que ninguna entrada puede considerarse obsoleta.</target>
+            </trans-unit>
+            <trans-unit id="160">
+                <source>label.config_prune_irreversible</source>
+                <target>La eliminación es irreversible y se lleva consigo el valor almacenado. Exporte sus configuraciones previamente si un bundle solo está desinstalado temporalmente.</target>
+            </trans-unit>
+            <trans-unit id="161">
+                <source>action.config_prune_delete</source>
+                <target>Eliminar las entradas seleccionadas</target>
+            </trans-unit>
+            <trans-unit id="162">
+                <source>flash.config_prune_deleted</source>
+                <target>%count% entrada(s) de configuración eliminada(s)</target>
+            </trans-unit>
+            <trans-unit id="163">
+                <source>flash.config_prune_nothing_deleted</source>
+                <target>Ninguna entrada seleccionada, no se ha eliminado nada</target>
+            </trans-unit>
+            <trans-unit id="164">
+                <source>label.config_prune_unreadable</source>
+                <target>Los siguientes configs*.json no se pueden leer, por lo que todo lo que declaran aparecería erróneamente como obsoleto. Corríjalos y vuelva a cargar esta página.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

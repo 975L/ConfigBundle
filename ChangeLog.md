@@ -1,5 +1,38 @@
 # ChangeLog
 
+## v5.11
+
+- Added the `c975l:config:set` command, setting one entry from the command line or several from a JSON file (27/07/2026)
+- `c975l:config:set` takes `--if-empty` to only fill entries still empty, and `--dry-run` to list the changes without writing (27/07/2026)
+- `c975l:config:set` skips empty and unchanged values, so an incomplete file never blanks out a live setting (27/07/2026)
+- `c975l:config:set` exits non-zero on an unknown slug or on a value not matching its entry `kind` (27/07/2026)
+- `c975l:config:set` encrypts sensitive values and masks them in its output, and refuses them when `C975L_VAULT_KEY` is not defined (27/07/2026)
+- Added the readme section on setting values from the command line (27/07/2026)
+- Added `ConfigDeclarationLocator`, single source of truth for the `configs*.json` files declaring config entries (27/07/2026)
+- `c975l:config:load-all` now also loads the consuming application's own `config/configs*.json`, out of reach of the `vendor/c975l/*` glob until now (27/07/2026)
+- `c975l:config:load-all` now reports the entries in database no `configs*.json` declares anymore, and points at `c975l:config:prune` (27/07/2026)
+- Added the `c975l:config:prune` command, listing undeclared entries and deleting them with `--force` (27/07/2026)
+- `c975l:config:prune` refuses to run when no `configs*.json` is found, so an unfinished install can't turn every entry into an orphan (27/07/2026)
+- `c975l:config:prune` asks for confirmation before deleting in interactive mode (27/07/2026)
+- Added `ConfigRepository::findAllSlugs()` (27/07/2026)
+- Added the readme sections on loading the application's own configs and on pruning undeclared entries (27/07/2026)
+- `c975l:config:load-all` now re-syncs the `sensitive` flag from the declaration, encrypting or decrypting the stored value accordingly - an entry that stops being sensitive no longer keeps an unreadable `C975L:…` value (27/07/2026)
+- The `sensitive` flag is left untouched when its value can't be converted (no `C975L_VAULT_KEY`, or value encrypted with another key), rather than storing something unusable (27/07/2026)
+- Added the "SQL + secrets" export (`ROLE_SUPER_ADMIN`), upserting sensitive values too for environments sharing the same `C975L_VAULT_KEY` (27/07/2026)
+- Added the readme section on exporting secrets between environments sharing a vault key (27/07/2026)
+- The config list no longer masks an empty sensitive value as `••••••••`, which hid the very entries the dashboard alerts ask to fill in (27/07/2026)
+- Added the "Obsolete configs" dashboard shortcut and page (`ROLE_SUPER_ADMIN`), listing undeclared entries and deleting the ticked ones (27/07/2026)
+- The "Obsolete configs" page recomputes the orphans on submit, so a stale form can't delete an entry declared again since (27/07/2026)
+- The "Obsolete configs" page hides a sensitive value, showing only that it would be lost (27/07/2026)
+- Added an optional `method` key on `ShortcutProviderInterface`, `GET` rendering the tile as a link instead of a POST form (27/07/2026)
+- `c975l:config:load-all` now points at the "Obsolete configs" page as well as at `c975l:config:prune` (27/07/2026)
+- Added the readme sections on the "Obsolete configs" page and on `GET` shortcuts (27/07/2026)
+- `c975l:config:prune` and the "Obsolete configs" page now refuse to run when a `configs*.json` can't be parsed (27/07/2026)
+- `c975l:config:load-all` no longer reports the entries of an unparsable `configs*.json` as no longer declared (27/07/2026)
+- `c975l:config:set` no longer accepts `--5` for an `int` entry (27/07/2026)
+- The `deployment` health check kind is now shown in the Health check "Site" section instead of once per page (27/07/2026)
+- Added the readme tip on `SitemapProviderInterface` implementations being health-checked by SiteBundle at no extra cost (27/07/2026)
+
 ## v5.10
 
 - Added `DevProfilePathProviderInterface`/`DevProfileCollector`/`DevProfileAnalyzer`/`DevProfileRunner` and the `c975l:dev-profile:run` command, listing what the dev toolbar would flag on every declared page (26/07/2026)

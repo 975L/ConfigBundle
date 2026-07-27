@@ -114,7 +114,12 @@ class ConfigService implements ConfigServiceInterface
     // Loads default config values in the database (if not already present)
     public function loadDefaultConfig(string $jsonPath): void
     {
-        $configs = json_decode(file_get_contents($jsonPath), true);
+        $configs = json_decode((string) file_get_contents($jsonPath), true);
+
+        // A malformed file must be reported, not skipped: c975l:config:load-all would otherwise announce the bundle as loaded, and c975l:config:prune would take its entries for orphans
+        if (!is_array($configs)) {
+            throw new \RuntimeException(sprintf('Unable to parse "%s": %s.', $jsonPath, json_last_error_msg()));
+        }
 
         foreach ($configs as $configData) {
             $existing = $this->configRepository->findOneBySlug($configData['slug']);
@@ -133,7 +138,7 @@ class ConfigService implements ConfigServiceInterface
         $this->invalidateCache();
     }
 
-    // Label/kind/group/description/severity/isRestricted are metadata fixed by the bundle author (not user data), so they're kept in sync even on existing configs; value/isSensitive carry production state and are never touched here
+    // Label/kind/group/description/severity/isRestricted/isSensitive are metadata fixed by the bundle author (not user data), so they're kept in sync even on existing configs; only the value carries production state and is never overwritten here - except when the sensitive flag itself changes, see syncSensitive()
     private function syncMetadata(Config $config, array $configData): void
     {
         $kind = $configData['kind'] ?? 'text';
@@ -142,7 +147,10 @@ class ConfigService implements ConfigServiceInterface
         $severity = $configData['severity'] ?? null;
         $isRestricted = $configData['restricted'] ?? false;
 
-        if ($config->getLabel() === $configData['label']
+        $sensitiveChanged = $this->syncSensitive($config, $configData);
+
+        if (!$sensitiveChanged
+            && $config->getLabel() === $configData['label']
             && $config->getKind() === $kind
             && $config->getGroup() === $group
             && $config->getDescription() === $description
@@ -161,6 +169,44 @@ class ConfigService implements ConfigServiceInterface
         $config->setModification(new \DateTime());
 
         $this->manager->persist($config);
+    }
+
+    // Aligns the stored sensitive flag on the declaration - the admin form disables that field, so the json is its only source. The value is converted in the same move (encrypted when it becomes sensitive, decrypted when it stops being), otherwise a flag flip would leave an unreadable "C975L:..." string in a plain-text setting. When the conversion can't be done (no vault key, value encrypted with another one), the flag is left untouched rather than storing something unusable. Returns true when something changed
+    private function syncSensitive(Config $config, array $configData): bool
+    {
+        $declared = (bool) ($configData['sensitive'] ?? false);
+
+        if ($declared === (bool) $config->getIsSensitive()) {
+            return false;
+        }
+
+        $value = $config->getValue();
+
+        if (null === $value || '' === $value) {
+            $config->setIsSensitive($declared);
+
+            return true;
+        }
+
+        if ($declared) {
+            if (!$this->vaultEncryptor->isKeyDefined()) {
+                return false;
+            }
+
+            if (!$this->vaultEncryptor->isEncrypted($value)) {
+                $config->setValue($this->vaultEncryptor->encrypt($value));
+            }
+        } elseif ($this->vaultEncryptor->isEncrypted($value)) {
+            try {
+                $config->setValue($this->vaultEncryptor->decrypt($value));
+            } catch (\RuntimeException) {
+                return false;
+            }
+        }
+
+        $config->setIsSensitive($declared);
+
+        return true;
     }
 
     private function createConfig(array $configData): void

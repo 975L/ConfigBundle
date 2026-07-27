@@ -87,6 +87,34 @@ class ConfigSqlExporterTest extends TestCase
         $this->assertStringNotContainsString('ON DUPLICATE KEY UPDATE', $response->getContent());
     }
 
+    // Environments sharing the same C975L_VAULT_KEY: the encrypted value is carried over instead of being preserved on the target
+    public function testExportWithSensitiveValuesUpsertsSensitiveRowsToo(): void
+    {
+        $connection = $this->createConnection([
+            ['slug' => 'stripe-secret-key', 'is_sensitive' => true, 'value' => 'C975L:encrypted'],
+        ]);
+
+        $response = $this->createExporter($connection)->export(true);
+
+        $this->assertStringContainsString('ON DUPLICATE KEY UPDATE', $response->getContent());
+        $this->assertStringNotContainsString('INSERT IGNORE INTO', $response->getContent());
+        $this->assertStringContainsString('C975L:encrypted', $response->getContent());
+    }
+
+    // An upsert of an empty sensitive row would wipe the secret already filled on the target
+    public function testExportWithSensitiveValuesStillInsertIgnoresEmptySensitiveRows(): void
+    {
+        $connection = $this->createConnection([
+            ['slug' => 'stripe-secret-key', 'is_sensitive' => true, 'value' => ''],
+            ['slug' => 'mailer-password', 'is_sensitive' => true, 'value' => null],
+        ]);
+
+        $response = $this->createExporter($connection)->export(true);
+
+        $this->assertSame(2, substr_count($response->getContent(), 'INSERT IGNORE INTO `site_config`'));
+        $this->assertStringNotContainsString('ON DUPLICATE KEY UPDATE', $response->getContent());
+    }
+
     public function testExportNeverRewritesCreationOnUpdate(): void
     {
         $connection = $this->createConnection([

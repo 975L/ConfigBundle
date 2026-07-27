@@ -1,0 +1,64 @@
+{#
+ # Dashboard counterpart of the c975l:config:prune command (see c975L\ConfigBundle\Controller\Management\ConfigPruneController).
+ # The page itself is the command's listing step, its submit button the --force one, so nothing is deleted by simply opening it.
+ # Expects:
+ #   - orphans: Config entities no configs*.json declares anymore, already sorted by slug
+ #   - hasDeclarations: false when no configs*.json was found at all, which is an unfinished install rather than an empty orphan list
+ #   - unreadableFiles: the declaration files that exist but can't be parsed, whose slugs would otherwise be taken for orphans
+ #}
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block main %}
+    <h1>{{ 'label.config_prune'|trans({}, 'config') }}</h1>
+    <p>{{ 'description.config_prune'|trans({}, 'config') }}</p>
+
+    {% if not hasDeclarations %}
+        <div class="alert alert-danger">{{ 'label.config_prune_no_declaration'|trans({}, 'config') }}</div>
+    {% elseif unreadableFiles is not empty %}
+        <div class="alert alert-danger">
+            {{ 'label.config_prune_unreadable'|trans({}, 'config') }}
+            <ul>
+                {% for file in unreadableFiles %}
+                    <li>{{ file }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% elseif orphans is empty %}
+        <div class="alert alert-success">{{ 'label.config_prune_none'|trans({}, 'config') }}</div>
+    {% else %}
+        <div class="alert alert-warning">{{ 'label.config_prune_irreversible'|trans({}, 'config') }}</div>
+
+        <form method="post" action="{{ path('management_config_prune_delete') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('management_config_prune_delete') }}">
+
+            <table class="table datagrid">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>{{ 'label.slug'|trans({}, 'config') }}</th>
+                        <th>{{ 'label.label'|trans({}, 'config') }}</th>
+                        <th>{{ 'label.group'|trans({}, 'config') }}</th>
+                        <th>{{ 'label.value'|trans({}, 'config') }}</th>
+                        <th>{{ 'label.modification'|trans({}, 'config') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for config in orphans %}
+                    <tr>
+                        <td><input type="checkbox" name="slugs[]" value="{{ config.slug }}" checked></td>
+                        <td>{{ config.slug }}</td>
+                        {# The stored label, not its site_config translation key: the bundle that declared it is usually gone, and its translations with it #}
+                        <td>{{ config.label }}</td>
+                        <td>{{ config.group }}</td>
+                        {# A sensitive value stays hidden here, the point being to see what would be lost, not to read a secret one last time #}
+                        <td>{{ config.isSensitive ? '•••••' : config.value|slice(0, 60) }}</td>
+                        <td>{{ config.modification ? config.modification|format_datetime('medium', 'short') : '' }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <button type="submit" class="btn btn-danger">{{ 'action.config_prune_delete'|trans({}, 'config') }}</button>
+        </form>
+    {% endif %}
+{% endblock main %}

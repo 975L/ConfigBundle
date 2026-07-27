@@ -10,6 +10,8 @@
 namespace c975L\ConfigBundle\Tests\Command;
 
 use c975L\ConfigBundle\Command\ConfigLoadAllCommand;
+use c975L\ConfigBundle\Repository\ConfigRepository;
+use c975L\ConfigBundle\Service\ConfigDeclarationLocator;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\ConfigBundle\Service\VaultEncryptor;
 use PHPUnit\Framework\TestCase;
@@ -41,11 +43,26 @@ class ConfigLoadAllCommandTest extends TestCase
         $this->filesystem->dumpFile($dir . '/' . $filename, json_encode($configs));
     }
 
+    private function createAppConfigFile(array $configs, string $filename = 'configs.json'): void
+    {
+        $this->filesystem->mkdir($this->projectDir . '/config');
+        $this->filesystem->dumpFile($this->projectDir . '/config/' . $filename, json_encode($configs));
+    }
+
     private function createTester(
         ConfigServiceInterface $configService,
         VaultEncryptor $vaultEncryptor,
+        array $slugsInDatabase = [],
     ): CommandTester {
-        return new CommandTester(new ConfigLoadAllCommand($configService, $vaultEncryptor, $this->projectDir));
+        $repository = $this->createStub(ConfigRepository::class);
+        $repository->method('findAllSlugs')->willReturn($slugsInDatabase);
+
+        return new CommandTester(new ConfigLoadAllCommand(
+            $configService,
+            $vaultEncryptor,
+            new ConfigDeclarationLocator($this->projectDir),
+            $repository,
+        ));
     }
 
     public function testExecuteWarnsWhenNoConfigsJsonIsFound(): void
@@ -74,7 +91,7 @@ class ConfigLoadAllCommandTest extends TestCase
         $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
         $this->assertStringContainsString('config-bundle', $tester->getDisplay());
         $this->assertStringContainsString('ui-bundle', $tester->getDisplay());
-        $this->assertStringContainsString('2 bundle config(s) processed', $tester->getDisplay());
+        $this->assertStringContainsString('2 config file(s) processed', $tester->getDisplay());
     }
 
     // A single bundle can ship its config as several files (e.g. configs.json + configs-css.json for theme variables), all matched by the configs*.json glob and loaded independently
@@ -90,7 +107,7 @@ class ConfigLoadAllCommandTest extends TestCase
         $tester->execute([]);
 
         $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
-        $this->assertStringContainsString('2 bundle config(s) processed', $tester->getDisplay());
+        $this->assertStringContainsString('2 config file(s) processed', $tester->getDisplay());
     }
 
     public function testExecuteWarnsButContinuesWhenABundleFailsToLoad(): void
@@ -144,5 +161,62 @@ class ConfigLoadAllCommandTest extends TestCase
         $tester->execute([]);
 
         $this->assertStringNotContainsString('C975L_VAULT_KEY is not defined', $tester->getDisplay());
+    }
+
+    // The consuming application declares its own entries in config/configs*.json, out of reach of the vendor/c975l/* glob
+    public function testExecuteLoadsTheApplicationOwnConfigFile(): void
+    {
+        $this->createBundleConfigFile('config-bundle', [['slug' => 'site-name']]);
+        $this->createAppConfigFile([['slug' => 'app-own-setting']]);
+
+        $configService = $this->createMock(ConfigServiceInterface::class);
+        $configService->expects($this->exactly(2))->method('loadDefaultConfig');
+
+        $tester = $this->createTester($configService, new VaultEncryptor(null));
+        $tester->execute([]);
+
+        $this->assertStringContainsString('app (configs.json)', $tester->getDisplay());
+        $this->assertStringContainsString('2 config file(s) processed', $tester->getDisplay());
+    }
+
+    public function testExecuteReportsEntriesNoLongerDeclared(): void
+    {
+        $this->createBundleConfigFile('site-bundle', [['slug' => 'site-name']]);
+
+        $configService = $this->createStub(ConfigServiceInterface::class);
+        $tester = $this->createTester($configService, new VaultEncryptor(null), ['site-name', 'site-favicon']);
+        $tester->execute([]);
+
+        $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
+        $this->assertStringContainsString('site-favicon', $tester->getDisplay());
+        $this->assertStringContainsString('c975l:config:prune', $tester->getDisplay());
+        $this->assertStringNotContainsString('site-name,', $tester->getDisplay());
+    }
+
+    // A file that couldn't be parsed declares none of its slugs, so pointing the admin at c975l:config:prune would send them deleting live entries
+    public function testExecuteReportsNoOrphanWhenADeclarationFileCannotBeParsed(): void
+    {
+        $this->createBundleConfigFile('site-bundle', [['slug' => 'site-name']]);
+        $this->filesystem->mkdir($this->projectDir . '/config');
+        $this->filesystem->dumpFile($this->projectDir . '/config/configs.json', '{"broken": ');
+
+        $configService = $this->createStub(ConfigServiceInterface::class);
+        $tester = $this->createTester($configService, new VaultEncryptor(null), ['site-name', 'app-own-setting']);
+        $tester->execute([]);
+
+        $this->assertStringNotContainsString('c975l:config:prune', $tester->getDisplay());
+        $this->assertStringContainsString('Obsolete entries not looked for', $tester->getDisplay());
+    }
+
+    public function testExecuteReportsNothingWhenEveryEntryIsDeclared(): void
+    {
+        $this->createBundleConfigFile('site-bundle', [['slug' => 'site-name']]);
+        $this->createAppConfigFile([['slug' => 'app-own-setting']]);
+
+        $configService = $this->createStub(ConfigServiceInterface::class);
+        $tester = $this->createTester($configService, new VaultEncryptor(null), ['site-name', 'app-own-setting']);
+        $tester->execute([]);
+
+        $this->assertStringNotContainsString('c975l:config:prune', $tester->getDisplay());
     }
 }

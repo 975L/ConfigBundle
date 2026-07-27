@@ -30,8 +30,8 @@ class HealthCheckController extends AbstractController
     // EasyAdmin prefixes this with the Dashboard's own route name, giving management_health_check_run
     public const RUN_ROUTE = 'management_health_check_run';
 
-    // Kinds checked once for the whole site (infrastructure-level: TLS cert, security headers, robots.txt/sitemap, redirect chains) rather than once per page - shown in their own "Site" section instead of the per-page table, see index()
-    private const SITE_WIDE_KINDS = ['security-headers', 'ssl-certificate', 'seo-files', 'redirect-chains'];
+    // Kinds checked once for the whole site (infrastructure-level: TLS cert, security headers, robots.txt/sitemap, redirect chains, http/https + 404 deployment checks) rather than once per page - shown in their own "Site" section instead of the per-page table, see index()
+    private const SITE_WIDE_KINDS = ['security-headers', 'ssl-certificate', 'seo-files', 'redirect-chains', 'deployment'];
 
     public function __construct(
         private readonly HealthCheckResultRepository $healthCheckResultRepository,

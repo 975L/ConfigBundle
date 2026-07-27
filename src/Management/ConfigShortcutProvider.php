@@ -8,6 +8,7 @@
  */
 namespace c975L\ConfigBundle\Management;
 
+use c975L\ConfigBundle\Controller\Management\ConfigPruneController;
 use c975L\ConfigBundle\Controller\Management\ConfigShortcutController;
 use c975L\ConfigBundle\Controller\Management\MaintenanceShortcutController;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
@@ -51,6 +52,16 @@ class ConfigShortcutProvider implements ShortcutProviderInterface
                 'active' => false,
                 'role' => $this->configService->get('site-role-admin'),
                 'category' => ShortcutProviderInterface::CATEGORY_EXPORT,
+            ],
+            [
+                'label' => $this->translator->trans('label.config_prune', [], 'config'),
+                'icon' => 'fas fa-trash-alt',
+                'route' => ConfigPruneController::INDEX_ROUTE,
+                // Opens the listing page rather than deleting anything, hence the only GET tile so far (see ShortcutProviderInterface)
+                'method' => 'GET',
+                'active' => false,
+                'role' => 'ROLE_SUPER_ADMIN',
+                'category' => ShortcutProviderInterface::CATEGORY_MAINTENANCE,
             ],
             [
                 'label' => $this->translator->trans('label.config_sitemaps_create', [], 'config'),

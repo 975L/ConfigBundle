@@ -1,5 +1,30 @@
 [
     {
+        "date": "2026-07-27",
+        "description": [
+            {
+                "en": "A new \"Obsolete configs\" page lists the settings the site no longer uses, shows what each one still holds, and deletes the ones you tick",
+                "fr": "Une nouvelle page \"Configurations obsolètes\" liste les paramètres que le site n'utilise plus, montre ce que chacun contient encore, et supprime ceux que vous cochez",
+                "es": "Una nueva página \"Configuraciones obsoletas\" enumera los ajustes que el sitio ya no utiliza, muestra lo que cada uno contiene todavía y elimina los que marque"
+            },
+            {
+                "en": "A new \"SQL + secrets\" export hands your passwords and keys over to another environment of the same site, so they don't have to be typed in again",
+                "fr": "Un nouvel export \"SQL + secrets\" transmet vos mots de passe et clés à un autre environnement du même site, pour ne pas avoir à les ressaisir",
+                "es": "Una nueva exportación \"SQL + secretos\" transfiere sus contraseñas y claves a otro entorno del mismo sitio, para no tener que volver a escribirlas"
+            },
+            {
+                "en": "A setting marked as secret but still empty no longer shows as \"••••••••\" in the list, which hid the very ones you are asked to fill in",
+                "fr": "Un paramètre marqué comme secret mais encore vide ne s'affiche plus \"••••••••\" dans la liste, ce qui masquait justement ceux qu'on vous demande de remplir",
+                "es": "Un ajuste marcado como secreto pero aún vacío ya no aparece como \"••••••••\" en la lista, lo que ocultaba precisamente los que se le pide rellenar"
+            },
+            {
+                "en": "The deployment checks now appear once in the Health check's \"Site\" section, instead of being repeated on every page",
+                "fr": "Les vérifications de déploiement apparaissent désormais une seule fois dans la section \"Site\" du Bilan de santé, au lieu d'être répétées sur chaque page",
+                "es": "Las comprobaciones de despliegue aparecen ahora una sola vez en la sección \"Sitio\" del Estado de salud, en lugar de repetirse en cada página"
+            }
+        ]
+    },
+    {
         "date": "2026-07-26",
         "description": [
             {

@@ -20,6 +20,16 @@ class ConfigRepository extends ServiceEntityRepository
         parent::__construct($registry, Config::class);
     }
 
+    // Returns every slug stored in database, to be compared with what the configs*.json files declare
+    public function findAllSlugs(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->select('c.slug')
+            ->orderBy('c.slug', 'ASC')
+            ->getQuery()
+            ->getSingleColumnResult();
+    }
+
     // Returns configs flagged with a severity whose value is still empty, i.e. requiring admin attention
     public function findRequiringAttention(): array
     {

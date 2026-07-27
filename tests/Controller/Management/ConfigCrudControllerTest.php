@@ -648,6 +648,33 @@ class ConfigCrudControllerTest extends TestCase
         $controller->exportSql($this->createAdminContext());
     }
 
+    // Same exporter, asked for the secrets this time - only usable on a target sharing this environment's C975L_VAULT_KEY
+    public function testExportSqlWithSensitiveAsksTheExporterForTheSecrets(): void
+    {
+        $exportResponse = new Response();
+        $configSqlExporter = $this->createMock(ConfigSqlExporter::class);
+        $configSqlExporter->expects($this->once())->method('export')->with(true)->willReturn($exportResponse);
+
+        $controller = $this->createController(configSqlExporter: $configSqlExporter);
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+        ]));
+
+        $this->assertSame($exportResponse, $controller->exportSqlWithSensitive($this->createAdminContext()));
+    }
+
+    public function testExportSqlWithSensitiveDeniesAccessWithoutRoleSuperAdmin(): void
+    {
+        $this->expectException(AccessDeniedException::class);
+
+        $controller = $this->createController();
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(false),
+        ]));
+
+        $controller->exportSqlWithSensitive($this->createAdminContext());
+    }
+
     public function testExportJsonDeniesAccessWithoutRoleAdmin(): void
     {
         $this->expectException(AccessDeniedException::class);
@@ -736,6 +763,25 @@ class ConfigCrudControllerTest extends TestCase
         $this->assertSame(Action::INDEX, $cancelAction->getCrudActionName());
     }
 
+    // The "SQL + secrets" export hands over decryptable secrets: its permission must stay stricter than the other exports', whose role is configurable
+    public function testConfigureActionsRestrictsTheSqlWithSensitiveExportToSuperAdmin(): void
+    {
+        $requestStack = new RequestStack();
+        $requestStack->push(new Request());
+
+        $controller = $this->createController(requestStack: $requestStack);
+
+        $actions = $controller->configureActions(
+            Actions::new()
+                ->add(Crud::PAGE_INDEX, Action::EDIT)
+        );
+
+        $this->assertSame(
+            'ROLE_SUPER_ADMIN',
+            $actions->getAsDto(null)->getActionPermissions()['exportSqlWithSensitive'] ?? null
+        );
+    }
+
     // --- configureFilters -----------------------------------------------------------------------------------
 
     public function testConfigureFiltersBuildsWithoutError(): void
@@ -786,6 +832,28 @@ class ConfigCrudControllerTest extends TestCase
         }
 
         $this->fail(sprintf('Field "%s" not found.', $property));
+    }
+
+    // The index masks secrets, but an empty sensitive config must read as empty - showing "••••••••" for a setting nobody filled in hides exactly what the dashboard alert asks the admin to fix
+    public function testConfigureFieldsMasksOnlyNonEmptySensitiveValuesOnIndexPage(): void
+    {
+        $contextProvider = $this->createStub(AdminContextProviderInterface::class);
+        $contextProvider->method('getContext')->willReturn(null);
+
+        $controller = $this->createController();
+        $controller->setContainer($this->createContainer([
+            AdminContextProviderInterface::class => $contextProvider,
+        ]));
+
+        $formatValue = $this->findField($controller->configureFields('index'), 'value')->getAsDto()->getFormatValueCallable();
+
+        $sensitive = (new Config())->setSlug('api-key')->setIsSensitive(true);
+        $plain = (new Config())->setSlug('site-name')->setIsSensitive(false);
+
+        $this->assertSame('••••••••', $formatValue('encrypted', $sensitive));
+        $this->assertSame('', $formatValue(null, $sensitive));
+        $this->assertSame('', $formatValue('', $sensitive));
+        $this->assertSame('My Site', $formatValue('My Site', $plain));
     }
 
     // The bool/int/date kinds must override the raw string value with a real typed value via setValue(), since EasyAdmin's boolean/date templates and formatters read it directly

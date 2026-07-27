@@ -8,6 +8,7 @@
  */
 namespace c975L\ConfigBundle\Tests\Management;
 
+use c975L\ConfigBundle\Controller\Management\ConfigPruneController;
 use c975L\ConfigBundle\Controller\Management\ConfigShortcutController;
 use c975L\ConfigBundle\Controller\Management\MaintenanceShortcutController;
 use c975L\ConfigBundle\Management\ConfigShortcutProvider;
@@ -57,15 +58,33 @@ class ConfigShortcutProviderTest extends TestCase
         $this->assertFalse($shortcuts[2]['active']);
         $this->assertSame('ROLE_ADMIN', $shortcuts[2]['role']);
         $this->assertSame(ShortcutProviderInterface::CATEGORY_EXPORT, $shortcuts[2]['category']);
-        $this->assertSame(ConfigShortcutController::SITEMAPS_CREATE_ROUTE, $shortcuts[3]['route']);
+        $this->assertSame(ConfigPruneController::INDEX_ROUTE, $shortcuts[3]['route']);
         $this->assertFalse($shortcuts[3]['active']);
         $this->assertSame('ROLE_SUPER_ADMIN', $shortcuts[3]['role']);
-        $this->assertSame(ShortcutProviderInterface::CATEGORY_SITE, $shortcuts[3]['category']);
-        $this->assertSame(MaintenanceShortcutController::TOGGLE_ROUTE_MAINTENANCE, $shortcuts[4]['route']);
+        $this->assertSame(ShortcutProviderInterface::CATEGORY_MAINTENANCE, $shortcuts[3]['category']);
+        // The only tile opening a page instead of acting, hence a link with no CSRF token (see _shortcuts.html.twig)
+        $this->assertSame('GET', $shortcuts[3]['method']);
+        $this->assertSame(ConfigShortcutController::SITEMAPS_CREATE_ROUTE, $shortcuts[4]['route']);
         $this->assertFalse($shortcuts[4]['active']);
-        $this->assertSame('label.maintenance_enable', $shortcuts[4]['label']);
-        $this->assertSame('ROLE_ADMIN', $shortcuts[4]['role']);
-        $this->assertSame(ShortcutProviderInterface::CATEGORY_MAINTENANCE, $shortcuts[4]['category']);
+        $this->assertSame('ROLE_SUPER_ADMIN', $shortcuts[4]['role']);
+        $this->assertSame(ShortcutProviderInterface::CATEGORY_SITE, $shortcuts[4]['category']);
+        $this->assertSame(MaintenanceShortcutController::TOGGLE_ROUTE_MAINTENANCE, $shortcuts[5]['route']);
+        $this->assertFalse($shortcuts[5]['active']);
+        $this->assertSame('label.maintenance_enable', $shortcuts[5]['label']);
+        $this->assertSame('ROLE_ADMIN', $shortcuts[5]['role']);
+        $this->assertSame(ShortcutProviderInterface::CATEGORY_MAINTENANCE, $shortcuts[5]['category']);
+    }
+
+    // Every other shortcut stays a POST form, the template defaulting to it when 'method' is absent
+    public function testEveryOtherShortcutOmitsTheMethodKey(): void
+    {
+        $provider = new ConfigShortcutProvider($this->createTranslator(), $this->createConfigService([]));
+
+        foreach ($provider->getShortcuts() as $shortcut) {
+            if (ConfigPruneController::INDEX_ROUTE !== $shortcut['route']) {
+                $this->assertArrayNotHasKey('method', $shortcut);
+            }
+        }
     }
 
     public function testGetShortcutsReflectsMaintenanceEnabledState(): void
@@ -78,7 +97,7 @@ class ConfigShortcutProviderTest extends TestCase
 
         $shortcuts = $provider->getShortcuts();
 
-        $this->assertTrue($shortcuts[4]['active']);
-        $this->assertSame('label.maintenance_disable', $shortcuts[4]['label']);
+        $this->assertTrue($shortcuts[5]['active']);
+        $this->assertSame('label.maintenance_disable', $shortcuts[5]['label']);
     }
 }

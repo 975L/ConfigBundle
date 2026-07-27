@@ -8,6 +8,8 @@
  */
 namespace c975L\ConfigBundle\Command;
 
+use c975L\ConfigBundle\Repository\ConfigRepository;
+use c975L\ConfigBundle\Service\ConfigDeclarationLocator;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\ConfigBundle\Service\VaultEncryptor;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -15,19 +17,18 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 #[AsCommand(
     name: 'c975l:config:load-all',
-    description: 'Loads default config values from all c975L bundles found in vendor/'
+    description: 'Loads default config values from all c975L bundles found in vendor/, and from the application itself'
 )]
 class ConfigLoadAllCommand extends Command
 {
     public function __construct(
         private readonly ConfigServiceInterface $configService,
         private readonly VaultEncryptor $vaultEncryptor,
-        #[Autowire(param: 'kernel.project_dir')]
-        private readonly string $projectDir,
+        private readonly ConfigDeclarationLocator $declarationLocator,
+        private readonly ConfigRepository $configRepository,
     ) {
         parent::__construct();
     }
@@ -36,10 +37,10 @@ class ConfigLoadAllCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $files = glob($this->projectDir . '/vendor/c975l/*/config/configs*.json') ?: [];
+        $files = $this->declarationLocator->findFiles();
 
         if (empty($files)) {
-            $io->warning('No configs*.json found in vendor/c975l/*/config/');
+            $io->warning('No configs*.json found in vendor/c975l/*/config/ nor in config/');
 
             return Command::SUCCESS;
         }
@@ -47,7 +48,7 @@ class ConfigLoadAllCommand extends Command
         $hasSensitiveValues = false;
 
         foreach ($files as $file) {
-            $bundle = basename(dirname(dirname($file)));
+            $bundle = $this->declarationLocator->describe($file);
 
             // Warn if sensitive settings with values are found but no vault key is configured
             if (!$this->vaultEncryptor->isKeyDefined()) {
@@ -77,8 +78,36 @@ class ConfigLoadAllCommand extends Command
             ]);
         }
 
-        $io->success(sprintf('%d bundle config(s) processed.', count($files)));
+        $this->reportOrphans($io);
+
+        $io->success(sprintf('%d config file(s) processed.', count($files)));
 
         return Command::SUCCESS;
+    }
+
+    // Lists the entries left in database that no configs*.json declares anymore (e.g. a setting a bundle dropped), and points at the dashboard page removing them - never deletes anything here, as this command runs unattended on every deployment
+    private function reportOrphans(SymfonyStyle $io): void
+    {
+        // A file that couldn't be parsed (already warned about above) declares none of its slugs, which would be listed here as orphans and send the admin to prune them
+        if (!empty($this->declarationLocator->findUnreadableFiles())) {
+            $io->note('Obsolete entries not looked for: some configs*.json could not be read, and everything they declare would be reported as no longer declared.');
+
+            return;
+        }
+
+        $orphans = array_diff($this->configRepository->findAllSlugs(), $this->declarationLocator->findDeclaredSlugs());
+
+        if (empty($orphans)) {
+            return;
+        }
+
+        $io->warning(array_merge(
+            [sprintf('%d config entrie(s) in database are no longer declared by any configs*.json:', count($orphans))],
+            array_values($orphans),
+            [
+                'Review and remove them from the dashboard: "Obsolete configs" shortcut.',
+                'Or from the command line: php bin/console c975l:config:prune',
+            ],
+        ));
     }
 }

@@ -586,6 +586,46 @@
                 <source>flash.config_sitemaps_error</source>
                 <target>Sitemaps could not be created: %error%</target>
             </trans-unit>
+            <trans-unit id="155">
+                <source>action.export_sql_with_sensitive</source>
+                <target>SQL + secrets</target>
+            </trans-unit>
+            <trans-unit id="156">
+                <source>label.config_prune</source>
+                <target>Obsolete configs</target>
+            </trans-unit>
+            <trans-unit id="157">
+                <source>description.config_prune</source>
+                <target>Entries left in database that no configs*.json declares anymore, e.g. a setting a bundle dropped, or a bundle uninstalled. Nothing is deleted until the form below is submitted.</target>
+            </trans-unit>
+            <trans-unit id="158">
+                <source>label.config_prune_none</source>
+                <target>No obsolete config entry.</target>
+            </trans-unit>
+            <trans-unit id="159">
+                <source>label.config_prune_no_declaration</source>
+                <target>No configs*.json found: nothing declares config entries here, so no entry can be considered obsolete.</target>
+            </trans-unit>
+            <trans-unit id="160">
+                <source>label.config_prune_irreversible</source>
+                <target>Deletion is irreversible and takes the stored value with it. Export your configs first if a bundle is only temporarily uninstalled.</target>
+            </trans-unit>
+            <trans-unit id="161">
+                <source>action.config_prune_delete</source>
+                <target>Delete the selected entries</target>
+            </trans-unit>
+            <trans-unit id="162">
+                <source>flash.config_prune_deleted</source>
+                <target>%count% config entrie(s) deleted</target>
+            </trans-unit>
+            <trans-unit id="163">
+                <source>flash.config_prune_nothing_deleted</source>
+                <target>No entry selected, nothing deleted</target>
+            </trans-unit>
+            <trans-unit id="164">
+                <source>label.config_prune_unreadable</source>
+                <target>The following configs*.json can't be read, so everything they declare would wrongly show up as obsolete. Fix them, then reload this page.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

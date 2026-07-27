@@ -154,8 +154,9 @@ class ConfigCrudController extends AbstractCrudController
         if (Crud::PAGE_INDEX === $pageName) {
             $valueField = TextareaField::new('value')
                 ->setLabel(t('label.value', [], 'config'))
+                // Only an actual secret is masked: an empty sensitive config must read as empty, otherwise the list shows "••••••••" for a setting nobody has filled in yet - and contradicts the dashboard alert telling you to fill it
                 ->formatValue(fn (?string $value, Config $config): string =>
-                    $config->getIsSensitive() ? '••••••••' : ($value ?? '')
+                    $config->getIsSensitive() && null !== $value && '' !== $value ? '••••••••' : ($value ?? '')
                 );
         } elseif ($isSensitive && Crud::PAGE_EDIT === $pageName) {
             // Sensitive fields are pre-filled with the decrypted raw string value in edit (must stay the raw string, not configService->get()'s kind-cast value, otherwise a sensitive bool/int/date config like site-maintenance renders as "1"/"" instead of "true"/"false") (no need to mask with a password widget, edit is the only page besides the masked index that ever shows this field)
@@ -305,6 +306,7 @@ class ConfigCrudController extends AbstractCrudController
             ->addAction(Action::new('exportCsv', 'CSV')->linkToCrudAction('exportCsv'))
             ->addAction(Action::new('exportJson', 'JSON')->linkToCrudAction('exportJson'))
             ->addAction(Action::new('exportContent', t('action.export_for_sync', [], 'config'))->linkToCrudAction('exportContent'))
+            ->addAction(Action::new('exportSqlWithSensitive', t('action.export_sql_with_sensitive', [], 'config'))->linkToCrudAction('exportSqlWithSensitive'))
         ;
 
         $request = $this->requestStack->getCurrentRequest();
@@ -355,6 +357,7 @@ class ConfigCrudController extends AbstractCrudController
             ->setPermission('exportCsv', $this->configService->get('site-role-admin'))
             ->setPermission('toggleSensitive', $this->configService->get('site-role-admin'))
             ->setPermission('exportSql', $this->configService->get('site-role-admin'))
+            ->setPermission('exportSqlWithSensitive', 'ROLE_SUPER_ADMIN')
             ->setPermission('exportJson', $this->configService->get('site-role-admin'))
             // Configs are fixed by the bundles' import json: no manual creation, no deletion; detail adds no information beyond what edit already shows (sensitive values are revealed in clear there too)
             ->disable(Action::NEW, Action::DELETE, Action::DETAIL)
@@ -571,6 +574,15 @@ class ConfigCrudController extends AbstractCrudController
         $this->denyAccessUnlessGranted($this->configService->get('site-role-admin'));
 
         return $this->configSqlExporter->export();
+    }
+
+    // Same export, secrets included: only makes sense when the target environment shares this one's C975L_VAULT_KEY, hence ROLE_SUPER_ADMIN and a separate button rather than an option on the previous one
+    #[AdminRoute]
+    public function exportSqlWithSensitive(AdminContext $context): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
+
+        return $this->configSqlExporter->export(true);
     }
 
     #[AdminRoute]
