@@ -2,37 +2,37 @@
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
     <file source-language="en" target-language="es" datatype="plaintext" original="site_config.es.xlf">
         <body>
-            <trans-unit id="1">
-                <source>description.site_role_admin</source>
-                <target>Rol requerido para la configuración, ej. ROLE_ADMIN (por defecto)</target>
-            </trans-unit>
-            <trans-unit id="2">
+            <trans-unit id="wjC9u3K">
                 <source>description.site_maintenance</source>
                 <target>Activa (true) o desactiva (false) el modo mantenimiento</target>
             </trans-unit>
-            <trans-unit id="3">
+            <trans-unit id="bFzwYOs">
                 <source>description.site_maintenance_hash</source>
                 <target>Hash utilizado para acceder al sitio en modo mantenimiento (?t=Hash)</target>
             </trans-unit>
-            <trans-unit id="4">
+            <trans-unit id="b8NL53A">
+                <source>description.site_role_admin</source>
+                <target>Rol requerido para la configuración, ej. ROLE_ADMIN (por defecto)</target>
+            </trans-unit>
+            <trans-unit id="drEaqSN">
                 <source>description.site_role_editor</source>
                 <target>Rol requerido para las acciones de editor, ej. ROLE_EDITOR (por defecto)</target>
             </trans-unit>
-            <trans-unit id="5">
-                <source>label.site_role_admin</source>
-                <target>Rol de administrador del sitio</target>
-            </trans-unit>
-            <trans-unit id="6">
-                <source>label.site_role_editor</source>
-                <target>Rol de editor del sitio</target>
-            </trans-unit>
-            <trans-unit id="7">
+            <trans-unit id="LXzR.TR">
                 <source>label.site_maintenance</source>
                 <target>Mantenimiento del sitio</target>
             </trans-unit>
-            <trans-unit id="8">
+            <trans-unit id="xqSakcb">
                 <source>label.site_maintenance_hash</source>
                 <target>Hash de mantenimiento del sitio</target>
+            </trans-unit>
+            <trans-unit id="z_rPP2B">
+                <source>label.site_role_admin</source>
+                <target>Rol de administrador del sitio</target>
+            </trans-unit>
+            <trans-unit id="OH9i9I8">
+                <source>label.site_role_editor</source>
+                <target>Rol de editor del sitio</target>
             </trans-unit>
         </body>
     </file>

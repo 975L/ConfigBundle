@@ -2,641 +2,641 @@
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
     <file source-language="en" target-language="es" datatype="plaintext" original="config.en.xlf">
         <body>
-            <trans-unit id="1">
-                <source>label.config</source>
-                <target>Configuración</target>
-            </trans-unit>
-            <trans-unit id="2">
-                <source>label.management_interface</source>
-                <target>Interfaz de gestión</target>
-            </trans-unit>
-            <trans-unit id="3">
-                <source>label.label</source>
-                <target>Etiqueta</target>
-            </trans-unit>
-            <trans-unit id="4">
-                <source>label.slug_exists</source>
-                <target>El slug ya existe</target>
-            </trans-unit>
-            <trans-unit id="5">
-                <source>label.kind</source>
-                <target>Tipo</target>
-            </trans-unit>
-            <trans-unit id="6">
-                <source>label.value</source>
-                <target>Valor</target>
-            </trans-unit>
-            <trans-unit id="7">
-                <source>label.dashboard</source>
-                <target>Tablero</target>
-            </trans-unit>
-            <trans-unit id="8">
-                <source>label.user</source>
-                <target>Usuario</target>
-            </trans-unit>
-            <trans-unit id="9">
-                <source>label.signout</source>
-                <target>Cerrar sesión</target>
-            </trans-unit>
-            <trans-unit id="10">
-                <source>label.management</source>
-                <target>Gestión</target>
-            </trans-unit>
-            <trans-unit id="11">
-                <source>label.slug</source>
-                <target>Slug</target>
-            </trans-unit>
-            <trans-unit id="12">
-                <source>label.is_sensitive</source>
-                <target>Sensible</target>
-            </trans-unit>
-            <trans-unit id="13">
-                <source>label.is_sensitive_help</source>
-                <target>Si sensible está activado, el valor se cifra en la base de datos</target>
-            </trans-unit>
-            <trans-unit id="14">
-                <source>label.show_sensitive</source>
-                <target>Ver datos sensibles</target>
-            </trans-unit>
-            <trans-unit id="15">
-                <source>label.hide_sensitive</source>
-                <target>Ocultar datos sensibles</target>
-            </trans-unit>
-            <trans-unit id="16">
-                <source>label.description</source>
-                <target>Descripción</target>
-            </trans-unit>
-            <trans-unit id="17">
-                <source>label.int</source>
-                <target>Entero (1, 2, 3, ...)</target>
-            </trans-unit>
-            <trans-unit id="18">
-                <source>label.boolean</source>
-                <target>Booleano (Verdadero/Falso)</target>
-            </trans-unit>
-            <trans-unit id="19">
-                <source>label.text</source>
-                <target>Texto</target>
-            </trans-unit>
-            <trans-unit id="20">
-                <source>label.creation</source>
-                <target>Creación</target>
-            </trans-unit>
-            <trans-unit id="21">
-                <source>label.modification</source>
-                <target>Modificación</target>
-            </trans-unit>
-            <trans-unit id="22">
-                <source>label.date</source>
-                <target>Fecha</target>
-            </trans-unit>
-            <trans-unit id="23">
-                <source>label.true</source>
-                <target>Verdadero</target>
-            </trans-unit>
-            <trans-unit id="24">
-                <source>label.false</source>
-                <target>Falso</target>
-            </trans-unit>
-            <trans-unit id="25">
-                <source>label.value_sensitive</source>
-                <target>Valor (dejar vacío para no modificar)</target>
-            </trans-unit>
-            <trans-unit id="26">
-                <source>label.links</source>
-                <target>Enlaces</target>
-            </trans-unit>
-            <trans-unit id="27">
-                <source>label.group</source>
-                <target>Grupo</target>
-            </trans-unit>
-            <trans-unit id="28">
-                <source>label.group_system</source>
-                <target>Sistema</target>
-            </trans-unit>
-            <trans-unit id="29">
-                <source>label.group_general</source>
-                <target>General</target>
-            </trans-unit>
-            <trans-unit id="30">
-                <source>label.group_legal</source>
-                <target>Legal</target>
-            </trans-unit>
-            <trans-unit id="31">
-                <source>label.group_credits</source>
-                <target>Créditos</target>
-            </trans-unit>
-            <trans-unit id="32">
-                <source>label.group_analytics</source>
-                <target>Analítica</target>
-            </trans-unit>
-            <trans-unit id="33">
-                <source>label.group_backup</source>
-                <target>Copia de seguridad</target>
-            </trans-unit>
-            <trans-unit id="34">
-                <source>label.group_email</source>
-                <target>Correo</target>
-            </trans-unit>
-            <trans-unit id="35">
-                <source>label.group_form</source>
-                <target>Formulario</target>
-            </trans-unit>
-            <trans-unit id="36">
-                <source>label.group_security</source>
-                <target>Seguridad</target>
-            </trans-unit>
-            <trans-unit id="37">
-                <source>label.group_shop</source>
-                <target>Tienda</target>
-            </trans-unit>
-            <trans-unit id="38">
-                <source>label.group_payment</source>
-                <target>Pago</target>
-            </trans-unit>
-            <trans-unit id="39">
-                <source>help.value</source>
-                <target>Solo este valor es editable (el resto viene de los bundles). Cifrado si es sensible.</target>
-            </trans-unit>
-            <trans-unit id="40">
-                <source>help.value_json</source>
-                <target>Introduzca un array JSON válido, p. ej. ["ROLE_ADMIN","ROLE_EDITOR"]</target>
-            </trans-unit>
-            <trans-unit id="41">
-                <source>label.invalid_json</source>
-                <target>Este valor debe ser un array JSON válido</target>
-            </trans-unit>
-            <trans-unit id="42">
-                <source>label.severity</source>
-                <target>Severidad</target>
-            </trans-unit>
-            <trans-unit id="43">
-                <source>label.severity_danger</source>
-                <target>Peligro</target>
-            </trans-unit>
-            <trans-unit id="44">
-                <source>label.severity_warning</source>
-                <target>Advertencia</target>
-            </trans-unit>
-            <trans-unit id="45">
-                <source>label.severity_info</source>
-                <target>Información</target>
-            </trans-unit>
-            <trans-unit id="46">
-                <source>label.export</source>
-                <target>Exportar</target>
-            </trans-unit>
-            <trans-unit id="47">
-                <source>label.items_not_filled</source>
-                <target>Elementos sin completar</target>
-            </trans-unit>
-            <trans-unit id="48">
-                <source>description.config</source>
-                <target>Configuración del sitio, organizada por grupo. Puede modificar el valor de cada entrada desde su página de edición; proceda con precaución, un valor incorrecto puede afectar el funcionamiento del sitio. Los valores sensibles se muestran en texto claro en la página de edición, pero permanecen almacenados cifrados en la base de datos.</target>
-            </trans-unit>
-            <trans-unit id="49">
-                <source>label.whatsnew</source>
-                <target>Novedades</target>
-            </trans-unit>
-            <trans-unit id="50">
-                <source>label.whatsnew_see_all</source>
-                <target>Ver todas las notas de versión</target>
-            </trans-unit>
-            <trans-unit id="53">
-                <source>label.no_whatsnew</source>
-                <target>Todavía no hay notas de versión</target>
-            </trans-unit>
-            <trans-unit id="54">
-                <source>label.items_not_filled_for</source>
-                <target>%entity% sin completar</target>
-            </trans-unit>
-            <trans-unit id="55">
-                <source>label.config_clear_cache</source>
-                <target>Vaciar la caché de configuración</target>
-            </trans-unit>
-            <trans-unit id="56">
-                <source>flash.config_cache_cleared</source>
-                <target>Caché de configuración vaciada</target>
-            </trans-unit>
-            <trans-unit id="57">
-                <source>label.shortcuts</source>
-                <target>Atajos</target>
-            </trans-unit>
-            <trans-unit id="58">
-                <source>label.maintenance_enable</source>
-                <target>Activar el modo mantenimiento</target>
-            </trans-unit>
-            <trans-unit id="59">
-                <source>label.maintenance_disable</source>
-                <target>Desactivar el modo mantenimiento</target>
-            </trans-unit>
-            <trans-unit id="60">
-                <source>flash.maintenance_enabled</source>
-                <target>Modo mantenimiento activado</target>
-            </trans-unit>
-            <trans-unit id="61">
-                <source>flash.maintenance_disabled</source>
-                <target>Modo mantenimiento desactivado</target>
-            </trans-unit>
-            <trans-unit id="62">
-                <source>label.maintenance</source>
-                <target>Mantenimiento</target>
-            </trans-unit>
-            <trans-unit id="63">
-                <source>label.maintenance_message</source>
-                <target>Estamos trabajando para ofrecerte una mejor experiencia. ¡Vuelve pronto!</target>
-            </trans-unit>
-            <trans-unit id="64">
-                <source>label.is_restricted</source>
-                <target>Restringido</target>
-            </trans-unit>
-            <trans-unit id="65">
-                <source>label.is_restricted_help</source>
-                <target>Si activado, solo un ROLE_SUPER_ADMIN puede ver/editar esta configuración</target>
-            </trans-unit>
-            <trans-unit id="66">
-                <source>label.group_theme</source>
-                <target>Tema</target>
-            </trans-unit>
-            <trans-unit id="79">
-                <source>label.group_ai</source>
-                <target>IA</target>
-            </trans-unit>
-            <trans-unit id="67">
-                <source>label.theme</source>
-                <target>Tema</target>
-            </trans-unit>
-            <trans-unit id="68">
-                <source>label.theme_mode_auto</source>
-                <target>Automático (sigue el dispositivo del visitante)</target>
-            </trans-unit>
-            <trans-unit id="69">
-                <source>label.theme_mode_light</source>
-                <target>Claro</target>
-            </trans-unit>
-            <trans-unit id="70">
-                <source>label.theme_mode_dark</source>
-                <target>Oscuro</target>
-            </trans-unit>
-            <trans-unit id="71">
-                <source>label.presets</source>
-                <target>Temas</target>
-            </trans-unit>
-            <trans-unit id="73">
-                <source>confirm.apply_preset</source>
-                <target>¿Aplicar este tema? Cambia la forma visual del sitio (bordes, sombras, navegación...) - tus colores y fuentes no se ven afectados.</target>
-            </trans-unit>
-            <trans-unit id="74">
-                <source>label.invalid_theme_color</source>
-                <target>Este valor no parece ser un color CSS válido</target>
-            </trans-unit>
-            <trans-unit id="75">
-                <source>help.value_theme_color</source>
-                <target>Hexadecimal (#b30000), rgb()/rgba(), hsl()/hsla(), o un nombre CSS (ej. tomato)</target>
-            </trans-unit>
-            <trans-unit id="78">
-                <source>action.preview_preset</source>
-                <target>Vista previa: %label%</target>
-            </trans-unit>
-            <trans-unit id="80">
-                <source>label.group_items_count</source>
-                <target>Número de elementos</target>
-            </trans-unit>
-            <trans-unit id="81">
-                <source>label.group_messenger</source>
-                <target>Messenger</target>
-            </trans-unit>
-            <trans-unit id="82">
-                <source>label.info_theme</source>
-                <target>Colores, fuentes, modo claro/oscuro. Edición manual reservada a ROLE_SUPER_ADMIN; presets disponibles desde editor.</target>
-            </trans-unit>
-            <trans-unit id="83">
-                <source>label.config_export_sql</source>
-                <target>Exportar (SQL) la configuración</target>
-            </trans-unit>
-            <trans-unit id="84">
-                <source>label.content_import</source>
-                <target>Importar contenido</target>
-            </trans-unit>
-            <trans-unit id="85">
-                <source>label.content_import_help</source>
-                <target>Sube una exportación (zip) generada por la acción de exportación de un bundle (por ejemplo, una página exportada desde la pantalla Páginas).</target>
-            </trans-unit>
-            <trans-unit id="86">
-                <source>action.content_import</source>
-                <target>Importar</target>
-            </trans-unit>
-            <trans-unit id="87">
-                <source>flash.content_import_invalid_token</source>
-                <target>Token de seguridad no válido, inténtalo de nuevo</target>
-            </trans-unit>
-            <trans-unit id="88">
-                <source>flash.content_import_no_file</source>
-                <target>No se ha enviado ningún archivo</target>
-            </trans-unit>
-            <trans-unit id="89">
-                <source>flash.content_import_file_too_large</source>
-                <target>El archivo enviado es demasiado grande</target>
-            </trans-unit>
-            <trans-unit id="90">
-                <source>flash.content_import_invalid_json</source>
-                <target>El archivo enviado no es una exportación válida</target>
-            </trans-unit>
-            <trans-unit id="91">
-                <source>flash.content_import_unsupported_kind</source>
-                <target>Aún no hay ningún proveedor de importación registrado para «%kind%»</target>
-            </trans-unit>
-            <trans-unit id="92">
-                <source>flash.content_import_success</source>
-                <target>%created% creado(s), %updated% actualizado(s)</target>
-            </trans-unit>
-            <trans-unit id="93">
-                <source>action.export_for_sync</source>
-                <target>Sincronizar</target>
-            </trans-unit>
-            <trans-unit id="94">
-                <source>flash.content_import_invalid_zip</source>
-                <target>El archivo enviado no es un archivo zip válido</target>
-            </trans-unit>
-            <trans-unit id="95">
-                <source>label.config_export_sync_all</source>
-                <target>Exportar la sincronización (todo)</target>
-            </trans-unit>
-            <trans-unit id="96">
-                <source>flash.content_import_success_kind</source>
-                <target>%kind%: %created% creado(s), %updated% actualizado(s)</target>
-            </trans-unit>
-            <trans-unit id="97">
-                <source>label.essential_actions_title</source>
-                <target>Acciones esenciales</target>
-            </trans-unit>
-            <trans-unit id="98">
-                <source>label.essential_actions_subtitle</source>
-                <target>%done%/%total% configuradas</target>
-            </trans-unit>
-            <trans-unit id="99">
-                <source>label.essential_action_identity</source>
-                <target>Identidad del sitio</target>
-            </trans-unit>
-            <trans-unit id="100">
-                <source>description.essential_action_identity</source>
-                <target>Nombre, eslogan, logo y favicon</target>
-            </trans-unit>
-            <trans-unit id="101">
-                <source>label.essential_action_legal</source>
-                <target>Contacto y aviso legal</target>
-            </trans-unit>
-            <trans-unit id="102">
-                <source>description.essential_action_legal</source>
-                <target>Email de contacto y director de publicación</target>
-            </trans-unit>
-            <trans-unit id="103">
-                <source>label.essential_action_email</source>
-                <target>Correos salientes</target>
-            </trans-unit>
-            <trans-unit id="104">
-                <source>description.essential_action_email</source>
-                <target>Quién envía y quién recibe las notificaciones del sitio</target>
-            </trans-unit>
-            <trans-unit id="105">
-                <source>label.essential_action_roles</source>
-                <target>Roles y accesos</target>
-            </trans-unit>
-            <trans-unit id="106">
-                <source>description.essential_action_roles</source>
-                <target>Quién puede hacer qué en el panel de administración</target>
-            </trans-unit>
-            <trans-unit id="107">
-                <source>label.menu_advanced</source>
-                <target>Avanzado</target>
-            </trans-unit>
-            <trans-unit id="108">
-                <source>label.shortcuts_category_export</source>
-                <target>Exportar</target>
-            </trans-unit>
-            <trans-unit id="109">
-                <source>label.shortcuts_category_maintenance</source>
-                <target>Mantenimiento</target>
-            </trans-unit>
-            <trans-unit id="110">
-                <source>label.shortcuts_category_site</source>
-                <target>Sitio</target>
-            </trans-unit>
-            <trans-unit id="111">
-                <source>label.shortcuts_category_other</source>
-                <target>Otros</target>
-            </trans-unit>
-            <trans-unit id="112">
-                <source>label.health_check</source>
-                <target>Estado de salud</target>
-            </trans-unit>
-            <trans-unit id="113">
-                <source>description.health_check</source>
-                <target>Puntuaciones de Lighthouse, problemas de accesibilidad y errores de consola de cada página publicada, actualizados periódicamente o bajo demanda.</target>
-            </trans-unit>
-            <trans-unit id="114">
-                <source>label.url</source>
-                <target>URL</target>
-            </trans-unit>
-            <trans-unit id="115">
-                <source>label.health_check_kind</source>
-                <target>Comprobación</target>
-            </trans-unit>
-            <trans-unit id="116">
-                <source>label.health_check_status</source>
-                <target>Estado</target>
-            </trans-unit>
-            <trans-unit id="117">
-                <source>label.health_check_summary</source>
-                <target>Resumen</target>
-            </trans-unit>
-            <trans-unit id="118">
-                <source>label.health_check_last_checked_at</source>
-                <target>Última comprobación: %date%</target>
-            </trans-unit>
-            <trans-unit id="119">
-                <source>label.health_check_details</source>
-                <target>Detalles</target>
-            </trans-unit>
-            <trans-unit id="120">
-                <source>label.health_check_status_ok</source>
-                <target>OK</target>
-            </trans-unit>
-            <trans-unit id="121">
-                <source>label.health_check_status_warning</source>
-                <target>Advertencia</target>
-            </trans-unit>
-            <trans-unit id="122">
-                <source>label.health_check_status_error</source>
-                <target>Error</target>
-            </trans-unit>
-            <trans-unit id="123">
-                <source>label.no_health_check</source>
-                <target>Aún no hay resultados de estado de salud</target>
-            </trans-unit>
-            <trans-unit id="124">
-                <source>action.health_check_run</source>
-                <target>Ejecutar el chequeo de salud ahora</target>
-            </trans-unit>
-            <trans-unit id="125">
-                <source>flash.health_check_queued</source>
-                <target>Chequeo de salud iniciado en segundo plano: %count% comprobación(es) en cola. Los resultados aparecerán aquí a medida que se completen.</target>
-            </trans-unit>
-            <trans-unit id="126">
-                <source>label.onboarding_start</source>
-                <target>Visita guiada</target>
-            </trans-unit>
-            <trans-unit id="127">
-                <source>label.onboarding_previous</source>
-                <target>Anterior</target>
-            </trans-unit>
-            <trans-unit id="128">
-                <source>label.onboarding_next</source>
-                <target>Siguiente</target>
-            </trans-unit>
-            <trans-unit id="129">
-                <source>label.onboarding_finish</source>
-                <target>Finalizar</target>
-            </trans-unit>
-            <trans-unit id="130">
-                <source>label.onboarding_close</source>
-                <target>Cerrar</target>
-            </trans-unit>
-            <trans-unit id="131">
-                <source>description.whatsnew</source>
-                <target>Lo que ha cambiado recientemente en este panel y en todos los bundles instalados.</target>
-            </trans-unit>
-            <trans-unit id="135">
-                <source>action.health_check_export</source>
-                <target>Exportar (CSV)</target>
-            </trans-unit>
-            <trans-unit id="136">
-                <source>label.health_check_trend</source>
-                <target>Tendencia</target>
-            </trans-unit>
-            <trans-unit id="137">
-                <source>label.health_check_filter_placeholder</source>
-                <target>Buscar url, etiqueta, resumen...</target>
-            </trans-unit>
-            <trans-unit id="138">
-                <source>label.health_check_gauge_performance</source>
-                <target>Rendimiento</target>
-            </trans-unit>
-            <trans-unit id="139">
-                <source>label.health_check_gauge_accessibility</source>
-                <target>Accesibilidad</target>
-            </trans-unit>
-            <trans-unit id="140">
-                <source>label.health_check_gauge_best_practices</source>
-                <target>Buenas prácticas</target>
-            </trans-unit>
-            <trans-unit id="141">
-                <source>label.health_check_gauge_seo</source>
-                <target>SEO</target>
-            </trans-unit>
-            <trans-unit id="142">
-                <source>label.site_link</source>
-                <target>Sitio: %name%</target>
-            </trans-unit>
-            <trans-unit id="143">
-                <source>label.health_check_site_heading</source>
-                <target>Sitio</target>
-            </trans-unit>
-            <trans-unit id="144">
-                <source>label.health_check_status_skipped</source>
-                <target>No probado</target>
-            </trans-unit>
-            <trans-unit id="145">
-                <source>flash.health_check_run_invalid_token</source>
-                <target>Token de seguridad no válido, inténtalo de nuevo</target>
-            </trans-unit>
-            <trans-unit id="146">
-                <source>label.health_check_pages_heading</source>
-                <target>Páginas</target>
-            </trans-unit>
-            <trans-unit id="147">
-                <source>label.health_check_advice_link</source>
-                <target>Ver el informe completo</target>
-            </trans-unit>
-            <trans-unit id="148">
-                <source>label.health_check_view_url</source>
-                <target>Abrir la página probada</target>
-            </trans-unit>
-            <trans-unit id="149">
-                <source>label.health_check_edit_page</source>
-                <target>Editar en el CRUD</target>
-            </trans-unit>
-            <trans-unit id="150">
-                <source>description.site_link</source>
-                <target>Abre su sitio en una nueva pestaña, tal como lo ven sus visitantes</target>
-            </trans-unit>
-            <trans-unit id="151">
-                <source>label.health_check_advice_details</source>
-                <target>Ver el detalle (%count%)</target>
-            </trans-unit>
-            <trans-unit id="152">
-                <source>label.config_sitemaps_create</source>
-                <target>Crear sitemaps</target>
-            </trans-unit>
-            <trans-unit id="153">
-                <source>flash.config_sitemaps_created</source>
-                <target>Sitemaps creadas con éxito</target>
-            </trans-unit>
-            <trans-unit id="154">
-                <source>flash.config_sitemaps_error</source>
-                <target>No se han podido crear las sitemaps: %error%</target>
-            </trans-unit>
-            <trans-unit id="155">
-                <source>action.export_sql_with_sensitive</source>
-                <target>SQL + secretos</target>
-            </trans-unit>
-            <trans-unit id="156">
-                <source>label.config_prune</source>
-                <target>Configuraciones obsoletas</target>
-            </trans-unit>
-            <trans-unit id="157">
-                <source>description.config_prune</source>
-                <target>Entradas que permanecen en la base de datos y que ningún configs*.json declara ya, por ejemplo un ajuste abandonado por un bundle, o un bundle desinstalado. No se elimina nada mientras no se valide el formulario de abajo.</target>
-            </trans-unit>
-            <trans-unit id="158">
-                <source>label.config_prune_none</source>
-                <target>Ninguna entrada de configuración obsoleta.</target>
-            </trans-unit>
-            <trans-unit id="159">
-                <source>label.config_prune_no_declaration</source>
-                <target>No se ha encontrado ningún configs*.json: nada declara entradas de configuración aquí, por lo que ninguna entrada puede considerarse obsoleta.</target>
-            </trans-unit>
-            <trans-unit id="160">
-                <source>label.config_prune_irreversible</source>
-                <target>La eliminación es irreversible y se lleva consigo el valor almacenado. Exporte sus configuraciones previamente si un bundle solo está desinstalado temporalmente.</target>
-            </trans-unit>
-            <trans-unit id="161">
+            <trans-unit id="svdf7gF">
                 <source>action.config_prune_delete</source>
                 <target>Eliminar las entradas seleccionadas</target>
             </trans-unit>
-            <trans-unit id="162">
+            <trans-unit id="IogkyYC">
+                <source>action.content_import</source>
+                <target>Importar</target>
+            </trans-unit>
+            <trans-unit id="4noVC8G">
+                <source>action.export_for_sync</source>
+                <target>Sincronizar</target>
+            </trans-unit>
+            <trans-unit id="w6w8vOt">
+                <source>action.export_sql_with_sensitive</source>
+                <target>SQL + secretos</target>
+            </trans-unit>
+            <trans-unit id="BQn6LPq">
+                <source>action.health_check_export</source>
+                <target>Exportar (CSV)</target>
+            </trans-unit>
+            <trans-unit id="uNJVXca">
+                <source>action.health_check_run</source>
+                <target>Ejecutar el chequeo de salud ahora</target>
+            </trans-unit>
+            <trans-unit id="ALmOjg.">
+                <source>action.preview_preset</source>
+                <target>Vista previa: %label%</target>
+            </trans-unit>
+            <trans-unit id="1RI0n59">
+                <source>confirm.apply_preset</source>
+                <target>¿Aplicar este tema? Cambia la forma visual del sitio (bordes, sombras, navegación...) - tus colores y fuentes no se ven afectados.</target>
+            </trans-unit>
+            <trans-unit id="5sURNHK">
+                <source>description.config</source>
+                <target>Configuración del sitio, organizada por grupo. Puede modificar el valor de cada entrada desde su página de edición; proceda con precaución, un valor incorrecto puede afectar el funcionamiento del sitio. Los valores sensibles se muestran en texto claro en la página de edición, pero permanecen almacenados cifrados en la base de datos.</target>
+            </trans-unit>
+            <trans-unit id="QYdNDiU">
+                <source>description.config_prune</source>
+                <target>Entradas que permanecen en la base de datos y que ningún configs*.json declara ya, por ejemplo un ajuste abandonado por un bundle, o un bundle desinstalado. No se elimina nada mientras no se valide el formulario de abajo.</target>
+            </trans-unit>
+            <trans-unit id="mf1xPAY">
+                <source>description.essential_action_email</source>
+                <target>Quién envía y quién recibe las notificaciones del sitio</target>
+            </trans-unit>
+            <trans-unit id="B0uyS_u">
+                <source>description.essential_action_identity</source>
+                <target>Nombre, eslogan, logo y favicon</target>
+            </trans-unit>
+            <trans-unit id="sACx.jR">
+                <source>description.essential_action_legal</source>
+                <target>Email de contacto y director de publicación</target>
+            </trans-unit>
+            <trans-unit id="kRHelm.">
+                <source>description.essential_action_roles</source>
+                <target>Quién puede hacer qué en el panel de administración</target>
+            </trans-unit>
+            <trans-unit id="sXfnWsf">
+                <source>description.health_check</source>
+                <target>Puntuaciones de Lighthouse, problemas de accesibilidad y errores de consola de cada página publicada, actualizados periódicamente o bajo demanda.</target>
+            </trans-unit>
+            <trans-unit id="FXQDiiD">
+                <source>description.health_check_alert</source>
+                <target>Última ejecución el %date%</target>
+            </trans-unit>
+            <trans-unit id="QEO2q6_">
+                <source>description.site_link</source>
+                <target>Abre su sitio en una nueva pestaña, tal como lo ven sus visitantes</target>
+            </trans-unit>
+            <trans-unit id="t2I77Fh">
+                <source>description.whatsnew</source>
+                <target>Lo que ha cambiado recientemente en este panel y en todos los bundles instalados.</target>
+            </trans-unit>
+            <trans-unit id="duvD5dn">
+                <source>flash.config_cache_cleared</source>
+                <target>Caché de configuración vaciada</target>
+            </trans-unit>
+            <trans-unit id="n9r4S2p">
                 <source>flash.config_prune_deleted</source>
                 <target>%count% entrada(s) de configuración eliminada(s)</target>
             </trans-unit>
-            <trans-unit id="163">
+            <trans-unit id="pFXTVkA">
                 <source>flash.config_prune_nothing_deleted</source>
                 <target>Ninguna entrada seleccionada, no se ha eliminado nada</target>
             </trans-unit>
-            <trans-unit id="164">
+            <trans-unit id="VcrLnzm">
+                <source>flash.config_sitemaps_created</source>
+                <target>Sitemaps creadas con éxito</target>
+            </trans-unit>
+            <trans-unit id="x.ODRRJ">
+                <source>flash.config_sitemaps_error</source>
+                <target>No se han podido crear las sitemaps: %error%</target>
+            </trans-unit>
+            <trans-unit id="8oxIund">
+                <source>flash.content_import_file_too_large</source>
+                <target>El archivo enviado es demasiado grande</target>
+            </trans-unit>
+            <trans-unit id="BV77uDV">
+                <source>flash.content_import_invalid_json</source>
+                <target>El archivo enviado no es una exportación válida</target>
+            </trans-unit>
+            <trans-unit id="qi0A_IU">
+                <source>flash.content_import_invalid_token</source>
+                <target>Token de seguridad no válido, inténtalo de nuevo</target>
+            </trans-unit>
+            <trans-unit id="W4hekV1">
+                <source>flash.content_import_invalid_zip</source>
+                <target>El archivo enviado no es un archivo zip válido</target>
+            </trans-unit>
+            <trans-unit id="UqYNg.4">
+                <source>flash.content_import_no_file</source>
+                <target>No se ha enviado ningún archivo</target>
+            </trans-unit>
+            <trans-unit id="EMNY23Y">
+                <source>flash.content_import_success</source>
+                <target>%created% creado(s), %updated% actualizado(s)</target>
+            </trans-unit>
+            <trans-unit id="o6n3nWr">
+                <source>flash.content_import_success_kind</source>
+                <target>%kind%: %created% creado(s), %updated% actualizado(s)</target>
+            </trans-unit>
+            <trans-unit id="irAKSdg">
+                <source>flash.content_import_unsupported_kind</source>
+                <target>Aún no hay ningún proveedor de importación registrado para «%kind%»</target>
+            </trans-unit>
+            <trans-unit id="VM4hYMi">
+                <source>flash.health_check_queued</source>
+                <target>Chequeo de salud iniciado en segundo plano: %count% comprobación(es) en cola. Los resultados aparecerán aquí a medida que se completen.</target>
+            </trans-unit>
+            <trans-unit id="Adv4I1e">
+                <source>flash.health_check_run_invalid_token</source>
+                <target>Token de seguridad no válido, inténtalo de nuevo</target>
+            </trans-unit>
+            <trans-unit id="YmaBUaQ">
+                <source>flash.maintenance_disabled</source>
+                <target>Modo mantenimiento desactivado</target>
+            </trans-unit>
+            <trans-unit id="HLroN8C">
+                <source>flash.maintenance_enabled</source>
+                <target>Modo mantenimiento activado</target>
+            </trans-unit>
+            <trans-unit id="NbIpWIT">
+                <source>help.value</source>
+                <target>Solo este valor es editable (el resto viene de los bundles). Cifrado si es sensible.</target>
+            </trans-unit>
+            <trans-unit id="SXn0aeS">
+                <source>help.value_json</source>
+                <target>Introduzca un array JSON válido, p. ej. ["ROLE_ADMIN","ROLE_EDITOR"]</target>
+            </trans-unit>
+            <trans-unit id="2R4Y3Vo">
+                <source>help.value_theme_color</source>
+                <target>Hexadecimal (#b30000), rgb()/rgba(), hsl()/hsla(), o un nombre CSS (ej. tomato)</target>
+            </trans-unit>
+            <trans-unit id="13FkC7i">
+                <source>label.boolean</source>
+                <target>Booleano (Verdadero/Falso)</target>
+            </trans-unit>
+            <trans-unit id="fqXGPNB">
+                <source>label.config</source>
+                <target>Configuración</target>
+            </trans-unit>
+            <trans-unit id="fZmwU0Q">
+                <source>label.config_clear_cache</source>
+                <target>Vaciar la caché de configuración</target>
+            </trans-unit>
+            <trans-unit id="OMw.Hf5">
+                <source>label.config_export_sql</source>
+                <target>Exportar (SQL) la configuración</target>
+            </trans-unit>
+            <trans-unit id="SYVeUIq">
+                <source>label.config_export_sync_all</source>
+                <target>Exportar la sincronización (todo)</target>
+            </trans-unit>
+            <trans-unit id="QCljyMm">
+                <source>label.config_prune</source>
+                <target>Configuraciones obsoletas</target>
+            </trans-unit>
+            <trans-unit id="Yrynu_0">
+                <source>label.config_prune_irreversible</source>
+                <target>La eliminación es irreversible y se lleva consigo el valor almacenado. Exporte sus configuraciones previamente si un bundle solo está desinstalado temporalmente.</target>
+            </trans-unit>
+            <trans-unit id="Ll7hDYv">
+                <source>label.config_prune_no_declaration</source>
+                <target>No se ha encontrado ningún configs*.json: nada declara entradas de configuración aquí, por lo que ninguna entrada puede considerarse obsoleta.</target>
+            </trans-unit>
+            <trans-unit id="jGTH0yg">
+                <source>label.config_prune_none</source>
+                <target>Ninguna entrada de configuración obsoleta.</target>
+            </trans-unit>
+            <trans-unit id="6XuQx8_">
                 <source>label.config_prune_unreadable</source>
                 <target>Los siguientes configs*.json no se pueden leer, por lo que todo lo que declaran aparecería erróneamente como obsoleto. Corríjalos y vuelva a cargar esta página.</target>
             </trans-unit>
-            <trans-unit id="165">
+            <trans-unit id="W.zT_E8">
+                <source>label.config_sitemaps_create</source>
+                <target>Crear sitemaps</target>
+            </trans-unit>
+            <trans-unit id="l7sg2Pt">
+                <source>label.content_import</source>
+                <target>Importar contenido</target>
+            </trans-unit>
+            <trans-unit id="lUu8ay1">
+                <source>label.content_import_help</source>
+                <target>Sube una exportación (zip) generada por la acción de exportación de un bundle (por ejemplo, una página exportada desde la pantalla Páginas).</target>
+            </trans-unit>
+            <trans-unit id="emPIlPf">
+                <source>label.creation</source>
+                <target>Creación</target>
+            </trans-unit>
+            <trans-unit id="id1d4o4">
+                <source>label.dashboard</source>
+                <target>Tablero</target>
+            </trans-unit>
+            <trans-unit id="QkYrM9J">
+                <source>label.date</source>
+                <target>Fecha</target>
+            </trans-unit>
+            <trans-unit id="Zb4xuOb">
+                <source>label.description</source>
+                <target>Descripción</target>
+            </trans-unit>
+            <trans-unit id="2W9fCVk">
+                <source>label.essential_action_email</source>
+                <target>Correos salientes</target>
+            </trans-unit>
+            <trans-unit id="lGDhwCB">
+                <source>label.essential_action_identity</source>
+                <target>Identidad del sitio</target>
+            </trans-unit>
+            <trans-unit id="6DZxkzD">
+                <source>label.essential_action_legal</source>
+                <target>Contacto y aviso legal</target>
+            </trans-unit>
+            <trans-unit id="pI7WW0o">
+                <source>label.essential_action_roles</source>
+                <target>Roles y accesos</target>
+            </trans-unit>
+            <trans-unit id="BuD8LTT">
+                <source>label.essential_actions_subtitle</source>
+                <target>%done%/%total% configuradas</target>
+            </trans-unit>
+            <trans-unit id="LTU8OLc">
+                <source>label.essential_actions_title</source>
+                <target>Acciones esenciales</target>
+            </trans-unit>
+            <trans-unit id="J2sBc_e">
+                <source>label.export</source>
+                <target>Exportar</target>
+            </trans-unit>
+            <trans-unit id="Sct9raH">
+                <source>label.false</source>
+                <target>Falso</target>
+            </trans-unit>
+            <trans-unit id="gEHa5iE">
+                <source>label.group</source>
+                <target>Grupo</target>
+            </trans-unit>
+            <trans-unit id="3US4Fj6">
+                <source>label.group_ai</source>
+                <target>IA</target>
+            </trans-unit>
+            <trans-unit id="8cYr.kC">
+                <source>label.group_analytics</source>
+                <target>Analítica</target>
+            </trans-unit>
+            <trans-unit id="ZRIEXFg">
+                <source>label.group_backup</source>
+                <target>Copia de seguridad</target>
+            </trans-unit>
+            <trans-unit id="YT1qsFL">
+                <source>label.group_credits</source>
+                <target>Créditos</target>
+            </trans-unit>
+            <trans-unit id="XRPo6XS">
+                <source>label.group_email</source>
+                <target>Correo</target>
+            </trans-unit>
+            <trans-unit id="0lC5dLu">
+                <source>label.group_form</source>
+                <target>Formulario</target>
+            </trans-unit>
+            <trans-unit id="h_MNGx0">
+                <source>label.group_general</source>
+                <target>General</target>
+            </trans-unit>
+            <trans-unit id="7y32L1t">
+                <source>label.group_items_count</source>
+                <target>Número de elementos</target>
+            </trans-unit>
+            <trans-unit id="U8p5Mto">
+                <source>label.group_legal</source>
+                <target>Legal</target>
+            </trans-unit>
+            <trans-unit id="McCkmrn">
+                <source>label.group_messenger</source>
+                <target>Messenger</target>
+            </trans-unit>
+            <trans-unit id="1sMeaZb">
+                <source>label.group_payment</source>
+                <target>Pago</target>
+            </trans-unit>
+            <trans-unit id="NontQa3">
+                <source>label.group_security</source>
+                <target>Seguridad</target>
+            </trans-unit>
+            <trans-unit id="AqgvWw8">
+                <source>label.group_shop</source>
+                <target>Tienda</target>
+            </trans-unit>
+            <trans-unit id="Fb_L38w">
+                <source>label.group_system</source>
+                <target>Sistema</target>
+            </trans-unit>
+            <trans-unit id="mw.jVyj">
+                <source>label.group_theme</source>
+                <target>Tema</target>
+            </trans-unit>
+            <trans-unit id="RXDF6wx">
+                <source>label.health_check</source>
+                <target>Estado de salud</target>
+            </trans-unit>
+            <trans-unit id="kUWeqbk">
+                <source>label.health_check_advice_details</source>
+                <target>Ver el detalle (%count%)</target>
+            </trans-unit>
+            <trans-unit id="hXk1bLK">
+                <source>label.health_check_advice_link</source>
+                <target>Ver el informe completo</target>
+            </trans-unit>
+            <trans-unit id="l7Bn1sZ">
                 <source>label.health_check_alert_errors</source>
                 <target>Chequeo de salud: %count% resultado(s) con error</target>
             </trans-unit>
-            <trans-unit id="166">
+            <trans-unit id="Zn2gDQp">
                 <source>label.health_check_alert_warnings</source>
                 <target>Chequeo de salud: %count% resultado(s) a vigilar</target>
             </trans-unit>
-            <trans-unit id="167">
-                <source>description.health_check_alert</source>
-                <target>Última ejecución el %date%</target>
+            <trans-unit id="EUFNbMU">
+                <source>label.health_check_details</source>
+                <target>Detalles</target>
+            </trans-unit>
+            <trans-unit id="wjAjiIq">
+                <source>label.health_check_edit_page</source>
+                <target>Editar en el CRUD</target>
+            </trans-unit>
+            <trans-unit id="l1Wf172">
+                <source>label.health_check_filter_placeholder</source>
+                <target>Buscar url, etiqueta, resumen...</target>
+            </trans-unit>
+            <trans-unit id="WEpANpz">
+                <source>label.health_check_gauge_accessibility</source>
+                <target>Accesibilidad</target>
+            </trans-unit>
+            <trans-unit id="uVOnlx3">
+                <source>label.health_check_gauge_best_practices</source>
+                <target>Buenas prácticas</target>
+            </trans-unit>
+            <trans-unit id="1eWuHWd">
+                <source>label.health_check_gauge_performance</source>
+                <target>Rendimiento</target>
+            </trans-unit>
+            <trans-unit id="VRmd3ap">
+                <source>label.health_check_gauge_seo</source>
+                <target>SEO</target>
+            </trans-unit>
+            <trans-unit id="o3s6n4c">
+                <source>label.health_check_kind</source>
+                <target>Comprobación</target>
+            </trans-unit>
+            <trans-unit id="Pv.1XR6">
+                <source>label.health_check_last_checked_at</source>
+                <target>Última comprobación: %date%</target>
+            </trans-unit>
+            <trans-unit id="6XIJPsF">
+                <source>label.health_check_pages_heading</source>
+                <target>Páginas</target>
+            </trans-unit>
+            <trans-unit id="EAt9YJO">
+                <source>label.health_check_site_heading</source>
+                <target>Sitio</target>
+            </trans-unit>
+            <trans-unit id="15UA7WE">
+                <source>label.health_check_status</source>
+                <target>Estado</target>
+            </trans-unit>
+            <trans-unit id="JvPh_wR">
+                <source>label.health_check_status_error</source>
+                <target>Error</target>
+            </trans-unit>
+            <trans-unit id="bTmh.Fl">
+                <source>label.health_check_status_ok</source>
+                <target>OK</target>
+            </trans-unit>
+            <trans-unit id="_qvT.iU">
+                <source>label.health_check_status_skipped</source>
+                <target>No probado</target>
+            </trans-unit>
+            <trans-unit id="FK6UmpN">
+                <source>label.health_check_status_warning</source>
+                <target>Advertencia</target>
+            </trans-unit>
+            <trans-unit id="DXINO1n">
+                <source>label.health_check_summary</source>
+                <target>Resumen</target>
+            </trans-unit>
+            <trans-unit id="TuTVoK5">
+                <source>label.health_check_trend</source>
+                <target>Tendencia</target>
+            </trans-unit>
+            <trans-unit id="BheTXiv">
+                <source>label.health_check_view_url</source>
+                <target>Abrir la página probada</target>
+            </trans-unit>
+            <trans-unit id="4sz8iu4">
+                <source>label.hide_sensitive</source>
+                <target>Ocultar datos sensibles</target>
+            </trans-unit>
+            <trans-unit id="NZUMwSH">
+                <source>label.info_theme</source>
+                <target>Colores, fuentes, modo claro/oscuro. Edición manual reservada a ROLE_SUPER_ADMIN; presets disponibles desde editor.</target>
+            </trans-unit>
+            <trans-unit id="Puo8mCm">
+                <source>label.int</source>
+                <target>Entero (1, 2, 3, ...)</target>
+            </trans-unit>
+            <trans-unit id="gDPKXt0">
+                <source>label.invalid_json</source>
+                <target>Este valor debe ser un array JSON válido</target>
+            </trans-unit>
+            <trans-unit id="GD0aiBK">
+                <source>label.invalid_theme_color</source>
+                <target>Este valor no parece ser un color CSS válido</target>
+            </trans-unit>
+            <trans-unit id="Tau.iPf">
+                <source>label.is_restricted</source>
+                <target>Restringido</target>
+            </trans-unit>
+            <trans-unit id="2Q0svza">
+                <source>label.is_restricted_help</source>
+                <target>Si activado, solo un ROLE_SUPER_ADMIN puede ver/editar esta configuración</target>
+            </trans-unit>
+            <trans-unit id="EBMtHmf">
+                <source>label.is_sensitive</source>
+                <target>Sensible</target>
+            </trans-unit>
+            <trans-unit id="fxTWmw2">
+                <source>label.is_sensitive_help</source>
+                <target>Si sensible está activado, el valor se cifra en la base de datos</target>
+            </trans-unit>
+            <trans-unit id="gH74JM1">
+                <source>label.items_not_filled</source>
+                <target>Elementos sin completar</target>
+            </trans-unit>
+            <trans-unit id="xvnZ7bJ">
+                <source>label.items_not_filled_for</source>
+                <target>%entity% sin completar</target>
+            </trans-unit>
+            <trans-unit id="NdoELG0">
+                <source>label.kind</source>
+                <target>Tipo</target>
+            </trans-unit>
+            <trans-unit id="y.9x3G.">
+                <source>label.label</source>
+                <target>Etiqueta</target>
+            </trans-unit>
+            <trans-unit id="7BYqEbj">
+                <source>label.links</source>
+                <target>Enlaces</target>
+            </trans-unit>
+            <trans-unit id="vDCVRyf">
+                <source>label.maintenance</source>
+                <target>Mantenimiento</target>
+            </trans-unit>
+            <trans-unit id="t435StY">
+                <source>label.maintenance_disable</source>
+                <target>Desactivar el modo mantenimiento</target>
+            </trans-unit>
+            <trans-unit id="NjPEnP0">
+                <source>label.maintenance_enable</source>
+                <target>Activar el modo mantenimiento</target>
+            </trans-unit>
+            <trans-unit id="bA8bvIF">
+                <source>label.maintenance_message</source>
+                <target>Estamos trabajando para ofrecerte una mejor experiencia. ¡Vuelve pronto!</target>
+            </trans-unit>
+            <trans-unit id="_0OT.Rv">
+                <source>label.management</source>
+                <target>Gestión</target>
+            </trans-unit>
+            <trans-unit id="Vbng0S2">
+                <source>label.management_interface</source>
+                <target>Interfaz de gestión</target>
+            </trans-unit>
+            <trans-unit id="EfqOe8j">
+                <source>label.menu_advanced</source>
+                <target>Avanzado</target>
+            </trans-unit>
+            <trans-unit id="baXk6pr">
+                <source>label.modification</source>
+                <target>Modificación</target>
+            </trans-unit>
+            <trans-unit id="iUnyZyo">
+                <source>label.no_health_check</source>
+                <target>Aún no hay resultados de estado de salud</target>
+            </trans-unit>
+            <trans-unit id="gKQ4vEW">
+                <source>label.no_whatsnew</source>
+                <target>Todavía no hay notas de versión</target>
+            </trans-unit>
+            <trans-unit id="qm9C7WD">
+                <source>label.onboarding_close</source>
+                <target>Cerrar</target>
+            </trans-unit>
+            <trans-unit id=".1_mjgz">
+                <source>label.onboarding_finish</source>
+                <target>Finalizar</target>
+            </trans-unit>
+            <trans-unit id="A1h8Yfw">
+                <source>label.onboarding_next</source>
+                <target>Siguiente</target>
+            </trans-unit>
+            <trans-unit id="SLzP.HC">
+                <source>label.onboarding_previous</source>
+                <target>Anterior</target>
+            </trans-unit>
+            <trans-unit id="ZCAnxZ3">
+                <source>label.onboarding_start</source>
+                <target>Visita guiada</target>
+            </trans-unit>
+            <trans-unit id="Cb.i5pM">
+                <source>label.presets</source>
+                <target>Temas</target>
+            </trans-unit>
+            <trans-unit id="RZMXcMI">
+                <source>label.severity</source>
+                <target>Severidad</target>
+            </trans-unit>
+            <trans-unit id="Vf7llby">
+                <source>label.severity_danger</source>
+                <target>Peligro</target>
+            </trans-unit>
+            <trans-unit id="CzebRT7">
+                <source>label.severity_info</source>
+                <target>Información</target>
+            </trans-unit>
+            <trans-unit id="p1cJlit">
+                <source>label.severity_warning</source>
+                <target>Advertencia</target>
+            </trans-unit>
+            <trans-unit id="6b0IH3c">
+                <source>label.shortcuts</source>
+                <target>Atajos</target>
+            </trans-unit>
+            <trans-unit id="co161qf">
+                <source>label.shortcuts_category_export</source>
+                <target>Exportar</target>
+            </trans-unit>
+            <trans-unit id="1HQLOkW">
+                <source>label.shortcuts_category_maintenance</source>
+                <target>Mantenimiento</target>
+            </trans-unit>
+            <trans-unit id="h0l5yRP">
+                <source>label.shortcuts_category_other</source>
+                <target>Otros</target>
+            </trans-unit>
+            <trans-unit id="kUBLlK6">
+                <source>label.shortcuts_category_site</source>
+                <target>Sitio</target>
+            </trans-unit>
+            <trans-unit id="06NLlwK">
+                <source>label.show_sensitive</source>
+                <target>Ver datos sensibles</target>
+            </trans-unit>
+            <trans-unit id="lnfUWu.">
+                <source>label.signout</source>
+                <target>Cerrar sesión</target>
+            </trans-unit>
+            <trans-unit id="WZuD44S">
+                <source>label.site_link</source>
+                <target>Sitio: %name%</target>
+            </trans-unit>
+            <trans-unit id="0kGqgMZ">
+                <source>label.slug</source>
+                <target>Slug</target>
+            </trans-unit>
+            <trans-unit id="o8eL7Qn">
+                <source>label.slug_exists</source>
+                <target>El slug ya existe</target>
+            </trans-unit>
+            <trans-unit id="zDdJoWc">
+                <source>label.text</source>
+                <target>Texto</target>
+            </trans-unit>
+            <trans-unit id="0BVSEus">
+                <source>label.theme</source>
+                <target>Tema</target>
+            </trans-unit>
+            <trans-unit id="Es83kpS">
+                <source>label.theme_mode_auto</source>
+                <target>Automático (sigue el dispositivo del visitante)</target>
+            </trans-unit>
+            <trans-unit id="lcI61Wi">
+                <source>label.theme_mode_dark</source>
+                <target>Oscuro</target>
+            </trans-unit>
+            <trans-unit id="V9AXtDG">
+                <source>label.theme_mode_light</source>
+                <target>Claro</target>
+            </trans-unit>
+            <trans-unit id="sS6ch7.">
+                <source>label.true</source>
+                <target>Verdadero</target>
+            </trans-unit>
+            <trans-unit id="mcQ1Bzu">
+                <source>label.url</source>
+                <target>URL</target>
+            </trans-unit>
+            <trans-unit id="ExAFOiH">
+                <source>label.user</source>
+                <target>Usuario</target>
+            </trans-unit>
+            <trans-unit id="hgGixhc">
+                <source>label.value</source>
+                <target>Valor</target>
+            </trans-unit>
+            <trans-unit id="jMNDg2i">
+                <source>label.value_sensitive</source>
+                <target>Valor (dejar vacío para no modificar)</target>
+            </trans-unit>
+            <trans-unit id="kzywktm">
+                <source>label.whatsnew</source>
+                <target>Novedades</target>
+            </trans-unit>
+            <trans-unit id="bjdEET4">
+                <source>label.whatsnew_see_all</source>
+                <target>Ver todas las notas de versión</target>
             </trans-unit>
         </body>
     </file>

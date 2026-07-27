@@ -2,37 +2,37 @@
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
     <file source-language="en" target-language="fr" datatype="plaintext" original="site_config.fr.xlf">
         <body>
-            <trans-unit id="1">
-                <source>description.site_role_admin</source>
-                <target>Rôle requis pour la configuration, ex. ROLE_ADMIN (par défaut)</target>
-            </trans-unit>
-            <trans-unit id="2">
+            <trans-unit id="wjC9u3K">
                 <source>description.site_maintenance</source>
                 <target>Active (true) ou désactive (false) le mode maintenance</target>
             </trans-unit>
-            <trans-unit id="3">
+            <trans-unit id="bFzwYOs">
                 <source>description.site_maintenance_hash</source>
                 <target>Hash utilisé pour accéder au site en mode maintenance (?t=Hash)</target>
             </trans-unit>
-            <trans-unit id="4">
+            <trans-unit id="b8NL53A">
+                <source>description.site_role_admin</source>
+                <target>Rôle requis pour la configuration, ex. ROLE_ADMIN (par défaut)</target>
+            </trans-unit>
+            <trans-unit id="drEaqSN">
                 <source>description.site_role_editor</source>
                 <target>Rôle requis pour les actions d'éditeur, ex. ROLE_EDITOR (par défaut)</target>
             </trans-unit>
-            <trans-unit id="5">
-                <source>label.site_role_admin</source>
-                <target>Rôle Admin du site</target>
-            </trans-unit>
-            <trans-unit id="6">
-                <source>label.site_role_editor</source>
-                <target>Rôle Éditeur du site</target>
-            </trans-unit>
-            <trans-unit id="7">
+            <trans-unit id="LXzR.TR">
                 <source>label.site_maintenance</source>
                 <target>Maintenance du site</target>
             </trans-unit>
-            <trans-unit id="8">
+            <trans-unit id="xqSakcb">
                 <source>label.site_maintenance_hash</source>
                 <target>Hash de maintenance du site</target>
+            </trans-unit>
+            <trans-unit id="z_rPP2B">
+                <source>label.site_role_admin</source>
+                <target>Rôle Admin du site</target>
+            </trans-unit>
+            <trans-unit id="OH9i9I8">
+                <source>label.site_role_editor</source>
+                <target>Rôle Éditeur du site</target>
             </trans-unit>
         </body>
     </file>

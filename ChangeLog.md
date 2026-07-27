@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v5.11.2
+
+- Replaced ids by hash in translations (27/07/2026)
+
 ## v5.11.1
 
 - Removed `ThemePresetProviderInterface`, `ThemePresetRegistry` and the `c975l.theme_preset_provider` tag (27/07/2026) [BC-Break]

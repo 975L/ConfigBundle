@@ -2,37 +2,37 @@
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
     <file source-language="en" target-language="en" datatype="plaintext" original="site_config.en.xlf">
         <body>
-            <trans-unit id="1">
-                <source>description.site_role_admin</source>
-                <target>Role required for config access, e.g. ROLE_ADMIN (default)</target>
-            </trans-unit>
-            <trans-unit id="2">
+            <trans-unit id="wjC9u3K">
                 <source>description.site_maintenance</source>
                 <target>Enable (true) or disable (false) maintenance mode</target>
             </trans-unit>
-            <trans-unit id="3">
+            <trans-unit id="bFzwYOs">
                 <source>description.site_maintenance_hash</source>
                 <target>Hash used to access maintenance mode (?t=Hash)</target>
             </trans-unit>
-            <trans-unit id="4">
+            <trans-unit id="b8NL53A">
+                <source>description.site_role_admin</source>
+                <target>Role required for config access, e.g. ROLE_ADMIN (default)</target>
+            </trans-unit>
+            <trans-unit id="drEaqSN">
                 <source>description.site_role_editor</source>
                 <target>Role required for editor actions, e.g. ROLE_EDITOR (default)</target>
             </trans-unit>
-            <trans-unit id="5">
-                <source>label.site_role_admin</source>
-                <target>Site Role Admin</target>
-            </trans-unit>
-            <trans-unit id="6">
-                <source>label.site_role_editor</source>
-                <target>Site Role Editor</target>
-            </trans-unit>
-            <trans-unit id="7">
+            <trans-unit id="LXzR.TR">
                 <source>label.site_maintenance</source>
                 <target>Site Maintenance</target>
             </trans-unit>
-            <trans-unit id="8">
+            <trans-unit id="xqSakcb">
                 <source>label.site_maintenance_hash</source>
                 <target>Site Maintenance Hash</target>
+            </trans-unit>
+            <trans-unit id="z_rPP2B">
+                <source>label.site_role_admin</source>
+                <target>Site Role Admin</target>
+            </trans-unit>
+            <trans-unit id="OH9i9I8">
+                <source>label.site_role_editor</source>
+                <target>Site Role Editor</target>
             </trans-unit>
         </body>
     </file>
