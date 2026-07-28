@@ -1,5 +1,12 @@
 # ChangeLog
 
+## v5.11.3
+
+- The row opening each url group of the Health check table is now tinted with that page's own verdict - the worst status among the rows currently listed for it - the neutral blue kept as a fallback for an unknown status (28/07/2026)
+- Those tints read Bootstrap's `--bs-*-bg-subtle` variables, so they follow EasyAdmin's light/dark theme (28/07/2026)
+- `c975l:config:load-all` no longer lists the entries no `configs*.json` declares anymore (28/07/2026)
+- `ConfigLoadAllCommand` lost its `ConfigRepository` constructor argument (28/07/2026) [BC-Break]
+
 ## v5.11.2
 
 - Replaced ids by hash in translations (27/07/2026)

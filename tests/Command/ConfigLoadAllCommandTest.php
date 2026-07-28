@@ -10,7 +10,6 @@
 namespace c975L\ConfigBundle\Tests\Command;
 
 use c975L\ConfigBundle\Command\ConfigLoadAllCommand;
-use c975L\ConfigBundle\Repository\ConfigRepository;
 use c975L\ConfigBundle\Service\ConfigDeclarationLocator;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\ConfigBundle\Service\VaultEncryptor;
@@ -52,16 +51,11 @@ class ConfigLoadAllCommandTest extends TestCase
     private function createTester(
         ConfigServiceInterface $configService,
         VaultEncryptor $vaultEncryptor,
-        array $slugsInDatabase = [],
     ): CommandTester {
-        $repository = $this->createStub(ConfigRepository::class);
-        $repository->method('findAllSlugs')->willReturn($slugsInDatabase);
-
         return new CommandTester(new ConfigLoadAllCommand(
             $configService,
             $vaultEncryptor,
             new ConfigDeclarationLocator($this->projectDir),
-            $repository,
         ));
     }
 
@@ -179,44 +173,17 @@ class ConfigLoadAllCommandTest extends TestCase
         $this->assertStringContainsString('2 config file(s) processed', $tester->getDisplay());
     }
 
-    public function testExecuteReportsEntriesNoLongerDeclared(): void
+    // Entries no configs*.json declares anymore are left to the "Obsolete configs" page and to c975l:config:prune - this command runs unattended on every deployment, where the listing was only noise
+    public function testExecuteDoesNotReportEntriesNoLongerDeclared(): void
     {
         $this->createBundleConfigFile('site-bundle', [['slug' => 'site-name']]);
 
         $configService = $this->createStub(ConfigServiceInterface::class);
-        $tester = $this->createTester($configService, new VaultEncryptor(null), ['site-name', 'site-favicon']);
+        $tester = $this->createTester($configService, new VaultEncryptor(null));
         $tester->execute([]);
 
         $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
-        $this->assertStringContainsString('site-favicon', $tester->getDisplay());
-        $this->assertStringContainsString('c975l:config:prune', $tester->getDisplay());
-        $this->assertStringNotContainsString('site-name,', $tester->getDisplay());
-    }
-
-    // A file that couldn't be parsed declares none of its slugs, so pointing the admin at c975l:config:prune would send them deleting live entries
-    public function testExecuteReportsNoOrphanWhenADeclarationFileCannotBeParsed(): void
-    {
-        $this->createBundleConfigFile('site-bundle', [['slug' => 'site-name']]);
-        $this->filesystem->mkdir($this->projectDir . '/config');
-        $this->filesystem->dumpFile($this->projectDir . '/config/configs.json', '{"broken": ');
-
-        $configService = $this->createStub(ConfigServiceInterface::class);
-        $tester = $this->createTester($configService, new VaultEncryptor(null), ['site-name', 'app-own-setting']);
-        $tester->execute([]);
-
         $this->assertStringNotContainsString('c975l:config:prune', $tester->getDisplay());
-        $this->assertStringContainsString('Obsolete entries not looked for', $tester->getDisplay());
-    }
-
-    public function testExecuteReportsNothingWhenEveryEntryIsDeclared(): void
-    {
-        $this->createBundleConfigFile('site-bundle', [['slug' => 'site-name']]);
-        $this->createAppConfigFile([['slug' => 'app-own-setting']]);
-
-        $configService = $this->createStub(ConfigServiceInterface::class);
-        $tester = $this->createTester($configService, new VaultEncryptor(null), ['site-name', 'app-own-setting']);
-        $tester->execute([]);
-
-        $this->assertStringNotContainsString('c975l:config:prune', $tester->getDisplay());
+        $this->assertStringNotContainsString('no longer declared', $tester->getDisplay());
     }
 }

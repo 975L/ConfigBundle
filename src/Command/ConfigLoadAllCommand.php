@@ -8,7 +8,6 @@
  */
 namespace c975L\ConfigBundle\Command;
 
-use c975L\ConfigBundle\Repository\ConfigRepository;
 use c975L\ConfigBundle\Service\ConfigDeclarationLocator;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\ConfigBundle\Service\VaultEncryptor;
@@ -28,7 +27,6 @@ class ConfigLoadAllCommand extends Command
         private readonly ConfigServiceInterface $configService,
         private readonly VaultEncryptor $vaultEncryptor,
         private readonly ConfigDeclarationLocator $declarationLocator,
-        private readonly ConfigRepository $configRepository,
     ) {
         parent::__construct();
     }
@@ -70,8 +68,6 @@ class ConfigLoadAllCommand extends Command
             ]);
         }
 
-        $this->reportOrphans($io);
-
         $io->success(sprintf('%d config file(s) processed.', count($files)));
 
         return Command::SUCCESS;
@@ -91,31 +87,5 @@ class ConfigLoadAllCommand extends Command
         }
 
         return false;
-    }
-
-    // Lists the entries left in database that no configs*.json declares anymore (e.g. a setting a bundle dropped), and points at the dashboard page removing them - never deletes anything here, as this command runs unattended on every deployment
-    private function reportOrphans(SymfonyStyle $io): void
-    {
-        // A file that couldn't be parsed (already warned about above) declares none of its slugs, which would be listed here as orphans and send the admin to prune them
-        if (!empty($this->declarationLocator->findUnreadableFiles())) {
-            $io->note('Obsolete entries not looked for: some configs*.json could not be read, and everything they declare would be reported as no longer declared.');
-
-            return;
-        }
-
-        $orphans = array_diff($this->configRepository->findAllSlugs(), $this->declarationLocator->findDeclaredSlugs());
-
-        if (empty($orphans)) {
-            return;
-        }
-
-        $io->warning(array_merge(
-            [sprintf('%d config entrie(s) in database are no longer declared by any configs*.json:', count($orphans))],
-            array_values($orphans),
-            [
-                'Review and remove them from the dashboard: "Obsolete configs" shortcut.',
-                'Or from the command line: php bin/console c975l:config:prune',
-            ],
-        ));
     }
 }

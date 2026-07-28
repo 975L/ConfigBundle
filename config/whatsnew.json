@@ -1,5 +1,20 @@
 [
     {
+        "date": "2026-07-28",
+        "description": [
+            {
+                "en": "In the Health check, the line opening each page's block is now colored with that page's overall result, so you see at a glance which pages are fine and which need attention",
+                "fr": "Dans le Bilan de santé, la ligne qui ouvre le bloc de chaque page est désormais colorée selon le résultat global de cette page, pour voir d'un coup d'œil lesquelles vont bien et lesquelles demandent votre attention",
+                "es": "En el Estado de salud, la línea que abre el bloque de cada página aparece ahora coloreada según el resultado global de esa página, para ver de un vistazo cuáles están bien y cuáles requieren su atención"
+            },
+            {
+                "en": "Those colors now follow the light or dark theme of the back office",
+                "fr": "Ces couleurs suivent désormais le thème clair ou sombre du back-office",
+                "es": "Esos colores siguen ahora el tema claro u oscuro del back office"
+            }
+        ]
+    },
+    {
         "date": "2026-07-27",
         "description": [
             {

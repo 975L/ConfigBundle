@@ -21,7 +21,7 @@ See it in action at [975l.com/pages/config-bundle](https://975l.com/pages/config
 - Key-value config entries stored in the database (`site_config` table)
 - EasyAdmin CRUD interface to manage values
 - `c975l:config:set` to fill values from the command line or a JSON file, for provisioning, deployment and tests
-- "Obsolete configs" dashboard page and `c975l:config:prune` to delete entries no `configs*.json` declares anymore, reported on every `load-all`
+- "Obsolete configs" dashboard page and `c975l:config:prune` to delete entries no `configs*.json` declares anymore
 - Export button (SQL/CSV/JSON/Sync-zip) for production deployment, reusable from any bundle's CRUD controller
 - Zip-based content import/export for syncing nested bundle content across environments, extensible via `ImportProviderInterface`/`ExportProviderInterface`
 - Twig and PHP service to read values anywhere
@@ -131,24 +131,14 @@ New entries (new `slug`) are inserted with their `value` from the JSON. For entr
 
 ## Pruning entries no longer declared
 
-An entry dropped from a `configs*.json` (a setting replaced by a proper entity, a bundle uninstalled) stays in database forever: `load-all` only ever inserts and syncs metadata, it never deletes. Those leftovers clutter the dashboard and confuse the next reader, so `load-all` ends by listing them:
-
-```text
-[WARNING] 2 config entrie(s) in database are no longer declared by any configs*.json:
-          site-favicon
-          site-logo
-          Review and remove them from the dashboard: "Obsolete configs" shortcut.
-          Or from the command line: php bin/console c975l:config:prune
-```
-
-Deleting is a separate, explicit step — never a side effect of a deployment, which is what `load-all` usually is. From the dashboard, the **Obsolete configs** shortcut (`ROLE_SUPER_ADMIN`) lists them with the value each deletion would take with it, and deletes the ones ticked. Or, without a browser:
+An entry dropped from a `configs*.json` (a setting replaced by a proper entity, a bundle uninstalled) stays in database forever: `load-all` only ever inserts and syncs metadata, it never deletes — and it says nothing about those leftovers either, being a deployment step whose output nobody reads. Removing them is an explicit step of its own. From the dashboard, the **Obsolete configs** shortcut (`ROLE_SUPER_ADMIN`) lists them with the value each deletion would take with it, and deletes the ones ticked. Or, without a browser:
 
 ```bash
 php bin/console c975l:config:prune            # lists them, deletes nothing
 php bin/console c975l:config:prune --force    # deletes them, after confirmation
 ```
 
-Both share the same safeguard, because "undeclared" is only meaningful when the declarations are all there: neither reports a single orphan when no `configs*.json` is found at all, an unfinished `composer install` otherwise making every entry look orphaned, nor when one exists but can't be parsed, a single misplaced comma otherwise turning everything that file declares into an orphan. `load-all` skips its own listing in that case too, rather than sending you here. The command adds a confirmation prompt in interactive mode, the page its list of what is about to go. Deletion takes the stored value with it — export your configs first if a bundle is only temporarily uninstalled.
+Both share the same safeguard, because "undeclared" is only meaningful when the declarations are all there: neither reports a single orphan when no `configs*.json` is found at all, an unfinished `composer install` otherwise making every entry look orphaned, nor when one exists but can't be parsed, a single misplaced comma otherwise turning everything that file declares into an orphan. The command adds a confirmation prompt in interactive mode, the page its list of what is about to go. Deletion takes the stored value with it — export your configs first if a bundle is only temporarily uninstalled.
 
 ## Setting values from the command line
 
@@ -811,6 +801,8 @@ The dashboard template only loops and includes each widget's own `template` with
 ## Health check
 
 `/management/health-check` gives a per-page technical health snapshot of the site — Lighthouse scores, security headers, W3C markup validation, WCAG accessibility issues (whichever `HealthCheckProviderInterface` implementations are installed; `c975l/site-bundle` contributes eleven, see its own README) — without needing Node/Lighthouse-CLI or any other JS tooling: everything runs server-side over plain HTTP calls.
+
+**Reading the table**: the page lists one row per url *and* per kind, its rows grouped by url. The row opening each group carries that page's name and is tinted with the page's own verdict — the worst status among the rows currently listed for it, so a page reads as ok/warning/error at a glance without adding up its rows' own status pills. The verdict follows the table's filters: filtering on a single kind repaints each group with what that kind alone found.
 
 **Refreshing results**: `php bin/console c975l:health-check:run` runs every registered provider and appends their results (never triggers a live check from a page load). It accepts a repeatable `--kind=` option to run only specific providers — e.g. `--kind=wave` on its own, less frequent cron entry for a paid/credit-based provider, separately from the free ones:
 
