@@ -13,6 +13,8 @@ namespace c975L\ConfigBundle\Controller\Management;
 use c975L\ConfigBundle\Management\AlertBuilder;
 use c975L\ConfigBundle\Management\DashboardWidgetBuilder;
 use c975L\ConfigBundle\Management\EssentialActionBuilder;
+use c975L\ConfigBundle\Management\GuidedProjectBuilder;
+use c975L\ConfigBundle\Management\GuidedProjectMountBuilder;
 use c975L\ConfigBundle\Management\MenuBuilder;
 use c975L\ConfigBundle\Management\OnboardingStepBuilder;
 use c975L\ConfigBundle\Management\ShortcutBuilder;
@@ -44,6 +46,8 @@ class DashboardController extends AbstractDashboardController
         private readonly EssentialActionBuilder $essentialActionBuilder,
         private readonly DashboardWidgetBuilder $dashboardWidgetBuilder,
         private readonly OnboardingStepBuilder $onboardingStepBuilder,
+        private readonly GuidedProjectBuilder $guidedProjectBuilder,
+        private readonly GuidedProjectMountBuilder $guidedProjectMountBuilder,
         private readonly ConfigServiceInterface $configService,
         private readonly ScriptAdminRegistry $scriptAdminRegistry,
         private readonly StylesheetManagementRegistry $stylesheetManagementRegistry,
@@ -70,6 +74,7 @@ class DashboardController extends AbstractDashboardController
                 'essentialActionsProgress' => $this->essentialActionBuilder->getProgress(),
                 'widgets' => $this->dashboardWidgetBuilder->getWidgets(),
                 'onboardingSteps' => $this->onboardingStepBuilder->getSteps(),
+                'guidedProjects' => $this->guidedProjectBuilder->getProjects(),
             ]
         );
     }
@@ -115,6 +120,9 @@ class DashboardController extends AbstractDashboardController
             $assets->addCssFile('bundles/build/admin.css');
         }
 
+        // The guided-project panel has to survive the page loads a project walks the user through, so its mount element goes on every admin page, not just the dashboard - EasyAdmin renders this on all of them (see its layout.html.twig), which spares an override of that layout
+        $assets->addHtmlContentToBody($this->guidedProjectMountBuilder->getHtml());
+
         return $assets;
     }
 
@@ -133,10 +141,7 @@ class DashboardController extends AbstractDashboardController
         $madeByUrl = $this->configService->get('site-made-by-url');
         if ($madeByLogo && $madeByUrl) {
             $madeByLabel = htmlspecialchars($this->translator->trans('label.made_by', [], 'site'), ENT_QUOTES);
-            // Resolved through the asset packages, like the site-side MadeBy/HostedBy components do with asset():
-            // the label is raw HTML, not a template, so a relative path stored in the config would otherwise be
-            // resolved against the current /management/... URL. An absolute URL is returned unchanged, so a config
-            // still holding one keeps working
+            // Through the asset packages: the label is raw HTML, so a relative path would resolve against /management/
             yield MenuItem::linkToUrl(
                 sprintf(
                     '<span>%s</span><img src="%s" alt="" class="config-made-by-logo">',

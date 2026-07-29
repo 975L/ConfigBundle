@@ -27,9 +27,9 @@ class ConfigSqlExporter
     ) {
     }
 
-    // Non-sensitive: INSERT ... ON DUPLICATE KEY UPDATE (syncs label/value/kind/group/description/severity); sensitive: INSERT IGNORE INTO (creates if missing, preserves production values)
-    // $withSensitiveValues upserts the sensitive rows too, for an install whose environments share the same C975L_VAULT_KEY: the exported value stays encrypted, so it is only readable on the target when the key matches - otherwise the target ends up with settings it can no longer decrypt
-    // Even then, a sensitive row left empty on the source keeps its INSERT IGNORE: nothing to carry over, and an upsert would wipe the secret filled on the target
+    // Non-sensitive rows upsert, sensitive ones INSERT IGNORE so production values survive
+    // $withSensitiveValues upserts those too, only readable on a target sharing the same vault key
+    // An empty sensitive row keeps its INSERT IGNORE, an upsert wiping the secret filled on the target
     public function export(bool $withSensitiveValues = false): Response
     {
         $sql = 'SELECT `label`, `slug`, `is_sensitive`, `is_restricted`, `value`, `kind`, `group`, `description`, `severity`, `creation`, `modification` '

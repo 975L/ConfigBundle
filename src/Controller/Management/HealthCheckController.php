@@ -12,6 +12,7 @@ namespace c975L\ConfigBundle\Controller\Management;
 use c975L\ConfigBundle\Command\HealthCheckRunCommand;
 use c975L\ConfigBundle\Entity\HealthCheckResult;
 use c975L\ConfigBundle\Management\AlertBuilder;
+use c975L\ConfigBundle\Management\BackupResultRecorder;
 use c975L\ConfigBundle\Management\HealthCheckAdviceBuilder;
 use c975L\ConfigBundle\Management\HealthCheckRunner;
 use c975L\ConfigBundle\Management\HealthCheckTrendChartBuilder;
@@ -33,8 +34,8 @@ class HealthCheckController extends AbstractController
     // EasyAdmin prefixes this with the Dashboard's own route name, giving management_health_check_run
     public const RUN_ROUTE = 'management_health_check_run';
 
-    // Kinds checked once for the whole site (infrastructure-level: TLS cert, security headers, robots.txt/sitemap, redirect chains, http/https + 404 deployment checks) rather than once per page - shown in their own "Site" section instead of the per-page table, see index()
-    private const SITE_WIDE_KINDS = ['security-headers', 'ssl-certificate', 'seo-files', 'redirect-chains', 'deployment'];
+    // Kinds checked once for the whole site (infrastructure-level: TLS cert, security headers, robots.txt/sitemap, redirect chains, http/https + 404 deployment checks, last backup) rather than once per page - shown in their own "Site" section instead of the per-page table, see index()
+    private const SITE_WIDE_KINDS = ['security-headers', 'ssl-certificate', 'seo-files', 'redirect-chains', 'deployment', BackupResultRecorder::KIND];
 
     public function __construct(
         private readonly HealthCheckResultRepository $healthCheckResultRepository,
@@ -79,8 +80,11 @@ class HealthCheckController extends AbstractController
                 // Same dashboard-wide list as management/index.html.twig (not filtered to health-check-specific alerts, there's no such category today) - so a config a HealthCheckProvider depends on (e.g. healthcheck-pagespeed-api-key) is visible here too, not just on the dashboard
                 'alerts' => $this->alertBuilder->getAlerts(),
                 'trendChart' => $this->healthCheckTrendChartBuilder->build(),
-                // Every page is checked in the same run (see HealthCheckRunner::run()), so a per-row date is redundant - shown once above the table instead, taking the most recent in case a kind was re-run on its own
-                'lastCheckedAt' => $this->latestCheckedAt($results),
+                // Every page is checked in the same run (see HealthCheckRunner::run()), so a per-row date is redundant - shown once above the table instead, taking the most recent in case a kind was re-run on its own. The backup rows are left out: they land here every few hours on a scheduler of their own, and would keep this date fresh long after the health-check one had stopped running - the very failure it's here to make visible
+                'lastCheckedAt' => $this->latestCheckedAt(array_filter(
+                    $results,
+                    static fn (HealthCheckResult $result) => BackupResultRecorder::KIND !== $result->getKind()
+                )),
                 // Built once across every result (site + page) and handed to both table includes below - the same shared table (health_check/_table.html.twig) any CRUD's own "Health check" tab uses, so advice reads identically everywhere
                 'advice' => $this->healthCheckAdviceBuilder->build($results),
             ]

@@ -10,6 +10,8 @@ namespace c975L\ConfigBundle\Management;
 
 interface WhatsNewProviderInterface
 {
-    // Each entry: ['date' => \DateTimeImmutable, 'description' => string[]]
+    /**
+     * @return list<array{date: \DateTimeImmutable, description: string[]}>
+     */
     public function getEntries(): array;
 }

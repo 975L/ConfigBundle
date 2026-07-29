@@ -1,0 +1,19 @@
+{# Renders the guided-projects list only; the panel walking one lives in assets/js/guided-project.js
+ # Every button starts out saying "Start", the browser's own storage filling in resume and badge #}
+{% if projects|length > 0 %}
+    <div data-guided-project-list hidden>
+        <h2>{{ 'label.guided_projects'|trans({}, 'config') }}</h2>
+        <p class="text-muted small">{{ 'label.guided_projects_intro'|trans({}, 'config') }}</p>
+
+        <ul class="list-unstyled">
+            {% for project in projects %}
+                <li class="mb-2">
+                    <button type="button" class="btn btn-sm btn-secondary" data-guided-project-slug="{{ project.slug }}">{{ 'label.guided_project_start'|trans({}, 'config') }}</button>
+                    <strong>{{ project.label }}</strong>
+                    <span class="badge text-bg-success" data-guided-project-badge="{{ project.slug }}" hidden>{{ 'label.guided_project_done'|trans({}, 'config') }}</span>
+                    {%- if project.description %} — <span class="text-muted small">{{ project.description }}</span>{% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}

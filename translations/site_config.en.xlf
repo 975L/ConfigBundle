@@ -2,6 +2,42 @@
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
     <file source-language="en" target-language="en" datatype="plaintext" original="site_config.en.xlf">
         <body>
+            <trans-unit id="gzatlgG">
+                <source>description.email_from</source>
+                <target>Email address used to send emails, e.g. contact@example.com</target>
+            </trans-unit>
+            <trans-unit id="PZrDv2T">
+                <source>description.site_backup_database</source>
+                <target>Name of the MySQL database to back up</target>
+            </trans-unit>
+            <trans-unit id="zquqL77">
+                <source>description.site_backup_db_host</source>
+                <target>MySQL host for backups</target>
+            </trans-unit>
+            <trans-unit id="y563wVd">
+                <source>description.site_backup_db_password</source>
+                <target>MySQL password for backups</target>
+            </trans-unit>
+            <trans-unit id="P7VAMy1">
+                <source>description.site_backup_db_user</source>
+                <target>MySQL user for backups</target>
+            </trans-unit>
+            <trans-unit id="ZL..tYO">
+                <source>description.site_backup_full_interval_months</source>
+                <target>Number of calendar months between two complete file backups (partial, modified-files-only backups run in between)</target>
+            </trans-unit>
+            <trans-unit id="3_4rjYZ">
+                <source>description.site_backup_mailto</source>
+                <target>Email address for backup reports and errors</target>
+            </trans-unit>
+            <trans-unit id="XmN1LNH">
+                <source>description.site_backup_max_age_hours</source>
+                <target>Past this long without a recorded backup, the dashboard raises an alert. It is the only signal a backup that stopped running altogether can produce</target>
+            </trans-unit>
+            <trans-unit id="OV1T_sI">
+                <source>description.site_backup_retention_days</source>
+                <target>Number of days of backups kept on the server. Whoever copies them offsite must keep more than this, otherwise the next copy downloads again what it has just purged</target>
+            </trans-unit>
             <trans-unit id="wjC9u3K">
                 <source>description.site_maintenance</source>
                 <target>Enable (true) or disable (false) maintenance mode</target>
@@ -18,6 +54,46 @@
                 <source>description.site_role_editor</source>
                 <target>Role required for editor actions, e.g. ROLE_EDITOR (default)</target>
             </trans-unit>
+            <trans-unit id="nInyIwr">
+                <source>description.site_url</source>
+                <target>URL of the website i.e. https://example.com</target>
+            </trans-unit>
+            <trans-unit id="meevaqA">
+                <source>label.email_from</source>
+                <target>Email (from)</target>
+            </trans-unit>
+            <trans-unit id="Y1PJ4Y0">
+                <source>label.site_backup_database</source>
+                <target>Backup Database</target>
+            </trans-unit>
+            <trans-unit id="iWzvwqZ">
+                <source>label.site_backup_db_host</source>
+                <target>Backup DB Host</target>
+            </trans-unit>
+            <trans-unit id="TyhqGFy">
+                <source>label.site_backup_db_password</source>
+                <target>Backup DB Password</target>
+            </trans-unit>
+            <trans-unit id="gKIoJD1">
+                <source>label.site_backup_db_user</source>
+                <target>Backup DB User</target>
+            </trans-unit>
+            <trans-unit id="NhbXiCq">
+                <source>label.site_backup_full_interval_months</source>
+                <target>Backup Full Interval (months)</target>
+            </trans-unit>
+            <trans-unit id="GvaXwxi">
+                <source>label.site_backup_mailto</source>
+                <target>Backup Mailto</target>
+            </trans-unit>
+            <trans-unit id="FYYWZW9">
+                <source>label.site_backup_max_age_hours</source>
+                <target>Backup Maximum Age (hours)</target>
+            </trans-unit>
+            <trans-unit id="k4fofqT">
+                <source>label.site_backup_retention_days</source>
+                <target>Backup Retention (days)</target>
+            </trans-unit>
             <trans-unit id="LXzR.TR">
                 <source>label.site_maintenance</source>
                 <target>Site Maintenance</target>
@@ -33,6 +109,10 @@
             <trans-unit id="OH9i9I8">
                 <source>label.site_role_editor</source>
                 <target>Site Role Editor</target>
+            </trans-unit>
+            <trans-unit id="rDTDQ70">
+                <source>label.site_url</source>
+                <target>Site URL</target>
             </trans-unit>
         </body>
     </file>

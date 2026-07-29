@@ -48,6 +48,10 @@ services:
         arguments:
             $essentialActionProviders: !tagged_iterator c975l.essential_action_provider
 
+    c975L\ConfigBundle\Management\GuidedProjectBuilder:
+        arguments:
+            $guidedProjectProviders: !tagged_iterator c975l.guided_project_provider
+
     c975L\ConfigBundle\Management\DashboardWidgetBuilder:
         arguments:
             $dashboardWidgetProviders: !tagged_iterator c975l.dashboard_widget_provider

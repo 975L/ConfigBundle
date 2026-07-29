@@ -34,12 +34,8 @@ class MenuBuilder
     ) {
     }
 
-    // Yields the EasyAdmin menu items, grouped by section and sorted alphabetically - items opting into
-    // the 'advanced' tier (see MenuProviderInterface::getMenus()/getMenuSection()) are collected into one
-    // collapsed submenu instead of staying under their own section, rendered once every essential section
-    // is done. Tier is resolved per item first, falling back to the section's own default - several
-    // providers commonly share one section (e.g. Config/Site/UiBundle all merge into "management"), so an
-    // item can move to "Avancé" without dragging every other item sharing that same section along with it.
+    // Items opting into the 'advanced' tier are collected into one collapsed submenu, rendered last
+    // Tier is resolved per item first, several providers commonly sharing one section
     public function getMenuItems(): iterable
     {
         $advancedItems = [];

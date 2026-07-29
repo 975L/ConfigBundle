@@ -324,9 +324,7 @@ class ConfigCrudController extends AbstractCrudController
             Config::TYPE_HTML => TextEditorField::new('value')
                 ->setLabel(t('label.value', [], 'config'))
                 ->setRequired(false),
-            // Font kind offers a <select> built from FontRegistry (see FontChoiceType) instead of free text. Falls
-            // back to a plain TextField when no FontProviderInterface is registered (e.g. no SiteBundle) or it
-            // returns no font - an unusable empty <select> would be worse than free text in that case
+            // Falls back to a plain TextField with no font declared, an empty <select> being worse than free text
             Config::TYPE_FONT => $this->buildFontField($rawValue),
             // Text kind is plain string (URLs, ids, emails...), a rich editor would wrap it in a <div>
             default => TextField::new('value')
@@ -455,13 +453,8 @@ class ConfigCrudController extends AbstractCrudController
     {
         $query = $searchDto->getQuery();
 
-        // EasyAdmin's own search only matches raw DB columns, but "label"/"description" store
-        // translation keys ("label.ai_help_llm_enabled"), never the rendered text an admin actually
-        // searches for ("Donovan (Q&A) - Activé") - a non-empty query is instead resolved against every
-        // row's *translated* label/description in memory (the whole config list is always small, a few
-        // dozen rows) into a slug allowlist below. The query itself is blanked out before calling
-        // parent() so its own SQL LIKE search (which would always find nothing against those keys)
-        // doesn't also apply and AND against zero rows
+        // Resolved in memory against translated labels: EasyAdmin's search only matches the raw translation keys
+        // The query is blanked before parent() so its own LIKE doesn't AND against zero rows
         $matchingSlugs = null;
         if ('' !== $query) {
             $matchingSlugs = $this->slugsMatchingTranslatedQuery($query);
@@ -479,8 +472,7 @@ class ConfigCrudController extends AbstractCrudController
         $qb = parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters);
 
         if (null !== $matchingSlugs) {
-            // Never an empty IN() - Doctrine/DBAL reject an empty parameter array, and a slug that can't
-            // exist cleanly yields zero rows when nothing matched
+            // Never an empty IN(), which DBAL rejects; an impossible slug cleanly yields zero rows
             $qb->andWhere('entity.slug IN (:matchingSlugs)')
                 ->setParameter('matchingSlugs', $matchingSlugs ?: ['']);
         }
@@ -519,10 +511,7 @@ class ConfigCrudController extends AbstractCrudController
         return null === $this->currentGroup() && (!\is_string($query) || '' === $query);
     }
 
-    // Slugs whose slug/translated-label/translated-description contain $query (case-insensitive) - raw
-    // SQL rather than the entity repository since this class already fetches this way (see
-    // fetchExportRows()) and doesn't otherwise need Doctrine ORM here. A throwaway Config instance
-    // reuses Config::getLabelTranslationKey() instead of duplicating its slug->key derivation
+    // Slugs whose slug or translated label contains $query; raw SQL, as the rest of this class already does
     private function slugsMatchingTranslatedQuery(string $query): array
     {
         $needle = mb_strtolower($query);
@@ -681,10 +670,7 @@ class ConfigCrudController extends AbstractCrudController
         }
     }
 
-    // Builds the "font" kind field: a <select> combining the 3 CSS generics (Config::GENERIC_FONT_FAMILIES, always
-    // available even with no FontProviderInterface registered) with whatever custom font-family names FontRegistry
-    // knows about (see FontChoiceType). A raw value no longer present in either (e.g. removed from the @font-face
-    // file) is kept as a choice so saving the form again doesn't silently wipe it
+    // The 3 CSS generics plus whatever FontRegistry knows; a raw value present in neither is kept selectable
     private function buildFontField(?string $rawValue): FieldInterface
     {
         $fonts = array_merge($this->fontRegistry->getFonts(), Config::GENERIC_FONT_FAMILIES);

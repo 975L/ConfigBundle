@@ -42,5 +42,115 @@
         "group": "system",
         "severity": "warning",
         "description": "description.site_maintenance_hash"
+    },
+    {
+        "label": "label.site_url",
+        "slug": "site-url",
+        "sensitive": false,
+        "restricted": false,
+        "value": null,
+        "kind": "text",
+        "group": "general",
+        "severity": "danger",
+        "description": "description.site_url"
+    },
+    {
+        "label": "label.site_backup_db_host",
+        "slug": "site-backup-db-host",
+        "sensitive": true,
+        "restricted": true,
+        "value": "localhost",
+        "kind": "text",
+        "group": "backup",
+        "severity": "danger",
+        "description": "description.site_backup_db_host"
+    },
+    {
+        "label": "label.site_backup_db_user",
+        "slug": "site-backup-db-user",
+        "sensitive": true,
+        "restricted": true,
+        "value": null,
+        "kind": "text",
+        "group": "backup",
+        "severity": "danger",
+        "description": "description.site_backup_db_user"
+    },
+    {
+        "label": "label.site_backup_db_password",
+        "slug": "site-backup-db-password",
+        "sensitive": true,
+        "restricted": true,
+        "value": null,
+        "kind": "text",
+        "group": "backup",
+        "severity": "danger",
+        "description": "description.site_backup_db_password"
+    },
+    {
+        "label": "label.site_backup_database",
+        "slug": "site-backup-database",
+        "sensitive": true,
+        "restricted": true,
+        "value": null,
+        "kind": "text",
+        "group": "backup",
+        "severity": "danger",
+        "description": "description.site_backup_database"
+    },
+    {
+        "label": "label.site_backup_mailto",
+        "slug": "site-backup-mailto",
+        "sensitive": false,
+        "restricted": true,
+        "value": null,
+        "kind": "text",
+        "group": "backup",
+        "severity": "warning",
+        "description": "description.site_backup_mailto"
+    },
+    {
+        "label": "label.site_backup_full_interval_months",
+        "slug": "site-backup-full-interval-months",
+        "sensitive": false,
+        "restricted": true,
+        "value": "1",
+        "kind": "int",
+        "group": "backup",
+        "severity": null,
+        "description": "description.site_backup_full_interval_months"
+    },
+    {
+        "label": "label.site_backup_retention_days",
+        "slug": "site-backup-retention-days",
+        "sensitive": false,
+        "restricted": true,
+        "value": "15",
+        "kind": "int",
+        "group": "backup",
+        "severity": null,
+        "description": "description.site_backup_retention_days"
+    },
+    {
+        "label": "label.site_backup_max_age_hours",
+        "slug": "site-backup-max-age-hours",
+        "sensitive": false,
+        "restricted": true,
+        "value": "30",
+        "kind": "int",
+        "group": "backup",
+        "severity": null,
+        "description": "description.site_backup_max_age_hours"
+    },
+    {
+        "label": "label.email_from",
+        "slug": "email-from",
+        "sensitive": false,
+        "restricted": false,
+        "value": null,
+        "kind": "text",
+        "group": "email",
+        "severity": "danger",
+        "description": "description.email_from"
     }
 ]

@@ -1,8 +1,6 @@
 {% extends '@EasyAdmin/page/content.html.twig' %}
 
-{# Intermediate "pick a group" screen shown by ConfigCrudController::index() whenever no "group" is
-   selected yet - one row per distinct group (translated via label.group_*), linking into the same
-   index filtered to it (?group=...). #}
+{# Intermediate "pick a group" screen, each row linking into the same index filtered to it #}
 {% block main %}
     <h1>{{ ('label.config'|trans({}, 'config')) }}</h1>
 

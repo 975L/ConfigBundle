@@ -13,11 +13,7 @@ use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGeneratorInterface;
 
-// Core essential actions every site needs regardless of which bundles are installed - each one links to
-// the Config grid already scoped to its group (ConfigCrudController's own "group" query param, see
-// currentGroup()), not a raw config list, so a value can be reviewed or changed at any time, not just on
-// a first visit. Other bundles add their own actions the same way, implementing this same interface -
-// this is the only provider ConfigBundle ships itself.
+// Core essential actions, each linking to the Config grid already scoped to its group
 class ConfigEssentialActionProvider implements EssentialActionProviderInterface
 {
     public function __construct(

@@ -12,6 +12,7 @@ namespace c975L\ConfigBundle\Tests\Controller\Management;
 use c975L\ConfigBundle\Controller\Management\HealthCheckController;
 use c975L\ConfigBundle\Entity\HealthCheckResult;
 use c975L\ConfigBundle\Management\AlertBuilder;
+use c975L\ConfigBundle\Management\BackupResultRecorder;
 use c975L\ConfigBundle\Management\HealthCheckAdviceBuilder;
 use c975L\ConfigBundle\Management\HealthCheckRunner;
 use c975L\ConfigBundle\Management\HealthCheckTrendChartBuilder;
@@ -154,6 +155,52 @@ class HealthCheckControllerTest extends TestCase
                     'kinds' => ['pagespeed'],
                     'siteResults' => [$securityHeadersResult, $sslCertificateResult, $deploymentResult],
                     'siteKinds' => ['security-headers', 'ssl-certificate', 'deployment'],
+                    'alerts' => [],
+                    'trendChart' => null,
+                    'lastCheckedAt' => $pagespeedResult->getCheckedAt(),
+                    'advice' => [],
+                ],
+            )
+            ->willReturn('<html></html>');
+
+        $controller = new HealthCheckController(
+            $healthCheckResultRepository,
+            $this->createStub(HealthCheckRunner::class),
+            $this->createAlertBuilder([]),
+            $this->createAdviceBuilder(),
+            $this->createTableExporter(),
+            $this->createTrendChartBuilder(),
+            $this->createConfigService(),
+            $this->createTranslator(),
+            $this->createMessageBus(),
+        );
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+            'twig' => $twig,
+        ]));
+
+        $controller->index();
+    }
+
+    // The backup rows land here every few hours on a scheduler of their own, and would keep the page's date fresh long after the health-check one had stopped running - the very failure that date is here to make visible
+    public function testIndexIgnoresTheBackupRowsWhenDatingTheLastCheck(): void
+    {
+        $pagespeedResult = (new HealthCheckResult())->setKind('pagespeed')->setUrl('https://example.com/')->setStatus(HealthCheckResult::STATUS_OK)->setSummary('ok')->setCheckedAt(new \DateTime('2026-07-20 10:00:00'));
+        $backupResult = (new HealthCheckResult())->setKind(BackupResultRecorder::KIND)->setUrl('https://example.com')->setStatus(HealthCheckResult::STATUS_OK)->setSummary('ok')->setCheckedAt(new \DateTime('2026-07-24 04:00:00'));
+
+        $healthCheckResultRepository = $this->createStub(HealthCheckResultRepository::class);
+        $healthCheckResultRepository->method('findLatestPerUrlAndKind')->willReturn([$pagespeedResult, $backupResult]);
+
+        $twig = $this->createMock(Environment::class);
+        $twig->expects($this->once())
+            ->method('render')
+            ->with(
+                '@c975LConfig/management/health_check/index.html.twig',
+                [
+                    'results' => [$pagespeedResult],
+                    'kinds' => ['pagespeed'],
+                    'siteResults' => [$backupResult],
+                    'siteKinds' => [BackupResultRecorder::KIND],
                     'alerts' => [],
                     'trendChart' => null,
                     'lastCheckedAt' => $pagespeedResult->getCheckedAt(),

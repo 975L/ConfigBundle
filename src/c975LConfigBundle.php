@@ -15,6 +15,7 @@ use c975L\ConfigBundle\Management\DashboardWidgetProviderInterface;
 use c975L\ConfigBundle\Management\DevProfilePathProviderInterface;
 use c975L\ConfigBundle\Management\EssentialActionProviderInterface;
 use c975L\ConfigBundle\Management\ExportProviderInterface;
+use c975L\ConfigBundle\Management\GuidedProjectProviderInterface;
 use c975L\ConfigBundle\Management\HealthCheckAdviceProviderInterface;
 use c975L\ConfigBundle\Management\HealthCheckProviderInterface;
 use c975L\ConfigBundle\Management\ImportmapProviderInterface;
@@ -54,6 +55,7 @@ class c975LConfigBundle extends AbstractBundle
         $container->addCompilerPass(new TaggedInterfacePass(ExportProviderInterface::class, 'c975l.export_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(LinkableRouteProviderInterface::class, 'c975l.linkable_route_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(EssentialActionProviderInterface::class, 'c975l.essential_action_provider'));
+        $container->addCompilerPass(new TaggedInterfacePass(GuidedProjectProviderInterface::class, 'c975l.guided_project_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(DashboardWidgetProviderInterface::class, 'c975l.dashboard_widget_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(HealthCheckProviderInterface::class, 'c975l.health_check_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(HealthCheckAdviceProviderInterface::class, 'c975l.health_check_advice_provider'));

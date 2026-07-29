@@ -81,10 +81,42 @@ class MaintenanceListenerTest extends TestCase
         $loginEvent = $this->createRequestEvent('/login');
         $listener->onKernelRequest($loginEvent);
         $this->assertFalse($loginEvent->hasResponse());
+    }
 
-        $shortcutEvent = $this->createRequestEvent('/m');
-        $listener->onKernelRequest($shortcutEvent);
-        $this->assertFalse($shortcutEvent->hasResponse());
+    // /m used to be exempt, as the shortcut to the back-office; the route is gone, so the path is now closed like any other public one
+    public function testShortcutPathIsClosedDuringMaintenance(): void
+    {
+        $twig = $this->createStub(Environment::class);
+        $twig->method('render')->willReturn('<html>maintenance</html>');
+        $listener = new MaintenanceListener(
+            $this->createConfigService(['site-maintenance' => true]),
+            $this->createStub(Security::class),
+            $twig,
+        );
+        $event = $this->createRequestEvent('/m');
+
+        $listener->onKernelRequest($event);
+
+        $this->assertTrue($event->hasResponse());
+        $this->assertSame(503, $event->getResponse()->getStatusCode());
+    }
+
+    // The entry ships with a null value, which the absent "?t=" of every anonymous request matched exactly, exempting them all and leaving the site open while the mode said it was closed
+    public function testEmptyMaintenanceHashGrantsNoAccess(): void
+    {
+        $twig = $this->createStub(Environment::class);
+        $twig->method('render')->willReturn('<html>maintenance</html>');
+        $listener = new MaintenanceListener(
+            $this->createConfigService(['site-maintenance' => true, 'site-maintenance-hash' => null]),
+            $this->createStub(Security::class),
+            $twig,
+        );
+        $event = $this->createRequestEvent('/some-page');
+
+        $listener->onKernelRequest($event);
+
+        $this->assertTrue($event->hasResponse());
+        $this->assertSame(503, $event->getResponse()->getStatusCode());
     }
 
     public function testDevToolRoutesStayReachableDuringMaintenance(): void
@@ -150,7 +182,6 @@ class MaintenanceListenerTest extends TestCase
         $configService = $this->createConfigService([
             'site-maintenance' => true,
             'site-role-admin' => 'ROLE_ADMIN',
-            // Non-null so the request's absent "?t=" query token (null) never accidentally matches it
             'site-maintenance-hash' => 'unused-token',
         ]);
         $twig = $this->createStub(Environment::class);
@@ -173,7 +204,6 @@ class MaintenanceListenerTest extends TestCase
         $configService = $this->createConfigService([
             'site-maintenance' => true,
             'site-role-admin' => 'ROLE_ADMIN',
-            // Non-null so the request's absent "?t=" query token (null) never accidentally matches it
             'site-maintenance-hash' => 'unused-token',
         ]);
         $twig = $this->createStub(Environment::class);
@@ -186,5 +216,25 @@ class MaintenanceListenerTest extends TestCase
         $this->assertTrue($event->hasResponse());
         $this->assertSame(503, $event->getResponse()->getStatusCode());
         $this->assertSame('<html>maintenance</html>', $event->getResponse()->getContent());
+    }
+
+    public function testMaintenancePageTellsCrawlersAndCachesTheOutageIsTemporary(): void
+    {
+        $configService = $this->createConfigService([
+            'site-maintenance' => true,
+            'site-role-admin' => 'ROLE_ADMIN',
+            'site-maintenance-hash' => 'unused-token',
+        ]);
+        $twig = $this->createStub(Environment::class);
+        $twig->method('render')->willReturn('<html>maintenance</html>');
+        $listener = new MaintenanceListener($configService, $this->createStub(Security::class), $twig);
+        $event = $this->createRequestEvent('/some-page');
+
+        $listener->onKernelRequest($event);
+
+        $headers = $event->getResponse()->headers;
+        $this->assertSame('3600', $headers->get('Retry-After'));
+        // Symfony appends its own "private" directive, hence the directive check rather than a strict header comparison
+        $this->assertTrue($headers->hasCacheControlDirective('no-store'));
     }
 }

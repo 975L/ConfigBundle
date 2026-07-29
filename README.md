@@ -16,6 +16,15 @@ See it in action at [975l.com/pages/config-bundle](https://975l.com/pages/config
 
 ---
 
+> **TL;DR** — Application configuration lives in the database (`site_config`), not in `.env`: a bundle declares its entries in `config/configs.json`, `c975l:config:load-all` inserts them, the site owner edits the values in EasyAdmin, and any code reads them back through `ConfigServiceInterface` or the `config()` Twig function. ConfigBundle also owns the `/management` dashboard the whole c975L ecosystem plugs into — menus, alerts, shortcuts, health check, backup — which is why most of this README is extension points for other bundles.
+
+## Contents
+
+- **Config entries** — [declare](#defining-config-entries-for-your-bundle) · [load](#loading-config-entries-into-the-database) · [prune](#pruning-entries-no-longer-declared) · [set from the CLI](#setting-values-from-the-command-line) · [encrypt](#encrypting-sensitive-values) · [read in PHP/Twig](#reading-config-values)
+- **Dashboard** — [EasyAdmin interface](#easyadmin-interface) · [export for deployment](#deploying-to-production--export) · [ROLE_SUPER_ADMIN-only entries](#restricting-configs-to-role_super_admin) · [Export button in another CRUD](#adding-an-export-button-to-another-bundles-crud-controller)
+- **Site maintenance** — [Maintenance mode](#maintenance-mode) · [Health check](#health-check) · [Backup](#backup) · [Dev profile](#dev-profile--automating-what-the-dev-toolbar-shows)
+- **Extension points for other bundles** — [menu items](#contributing-menu-items-from-other-bundles) · [dashboard alerts](#contributing-dashboard-alerts-from-other-bundles) · [shortcuts](#contributing-dashboard-shortcuts-from-other-bundles) · [essential actions](#contributing-essential-actions-from-other-bundles) · [widgets](#contributing-dashboard-widgets-from-other-bundles) · [guided projects](#contributing-guided-projects-from-other-bundles) · [health check providers](#contributing-health-check-providers-from-other-bundles) and [advice](#contributing-health-check-advice-from-other-bundles) · [sitemaps](#contributing-a-sitemap-from-other-bundles) · [importmap entries](#contributing-importmap-entries-from-other-bundles) · [import](#contributing-import-providers-from-other-bundles) and [export providers](#contributing-export-providers-from-other-bundles) · ["What's new" entries](#contributing-whats-new-entries-from-other-bundles) · [linkable routes](#contributing-linkable-routes-for-sitebundle-menus) · [dev profile paths](#contributing-dev-profile-paths-from-other-bundles) · [AI assistant procedures](#contributing-procedures-for-the-dashboard-ai-assistant)
+
 ## Features
 
 - Key-value config entries stored in the database (`site_config` table)
@@ -31,7 +40,10 @@ See it in action at [975l.com/pages/config-bundle](https://975l.com/pages/config
 - Dashboard "Essential actions" checklist, a permanent quick-access entry point to the handful of settings every site needs
 - Dashboard widgets contributed by other bundles (e.g. UiBundle's Donovan card)
 - Dashboard "Guided tour" walking through every sidebar item that declares a `description`
+- Dashboard "Guided projects" walking through a whole task across the admin screens it spans, extensible via `GuidedProjectProviderInterface`
 - "Health check" dashboard page (Lighthouse scores, security headers, W3C/accessibility checks...) with history, a trend chart, and CSV export, extensible via `HealthCheckProviderInterface`/`HealthCheckAdviceProviderInterface`
+- `c975l:config:backup`, dumping the database table by table and archiving `public/`+`private/`, with archive integrity verification, a retention window on the server, a dashboard alert when a backup stops running, and a weekly digest email for the sites whose dashboard you don't open daily
+- Maintenance mode closing the site to its visitors, answering the search-engine-friendly 503 they expect from a temporary outage, with a dashboard alert turning to danger once it has lasted long enough to cost indexing
 - Sitemap generation (one sub-sitemap per bundle plus the sitemap index), extensible via `SitemapProviderInterface`
 - `c975l:dev-profile:run`, a dev-only command listing what the Symfony dev toolbar would flag on every page (n+1 queries, deprecations, missing translations...), extensible via `DevProfilePathProviderInterface`
 
@@ -682,7 +694,9 @@ Make sure your bundle's `services.yaml` includes the `Management/` folder in its
 
 **Dashboard aggregation:** `AlertBuilder::getAlerts()` merges every provider's alerts and groups them by severity for the main `/management` dashboard.
 
-**Own CRUD index:** a controller that only wants its own provider's alerts (not every bundle's) calls `AlertBuilder::groupBySeverity()` directly on that provider's flat list — see `ConfigCrudController` for an example.
+**Restricting an alert:** add an optional `'role' => 'ROLE_SUPER_ADMIN'` to an entry and `AlertBuilder` drops it for anyone lacking that role, same key as a shortcut tile's. Use it when the configs behind the alert are themselves `restricted` (see [Restricting configs to ROLE_SUPER_ADMIN](#restricting-configs-to-role_super_admin)) — `BackupAlertProvider` does exactly that: an admin who can't even read the backup settings can do nothing about a backup that stopped running, so the alert would be noise on their dashboard rather than information. Omit the key for an alert every admin should act on.
+
+**Own CRUD index:** a controller that only wants its own provider's alerts (not every bundle's) calls `AlertBuilder::groupBySeverity()` directly on that provider's flat list — see `ConfigCrudController` for an example. That path does no role filtering, the controller having already gated its own page.
 
 **Rendering:** both cases are rendered with the shared `templates/management/_alerts.html.twig` partial, which expects a severity-grouped `alerts` array and a translated `title`.
 
@@ -770,6 +784,56 @@ Make sure your bundle's `services.yaml` includes the `Management/` folder in its
 
 `isDone` only drives the status icon (a checkmark once true) — the link itself is always shown, even once done. `order` decides the checklist's display order across every provider (low to high), unlike menus/alerts which sort alphabetically. `EssentialActionBuilder::getProgress()` (`{done, total}`) drives the panel's "X/Y configured" subtitle.
 
+## Contributing guided projects from other bundles
+
+The `/management` dashboard shows a "Guided projects" button next to the guided tour. Where the tour *shows* the back office, a project puts the user to work in it: a real task to carry out — create a page, add a block to it, put it in a menu — with a panel following them from screen to screen.
+
+`ConfigGuidedProjectProvider` ships this bundle's own three, opening the order sequence the satellite bundles continue (SiteBundle picks up at 50, UiBundle at 90): **"Régler la configuration du site"** (find a setting, change it, and see what the dashboard makes of it), **"Lancer un bilan de santé"** (run it, read what is reported, know where to start) and **"Mettre le site en maintenance"** (rehearse the switch on a quiet day rather than discover it on the day it is needed).
+
+A project is a **replayable exercise**, not a wizard to get through once. Nothing is derived from the site's own data, so a project is still worth following on a site already full of pages, and still worth replaying once done. Consequently it carries no `isDone`: nothing is ever detected server-side, the user says when a step is done. Whatever they create along the way stays on the site — deleting the practice page is their call.
+
+Satellite bundles contribute their own projects by implementing `GuidedProjectProviderInterface` — no manual service tagging needed, `TaggedInterfacePass` auto-detects any class implementing it, same mechanism as `MenuProviderInterface` above:
+
+```php
+namespace c975L\MyBundle\Management;
+
+use c975L\ConfigBundle\Management\GuidedProjectProviderInterface;
+
+class MyGuidedProjectProvider implements GuidedProjectProviderInterface
+{
+    public function getGuidedProjects(): array
+    {
+        return [
+            [
+                'slug' => 'creer-page',
+                'label' => 'label.guided_project_creer_page',
+                'description' => 'description.guided_project_creer_page',
+                'translation_domain' => 'my_bundle',
+                'order' => 10,
+                'steps' => [
+                    ['label' => 'label.step_open_pages', 'url' => '/management/page'],
+                    ['label' => 'label.step_click_new', 'description' => 'description.step_click_new', 'highlight' => '.action-new'],
+                    ['label' => 'label.step_done'],
+                ],
+            ],
+        ];
+    }
+}
+```
+
+Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
+
+**`order`** decides the display order across every provider (low to high) — a deliberate sequence, the one the user is meant to follow, unlike menus/alerts which sort alphabetically. **`role`** is optional: a project needing a role the current user lacks is dropped, the screens it walks through being out of their reach anyway. **`slug`** must be unique across every bundle contributing projects.
+
+**Steps** set either `url` or `highlight`, never both:
+
+- **`url`** sends the user to another screen. The panel stores the next step before leaving, and picks the parcours back up there once the page has loaded — that store-then-navigate is the whole cross-page mechanism, there is no arrival to detect.
+- **`highlight`** is a CSS selector pointing at what to look at on the screen already open. A selector matching nothing — EasyAdmin renamed a class on an upgrade, the user reached the step from elsewhere — costs the highlight and nothing else: the step still reads and the parcours still runs.
+
+**Rendering:** the list lives in `templates/management/_guided_projects.html.twig`, but the panel driving a project is `assets/js/guided-project.js`, mounted on *every* admin page through EasyAdmin's own `Assets::addHtmlContentToBody()` (see `GuidedProjectMountBuilder`) — a project spans several screens, so the panel has to survive each page load, and this reaches all of them without overriding EasyAdmin's layout. It fetches the steps from `management_guided_project_steps` only while a parcours is running, so the mount element costs no request in normal use.
+
+**Progress is stored in the browser**, in `localStorage`, never in the database — a replayable exercise isn't a record worth a table. It is scoped per user (see `GuidedProjectKeyGenerator`) so two admins sharing one browser profile don't share one parcours, through an HMAC of the user identifier rather than the identifier itself: a `localStorage` key outlives the session, and that identifier is usually an email. The dashboard says as much to the user — progress won't follow them to another computer.
+
 ## Contributing dashboard widgets from other bundles
 
 Any bundle can render an arbitrary block on the `/management` dashboard (e.g. UiBundle's Donovan card) by implementing `DashboardWidgetProviderInterface` — no manual service tagging needed, `TaggedInterfacePass` auto-detects any class implementing it, same mechanism as `MenuProviderInterface` above:
@@ -797,6 +861,18 @@ class MyDashboardWidgetProvider implements DashboardWidgetProviderInterface
 Make sure your bundle's `services.yaml` includes the `Management/` folder in its `src/` resource so the class is registered.
 
 The dashboard template only loops and includes each widget's own `template` with its own `context` — it never contains business logic about what a widget is. Return `[]` when there's nothing to show (e.g. an unconfigured feature) so it stays entirely absent rather than showing a disabled placeholder.
+
+## Maintenance mode
+
+Setting the `site-maintenance` config to `true` — from the config list, or from the dashboard's own toggle tile — closes the site to its visitors: `MaintenanceListener` answers every public request with the `@c975LConfig/maintenance/index.html.twig` page. `/management` and `/login` stay reachable so an admin can always get back in and lift it, as does anyone already authenticated with the `site-role-admin` role, or holding the `site-maintenance-hash` token (`?t=…`, which opens a 6-hour session).
+
+The dashboard toggle generates that token when it closes the site and the entry is still empty — an empty one grants nobody anything, so a site closed without it could only be visited by logging into the back-office. The dashboard then shows the ready-made url alongside the maintenance alert: hand it over to a client signing off on the work or to whoever has to see the site as its visitors will, without giving them an account.
+
+That page is served with **HTTP 503** and a `Retry-After` header, which is what search engines expect from a temporary outage — a `200` would get the maintenance page indexed in place of the real ones, a `404`/`410` would drop them from the index, and a `noindex` on a 503 risks the same. `Retry-After` is deliberately short (one hour, whatever the real length of the outage): it's only a hint, so a crawler coming back too early just meets another 503 and applies its own backoff, whereas too long a delay keeps it away after the site is back up. A `Cache-Control: no-store` keeps any proxy or CDN from serving the maintenance page once it's over.
+
+`robots.txt` and the sitemaps are static files under `public/`, served by the web server without going through the listener — they keep answering `200` during maintenance, which matters: a `robots.txt` answering 503 stops crawling on the whole site.
+
+**Don't leave it on for more than a day or two.** Past that, search engines stop reading the 503 as temporary and start dropping the pages from their index. `MaintenanceAlertProvider` puts that on the dashboard: an `info` alert while the site is closed, turning to `danger` past two days, both dated from the moment the mode was switched on. For a closure that has to last, publishing a real home page answering `200` ("closed until…", contact details) keeps the site indexed where maintenance mode wouldn't.
 
 ## Health check
 
@@ -834,6 +910,83 @@ If it isn't routed, Messenger handles the message synchronously — the button t
 The table itself can be sorted (click a column) and filtered (free-text search, status, kind) client-side — hand-rolled (`assets/js/health-check-table.js`), no DataTables/jQuery dependency.
 
 The page also shows the same dashboard-wide alerts as `/management` (e.g. a health check provider's own missing API key, flagged via its config's `severity`), so anything blocking a full check is visible without leaving the page.
+
+## Backup
+
+`c975l:config:backup` dumps the database table by table and archives the site's own files, replacing the shell scripts this used to need. It lives here rather than in `c975l/site-bundle`, where it started: backing up is what every install needs whichever satellite bundles it happens to have, and none of ShopBundle, GalleryBundle, BookBundle or CrowdfundingBundle depends on SiteBundle — a shop-only or gallery-only install used to have no backup at all. The former name `c975l:site:backup` is kept as an alias, so schedulers and crontabs already deployed keep working.
+
+```bash
+php bin/console c975l:config:backup                  # dump + archive, silent unless something fails
+php bin/console c975l:config:backup --report         # same, plus a summary email of that run
+php bin/console c975l:config:backup:digest           # no backup: emails a digest of the last 7 days
+php bin/console c975l:config:backup:digest --days=30 # any other window
+php bin/console c975l:config:backup:digest --dry-run # print the digest, send nothing
+```
+
+Everything is configured through the `backup` config group (all `restricted`, see [Restricting configs to ROLE_SUPER_ADMIN](#restricting-configs-to-role_super_admin)): `site-backup-database`, `site-backup-db-host`/`-db-user`/`-db-password`, `site-backup-mailto`, `site-backup-full-interval-months`, `site-backup-retention-days` and `site-backup-max-age-hours`. The emails also read `email-from` — declared here rather than in SiteBundle, an install having backups to report whichever satellite bundles it happens to have — and fall back to `site-backup-mailto` when it's empty, rather than failing to send at all.
+
+**What is archived**: the database, one `.sql` file per table (so a single table can be restored on its own) compressed into one archive; then `public/` and `private/` — the latter being where a bundle keeps what the document root must never expose, ShopBundle's invoices being the typical case. Each root gets its own archive, both in the same mode on the same run, so a restore never has to pair a complete archive with a partial one. Files go complete on the first run and every `site-backup-full-interval-months` calendar months, modified-since-last-run in between. `config/backup_exclude.cnf`, if present, adds your own `tar --exclude-from` patterns.
+
+**Verifying rather than assuming**: every archive is read back and checked (`bzip2 --test`) before being counted, its size recorded, and the number of tables actually dumped compared against `INFORMATION_SCHEMA`. A table is reported only once its dump exists, with its size — a table listed in the report used to prove nothing about it having been saved. Anything discarded as empty is named in the report instead of vanishing silently.
+
+**Retention on the server**: each run purges the dated `var/backup/YYYY/YYYY-MM/YYYY-MM-DD` folders older than `site-backup-retention-days` (15 by default). Whoever copies the archives offsite should keep a *longer* window than this one — otherwise the next copy downloads again what it has just purged locally. The point is that production always holds a rolling set of restorable archives: deleting them as soon as they were copied off left a gap where the only surviving copy was the offsite one.
+
+### Seeing that it actually ran
+
+Every run — not only the one carrying `--report` — records a `HealthCheckResult` row of kind `backup`, so it shows up in the site-wide section of [the Health check page](#health-check), in its trend chart and in the CSV export, with no extra screen to maintain. Those same rows are what [the weekly digest](#the-weekly-digest) reads back. The row's summary carries the numbers a "backup ok" message never gives: tables dumped, archive sizes, duration.
+
+`BackupAlertProvider` then reads that row live at every dashboard load and raises, for `ROLE_SUPER_ADMIN` only (its alerts carry `'role' => 'ROLE_SUPER_ADMIN'`, every config behind them being `restricted` too — an admin who can't read the backup settings can't act on them either):
+
+| Situation | Severity |
+| --- | --- |
+| No backup recorded for longer than `site-backup-max-age-hours` (30 by default) | danger |
+| The last run failed | danger |
+| The last run has warnings, or its SQL archive lost more than half its size since the previous run | warning |
+| Backup configured but never run | warning |
+
+The first line is the one no report email can ever cover: an email only exists when the command ran far enough to send one, so a dead scheduler consumer, a crontab lost on a server move or a PHP fatal mid-dump all produce the same signal — nothing at all — and a missing email is precisely what nobody notices. Staleness is checked whatever the last run's own status was, a backup that succeeded a fortnight ago being a worse problem than one that failed this morning.
+
+The size-drop check compares against the previous run rather than a fixed threshold: what a healthy archive weighs is entirely site-specific, and a dump holding half of last week's is the failure mode no per-table error ever reports — every table having dumped "successfully" into a truncated result.
+
+None of this proves a *restore* works. Only restoring does, and that stays a manual exercise worth doing on the offsite copy once in a while.
+
+### The weekly digest
+
+The dashboard covers the site you happen to be looking at. `c975l:config:backup:digest` covers the week you didn't look at it, on every site at once: scheduled weekly, it mails what the last 7 days of `backup` rows say, one mail per site, its verdict in the subject line so a mailbox full of them is read without opening any:
+
+```text
+[OK] Backups over the last 7 days - example.com
+
+Site example.com - last 7 days (since 22/07/2026 03:07)
+
+28 run(s): 28 ok, 0 warning(s), 0 error(s)
+Last run on 29/07/2026 06:07: 42 tables · SQL 18.4 MB · Files: partial 12 (3.1 MB) · 1 min 44 s
+SQL archive over the period: 17.9 MB -> 18.4 MB
+Retention (15 days): 15 run(s) kept on the server, oldest 2026-07-14
+```
+
+It **runs no backup of its own** — it reads the rows back — and that's the whole point of it being a separate command rather than a bigger `--report`: `--report` rides on a backup run and only exists if that run reaches its last line, so a dead consumer, a lost crontab or a fatal mid-dump send nothing at all. The digest goes out either way, and when nothing ran it says exactly that (`[ALERT] No backup over the last 7 days`) and exits non-zero, so the scheduler's own logs carry the verdict too. On an install where `site-backup-database` is empty nothing is sent: a site that deliberately doesn't back up from here shouldn't get a weekly false alarm.
+
+Beyond the counts, it reports what a single run can't see:
+
+| Reported | Why a per-run report misses it |
+| --- | --- |
+| The longest stretch without a backup, once past `site-backup-max-age-hours` | A scheduler that stopped on Wednesday and restarted Friday leaves every row saying "ok" |
+| The SQL archive at both ends of the window | The shrink warning only compares a run against the one before it, so a slow drift never trips it |
+| Errors and warnings, deduplicated with their count | The same table failing every 6 hours is one problem, and listing it 28 times is how a report stops being read |
+
+The stretch *before* the first run of the window is deliberately not counted: a site whose backups started three days ago hasn't skipped the four days before that.
+
+### Scheduling it
+
+`c975l:config:backup` is a plain command; schedule it with [Symfony Scheduler](https://symfony.com/doc/current/scheduler.html) alongside `c975l:sitemaps:create`/`c975l:health-check:run`, or from a crontab. `c975l/site-bundle` ships a ready-made `MaintenanceSchedule` in its scaffold; on an install without it:
+
+```php
+->add(RecurringMessage::cron('7 */6 * * *', new RunCommandMessage('c975l:config:backup')))
+->add(RecurringMessage::cron('7 3 * * 1', new RunCommandMessage('c975l:config:backup:digest')))
+```
+
+Keep `site-backup-max-age-hours` comfortably above the interval you pick, so an ordinary late run doesn't alert. The digest is scheduled on its own line rather than as `c975l:config:backup --report` on the Monday run, so the week's summary doesn't depend on that particular run getting through.
 
 ## Contributing health check providers from other bundles
 

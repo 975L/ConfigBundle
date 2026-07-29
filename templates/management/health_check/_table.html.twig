@@ -1,9 +1,7 @@
 {% import '@c975LConfig/management/health_check/_macros.html.twig' as health_check %}
 {% set advice = advice|default({}) %}
 
-{# Client-side sort/filter (see assets/js/health-check-table.js) - each row carries its own raw status/kind
-   and a lowercased "search text" blob (url+label+summary) as data-* attributes, read directly by the JS
-   rather than re-deriving them from rendered markup #}
+{# Each row carries its raw status/kind and a lowercased search blob for assets/js/health-check-table.js #}
 {# group ?? true: off for the "Site" section (see index.html.twig) - its rows are site-wide checks, not tied to any one page, so grouping/highlighting them by url doesn't make sense there #}
 <div data-controller="health-check-table" data-health-check-table-group-value="{{ (group ?? true) ? 'true' : 'false' }}">
     {# Not |default(true): Twig's default filter falls back whenever the value is "empty", and false counts as empty - it would silently turn a real showFilters:false back into true #}

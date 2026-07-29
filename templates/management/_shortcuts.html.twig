@@ -1,16 +1,6 @@
-{#
- # Renders the dashboard shortcuts (see c975L\ConfigBundle\Management\ShortcutBuilder) as a grid of small
- # tiles (icon on top, label below) rather than a row of pill buttons - reads as a "quick actions" panel
- # instead of a wall of buttons once several bundles each contribute a few. Ordered by category (e.g.
- # "Export", "Maintenance") so themed shortcuts from different bundles sit next to each other, but rendered
- # as one flat grid with no heading per category - keeps the panel compact.
- # Expects:
- #   - shortcuts: flat array of ['label', 'icon', 'route', 'active', 'role'?, 'method'?], already ordered (see ShortcutBuilder)
- # A shortcut is a POST form (not a plain link) since it triggers an action, protected by its own CSRF token - unless it
- # declares 'method' => 'GET', for the few tiles opening a page instead of acting (see ShortcutProviderInterface)
- # 'role' is optional (see ShortcutProviderInterface) - a shortcut omitting it has no access restriction of its own
- # Caller is responsible for checking shortcuts|length > 0 (see management/index.html.twig)
- #}
+{# Renders the dashboard shortcuts as one flat grid of tiles, ordered by category with no heading per category
+ # A shortcut is a CSRF-protected POST form unless it declares 'method' => 'GET'; 'role' is optional
+ # The caller checks shortcuts|length > 0 #}
 <div class="shortcuts-grid">
 {% for shortcut in shortcuts %}
     {% if shortcut.role is not defined or is_granted(shortcut.role) %}

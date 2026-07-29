@@ -61,8 +61,7 @@ class ShortcutBuilderTest extends TestCase
         ]);
         $builder = new ShortcutBuilder([$provider], $this->createTranslator());
 
-        // CATEGORY_EXPORT sorts before CATEGORY_SITE (translated label), and within it "a" before "b" -
-        // same-category tiles end up adjacent even though nothing marks the boundary between groups
+        // Same-category tiles end up adjacent even though nothing marks the boundary between groups
         $this->assertSame(['a', 'b', 'z'], array_column($builder->getShortcuts(), 'label'));
     }
 

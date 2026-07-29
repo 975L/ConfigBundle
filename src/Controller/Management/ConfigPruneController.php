@@ -37,8 +37,8 @@ class ConfigPruneController extends AbstractController
     ) {
     }
 
-    // Lists the entries no configs*.json declares anymore, with the value each deletion would take with it - deleting nothing, exactly like the command without --force.
-    // Deliberately not under '/config/', where ConfigCrudController's own '/config/{entityId}' detail route would match it first and look for an entity with "id = prune" - the POST-only shortcuts sitting there (see ConfigShortcutController) only escape it because that route is GET
+    // Lists what the command would delete, deleting nothing, exactly like it without --force
+    // Not under '/config/', where the detail route would match it first and look for id "prune"
     #[AdminRoute(path: '/obsolete-configs', name: 'config_prune_index')]
     public function index(): Response
     {

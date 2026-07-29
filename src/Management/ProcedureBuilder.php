@@ -8,8 +8,7 @@
  */
 namespace c975L\ConfigBundle\Management;
 
-// Merges the admin procedures contributed by every ProcedureProvider (bundles depending on ConfigBundle),
-// sorted by slug for a stable, deterministic order regardless of service registration order
+// Merges every provider's admin procedures, sorted by slug for an order independent of registration
 class ProcedureBuilder
 {
     public function __construct(

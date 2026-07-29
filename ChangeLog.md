@@ -1,5 +1,89 @@
 # ChangeLog
 
+## v5.12.0
+
+Moved the backup in from SiteBundle, added the guided projects
+
+- Trimmed the sources', templates' and stylesheet's comments down to what the readme doesn't already say (29/07/2026)
+- Replaced the provider interfaces' comments by PHPDoc blocks giving their array shapes (29/07/2026)
+- Added the readme feature line on the guided projects (29/07/2026)
+- Added `MaintenanceAlertProvider`, alerting while the site is closed and turning to `danger` past two days (29/07/2026)
+- Added the `label.maintenance_alert*`/`label.maintenance_preview_link` translations and their `description.` pairs (29/07/2026)
+- The maintenance page now sends `Retry-After` and `Cache-Control: no-store` (29/07/2026)
+- Added the readme section on maintenance mode (29/07/2026)
+- Added `MaintenanceAlertProviderTest` (29/07/2026)
+- Added `ConfigGuidedProjectProvider`, contributing this bundle's own guided projects (29/07/2026)
+- Added the "Régler la configuration du site", "Lancer un bilan de santé" and "Mettre le site en maintenance" projects (29/07/2026)
+- Added the `label.guided_project_config_*`/`label.guided_step_config_*` translations and their `description.` pairs (29/07/2026)
+- Added `ConfigGuidedProjectProviderTest` (29/07/2026)
+- Added `GuidedProjectProviderInterface` to the bundle's tagged-interface test (29/07/2026)
+- Added the readme note on `email-from` backing the backup emails (29/07/2026)
+- Maintenance mode no longer lets every visitor through when `site-maintenance-hash` is empty (29/07/2026)
+- The dashboard maintenance toggle now generates `site-maintenance-hash` when it is still empty (29/07/2026)
+- `MaintenanceAlertProvider` now also gives the preview url built with `site-maintenance-hash` (29/07/2026)
+- `c975l:config:backup` no longer moves its date markers past files no archive holds (29/07/2026)
+- `c975l:config:backup` now stores the partial archives' members relative to the backed-up root (29/07/2026)
+- `c975l:config:backup` and `c975l:config:backup:digest` no longer throw when `email-from` is empty (29/07/2026)
+- `c975l:config:backup` now sends its failure report even without `site-url` (29/07/2026)
+- Added the `email-from` config entry and its translations (29/07/2026)
+- The health check page's "last checked" date now ignores the backup rows (29/07/2026)
+- `ConfigRepositoryFindOneBySlugFixture` gained an optional per-slug map (29/07/2026)
+- Added the `c975l:config:backup:digest` command, emailing a digest of the backups recorded over the last days (29/07/2026)
+- `c975l:config:backup:digest` takes `--days` for the window and `--dry-run` to print the digest without sending it (29/07/2026)
+- `c975l:config:backup:digest` reports the longest stretch without a backup (29/07/2026)
+- `c975l:config:backup:digest` reports the archive size at both ends of the window (29/07/2026)
+- `c975l:config:backup:digest` deduplicates the errors and warnings it lists, with their count (29/07/2026)
+- `c975l:config:backup:digest` exits non-zero when no backup was recorded over the window, or when no recipient is configured (29/07/2026)
+- `c975l:config:backup:digest` sends nothing when `site-backup-database` is empty (29/07/2026)
+- Added `BackupDigestBuilder` and `HealthCheckResultRepository::findByKindSince()` (29/07/2026)
+- `BackupAlertProvider::DEFAULT_MAX_AGE_HOURS` is now public (29/07/2026)
+- Replaced the readme's weekly `c975l:config:backup --report` schedule by `c975l:config:backup:digest` (29/07/2026)
+- Added the readme section on the weekly digest (29/07/2026)
+- Added `BackupDigestBuilderTest` and `BackupDigestCommandTest` (29/07/2026)
+- Removed `ManagementShortcutController` and its `/m` route (29/07/2026) [BC-Break]
+- Added a "TL;DR" and a "Contents" section to the readme (29/07/2026)
+- Moved the `site-url` config entry and its translations from SiteBundle, PaymentBundle and ShopBundle (29/07/2026) [BC-Break]
+- Added an optional `role` key on `AlertProviderInterface` entries (29/07/2026)
+- `AlertBuilder` now drops the alerts the current user lacks the `role` for (29/07/2026)
+- `BackupAlertProvider`'s alerts are now restricted to `ROLE_SUPER_ADMIN` (29/07/2026)
+- `AlertBuilder` gained a `Security` constructor argument (29/07/2026) [BC-Break]
+- Added `symfony/console`, `symfony/finder` and `symfony/security-bundle` to the requirements (29/07/2026)
+- Moved `BackupCommand` from SiteBundle (29/07/2026) [BC-Break]
+- Renamed the command to `c975l:config:backup`, `c975l:site:backup` kept as an alias (29/07/2026)
+- Moved the `site-backup-*` config entries and their translations from SiteBundle, slugs unchanged (29/07/2026) [BC-Break]
+- Added `symfony/mailer` and `symfony/process` to the requirements (29/07/2026)
+- `c975l:config:backup` now archives `private/` as well as `public/`, one archive per root (29/07/2026)
+- `c975l:config:backup` now verifies every archive with `bzip2 --test` and records its size (29/07/2026)
+- `c975l:config:backup` now reports a table only once its dump exists, with its size (29/07/2026)
+- `c975l:config:backup` now compares the tables dumped against `INFORMATION_SCHEMA` and errors on the difference (29/07/2026)
+- `c975l:config:backup` now names the empty files it discards instead of deleting them silently (29/07/2026)
+- Added the `site-backup-retention-days` config (29/07/2026)
+- `c975l:config:backup` now purges the runs older than `site-backup-retention-days` from the server (29/07/2026)
+- Added `BackupRetentionPurger` (29/07/2026)
+- Added `BackupResultRecorder`, every run recording a `HealthCheckResult` row of kind `backup` (29/07/2026)
+- Added `backup` to the Health check page's site-wide kinds (29/07/2026)
+- Added `BackupAlertProvider`, alerting on a backup that failed, that shrank, or that stopped running (29/07/2026)
+- Added the `site-backup-max-age-hours` config, past which the dashboard alerts (29/07/2026)
+- Added `BackupHealthCheckAdviceProvider` (29/07/2026)
+- Added `ByteFormatter` (29/07/2026)
+- Added `HealthCheckResultRepository::findLatestByKind()` (29/07/2026)
+- `BackupCommand` gained `BackupRetentionPurger` and `BackupResultRecorder` constructor arguments (29/07/2026) [BC-Break]
+- Added the readme section on the backup (29/07/2026)
+- Added `BackupCommandTest`, `BackupRetentionPurgerTest`, `BackupResultRecorderTest`, `BackupAlertProviderTest`, `BackupHealthCheckAdviceProviderTest` and `ByteFormatterTest` (29/07/2026)
+- Added `GuidedProjectProviderInterface` and the `c975l.guided_project_provider` tag, each bundle contributing its own guided projects (28/07/2026)
+- Added `GuidedProjectBuilder`, merging the projects and sorting them by `order` (28/07/2026)
+- `GuidedProjectBuilder` drops the projects the current user lacks the `role` for (28/07/2026)
+- Added the `management_guided_project_steps` route, serving one project's steps as JSON (28/07/2026)
+- Added the "Guided projects" dashboard button and its list (28/07/2026)
+- Added `assets/js/guided-project.js`, walking a project across the admin screens it spans (28/07/2026)
+- Added `GuidedProjectMountBuilder`, mounting that panel on every admin page (28/07/2026)
+- Added `GuidedProjectKeyGenerator`, scoping the panel's browser storage per user (28/07/2026)
+- Extracted `assets/js/guided-ui.js`, shared by the guided tour and the guided projects (28/07/2026)
+- Renamed the `onboarding-tour-highlight` CSS class to `guided-highlight` (28/07/2026) [BC-Break]
+- `DashboardController` gained `GuidedProjectBuilder` and `GuidedProjectMountBuilder` constructor arguments (28/07/2026) [BC-Break]
+- Added the readme section on contributing guided projects (28/07/2026)
+- Added `GuidedProjectBuilderTest`, `GuidedProjectKeyGeneratorTest`, `GuidedProjectMountBuilderTest` and `GuidedProjectControllerTest` (28/07/2026)
+
 ## v5.11.3
 
 - The row opening each url group of the Health check table is now tinted with that page's own verdict - the worst status among the rows currently listed for it - the neutral blue kept as a fallback for an unknown status (28/07/2026)

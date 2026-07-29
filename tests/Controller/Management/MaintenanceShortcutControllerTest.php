@@ -35,16 +35,39 @@ class MaintenanceShortcutControllerTest extends TestCase
         ?Config $config,
         EntityManagerInterface $manager,
         ConfigServiceInterface $configService,
+        array $bySlug = [],
     ): MaintenanceShortcutController {
         $translator = $this->createStub(TranslatorInterface::class);
         $translator->method('trans')->willReturnArgument(0);
 
         return new MaintenanceShortcutController(
-            new ConfigRepositoryFindOneBySlugFixture($config),
+            new ConfigRepositoryFindOneBySlugFixture($config, $bySlug),
             $manager,
             $configService,
             $translator,
         );
+    }
+
+    // The toggle and the token entry, as the fixtures answer them slug by slug
+    private function createTogglingController(?string $hashValue, bool $currentlyEnabled = false): array
+    {
+        $config = (new Config())->setSlug('site-maintenance')->setValue($currentlyEnabled);
+        $hash = (new Config())->setSlug('site-maintenance-hash')->setValue($hashValue);
+
+        $controller = $this->createController(
+            $config,
+            $this->createStub(EntityManagerInterface::class),
+            $this->createConfigService($currentlyEnabled),
+            ['site-maintenance' => $config, 'site-maintenance-hash' => $hash],
+        );
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+            'security.csrf.token_manager' => $this->createCsrfTokenManager(true),
+            'router' => $this->createRouter(),
+            'request_stack' => $this->createRequestStackWithSession()[0],
+        ]));
+
+        return [$controller, $hash];
     }
 
     public function testToggleMaintenanceFlipsTheConfigValueAndFlushesWhenTokenIsValid(): void
@@ -135,6 +158,36 @@ class MaintenanceShortcutControllerTest extends TestCase
         $response = $controller->toggleMaintenance(new Request([], ['_token' => 'valid-token']));
 
         $this->assertSame('/management', $response->getTargetUrl());
+    }
+
+    // An empty token grants nobody anything, so closing the site without one would leave the back-office as the only way to see it
+    public function testEnablingMaintenanceFillsAnEmptyHash(): void
+    {
+        [$controller, $hash] = $this->createTogglingController(hashValue: null);
+
+        $controller->toggleMaintenance(new Request([], ['_token' => 'valid-token']));
+
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{32}$/', (string) $hash->getValue());
+        $this->assertNotNull($hash->getModification());
+    }
+
+    // A token already handed out has to keep working: regenerating it would silently revoke every link built with it
+    public function testEnablingMaintenanceKeepsAnExistingHash(): void
+    {
+        [$controller, $hash] = $this->createTogglingController(hashValue: 'already-shared');
+
+        $controller->toggleMaintenance(new Request([], ['_token' => 'valid-token']));
+
+        $this->assertSame('already-shared', $hash->getValue());
+    }
+
+    public function testDisablingMaintenanceLeavesTheHashAlone(): void
+    {
+        [$controller, $hash] = $this->createTogglingController(hashValue: null, currentlyEnabled: true);
+
+        $controller->toggleMaintenance(new Request([], ['_token' => 'valid-token']));
+
+        $this->assertNull($hash->getValue());
     }
 
     public function testToggleMaintenanceDeniesAccessWhenNotGranted(): void

@@ -19,10 +19,7 @@ class WhatsNewBuilder
     ) {
     }
 
-    // Returns the most recent entries, hard-capped at $maxItems total description lines - always visible
-    // on the dashboard now (see management/index.html.twig), so this stays a short, fixed-size list rather
-    // than growing with whichever date happens to have the most changes; a date exceeding what's left is
-    // truncated rather than included in full, the full history stays one click away (management_whatsnew_index)
+    // Hard-capped at $maxItems description lines, always visible on the dashboard; the full history is a click away
     public function getLatest(int $maxItems = 5): array
     {
         $latest = [];

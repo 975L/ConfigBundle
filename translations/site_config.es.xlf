@@ -2,6 +2,42 @@
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
     <file source-language="en" target-language="es" datatype="plaintext" original="site_config.es.xlf">
         <body>
+            <trans-unit id="gzatlgG">
+                <source>description.email_from</source>
+                <target>Correo usado para enviar los correos, ej. contact@example.com</target>
+            </trans-unit>
+            <trans-unit id="PZrDv2T">
+                <source>description.site_backup_database</source>
+                <target>Nombre de la base de datos MySQL a respaldar</target>
+            </trans-unit>
+            <trans-unit id="zquqL77">
+                <source>description.site_backup_db_host</source>
+                <target>Host MySQL para las copias de seguridad</target>
+            </trans-unit>
+            <trans-unit id="y563wVd">
+                <source>description.site_backup_db_password</source>
+                <target>Contraseña MySQL para las copias de seguridad</target>
+            </trans-unit>
+            <trans-unit id="P7VAMy1">
+                <source>description.site_backup_db_user</source>
+                <target>Usuario MySQL para las copias de seguridad</target>
+            </trans-unit>
+            <trans-unit id="ZL..tYO">
+                <source>description.site_backup_full_interval_months</source>
+                <target>Número de meses naturales entre dos copias de seguridad completas de archivos (entre medias se realizan copias parciales, solo con los archivos modificados)</target>
+            </trans-unit>
+            <trans-unit id="3_4rjYZ">
+                <source>description.site_backup_mailto</source>
+                <target>Correo para los informes de copia de seguridad y errores</target>
+            </trans-unit>
+            <trans-unit id="XmN1LNH">
+                <source>description.site_backup_max_age_hours</source>
+                <target>Pasado este plazo sin ninguna copia registrada, el panel muestra una alerta. Es la única señal que puede dar una copia que ha dejado de ejecutarse</target>
+            </trans-unit>
+            <trans-unit id="OV1T_sI">
+                <source>description.site_backup_retention_days</source>
+                <target>Número de días de copias de seguridad conservadas en el servidor. La copia externa debe guardar más, de lo contrario vuelve a descargar lo que acaba de purgar</target>
+            </trans-unit>
             <trans-unit id="wjC9u3K">
                 <source>description.site_maintenance</source>
                 <target>Activa (true) o desactiva (false) el modo mantenimiento</target>
@@ -18,6 +54,46 @@
                 <source>description.site_role_editor</source>
                 <target>Rol requerido para las acciones de editor, ej. ROLE_EDITOR (por defecto)</target>
             </trans-unit>
+            <trans-unit id="nInyIwr">
+                <source>description.site_url</source>
+                <target>URL del sitio web, ej. https://example.com</target>
+            </trans-unit>
+            <trans-unit id="meevaqA">
+                <source>label.email_from</source>
+                <target>Correo (remitente)</target>
+            </trans-unit>
+            <trans-unit id="Y1PJ4Y0">
+                <source>label.site_backup_database</source>
+                <target>Base de datos de copia de seguridad</target>
+            </trans-unit>
+            <trans-unit id="iWzvwqZ">
+                <source>label.site_backup_db_host</source>
+                <target>Host de la base de datos de copia de seguridad</target>
+            </trans-unit>
+            <trans-unit id="TyhqGFy">
+                <source>label.site_backup_db_password</source>
+                <target>Contraseña de la base de datos de copia de seguridad</target>
+            </trans-unit>
+            <trans-unit id="gKIoJD1">
+                <source>label.site_backup_db_user</source>
+                <target>Usuario de la base de datos de copia de seguridad</target>
+            </trans-unit>
+            <trans-unit id="NhbXiCq">
+                <source>label.site_backup_full_interval_months</source>
+                <target>Intervalo copia completa (meses)</target>
+            </trans-unit>
+            <trans-unit id="GvaXwxi">
+                <source>label.site_backup_mailto</source>
+                <target>Correo de copia de seguridad</target>
+            </trans-unit>
+            <trans-unit id="FYYWZW9">
+                <source>label.site_backup_max_age_hours</source>
+                <target>Antigüedad máxima de la copia (horas)</target>
+            </trans-unit>
+            <trans-unit id="k4fofqT">
+                <source>label.site_backup_retention_days</source>
+                <target>Retención de copias (días)</target>
+            </trans-unit>
             <trans-unit id="LXzR.TR">
                 <source>label.site_maintenance</source>
                 <target>Mantenimiento del sitio</target>
@@ -33,6 +109,10 @@
             <trans-unit id="OH9i9I8">
                 <source>label.site_role_editor</source>
                 <target>Rol de editor del sitio</target>
+            </trans-unit>
+            <trans-unit id="rDTDQ70">
+                <source>label.site_url</source>
+                <target>URL del sitio</target>
             </trans-unit>
         </body>
     </file>

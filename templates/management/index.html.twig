@@ -5,8 +5,19 @@
         <h1>{{ ('label.management'|trans({}, 'config')) }}</h1>
         <p>{{ ('label.management_interface'|trans({}, 'config')) }}</p>
         <p>{{ app.user.roles|join(', ') }}</p>
-        {{ include('@c975LConfig/management/_onboarding_tour.html.twig', { steps: onboardingSteps }) }}
+        {# Guided tour and guided projects side by side: the first shows what the back-office holds, the second walks through a real task to carry out. The list itself sits below, hidden until this button opens it - toggled by assets/js/guided-project.js rather than a Bootstrap collapse, that controller being mounted on the page anyway #}
+        <div class="d-flex justify-content-center gap-2">
+            {{ include('@c975LConfig/management/_onboarding_tour.html.twig', { steps: onboardingSteps }) }}
+            {% if guidedProjects|length > 0 %}
+                <button type="button" class="btn btn-secondary mb-3" data-guided-project-toggle>
+                    <i class="fa fa-list-check"></i> {{ 'label.guided_projects'|trans({}, 'config') }}
+                </button>
+            {% endif %}
+        </div>
     </section>
+
+    {# Guided projects merged across every bundle's GuidedProjectProvider - replayable exercises, not a one-time wizard #}
+    {{ include('@c975LConfig/management/_guided_projects.html.twig', { projects: guidedProjects }) }}
 
     {# Dashboard widgets merged across every bundle's DashboardWidgetProvider (e.g. UiBundle's Donovan card) #}
     {% for widget in widgets %}

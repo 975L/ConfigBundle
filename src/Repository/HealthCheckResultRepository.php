@@ -60,6 +60,35 @@ class HealthCheckResultRepository extends ServiceEntityRepository
         return $latest;
     }
 
+    // The most recent rows of a single kind, newest first - unlike findLatestPerUrlAndKind() this keeps the history rather than deduping it, so a caller can compare a run against the one before it (see BackupResultRecorder, which flags an archive that suddenly shrank, and BackupAlertProvider, which only needs the first row)
+    // @return HealthCheckResult[]
+    public function findLatestByKind(string $kind, int $limit = 2): array
+    {
+        return $this->createQueryBuilder('h')
+            ->andWhere('h.kind = :kind')
+            ->setParameter('kind', $kind)
+            ->orderBy('h.checkedAt', 'DESC')
+            ->addOrderBy('h.id', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    // Every row of a single kind recorded since a given moment, newest first - what the weekly digest reads (see BackupDigestBuilder), findLatestByKind()'s limit being a number of rows and not a period: how many runs a week holds depends on the schedule, and a window asked for in days must not be cut short by a count guessed here
+    // @return HealthCheckResult[]
+    public function findByKindSince(string $kind, \DateTimeInterface $since): array
+    {
+        return $this->createQueryBuilder('h')
+            ->andWhere('h.kind = :kind')
+            ->andWhere('h.checkedAt >= :since')
+            ->setParameter('kind', $kind)
+            ->setParameter('since', $since)
+            ->orderBy('h.checkedAt', 'DESC')
+            ->addOrderBy('h.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
     // Status counts (ok/warning/error) grouped by calendar day, across every kind/url - the "is our site's health improving or degrading" trend chart on the Health check page (see HealthCheckController), not a per-page breakdown. Capped to the last $maxDates distinct days so the chart stays readable as history accumulates (see HealthCheckResult's own class comment on why history isn't pruned)
     public function findStatusCountsByDate(int $maxDates = 12): array
     {

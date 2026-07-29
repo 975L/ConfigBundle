@@ -2,6 +2,42 @@
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
     <file source-language="en" target-language="fr" datatype="plaintext" original="site_config.fr.xlf">
         <body>
+            <trans-unit id="gzatlgG">
+                <source>description.email_from</source>
+                <target>Adresse email d'envoi des emails, ex. contact@example.com</target>
+            </trans-unit>
+            <trans-unit id="PZrDv2T">
+                <source>description.site_backup_database</source>
+                <target>Nom de la base de données MySQL à sauvegarder</target>
+            </trans-unit>
+            <trans-unit id="zquqL77">
+                <source>description.site_backup_db_host</source>
+                <target>Hôte MySQL pour les sauvegardes</target>
+            </trans-unit>
+            <trans-unit id="y563wVd">
+                <source>description.site_backup_db_password</source>
+                <target>Mot de passe MySQL pour les sauvegardes</target>
+            </trans-unit>
+            <trans-unit id="P7VAMy1">
+                <source>description.site_backup_db_user</source>
+                <target>Utilisateur MySQL pour les sauvegardes</target>
+            </trans-unit>
+            <trans-unit id="ZL..tYO">
+                <source>description.site_backup_full_interval_months</source>
+                <target>Nombre de mois calendaires entre deux sauvegardes complètes des fichiers (des sauvegardes partielles, fichiers modifiés uniquement, ont lieu entre-temps)</target>
+            </trans-unit>
+            <trans-unit id="3_4rjYZ">
+                <source>description.site_backup_mailto</source>
+                <target>Adresse email pour les rapports de sauvegarde et erreurs</target>
+            </trans-unit>
+            <trans-unit id="XmN1LNH">
+                <source>description.site_backup_max_age_hours</source>
+                <target>Au-delà de ce délai sans sauvegarde enregistrée, le tableau de bord alerte. C'est le seul signal qu'une sauvegarde qui ne tourne plus du tout puisse produire</target>
+            </trans-unit>
+            <trans-unit id="OV1T_sI">
+                <source>description.site_backup_retention_days</source>
+                <target>Nombre de jours de sauvegardes conservées sur le serveur. La copie hors site doit en garder davantage, sinon elle re-télécharge à chaque passage ce qu'elle vient de purger</target>
+            </trans-unit>
             <trans-unit id="wjC9u3K">
                 <source>description.site_maintenance</source>
                 <target>Active (true) ou désactive (false) le mode maintenance</target>
@@ -18,6 +54,46 @@
                 <source>description.site_role_editor</source>
                 <target>Rôle requis pour les actions d'éditeur, ex. ROLE_EDITOR (par défaut)</target>
             </trans-unit>
+            <trans-unit id="nInyIwr">
+                <source>description.site_url</source>
+                <target>URL du site web, ex. https://example.com</target>
+            </trans-unit>
+            <trans-unit id="meevaqA">
+                <source>label.email_from</source>
+                <target>Email (expéditeur)</target>
+            </trans-unit>
+            <trans-unit id="Y1PJ4Y0">
+                <source>label.site_backup_database</source>
+                <target>Base de données de sauvegarde</target>
+            </trans-unit>
+            <trans-unit id="iWzvwqZ">
+                <source>label.site_backup_db_host</source>
+                <target>Hôte de la base de données de sauvegarde</target>
+            </trans-unit>
+            <trans-unit id="TyhqGFy">
+                <source>label.site_backup_db_password</source>
+                <target>Mot de passe de la base de données de sauvegarde</target>
+            </trans-unit>
+            <trans-unit id="gKIoJD1">
+                <source>label.site_backup_db_user</source>
+                <target>Utilisateur de la base de données de sauvegarde</target>
+            </trans-unit>
+            <trans-unit id="NhbXiCq">
+                <source>label.site_backup_full_interval_months</source>
+                <target>Intervalle sauvegarde complète (mois)</target>
+            </trans-unit>
+            <trans-unit id="GvaXwxi">
+                <source>label.site_backup_mailto</source>
+                <target>Email de sauvegarde</target>
+            </trans-unit>
+            <trans-unit id="FYYWZW9">
+                <source>label.site_backup_max_age_hours</source>
+                <target>Âge maximal d'une sauvegarde (heures)</target>
+            </trans-unit>
+            <trans-unit id="k4fofqT">
+                <source>label.site_backup_retention_days</source>
+                <target>Rétention des sauvegardes (jours)</target>
+            </trans-unit>
             <trans-unit id="LXzR.TR">
                 <source>label.site_maintenance</source>
                 <target>Maintenance du site</target>
@@ -33,6 +109,10 @@
             <trans-unit id="OH9i9I8">
                 <source>label.site_role_editor</source>
                 <target>Rôle Éditeur du site</target>
+            </trans-unit>
+            <trans-unit id="rDTDQ70">
+                <source>label.site_url</source>
+                <target>URL du site</target>
             </trans-unit>
         </body>
     </file>

@@ -15,12 +15,13 @@ use c975L\ConfigBundle\Repository\ConfigRepository;
 // findOneBySlug() is resolved by Doctrine's EntityRepository::__call() magic (no real declared method to mock), so callers needing a double override it directly here instead - the parent constructor is never invoked, which is safe since this fixture never touches the (otherwise uninitialized) Doctrine internals. Own PSR-4 file for the same reason as TaggedInterfacePassTest's fixtures (see that test for details).
 class ConfigRepositoryFindOneBySlugFixture extends ConfigRepository
 {
-    public function __construct(private readonly ?Config $config)
+    // $config answers every slug, which is all a caller looking up a single entry needs; $bySlug is for the ones looking up several, each entry taking precedence over the catch-all
+    public function __construct(private readonly ?Config $config, private readonly array $bySlug = [])
     {
     }
 
     public function findOneBySlug(string $slug): ?Config
     {
-        return $this->config;
+        return $this->bySlug[$slug] ?? $this->config;
     }
 }

@@ -14,6 +14,8 @@ use c975L\ConfigBundle\Controller\Management\DashboardController;
 use c975L\ConfigBundle\Management\AlertBuilder;
 use c975L\ConfigBundle\Management\DashboardWidgetBuilder;
 use c975L\ConfigBundle\Management\EssentialActionBuilder;
+use c975L\ConfigBundle\Management\GuidedProjectBuilder;
+use c975L\ConfigBundle\Management\GuidedProjectMountBuilder;
 use c975L\ConfigBundle\Management\MenuBuilder;
 use c975L\ConfigBundle\Management\OnboardingStepBuilder;
 use c975L\ConfigBundle\Management\ShortcutBuilder;
@@ -28,8 +30,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class DashboardControllerTest extends TestCase
 {
-    private function createController(bool $debug, array $managementStylesheets, array $configs = []): DashboardController
+    private function createController(bool $debug, array $managementStylesheets, array $configs = [], string $guidedProjectMount = ''): DashboardController
     {
+        $guidedProjectMountBuilder = $this->createStub(GuidedProjectMountBuilder::class);
+        $guidedProjectMountBuilder->method('getHtml')->willReturn($guidedProjectMount);
+
         $stylesheetManagementRegistry = $this->createStub(StylesheetManagementRegistry::class);
         $stylesheetManagementRegistry->method('all')->willReturn($managementStylesheets);
 
@@ -52,6 +57,8 @@ class DashboardControllerTest extends TestCase
             $this->createStub(EssentialActionBuilder::class),
             $this->createStub(DashboardWidgetBuilder::class),
             $this->createStub(OnboardingStepBuilder::class),
+            $this->createStub(GuidedProjectBuilder::class),
+            $guidedProjectMountBuilder,
             $configService,
             $this->createStub(ScriptAdminRegistry::class),
             $stylesheetManagementRegistry,
@@ -96,8 +103,15 @@ class DashboardControllerTest extends TestCase
         $this->assertNotContains('bundles/c975lconfig/css/management.min.css', $cssPaths);
     }
 
-    // The menu label is raw HTML, not a template, so a relative path has to go through the asset packages here -
-    // left as-is it would resolve against the current /management/... URL instead of the site root
+    // The guided-project panel has to survive the page loads a project walks the user through, so its mount element goes into the body of every admin page rather than into the dashboard template alone - EasyAdmin renders these on all of them, which spares an override of its layout
+    public function testConfigureAssetsMountsTheGuidedProjectPanelOnEveryAdminPage(): void
+    {
+        $controller = $this->createController(true, [], [], '<div data-controller="guided-project"></div>');
+
+        $this->assertContains('<div data-controller="guided-project"></div>', $controller->configureAssets()->getAsDto()->getBodyContents());
+    }
+
+    // The label is raw HTML, so a relative path must go through the asset packages, not /management/
     public function testMadeByLogoPathIsResolvedThroughTheAssetPackages(): void
     {
         $controller = $this->createController(false, [], [

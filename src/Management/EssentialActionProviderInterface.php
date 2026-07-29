@@ -10,6 +10,10 @@ namespace c975L\ConfigBundle\Management;
 
 interface EssentialActionProviderInterface
 {
-    // Each entry: ['slug' => string, 'label' => string, 'description' => ?string, 'translation_domain' => string, 'url' => string, 'isDone' => bool, 'order' => int]. Not a one-time onboarding wizard - a permanent quick-access entry point to the handful of settings every site needs, always linking straight to its screen so a value can be reviewed or redone at any time, "isDone" only drives the status icon. "order" decides the checklist's display order across every provider (low to high) - unlike menus/alerts, these have a deliberate sequence, not an alphabetical one.
+    /**
+     * Not a one-time onboarding wizard - a permanent quick-access entry point to the handful of settings every site needs, always linking straight to its screen so a value can be reviewed or redone at any time, "isDone" only drives the status icon. "order" decides the checklist's display order across every provider (low to high) - unlike menus/alerts, these have a deliberate sequence, not an alphabetical one.
+     *
+     * @return list<array{slug: string, label: string, description: ?string, translation_domain: string, url: string, isDone: bool, order: int}>
+     */
     public function getEssentialActions(): array;
 }

@@ -29,9 +29,7 @@ class Config
     public const TYPE_JSON = 'json';
     public const TYPE_FONT = 'font';
 
-    // Always offered alongside whatever custom fonts FontRegistry knows about (see ConfigCrudController::buildFontField()) -
-    // lets a site pick a plain generic without declaring any @font-face, and never needs a fallback suffix itself (see
-    // SiteBundle's ThemeVariablesCssListener)
+    // Always offered alongside the custom fonts, and never needing a fallback suffix of its own
     public const GENERIC_FONT_FAMILIES = ['serif', 'sans-serif', 'monospace'];
 
     public const TYPES = [

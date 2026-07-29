@@ -1,9 +1,4 @@
-{#
- # Renders a grouped-by-severity alert list (see c975L\ConfigBundle\Management\AlertBuilder).
- # Expects:
- #   - alerts: array<string, array> grouped by severity (Config::SEVERITY_*)
- #   - title: string, already translated - callers decide how generic/specific it should be
- #}
+{# Renders a grouped-by-severity alert list; expects "alerts" keyed by severity and a translated "title" #}
 {% set hasAlerts = false %}
 {% for items in alerts|default([]) %}
     {% if items|length > 0 %}

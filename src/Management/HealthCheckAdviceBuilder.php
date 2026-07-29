@@ -24,7 +24,7 @@ class HealthCheckAdviceBuilder
         return $result->getKind() . '|' . $result->getUrl();
     }
 
-    // Not ProviderMerger::merge(): two providers with something to say about the same result have their lines appended, not one overwriting the other
+    // Not ProviderMerger::merge(): two providers' lines are appended, not one overwriting the other
     // @param HealthCheckResult[] $results
     // @return array<string, array{text: string, url: ?string, items?: array{text: string, url: ?string, label: ?string}[]}[]>
     public function build(array $results): array

@@ -21,6 +21,9 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 #[AsEventListener(event: 'kernel.request', method: 'onKernelRequest', priority: 6)]
 class MaintenanceListener
 {
+    // Seconds sent as Retry-After on the maintenance page
+    private const RETRY_AFTER = 3600;
+
     public function __construct(
         private readonly ConfigServiceInterface $configService,
         private readonly Security $security,
@@ -44,7 +47,21 @@ class MaintenanceListener
 
         // Otherwise maintenance page
         $html = $this->twig->render('@c975LConfig/maintenance/index.html.twig');
-        $event->setResponse(new Response($html, 503));
+        $event->setResponse($this->maintenanceResponse($html));
+    }
+
+    // 503 is what search engines expect from a temporary outage (a 200 would get the maintenance page indexed in place of the real ones, a 404/410 would drop them from the index)
+    private function maintenanceResponse(string $html): Response
+    {
+        $response = new Response($html, 503);
+
+        // Retry-After is only a hint, never a promise: a crawler coming back too early just meets another 503 and applies its own backoff, whereas too long a delay keeps it away after the site is back - hence the deliberately short hour, whatever the maintenance's real length
+        $response->headers->set('Retry-After', (string) self::RETRY_AFTER);
+
+        // Keeps any proxy/CDN from serving the maintenance page once the site is back up
+        $response->headers->set('Cache-Control', 'no-store');
+
+        return $response;
     }
 
     // Everything that keeps working while the site is down: the admin's own way back in, Symfony's dev tools, an already-authenticated admin, and the maintenance token
@@ -52,8 +69,8 @@ class MaintenanceListener
     {
         $path = $request->getPathInfo();
 
-        // /management, /login and /m (its shortcut, see ManagementShortcutController) stay reachable so an admin can always log in and lift maintenance
-        if (str_starts_with($path, '/management') || str_starts_with($path, '/login') || '/m' === $path) {
+        // /management and /login stay reachable so an admin can always log in and lift maintenance
+        if (str_starts_with($path, '/management') || str_starts_with($path, '/login')) {
             return true;
         }
 
@@ -75,7 +92,10 @@ class MaintenanceListener
     // Access via token in URL (?t=secret_token), which then opens a 6-hour session for the rest of the visit
     private function hasMaintenanceAccess(Request $request): bool
     {
-        if ($request->query->get('t') === $this->configService->get('site-maintenance-hash')) {
+        $hash = (string) $this->configService->get('site-maintenance-hash');
+
+        // Both sides cast and the empty hash excluded: the entry ships with a null value, which a visitor's absent "?t=" matched exactly, making every anonymous request exempt and the whole maintenance mode inert
+        if ('' !== $hash && (string) $request->query->get('t') === $hash) {
             $request->getSession()->set('site-maintenance', [
                 'access' => true,
                 'access_time' => time() + 6 * 60 * 60,

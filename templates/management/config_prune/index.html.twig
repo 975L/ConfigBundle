@@ -1,11 +1,5 @@
-{#
- # Dashboard counterpart of the c975l:config:prune command (see c975L\ConfigBundle\Controller\Management\ConfigPruneController).
- # The page itself is the command's listing step, its submit button the --force one, so nothing is deleted by simply opening it.
- # Expects:
- #   - orphans: Config entities no configs*.json declares anymore, already sorted by slug
- #   - hasDeclarations: false when no configs*.json was found at all, which is an unfinished install rather than an empty orphan list
- #   - unreadableFiles: the declaration files that exist but can't be parsed, whose slugs would otherwise be taken for orphans
- #}
+{# Dashboard counterpart of c975l:config:prune: the page is its listing step, the submit its --force
+ # "hasDeclarations" false means an unfinished install rather than an empty orphan list #}
 {% extends '@EasyAdmin/page/content.html.twig' %}
 
 {% block main %}

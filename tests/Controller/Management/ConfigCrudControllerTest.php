@@ -133,8 +133,7 @@ class ConfigCrudControllerTest extends TestCase
         );
     }
 
-    // Builds a FontRegistry pre-populated with a single stub provider returning $fonts, mirroring what
-    // FontProviderPass would wire in a real app that has a font-declaring bundle (e.g. SiteBundle) installed
+    // A FontRegistry holding one stub provider, mirroring what FontProviderPass wires in a real app
     private function createFontRegistry(array $fonts): FontRegistry
     {
         $provider = $this->createStub(FontProviderInterface::class);
@@ -437,9 +436,7 @@ class ConfigCrudControllerTest extends TestCase
         );
     }
 
-    // EasyAdmin's own search only ever matches raw DB columns ("label" stores a translation key like
-    // "label.ai_help_llm_enabled", never the rendered "Donovan (Q&A) - Activé" an admin actually types)
-    // - a non-empty query must instead restrict to slugs whose *translated* label/description contain it
+    // EasyAdmin's search only matches raw columns, so a query must restrict to translated matches
     public function testCreateIndexQueryBuilderRestrictsToSlugsMatchingTranslatedLabelOrDescription(): void
     {
         $security = $this->createStub(Security::class);
@@ -459,8 +456,7 @@ class ConfigCrudControllerTest extends TestCase
         ]);
 
         $queryBuilder = $this->createMock(QueryBuilder::class);
-        // 1 extra andWhere/setParameter for the slug allowlist, on top of the usual isSensitive one
-        // (isRestricted is skipped here since $security grants ROLE_SUPER_ADMIN)
+        // One extra andWhere for the slug allowlist, on top of the usual isSensitive one
         $queryBuilder->expects($this->exactly(2))->method('andWhere')->willReturnSelf();
         $queryBuilder->expects($this->exactly(2))->method('setParameter')->willReturnCallback(
             function (string $name, mixed $value) use ($queryBuilder) {
@@ -949,8 +945,7 @@ class ConfigCrudControllerTest extends TestCase
         );
     }
 
-    // With no font declared anywhere (no FontProviderInterface registered, or its file is empty/missing), the select
-    // still offers the 3 CSS generics - never an empty, unusable <select>
+    // With no font declared the select still offers the 3 generics, never an unusable empty one
     public function testConfigureFieldsOffersOnlyGenericFontFamiliesWhenRegistryIsEmpty(): void
     {
         $config = (new Config())->setSlug('theme-font-family-title')->setKind(Config::TYPE_FONT)->setValue(null);
@@ -967,8 +962,7 @@ class ConfigCrudControllerTest extends TestCase
         );
     }
 
-    // A value no longer declared in the font file (e.g. removed from the @font-face CSS) must stay selectable,
-    // otherwise re-saving the form unchanged would silently wipe it
+    // A value no longer declared must stay selectable, else re-saving would silently wipe it
     public function testConfigureFieldsKeepsStaleFontValueSelectableWhenNoLongerInRegistry(): void
     {
         $config = (new Config())->setSlug('theme-font-family-title')->setKind(Config::TYPE_FONT)->setValue('Old Font');

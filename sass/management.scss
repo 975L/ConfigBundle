@@ -8,8 +8,7 @@
 
 /* MADE BY (Controller/Management/DashboardController.php) */
 .menu-item-made-by {
-    /* EasyAdmin's own .ea-sidebar-item-link rule only sets align-items,
-       so justify-content is free to center this single-child link without a specificity fight */
+    // EasyAdmin's own rule only sets align-items, so justify-content needs no specificity fight
     justify-content: center;
 }
 
@@ -45,10 +44,7 @@ ul {
     margin-left: .5rem;
 }
 
-/* Collapsed list of the individual offenders behind an advice line (each image without alt text, each broken
-   link...) - a page with a dozen of them would otherwise push every following row off screen. Own list marker
-   removed: the parent advice <ul> sets an svg one that reads oddly nested, and urls get their own break rule
-   so a long one wraps inside the cell instead of widening the whole table */
+// Collapsed list of the offenders behind an advice line, its own marker removed, urls breaking inside the cell
 .health-check-advice-items > summary {
     cursor: pointer;
 }
@@ -59,17 +55,8 @@ ul {
     word-break: break-word;
 }
 
-/* Marks the row that carries a group's page name/links (health-check-table.js#updateGrouping) - a background
-   tint (not the <tr> itself: Bootstrap's .table uses border-collapse: collapse, under which a <tr>'s own
-   background/border never renders, only its cells') so groups of rows for the same page stay visually separated.
-   The tint is that page's own verdict - the worst status among the rows currently listed for it - rather than one
-   neutral color: the same ok/warning/error reading as the status pills of the rows it opens, at page level. The
-   base rule stays as a neutral fallback, overridden by the modifiers below (equal specificity, later in the
-   cascade), so a status a provider returns outside the four known ones still separates its group visually.
-   Bootstrap's own subtle backgrounds (shipped by EasyAdmin, each with its dark-theme value) rather than hardcoded
-   colors, so this follows the admin's light/dark theme - their light values kept as fallbacks for a Bootstrap
-   older than 5.3, which had no such variable. !important needed: Bootstrap's own ".table > :not(caption) > * > *"
-   cell background rule has the same specificity and comes later in the cascade, so it otherwise wins the tie */
+// Tints the row carrying a group's page name with that page's own verdict, so groups stay separated
+// On the cells, not the <tr>, whose background never renders under border-collapse; !important beats Bootstrap's own tie
 tr.health-check-row-first > td {
     background-color: var(--bs-info-bg-subtle, #cff4fc) !important;
 }
@@ -91,9 +78,7 @@ tr.health-check-row-first--skipped > td {
     background-color: var(--bs-secondary-bg-subtle, #e2e3e5) !important;
 }
 
-/* PAGESPEED GAUGES (management/health_check/_table.html.twig, pagespeed_gauges macro) - same red/orange/green
-   thresholds and colors as Lighthouse's own report. stroke-dasharray/-dashoffset are set as plain SVG
-   attributes in the template (not inline style=""), so this needed no CSP allowance */
+// Same thresholds and colors as Lighthouse; the dash attributes are plain SVG, so no CSP allowance was needed
 .lh-gauges {
     display: flex;
     gap: .75rem;
@@ -139,41 +124,30 @@ tr.health-check-row-first--skipped > td {
     stroke: #ff4e42;
 }
 
-/* EasyAdmin's own sidebar menu is rendered as <ul><li> too, so the rule above would otherwise
-   give every dashboard menu item this content bullet, which doesn't belong on a nav list */
+// EasyAdmin's sidebar is a <ul><li> too, and a nav list has no business carrying the bullet above
 .ea-sidebar-group-items,
 .ea-sidebar-submenu-items {
     list-style: none;
 }
 
-/* Same issue for EasyAdmin's crud form tabs (e.g. SiteBundle's Page edit form), also a plain
-   <ul class="nav nav-tabs"><li class="nav-item"> - see vendor/easycorp/.../crud/form_theme.html.twig */
+// Same issue for EasyAdmin's crud form tabs, also a plain <ul class="nav nav-tabs">
 .nav-tabs {
     list-style: none;
 }
 
-/* A sidebar link leaving the admin entirely (see MenuBuilder/MenuProviderInterface's optional "target"
-   link key) gets a small external-link glyph automatically - a plain Unicode character, not an icon-font
-   glyph, so it doesn't depend on whichever icon set/version a menu item's own "icon" happens to use.
-   Targets EasyAdmin 5's own .ea-sidebar-item-link class (see vendor/easycorp/.../Sidebar/Item.html.twig) -
-   the old .menu-item-contents class this rule used to target no longer exists in that template. */
+// A sidebar link leaving the admin gets a Unicode glyph, so it depends on no icon set or version
 a.ea-sidebar-item-link[target="_blank"]::after {
     content: '\2197';
     margin-left: .35em;
     opacity: .6;
 }
 
-/* Config's index has many columns (kind/group/severity/value...), so EasyAdmin's auto table layout
-   squeezes the actions cell. It then wraps at the only breakable point left - the whitespace between
-   the icon-only Detail/Edit buttons - stacking them on two lines instead of shrinking another column. */
+// Config's many columns squeeze the actions cell, which then wraps between the two icon buttons
 .datagrid td.actions {
     white-space: nowrap;
 }
 
-/* SHORTCUTS (management/_shortcuts.html.twig, ShortcutBuilder) - a grid of tiles instead of a row of
-   pill buttons, so it stays readable as more bundles each contribute a shortcut. Uses Bootstrap's own
-   CSS variables (shipped by EasyAdmin) rather than hardcoded colors, so it follows EasyAdmin's light/dark
-   theme automatically. */
+// A grid of tiles rather than pill buttons, on Bootstrap's variables so it follows the admin theme
 .shortcuts-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
@@ -211,10 +185,7 @@ a.ea-sidebar-item-link[target="_blank"]::after {
     font-size: 1.25rem;
 }
 
-/* GUIDED TOUR (management/_onboarding_tour.html.twig, assets/js/onboarding-tour.js) - built through the
-   compiled stylesheet rather than an inline <style> tag: a strict style-src CSP with a nonce present makes
-   'unsafe-inline' a no-op (per spec), and a nonce doesn't cover style="" attributes/inline <style> blocks
-   the way it covers <script>, so this is the only reliably CSP-compatible way to ship it */
+// Built through the stylesheet: a nonce covers neither an inline <style> nor a style attribute
 .onboarding-tour-overlay {
     position: fixed;
     inset: 0;
@@ -222,7 +193,8 @@ a.ea-sidebar-item-link[target="_blank"]::after {
     z-index: 2000;
 }
 
-.onboarding-tour-highlight {
+// Shared by the tour and the projects, only the tour needing it above an overlay of its own
+.guided-highlight {
     position: relative;
     z-index: 2001;
     outline: 3px solid #ffc107;
@@ -275,6 +247,58 @@ a.ea-sidebar-item-link[target="_blank"]::after {
 }
 
 .onboarding-tour-actions button:disabled {
+    opacity: .4;
+    cursor: default;
+}
+
+// Not the tour's centered modal: the user keeps working in the form, so this dims and traps nothing
+.guided-project-panel {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    width: calc(100% - 2rem);
+    max-width: 22rem;
+    background: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    border: 1px solid var(--bs-border-color);
+    border-radius: .5rem;
+    box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .3);
+    padding: 1rem;
+    z-index: 1900;
+}
+
+.guided-project-panel h3 {
+    margin: .25rem 0 .5rem;
+    font-size: 1.05rem;
+}
+
+.guided-project-panel p {
+    margin: 0 0 1rem;
+}
+
+.guided-project-progress {
+    font-size: .8rem;
+    opacity: .6;
+}
+
+.guided-project-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+
+.guided-project-actions button {
+    border: 1px solid var(--bs-border-color);
+    background: var(--bs-tertiary-bg);
+    color: inherit;
+    border-radius: .25rem;
+    padding: .35rem .75rem;
+    cursor: pointer;
+}
+
+.guided-project-actions button:disabled {
     opacity: .4;
     cursor: default;
 }

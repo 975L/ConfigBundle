@@ -16,6 +16,7 @@ use c975L\ConfigBundle\Management\DashboardWidgetProviderInterface;
 use c975L\ConfigBundle\Management\DevProfilePathProviderInterface;
 use c975L\ConfigBundle\Management\EssentialActionProviderInterface;
 use c975L\ConfigBundle\Management\ExportProviderInterface;
+use c975L\ConfigBundle\Management\GuidedProjectProviderInterface;
 use c975L\ConfigBundle\Management\ImportProviderInterface;
 use c975L\ConfigBundle\Management\LinkableRouteProviderInterface;
 use c975L\ConfigBundle\Management\MenuProviderInterface;
@@ -45,6 +46,7 @@ class c975LConfigBundleTest extends TestCase
         $container->register('dashboard_widget_provider', c975LConfigBundleTestDashboardWidgetProviderFixture::class);
         $container->register('sitemap_provider', c975LConfigBundleTestSitemapProviderFixture::class);
         $container->register('dev_profile_path_provider', c975LConfigBundleTestDevProfilePathProviderFixture::class);
+        $container->register('guided_project_provider', c975LConfigBundleTestGuidedProjectProviderFixture::class);
 
         (new c975LConfigBundle())->build($container);
 
@@ -67,6 +69,7 @@ class c975LConfigBundleTest extends TestCase
         $this->assertTrue($container->getDefinition('sitemap_provider')->hasTag('c975l.sitemap_provider'));
         // Registered in every environment even though every implementation is #[When('dev')], the pass simply having nothing to tag in prod
         $this->assertTrue($container->getDefinition('dev_profile_path_provider')->hasTag('c975l.dev_profile_path_provider'));
+        $this->assertTrue($container->getDefinition('guided_project_provider')->hasTag('c975l.guided_project_provider'));
     }
 
     // Mirrors how Symfony's own kernel invokes it (BundleExtension::load() builds the ContainerConfigurator and calls loadExtension() for us), so this also validates that config/services.yaml itself parses and wires without error
@@ -204,6 +207,14 @@ class c975LConfigBundleTestSitemapProviderFixture implements SitemapProviderInte
 class c975LConfigBundleTestDevProfilePathProviderFixture implements DevProfilePathProviderInterface
 {
     public function getPaths(): array
+    {
+        return [];
+    }
+}
+
+class c975LConfigBundleTestGuidedProjectProviderFixture implements GuidedProjectProviderInterface
+{
+    public function getGuidedProjects(): array
     {
         return [];
     }

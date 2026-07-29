@@ -272,9 +272,7 @@ class MenuBuilderTest extends TestCase
         $this->assertSame('label.seo_settings', $submenuDto->getSubItems()[0]->getLabel()->getMessage());
     }
 
-    // Real-world case: several providers share the same section (e.g. Config/Site/UiBundle all merge into
-    // "management") - an individual item's own 'tier' must move just that item to "Avancé" without
-    // dragging the rest of that shared section (from the same or another provider) along with it
+    // An item's own 'tier' must move just that item, not the rest of a shared section
     public function testGetMenuItemsMovesOnlyTheItemsThatOptInWithinASharedSection(): void
     {
         $section = ['label' => 'label.management', 'translation_domain' => 'site'];

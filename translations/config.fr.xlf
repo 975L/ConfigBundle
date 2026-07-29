@@ -34,6 +34,14 @@
                 <source>confirm.apply_preset</source>
                 <target>Appliquer ce thème ? Il change la forme visuelle du site (arrondis, ombres, navigation...) - vos couleurs et polices ne sont pas modifiées.</target>
             </trans-unit>
+            <trans-unit id="BTepaai">
+                <source>description.backup_alert</source>
+                <target>Le %date% : %summary%</target>
+            </trans-unit>
+            <trans-unit id="RjVWU19">
+                <source>description.backup_alert_never_ran</source>
+                <target>La sauvegarde est configurée mais aucun passage n'a encore été enregistré</target>
+            </trans-unit>
             <trans-unit id="5sURNHK">
                 <source>description.config</source>
                 <target>Configuration du site, organisée par groupe. Vous pouvez modifier la valeur de chaque entrée depuis sa page d'édition ; procédez avec prudence, une valeur incorrecte peut perturber le fonctionnement du site. Les valeurs sensibles sont affichées en clair sur la page d'édition, mais restent stockées chiffrées en base de données.</target>
@@ -58,6 +66,78 @@
                 <source>description.essential_action_roles</source>
                 <target>Qui peut faire quoi dans le back-office</target>
             </trans-unit>
+            <trans-unit id="DJGspy9">
+                <source>description.guided_project_config_health_check</source>
+                <target>Faire vérifier le site de l'extérieur, lire ce qui est signalé et savoir par quoi commencer</target>
+            </trans-unit>
+            <trans-unit id="EHg5ZWS">
+                <source>description.guided_project_config_maintenance</source>
+                <target>Répéter à froid la manœuvre qu'on ne veut pas découvrir le jour où il faut la faire</target>
+            </trans-unit>
+            <trans-unit id="kwjx7gS">
+                <source>description.guided_project_config_settings</source>
+                <target>Trouver un réglage, le modifier, et comprendre ce que le tableau de bord en fait</target>
+            </trans-unit>
+            <trans-unit id="w22XwFU">
+                <source>description.guided_step_config_health_check_again</source>
+                <target>Après correction, relancez : la courbe de tendance en haut de page montre si le site s'améliore.</target>
+            </trans-unit>
+            <trans-unit id="QG5uvYM">
+                <source>description.guided_step_config_health_check_fix</source>
+                <target>Chaque ligne en erreur porte le conseil du bundle qui l'a produite : c'est par là qu'il faut commencer, pas par la liste entière.</target>
+            </trans-unit>
+            <trans-unit id="tLFBlPG">
+                <source>description.guided_step_config_health_check_open</source>
+                <target>Pages introuvables, redirections, en-têtes de sécurité, certificat, sitemaps, validation W3C : le site est passé au crible de l'extérieur.</target>
+            </trans-unit>
+            <trans-unit id="JwcISzW">
+                <source>description.guided_step_config_health_check_read</source>
+                <target>Une ligne par url et par famille. Filtrez par statut pour ne garder que ce qui cloche.</target>
+            </trans-unit>
+            <trans-unit id=".gWOAiY">
+                <source>description.guided_step_config_health_check_run</source>
+                <target>Une tâche part en file d'attente par famille de vérifications : la page n'attend rien, les résultats arrivent au fur et à mesure.</target>
+            </trans-unit>
+            <trans-unit id="KUmw7pU">
+                <source>description.guided_step_config_maintenance_check</source>
+                <target>Ouvrez le site dans une fenêtre de navigation privée : c'est exactement ce qu'ils ont sous les yeux.</target>
+            </trans-unit>
+            <trans-unit id="wgS33Ny">
+                <source>description.guided_step_config_maintenance_disable</source>
+                <target>Le même raccourci, dont le libellé a changé, refait passer le site en ligne.</target>
+            </trans-unit>
+            <trans-unit id="_73o9ee">
+                <source>description.guided_step_config_maintenance_done</source>
+                <target>La bascule tient dans un clic : rien n'oblige à prévenir à l'avance pour une intervention de quelques minutes.</target>
+            </trans-unit>
+            <trans-unit id="pR3dqe6">
+                <source>description.guided_step_config_maintenance_enable</source>
+                <target>Vos visiteurs reçoivent la page de maintenance ; vous, connecté, continuez de voir le site.</target>
+            </trans-unit>
+            <trans-unit id="xVtLKDB">
+                <source>description.guided_step_config_maintenance_open</source>
+                <target>Les raccourcis du tableau de bord sont des actions immédiates, sans écran intermédiaire.</target>
+            </trans-unit>
+            <trans-unit id="3BtYhFM">
+                <source>description.guided_step_config_settings_alerts</source>
+                <target>Les entrées essentielles restées vides remontent en alertes sur le tableau de bord, jusqu'à ce qu'elles soient remplies.</target>
+            </trans-unit>
+            <trans-unit id="no3aHY3">
+                <source>description.guided_step_config_settings_entry</source>
+                <target>Chaque entrée est déclarée par le bundle qui s'en sert, qui en fixe le libellé, le type et le groupe.</target>
+            </trans-unit>
+            <trans-unit id="ctGNsEA">
+                <source>description.guided_step_config_settings_group</source>
+                <target>Identité, e-mails, mentions légales, sécurité : chaque groupe rassemble les entrées d'un même sujet.</target>
+            </trans-unit>
+            <trans-unit id="WdcL8nZ">
+                <source>description.guided_step_config_settings_open</source>
+                <target>Tous les réglages du site vivent ici, groupés par sujet — aucun n'est à écrire dans un fichier.</target>
+            </trans-unit>
+            <trans-unit id="qd4IzF2">
+                <source>description.guided_step_config_settings_value</source>
+                <target>Une entrée marquée sensible est chiffrée en base et n'est jamais réaffichée en clair.</target>
+            </trans-unit>
             <trans-unit id="sXfnWsf">
                 <source>description.health_check</source>
                 <target>Scores Lighthouse, problèmes d'accessibilité et erreurs console pour chaque page publiée, actualisés périodiquement ou à la demande.</target>
@@ -65,6 +145,18 @@
             <trans-unit id="FXQDiiD">
                 <source>description.health_check_alert</source>
                 <target>Dernière exécution le %date%</target>
+            </trans-unit>
+            <trans-unit id="0MwgbmU">
+                <source>description.maintenance_alert</source>
+                <target>Depuis le %date%. Le site est fermé à vos visiteurs et aux moteurs de recherche.</target>
+            </trans-unit>
+            <trans-unit id="u4.sgjf">
+                <source>description.maintenance_alert_long</source>
+                <target>Depuis le %date%. Au-delà de quelques jours, les moteurs de recherche retirent les pages de leurs résultats : remettez le site en ligne, ou publiez une page d'accueil temporaire.</target>
+            </trans-unit>
+            <trans-unit id="VwWnpJK">
+                <source>description.maintenance_preview_link</source>
+                <target>Quiconque ouvre %url% voit le site normalement pendant les 6 heures qui suivent.</target>
             </trans-unit>
             <trans-unit id="QEO2q6_">
                 <source>description.site_link</source>
@@ -153,6 +245,78 @@
             <trans-unit id="2R4Y3Vo">
                 <source>help.value_theme_color</source>
                 <target>Hexadécimal (#b30000), rgb()/rgba(), hsl()/hsla(), ou un nom CSS (ex. tomato)</target>
+            </trans-unit>
+            <trans-unit id="IDGH76b">
+                <source>label.backup_alert_error</source>
+                <target>La dernière sauvegarde a échoué</target>
+            </trans-unit>
+            <trans-unit id="vffMDf7">
+                <source>label.backup_alert_never_ran</source>
+                <target>Aucune sauvegarde enregistrée</target>
+            </trans-unit>
+            <trans-unit id="sdd_iX3">
+                <source>label.backup_alert_stale</source>
+                <target>Dernière sauvegarde il y a %hours% h</target>
+            </trans-unit>
+            <trans-unit id="VpZXj4C">
+                <source>label.backup_alert_warning</source>
+                <target>La dernière sauvegarde demande une vérification</target>
+            </trans-unit>
+            <trans-unit id="Y1doo6_">
+                <source>label.backup_digest_errors</source>
+                <target>Erreurs :</target>
+            </trans-unit>
+            <trans-unit id="2gwqXik">
+                <source>label.backup_digest_gap</source>
+                <target>Plus longue période sans sauvegarde : %hours% h (au-delà des %max% h attendues)</target>
+            </trans-unit>
+            <trans-unit id="OJuxvJB">
+                <source>label.backup_digest_intro</source>
+                <target>Site %site% - %days% derniers jours (depuis le %since%)</target>
+            </trans-unit>
+            <trans-unit id="GpMJ6SN">
+                <source>label.backup_digest_issue</source>
+                <target>- %message% (x%count%)</target>
+            </trans-unit>
+            <trans-unit id="HXzTqcI">
+                <source>label.backup_digest_last_run</source>
+                <target>Dernière exécution le %date% : %summary%</target>
+            </trans-unit>
+            <trans-unit id=".pEGgt6">
+                <source>label.backup_digest_none</source>
+                <target>Aucune sauvegarde n'a été enregistrée depuis %days% jours. Vérifiez que le planificateur ou la crontab lance toujours c975l:config:backup sur ce serveur.</target>
+            </trans-unit>
+            <trans-unit id="F0eyfw.">
+                <source>label.backup_digest_retention</source>
+                <target>Rétention (%days% jours) : %runs% exécution(s) conservée(s) sur le serveur, la plus ancienne %oldest%</target>
+            </trans-unit>
+            <trans-unit id="xIydbYy">
+                <source>label.backup_digest_runs</source>
+                <target>%count% exécution(s) : %ok% ok, %warning% avertissement(s), %error% erreur(s)</target>
+            </trans-unit>
+            <trans-unit id="5O2VuUx">
+                <source>label.backup_digest_sql_trend</source>
+                <target>Archive SQL sur la période : %first% -&gt; %last%</target>
+            </trans-unit>
+            <trans-unit id="7qtyVbj">
+                <source>label.backup_digest_subject_error</source>
+                <target>[ERREUR] Sauvegardes des %days% derniers jours - %site%</target>
+            </trans-unit>
+            <trans-unit id="l76tlyo">
+                <source>label.backup_digest_subject_none</source>
+                <target>[ALERTE] Aucune sauvegarde depuis %days% jours - %site%</target>
+            </trans-unit>
+            <trans-unit id="X5Mx1zt">
+                <source>label.backup_digest_subject_ok</source>
+                <target>[OK] Sauvegardes des %days% derniers jours - %site%</target>
+            </trans-unit>
+            <trans-unit id="iJCViub">
+                <source>label.backup_digest_subject_warning</source>
+                <target>[AVERTISSEMENT] Sauvegardes des %days% derniers jours - %site%</target>
+            </trans-unit>
+            <trans-unit id="M6cJ.ah">
+                <source>label.backup_digest_warnings</source>
+                <target>Avertissements :</target>
             </trans-unit>
             <trans-unit id="13FkC7i">
                 <source>label.boolean</source>
@@ -318,9 +482,133 @@
                 <source>label.group_theme</source>
                 <target>Thème</target>
             </trans-unit>
+            <trans-unit id="RSrMvT0">
+                <source>label.guided_project_config_health_check</source>
+                <target>Lancer un bilan de santé</target>
+            </trans-unit>
+            <trans-unit id="crTt37.">
+                <source>label.guided_project_config_maintenance</source>
+                <target>Mettre le site en maintenance</target>
+            </trans-unit>
+            <trans-unit id="8QVNypE">
+                <source>label.guided_project_config_settings</source>
+                <target>Régler la configuration du site</target>
+            </trans-unit>
+            <trans-unit id="bw6vzfK">
+                <source>label.guided_project_done</source>
+                <target>Déjà suivi</target>
+            </trans-unit>
+            <trans-unit id="3j1dPiE">
+                <source>label.guided_project_goto</source>
+                <target>Aller à cet écran</target>
+            </trans-unit>
+            <trans-unit id="IDRprtX">
+                <source>label.guided_project_pause</source>
+                <target>Mettre en pause</target>
+            </trans-unit>
+            <trans-unit id="3ElmLm6">
+                <source>label.guided_project_quit</source>
+                <target>Abandonner</target>
+            </trans-unit>
+            <trans-unit id="4hd_MXn">
+                <source>label.guided_project_replay</source>
+                <target>Rejouer</target>
+            </trans-unit>
+            <trans-unit id="W154v_q">
+                <source>label.guided_project_resume</source>
+                <target>Reprendre</target>
+            </trans-unit>
+            <trans-unit id="XjZ9eKk">
+                <source>label.guided_project_start</source>
+                <target>Commencer</target>
+            </trans-unit>
+            <trans-unit id="D_JG6Lt">
+                <source>label.guided_projects</source>
+                <target>Projets guidés</target>
+            </trans-unit>
+            <trans-unit id="aOZmqdz">
+                <source>label.guided_projects_intro</source>
+                <target>Votre progression est enregistrée dans ce navigateur, pas sur le site : elle ne vous suivra pas sur un autre ordinateur.</target>
+            </trans-unit>
+            <trans-unit id="R_aUKTH">
+                <source>label.guided_step_config_health_check_again</source>
+                <target>Relancer</target>
+            </trans-unit>
+            <trans-unit id="5Mjqbt4">
+                <source>label.guided_step_config_health_check_fix</source>
+                <target>Traiter une erreur</target>
+            </trans-unit>
+            <trans-unit id="SS7Ap3H">
+                <source>label.guided_step_config_health_check_open</source>
+                <target>Ouvrir le bilan de santé</target>
+            </trans-unit>
+            <trans-unit id="_6zUE5G">
+                <source>label.guided_step_config_health_check_read</source>
+                <target>Lire les résultats</target>
+            </trans-unit>
+            <trans-unit id="AcvSEaZ">
+                <source>label.guided_step_config_health_check_run</source>
+                <target>Lancer le bilan maintenant</target>
+            </trans-unit>
+            <trans-unit id="nMjkcTU">
+                <source>label.guided_step_config_maintenance_check</source>
+                <target>Vérifier ce que voient les visiteurs</target>
+            </trans-unit>
+            <trans-unit id="qrKigve">
+                <source>label.guided_step_config_maintenance_disable</source>
+                <target>Remettre le site en ligne</target>
+            </trans-unit>
+            <trans-unit id="4fgoBY9">
+                <source>label.guided_step_config_maintenance_done</source>
+                <target>Maintenant vous savez</target>
+            </trans-unit>
+            <trans-unit id="Am8yZqI">
+                <source>label.guided_step_config_maintenance_enable</source>
+                <target>Basculer le site en maintenance</target>
+            </trans-unit>
+            <trans-unit id="uiJ8s5u">
+                <source>label.guided_step_config_maintenance_open</source>
+                <target>Ouvrir le tableau de bord</target>
+            </trans-unit>
+            <trans-unit id="yK2RVv_">
+                <source>label.guided_step_config_settings_alerts</source>
+                <target>Ce que le tableau de bord en fait</target>
+            </trans-unit>
+            <trans-unit id="ebzQ_RB">
+                <source>label.guided_step_config_settings_entry</source>
+                <target>Ouvrir une entrée</target>
+            </trans-unit>
+            <trans-unit id="ymonOC9">
+                <source>label.guided_step_config_settings_group</source>
+                <target>Choisir un groupe</target>
+            </trans-unit>
+            <trans-unit id="Xid8Tgb">
+                <source>label.guided_step_config_settings_open</source>
+                <target>Ouvrir la configuration</target>
+            </trans-unit>
+            <trans-unit id="XBS3oAU">
+                <source>label.guided_step_config_settings_save</source>
+                <target>Enregistrer</target>
+            </trans-unit>
+            <trans-unit id="1pezZfR">
+                <source>label.guided_step_config_settings_value</source>
+                <target>Saisir la valeur</target>
+            </trans-unit>
             <trans-unit id="RXDF6wx">
                 <source>label.health_check</source>
                 <target>Bilan de santé</target>
+            </trans-unit>
+            <trans-unit id="ZVYErlG">
+                <source>label.health_check_advice_backup_errors</source>
+                <target>%count% erreur(s) pendant la sauvegarde</target>
+            </trans-unit>
+            <trans-unit id="OCPGpq8">
+                <source>label.health_check_advice_backup_retention</source>
+                <target>%count% sauvegarde(s) encore sur le serveur, la plus ancienne du %oldest% (rétention : %days% jours)</target>
+            </trans-unit>
+            <trans-unit id="n1ZVO85">
+                <source>label.health_check_advice_backup_warnings</source>
+                <target>%count% point(s) à vérifier</target>
             </trans-unit>
             <trans-unit id="kUWeqbk">
                 <source>label.health_check_advice_details</source>
@@ -337,6 +625,30 @@
             <trans-unit id="Zn2gDQp">
                 <source>label.health_check_alert_warnings</source>
                 <target>Bilan de santé : %count% résultat(s) à surveiller</target>
+            </trans-unit>
+            <trans-unit id=".2ZbORB">
+                <source>label.health_check_backup_errors</source>
+                <target>%count% erreur(s)</target>
+            </trans-unit>
+            <trans-unit id="48lP9PI">
+                <source>label.health_check_backup_files_complete</source>
+                <target>complète, %size%</target>
+            </trans-unit>
+            <trans-unit id="AiD6SaT">
+                <source>label.health_check_backup_files_none</source>
+                <target>aucun fichier modifié</target>
+            </trans-unit>
+            <trans-unit id="LNWUNwV">
+                <source>label.health_check_backup_files_partial</source>
+                <target>partielle, %count% fichier(s), %size%</target>
+            </trans-unit>
+            <trans-unit id="uVOosIa">
+                <source>label.health_check_backup_sql_shrank</source>
+                <target>L'archive SQL a perdu %percent% % de son volume par rapport à la précédente (%previous%)</target>
+            </trans-unit>
+            <trans-unit id="jH91Kr4">
+                <source>label.health_check_backup_warnings</source>
+                <target>%count% point(s) à vérifier</target>
             </trans-unit>
             <trans-unit id="EUFNbMU">
                 <source>label.health_check_details</source>
@@ -406,6 +718,10 @@
                 <source>label.health_check_summary</source>
                 <target>Résumé</target>
             </trans-unit>
+            <trans-unit id="0RxuWX_">
+                <source>label.health_check_summary_backup</source>
+                <target>%tables% tables · SQL %sql% · Fichiers : %files% · %duration%</target>
+            </trans-unit>
             <trans-unit id="TuTVoK5">
                 <source>label.health_check_trend</source>
                 <target>Tendance</target>
@@ -474,6 +790,10 @@
                 <source>label.maintenance</source>
                 <target>Maintenance</target>
             </trans-unit>
+            <trans-unit id="JYXDc.L">
+                <source>label.maintenance_alert</source>
+                <target>Site en mode maintenance</target>
+            </trans-unit>
             <trans-unit id="t435StY">
                 <source>label.maintenance_disable</source>
                 <target>Désactiver le mode maintenance</target>
@@ -485,6 +805,10 @@
             <trans-unit id="bA8bvIF">
                 <source>label.maintenance_message</source>
                 <target>Nous travaillons pour vous offrir une meilleure expérience. Revenez bientôt !</target>
+            </trans-unit>
+            <trans-unit id="kLtAgow">
+                <source>label.maintenance_preview_link</source>
+                <target>Lien de prévisualisation du mode maintenance</target>
             </trans-unit>
             <trans-unit id="_0OT.Rv">
                 <source>label.management</source>

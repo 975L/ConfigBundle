@@ -10,6 +10,10 @@ namespace c975L\ConfigBundle\Management;
 
 interface DashboardWidgetProviderInterface
 {
-    // Each entry: ['template' => string, 'context' => array]. The dashboard template only loops and includes - it never contains business logic about what a widget is (e.g. UiBundle's DonovanWidgetProvider only returns an entry when its own isEnabled()/role check passes, so an unconfigured feature stays entirely absent rather than showing a disabled placeholder); return [] when nothing to show.
+    /**
+     * The dashboard template only loops and includes - it never contains business logic about what a widget is (e.g. UiBundle's DonovanWidgetProvider only returns an entry when its own isEnabled()/role check passes, so an unconfigured feature stays entirely absent rather than showing a disabled placeholder); return [] when nothing to show.
+     *
+     * @return list<array{template: string, context: array<string, mixed>}>
+     */
     public function getDashboardWidgets(): array;
 }

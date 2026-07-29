@@ -46,6 +46,11 @@ class MaintenanceShortcutController extends AbstractController
             $enabled = !$this->configService->getBool($config->getValue());
             $config->setValue($enabled);
             $config->setModification(new \DateTime());
+
+            if ($enabled) {
+                $this->ensureMaintenanceHash();
+            }
+
             $this->manager->flush();
             $this->configService->invalidateCache();
 
@@ -57,5 +62,17 @@ class MaintenanceShortcutController extends AbstractController
         }
 
         return $this->redirectToRoute('management');
+    }
+
+    // The token entry ships empty, and an empty one grants nobody anything (see MaintenanceListener::hasMaintenanceAccess()), so closing the site would leave no way in besides logging into the back-office - one is generated here instead, and MaintenanceAlertProvider hands out the url built with it
+    private function ensureMaintenanceHash(): void
+    {
+        $hash = $this->configRepository->findOneBySlug('site-maintenance-hash');
+        if (null === $hash || '' !== (string) $hash->getValue()) {
+            return;
+        }
+
+        $hash->setValue(bin2hex(random_bytes(16)));
+        $hash->setModification(new \DateTime());
     }
 }

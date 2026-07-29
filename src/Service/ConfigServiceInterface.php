@@ -9,28 +9,46 @@
 
 namespace c975L\ConfigBundle\Service;
 
-use c975L\ConfigBundle\Entity\Config;
-
 interface ConfigServiceInterface
 {
-    // Returns the value of a config (or null if not found)
+    /**
+     * Returns the value of a config, cast to the type its declaration gives it (or null if not found)
+     */
     public function get(string $key): mixed;
 
-    // Returns the boolean value of a config (true or false)
+    /**
+     * Returns the boolean value of a config (true or false)
+     *
+     * @param mixed $value the raw stored value, of any type
+     */
     public function getBool($value): bool;
 
-    // Returns true if the parameter exists in the configs, false otherwise
+    /**
+     * Returns true if the parameter exists in the configs, false otherwise
+     */
     public function hasParameter(string $parameter): bool;
 
-    // Returns the value of a container parameter (or null if not found)
+    /**
+     * Returns the value of a container parameter (or null if not found)
+     */
     public function getContainerParameter(string $parameter): mixed;
 
-    // Invalidates the configs cache (to be called after any modification).
+    /**
+     * Invalidates the configs cache (to be called after any modification).
+     */
     public function invalidateCache(): void;
 
-    // Loads all configs in cache and returns them as an associative array (slug => value)
+    /**
+     * Loads all configs in cache and returns them
+     *
+     * @return array<string, mixed> slug => value
+     */
     public function loadAll(): array;
 
-    // Loads default config values in the database (if not already present)
+    /**
+     * Loads default config values in the database (if not already present)
+     *
+     * @param string $jsonPath absolute path to a configs*.json declaration file
+     */
     public function loadDefaultConfig(string $jsonPath): void;
 }

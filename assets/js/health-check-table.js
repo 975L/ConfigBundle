@@ -7,18 +7,13 @@
  */
 import { Controller } from "@hotwired/stimulus";
 
-// HealthCheckResult::STATUS_*, from the mildest to the worst - the order the verdict of a whole group is read
-// off its rows, and the list of modifier classes to keep in sync on the row carrying it (see sass/management.scss)
+// STATUS_* from mildest to worst: the order a group's verdict is read off its rows
 const STATUSES = ['skipped', 'ok', 'warning', 'error'];
 
-// Client-side sort (click a <th data-action="click->health-check-table#sort">) and filter (free-text + status +
-// kind) for the Health check table - hand-rolled rather than a DataTables/jQuery dependency, this ecosystem
-// has none and the actual need (sort N rows, filter by 3 criteria) doesn't warrant one. Rows never leave the
-// DOM (row.hidden, not removal) so nothing here can lose a row on a filter/sort round-trip
+// Hand-rolled sort and filter, no DataTables dependency; rows are hidden, never removed
 export default class extends Controller {
     static targets = ['row', 'filter', 'status', 'kind', 'header', 'label'];
-    // Off for the "Site" section's table (site-wide checks, eg. security-headers/ssl-certificate, don't belong
-    // to any one page) - see _table.html.twig's group param and index.html.twig, which passes group: false there
+    // Off for the "Site" section, whose site-wide checks belong to no one page
     static values = { group: { type: Boolean, default: true } };
 
     connect() {
@@ -65,12 +60,7 @@ export default class extends Controller {
         this.updateGrouping();
     }
 
-    // Blanks a row's page name/edit-link cell when it repeats the previous VISIBLE row's url, and highlights the
-    // row that keeps it (health-check-row-first, see sass/management.scss) so groups of rows for the same page
-    // stay visually separated without it - re-run after every sort/filter (rather than baked in server-side)
-    // since a static rowspan couldn't survive rows being reordered/hidden by the above. That highlight is
-    // painted with the group's own verdict, so a page reads as ok/warning/error at a glance without adding up
-    // its rows' own status pills
+    // Blanks a repeated page cell and tints the row keeping it, re-run after every sort or filter
     updateGrouping() {
         if (!this.groupValue) {
             return;
@@ -95,9 +85,7 @@ export default class extends Controller {
         });
     }
 
-    // One page's verdict: the worst status among the rows currently listed for its url. Read over every visible
-    // row sharing that url rather than the ones sitting next to it - a sort by status scatters a page's own rows
-    // across the table, and a filter can leave only some of them
+    // The worst status among every visible row sharing that url, a sort scattering a page's rows
     verdictByUrl() {
         const verdicts = new Map();
 

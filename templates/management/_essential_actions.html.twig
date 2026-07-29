@@ -1,12 +1,4 @@
-{#
- # Renders the essential-actions panel (see c975L\ConfigBundle\Management\EssentialActionBuilder).
- # Expects:
- #   - actions: array of ['slug', 'label', 'description', 'translation_domain', 'url', 'isDone', 'order'], already sorted
- #   - progress: ['done' => int, 'total' => int]
- # Not a one-time onboarding wizard that goes away once done - a permanent, always-visible quick-access
- # entry point, so every action stays a real link even once done (to review/redo it), only the icon
- # reflects its status.
- #}
+{# Renders the essential-actions panel; a permanent quick-access entry point, not a one-time wizard, so every action stays a link once done #}
 <h2>
     {{ 'label.essential_actions_title'|trans({}, 'config') }}
     <small class="text-muted">{{ 'label.essential_actions_subtitle'|trans({ '%done%': progress.done, '%total%': progress.total }, 'config') }}</small>

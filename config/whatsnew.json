@@ -1,7 +1,77 @@
 [
     {
+        "date": "2026-07-29",
+        "description": [
+            {
+                "en": "The dashboard now offers guided projects for the back office itself: finding and changing a setting, running a health check and knowing where to start on what it reports, and rehearsing the maintenance switch on a quiet day",
+                "fr": "Le tableau de bord propose désormais des parcours guidés pour le back-office lui-même : trouver et modifier un réglage, lancer un bilan de santé et savoir par quoi commencer dans ce qu'il signale, et répéter à froid la bascule en maintenance",
+                "es": "El panel ofrece ahora recorridos guiados para el propio back office: encontrar y modificar un ajuste, lanzar un estado de salud y saber por dónde empezar con lo que informa, y ensayar en frío el cambio a mantenimiento"
+            }
+        ]
+    },
+    {
+        "date": "2026-07-29",
+        "description": [
+            {
+                "en": "Maintenance mode now really closes the site: until its access token was filled in by hand, every visitor was let straight through while the dashboard said the site was closed",
+                "fr": "Le mode maintenance ferme désormais vraiment le site : tant que son jeton d'accès n'était pas rempli à la main, tous les visiteurs passaient alors que le tableau de bord annonçait le site fermé",
+                "es": "El modo mantenimiento cierra ahora realmente el sitio: mientras su token de acceso no se rellenaba a mano, todos los visitantes pasaban aunque el panel indicara el sitio cerrado"
+            },
+            {
+                "en": "Closing the site now hands you a ready-made link on the dashboard: give it to a client signing off on the work, or to anyone who has to see the site as its visitors will, without creating them an account",
+                "fr": "Fermer le site vous donne désormais un lien tout prêt sur le tableau de bord : donnez-le au client qui valide le travail, ou à qui doit voir le site comme le verront les visiteurs, sans lui créer de compte",
+                "es": "Cerrar el sitio le ofrece ahora un enlace listo en el panel: déselo al cliente que valida el trabajo, o a quien deba ver el sitio como lo verán los visitantes, sin crearle una cuenta"
+            },
+            {
+                "en": "The dashboard now tells you the site is closed, and turns that warning red once the closure has lasted long enough for search engines to start dropping your pages",
+                "fr": "Le tableau de bord vous signale désormais que le site est fermé, et passe l'avertissement en rouge dès que la fermeture dure assez longtemps pour que les moteurs de recherche commencent à retirer vos pages",
+                "es": "El panel le indica ahora que el sitio está cerrado, y pone el aviso en rojo en cuanto el cierre dura lo suficiente para que los buscadores empiecen a retirar sus páginas"
+            },
+            {
+                "en": "Reopening the site is now immediate for everyone: the maintenance page can no longer stay cached somewhere along the way once the site is back up",
+                "fr": "La réouverture du site est désormais immédiate pour tout le monde : la page de maintenance ne peut plus rester en cache quelque part une fois le site revenu",
+                "es": "La reapertura del sitio es ahora inmediata para todos: la página de mantenimiento ya no puede quedarse en caché por el camino una vez que el sitio ha vuelto"
+            },
+            {
+                "en": "A weekly email can now tell you that the backups of the last 7 days all went through — with what was saved, what failed and how long the longest stretch without a backup was — for the sites whose dashboard you don't open every day",
+                "fr": "Un email hebdomadaire peut désormais vous confirmer que les sauvegardes des 7 derniers jours se sont toutes bien passées — avec ce qui a été sauvegardé, ce qui a échoué et la plus longue période sans sauvegarde — pour les sites dont vous n'ouvrez pas le tableau de bord tous les jours",
+                "es": "Un correo semanal puede ahora confirmarle que todas las copias de seguridad de los últimos 7 días se realizaron correctamente — con lo que se guardó, lo que falló y el periodo más largo sin copia — para los sitios cuyo panel no abre todos los días"
+            },
+            {
+                "en": "That email arrives even when no backup ran at all, and says so: it is sent on its own schedule instead of riding on a backup run that may never reach its last line",
+                "fr": "Cet email arrive même quand plus aucune sauvegarde n'a tourné, et le dit : il part selon son propre planning au lieu de dépendre d'une sauvegarde qui peut ne jamais aller à son terme",
+                "es": "Ese correo llega incluso cuando no se ha ejecutado ninguna copia, y lo indica: se envía según su propia planificación en lugar de depender de una copia que puede no llegar a completarse"
+            },
+            {
+                "en": "The dashboard now tells you the state of the last backup, and warns you when no backup has run for too long — the one thing a report email can never do, since an email that is never sent is exactly what nobody notices",
+                "fr": "Le tableau de bord indique désormais l'état de la dernière sauvegarde, et vous alerte quand plus aucune sauvegarde n'a tourné depuis trop longtemps — ce qu'un email de rapport ne pourra jamais faire, un email jamais envoyé étant justement ce que personne ne remarque",
+                "es": "El panel indica ahora el estado de la última copia de seguridad y le avisa cuando hace demasiado tiempo que no se ejecuta ninguna — algo que un correo de informe nunca podrá hacer, ya que un correo que nunca se envía es precisamente lo que nadie nota"
+            },
+            {
+                "en": "Each backup is now checked before being counted as done: its archives are read back, their size recorded, and the tables actually saved compared against the database's own list",
+                "fr": "Chaque sauvegarde est désormais vérifiée avant d'être considérée comme faite : ses archives sont relues, leur taille enregistrée, et les tables réellement sauvegardées comparées à la liste de la base",
+                "es": "Cada copia de seguridad se verifica ahora antes de darse por hecha: se releen sus archivos, se registra su tamaño y las tablas realmente guardadas se comparan con la lista de la base de datos"
+            },
+            {
+                "en": "The site's private files are backed up too, and the server now keeps a rolling window of backups instead of relying on someone copying them off before they pile up",
+                "fr": "Les fichiers privés du site sont sauvegardés eux aussi, et le serveur conserve désormais un nombre de jours de sauvegardes plutôt que d'attendre que quelqu'un les recopie ailleurs",
+                "es": "Los archivos privados del sitio también se respaldan, y el servidor conserva ahora un número de días de copias en lugar de esperar a que alguien las copie a otro lugar"
+            }
+        ]
+    },
+    {
         "date": "2026-07-28",
         "description": [
+            {
+                "en": "A new \"Guided projects\" button on the dashboard walks you through a whole task step by step — creating a page, adding a block, putting it in a menu — following you from screen to screen and pointing at what to click",
+                "fr": "Un nouveau bouton « Projets guidés » sur le tableau de bord vous accompagne pas à pas dans une tâche complète — créer une page, ajouter un bloc, la mettre dans un menu — en vous suivant d'écran en écran et en pointant ce sur quoi cliquer",
+                "es": "Un nuevo botón «Proyectos guiados» en el panel le acompaña paso a paso en una tarea completa — crear una página, añadir un bloque, ponerla en un menú — siguiéndole de pantalla en pantalla y señalando dónde hacer clic"
+            },
+            {
+                "en": "Each guided project can be replayed as often as you like, and picks up where you left it if you close the panel and come back later",
+                "fr": "Chaque projet guidé peut être rejoué autant de fois que vous le voulez, et reprend là où vous l'aviez laissé si vous fermez le panneau et y revenez plus tard",
+                "es": "Cada proyecto guiado puede repetirse tantas veces como quiera, y se reanuda donde lo dejó si cierra el panel y vuelve más tarde"
+            },
             {
                 "en": "In the Health check, the line opening each page's block is now colored with that page's overall result, so you see at a glance which pages are fine and which need attention",
                 "fr": "Dans le Bilan de santé, la ligne qui ouvre le bloc de chaque page est désormais colorée selon le résultat global de cette page, pour voir d'un coup d'œil lesquelles vont bien et lesquelles demandent votre attention",

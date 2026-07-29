@@ -6,14 +6,10 @@
  * with this source code in the file LICENSE.
  */
 import { Controller } from "@hotwired/stimulus";
+import { buildButton, buildElement, clearHighlight, highlight } from "./guided-ui.js";
 
-// Walks the dashboard's onboardingSteps (see OnboardingStepBuilder), highlighting each sidebar item in
-// turn behind a dimmed overlay, with a fixed panel naming it (and explaining it, for a step whose
-// "description" - see MenuProviderInterface - isn't empty). Steps are matched against the sidebar's own
-// rendered a[href] rather than an invented id - no EasyAdmin Sidebar/Item template override needed. Re-launchable any time via the "Guided tour"
-// button (data-action="click->onboarding-tour#start"), see management/index.html.twig. The panel/overlay
-// are built and wired by hand (addEventListener, not data-action) since they're appended to <body>, outside
-// this controller's own element - Stimulus can't resolve data-action on elements it never scoped
+// Walks the dashboard's onboardingSteps, matching them against the sidebar's rendered a[href]
+// The panel is wired by hand, being appended to <body> outside this controller's element
 export default class extends Controller {
     static values = {
         steps: Array,
@@ -43,7 +39,8 @@ export default class extends Controller {
 
     stop() {
         document.removeEventListener('keydown', this.boundKeydown);
-        this.clearHighlight();
+        clearHighlight(this.highlighted);
+        this.highlighted = null;
         this.overlay?.remove();
         this.panel?.remove();
         this.overlay = null;
@@ -70,34 +67,28 @@ export default class extends Controller {
     }
 
     render() {
-        this.clearHighlight();
+        clearHighlight(this.highlighted);
 
         const step = this.stepsValue[this.index];
-        const target = document.querySelector(`a[href="${CSS.escape(step.url)}"]`);
-        if (target) {
-            this.expandAncestorSubmenu(target);
-            target.classList.add('onboarding-tour-highlight');
-            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            this.highlighted = target;
-        }
+        this.highlighted = highlight(`a[href="${CSS.escape(step.url)}"]`);
 
         const total = this.stepsValue.length;
         const labels = this.labelsValue;
 
         this.panel.replaceChildren();
         this.panel.append(
-            this.buildElement('div', 'onboarding-tour-progress', `${this.index + 1} / ${total}`),
-            this.buildElement('h3', null, step.label),
+            buildElement('div', 'onboarding-tour-progress', `${this.index + 1} / ${total}`),
+            buildElement('h3', null, step.label),
         );
-        if (step.description) this.panel.append(this.buildElement('p', null, step.description));
+        if (step.description) this.panel.append(buildElement('p', null, step.description));
 
-        const actions = this.buildElement('div', 'onboarding-tour-actions');
-        const closeButton = this.buildButton(labels.close, () => this.stop());
-        const previousButton = this.buildButton(labels.previous, () => this.previous());
+        const actions = buildElement('div', 'onboarding-tour-actions');
+        const closeButton = buildButton(labels.close, () => this.stop());
+        const previousButton = buildButton(labels.previous, () => this.previous());
         previousButton.disabled = 0 === this.index;
-        const nextButton = this.buildButton(this.index === total - 1 ? labels.finish : labels.next, () => this.next());
+        const nextButton = buildButton(this.index === total - 1 ? labels.finish : labels.next, () => this.next());
 
-        const navGroup = this.buildElement('div');
+        const navGroup = buildElement('div');
         navGroup.append(previousButton, nextButton);
         actions.append(closeButton, navGroup);
         this.panel.append(actions);
@@ -116,37 +107,5 @@ export default class extends Controller {
     previous() {
         this.index = Math.max(0, this.index - 1);
         this.render();
-    }
-
-    // A menu item tagged 'advanced' (see MenuBuilder) sits inside EasyAdmin's collapsed "Avancé" submenu -
-    // invisible until opened. Clicks the submenu's own toggle button (EasyAdmin's app.js binds a plain
-    // click listener to it, see #createMainMenu()) rather than toggling the 'is-expanded' class by hand,
-    // so its single-open-at-a-time accordion behavior and aria-expanded bookkeeping stay in sync
-    expandAncestorSubmenu(target) {
-        const submenuItem = target.closest('.ea-sidebar-item.has-submenu');
-        if (!submenuItem || submenuItem.classList.contains('is-expanded')) return;
-
-        submenuItem.querySelector(':scope > .ea-sidebar-item-link')?.click();
-    }
-
-    clearHighlight() {
-        this.highlighted?.classList.remove('onboarding-tour-highlight');
-        this.highlighted = null;
-    }
-
-    buildElement(tag, className, text) {
-        const element = document.createElement(tag);
-        if (className) element.className = className;
-        if (undefined !== text) element.textContent = text;
-
-        return element;
-    }
-
-    buildButton(label, onClick) {
-        const button = this.buildElement('button', null, label);
-        button.type = 'button';
-        button.addEventListener('click', onClick);
-
-        return button;
     }
 }

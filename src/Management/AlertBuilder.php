@@ -9,19 +9,22 @@
 namespace c975L\ConfigBundle\Management;
 
 use c975L\ConfigBundle\Entity\Config;
+use Symfony\Bundle\SecurityBundle\Security;
 
 // Merges the dashboard alerts contributed by every AlertProvider (bundles depending on ConfigBundle), grouped by severity (danger first)
 class AlertBuilder
 {
     public function __construct(
         private readonly iterable $alertProviders,
+        private readonly Security $security,
     ) {
     }
 
-    // Every alert, across every provider, grouped by severity - for the main dashboard
+    // Every alert, across every provider, grouped by severity - one declaring a role the current user lacks is dropped, same treatment as a shortcut tile or a guided project (see GuidedProjectBuilder)
     public function getAlerts(): array
     {
         $alerts = ProviderMerger::merge($this->alertProviders, fn (AlertProviderInterface $provider) => $provider->getAlerts());
+        $alerts = array_filter($alerts, fn (array $alert) => !isset($alert['role']) || $this->security->isGranted($alert['role']));
 
         return self::groupBySeverity($alerts);
     }
