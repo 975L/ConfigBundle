@@ -67,7 +67,7 @@ class ConfigGuidedProjectProvider implements GuidedProjectProviderInterface
                 ],
                 [
                     'label' => 'label.guided_step_config_settings_save',
-                    'highlight' => '.action-save',
+                    'highlight' => '.action-saveAndReturn',
                 ],
                 [
                     'label' => 'label.guided_step_config_settings_alerts',

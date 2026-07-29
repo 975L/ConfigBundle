@@ -1,5 +1,12 @@
 # ChangeLog
 
+## v5.12.1
+
+Fixed the guided settings step highlighting no button
+
+- The guided settings step now highlights `.action-saveAndReturn`, the class EasyAdmin gives that button (29/07/2026)
+- Added the `ConfigGuidedProjectProviderTest` case pinning the highlighted EasyAdmin action classes (29/07/2026)
+
 ## v5.12.0
 
 Moved the backup in from SiteBundle, added the guided projects

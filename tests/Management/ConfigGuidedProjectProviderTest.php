@@ -9,6 +9,7 @@
 namespace c975L\ConfigBundle\Tests\Management;
 
 use c975L\ConfigBundle\Management\ConfigGuidedProjectProvider;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGeneratorInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -82,6 +83,37 @@ class ConfigGuidedProjectProviderTest extends TestCase
                 );
             }
         }
+    }
+
+    // EasyAdmin renders a button as `action-<actionName>`, so a highlight guessing at the name (`.action-save`) points at nothing
+    public function testEveryHighlightedActionIsAnEasyAdminOne(): void
+    {
+        $actions = $this->easyAdminActionNames();
+
+        foreach ($this->createProvider()->getGuidedProjects() as $project) {
+            foreach ($project['steps'] as $index => $step) {
+                if (!isset($step['highlight']) || !preg_match('/^\.action-(\w+)$/', $step['highlight'], $matches)) {
+                    continue;
+                }
+
+                $this->assertContains(
+                    $matches[1],
+                    $actions,
+                    sprintf('Step %d of "%s" highlights an action EasyAdmin does not render', $index, $project['slug'])
+                );
+            }
+        }
+    }
+
+    private function easyAdminActionNames(): array
+    {
+        $constants = (new \ReflectionClass(Action::class))->getConstants();
+
+        return array_values(array_filter(
+            $constants,
+            static fn (string $name): bool => !str_starts_with($name, 'TYPE_'),
+            ARRAY_FILTER_USE_KEY
+        ));
     }
 
     // Only the opening step leaves the screen, everything after it walking the one the user has been sent to
