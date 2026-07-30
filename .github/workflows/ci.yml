@@ -13,11 +13,14 @@ jobs:
         env:
             CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
 
+            # Composer versionne le paquet racine d'après la branche, jamais d'après le tag : `dev-dev` ne satisfait pas le `c975l/config-bundle: ^5` d'UiBundle, qui redescend alors sur une version antérieure
+            COMPOSER_ROOT_VERSION: 5.x-dev
+
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
 
             # pcov mesure la couverture, que la machine de développement n'a pas ; les outils qualité sont installés ici plutôt qu'en require-dev, pour ne pas alourdir le bundle de 17 paquets transitifs
-            - uses: shivammathur/setup-php@v2
+            - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
               with:
                   php-version: '8.4'
                   coverage: pcov
@@ -43,7 +46,7 @@ jobs:
             # Sans le secret, l'envoi est sauté plutôt que de faire échouer la CI
             - name: Couverture vers Codacy
               if: env.CODACY_PROJECT_TOKEN != ''
-              uses: codacy/codacy-coverage-reporter-action@v1
+              uses: codacy/codacy-coverage-reporter-action@89d6c85cfafaec52c72b6c5e8b2878d33104c699 # v1.3.0
               with:
                   project-token: ${{ env.CODACY_PROJECT_TOKEN }}
                   coverage-reports: clover.xml
