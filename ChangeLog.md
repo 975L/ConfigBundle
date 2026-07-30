@@ -1,5 +1,9 @@
 # ChangeLog
 
+## Unreleased
+
+- Added a `.stylelintrc.json`, read by Codacy in place of its default ruleset (30/07/2026)
+
 ## v5.13
 
 Require PHP 8.4 and Symfony 8, bound every requirement
