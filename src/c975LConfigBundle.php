@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2018: 975L <contact@975l.com>
  * (c) 2018: Laurent Marquet <laurent.marquet@laposte.net>
@@ -9,6 +10,7 @@
 
 namespace c975L\ConfigBundle;
 
+use c975L\ConfigBundle\Contract\UserInterface;
 use c975L\ConfigBundle\DependencyInjection\Compiler\TaggedInterfacePass;
 use c975L\ConfigBundle\Management\AlertProviderInterface;
 use c975L\ConfigBundle\Management\DashboardWidgetProviderInterface;
@@ -42,6 +44,17 @@ class c975LConfigBundle extends AbstractBundle
                 ],
             ],
         ]);
+
+        // Then the user entity every c975L bundle relates to: they map against Contract\UserInterface, Doctrine resolves it to the application's own App\Entity\User. Guarded because a bundle checkout running its own tests has no DoctrineBundle registered
+        if ($container->hasExtension('doctrine')) {
+            $container->prependExtensionConfig('doctrine', [
+                'orm' => [
+                    'resolve_target_entities' => [
+                        UserInterface::class => 'App\Entity\User',
+                    ],
+                ],
+            ]);
+        }
     }
 
     public function build(ContainerBuilder $container): void

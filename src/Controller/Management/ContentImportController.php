@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2026: 975L <contact@975l.com>
  * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
@@ -166,9 +167,10 @@ class ContentImportController extends AbstractController
         $extractDir = sys_get_temp_dir() . '/content_import_' . bin2hex(random_bytes(8));
         mkdir($extractDir, 0777, true);
 
-        for ($i = 0; $i < $zip->numFiles; $i++) {
+        for ($i = 0; $i < $zip->numFiles; ++$i) {
             $name = $zip->getNameIndex($i);
-            if (null === $name || str_contains($name, '..') || str_starts_with($name, '/')) {
+            // getNameIndex() reports its failure with false, never with null: testing for null let an unreadable entry through the traversal check
+            if (false === $name || str_contains($name, '..') || str_starts_with($name, '/')) {
                 $zip->close();
                 $this->removeDirectory($extractDir);
 

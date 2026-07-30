@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2026: 975L <contact@975l.com>
  * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
@@ -10,6 +11,7 @@
 namespace c975L\ConfigBundle\Tests;
 
 use c975L\ConfigBundle\c975LConfigBundle;
+use c975L\ConfigBundle\Contract\UserInterface;
 use c975L\ConfigBundle\DependencyInjection\Compiler\TaggedInterfacePass;
 use c975L\ConfigBundle\Management\AlertProviderInterface;
 use c975L\ConfigBundle\Management\DashboardWidgetProviderInterface;
@@ -27,6 +29,8 @@ use c975L\ConfigBundle\Management\WhatsNewProviderInterface;
 use c975L\ConfigBundle\Service\ConfigService;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 class c975LConfigBundleTest extends TestCase
 {
@@ -82,11 +86,60 @@ class c975LConfigBundleTest extends TestCase
         $this->assertTrue($container->hasDefinition(ConfigService::class));
     }
 
+    // The bundle's own JS/CSS (assets/controllers-admin.js) only reaches AssetMapper through this path registration
+    public function testPrependExtensionRegistersTheBundleAssetMapperPath(): void
+    {
+        $container = new ContainerBuilder();
+
+        (new c975LConfigBundle())->prependExtension($this->createStub(ContainerConfigurator::class), $container);
+
+        $paths = $container->getExtensionConfig('framework')[0]['asset_mapper']['paths'];
+        $this->assertSame(['@c975l/config-bundle'], array_values($paths));
+        $this->assertSame(\dirname(__DIR__) . '/assets', realpath(array_key_first($paths)));
+    }
+
+    // What lets every c975L entity relate to Contract\UserInterface while Doctrine actually joins the application's own User
+    public function testPrependExtensionMapsTheUserInterfaceOntoTheApplicationUserEntity(): void
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension(new c975LConfigBundleTestDoctrineExtensionFixture());
+
+        (new c975LConfigBundle())->prependExtension($this->createStub(ContainerConfigurator::class), $container);
+
+        $this->assertSame(
+            [['orm' => ['resolve_target_entities' => [UserInterface::class => 'App\Entity\User']]]],
+            $container->getExtensionConfig('doctrine')
+        );
+    }
+
+    // A bundle checkout running its own tests has no DoctrineBundle registered, and the mapping must not be prepended for an extension that isn't there
+    public function testPrependExtensionSkipsTheDoctrineMappingWithoutTheDoctrineExtension(): void
+    {
+        $container = new ContainerBuilder();
+
+        (new c975LConfigBundle())->prependExtension($this->createStub(ContainerConfigurator::class), $container);
+
+        $this->assertSame([], $container->getExtensionConfig('doctrine'));
+    }
+
     public function testGetPathReturnsTheBundleRootDirectory(): void
     {
         $bundle = new c975LConfigBundle();
 
         $this->assertSame(\dirname(__DIR__), $bundle->getPath());
+    }
+}
+
+// Stands in for DoctrineBundle's extension, only its alias mattering to prependExtension()
+class c975LConfigBundleTestDoctrineExtensionFixture implements ExtensionInterface
+{
+    public function load(array $configs, ContainerBuilder $container): void
+    {
+    }
+
+    public function getAlias(): string
+    {
+        return 'doctrine';
     }
 }
 

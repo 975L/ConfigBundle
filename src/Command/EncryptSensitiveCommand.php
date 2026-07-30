@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2026: 975L <contact@975l.com>
  * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
@@ -54,26 +55,26 @@ class EncryptSensitiveCommand extends Command
         }
 
         $encrypted = 0;
-        $skipped   = 0;
+        $skipped = 0;
 
         foreach ($sensitiveConfigs as $config) {
             $value = $config->getValue();
 
             if (null === $value || '' === $value) {
-                $skipped++;
+                ++$skipped;
                 $io->text('  SKIP (empty): ' . $config->getSlug());
                 continue;
             }
 
             if ($this->vaultEncryptor->isEncrypted($value)) {
-                $skipped++;
+                ++$skipped;
                 $io->text('  SKIP (already encrypted): ' . $config->getSlug());
                 continue;
             }
 
             $config->setValue($this->vaultEncryptor->encrypt($value));
             $this->manager->persist($config);
-            $encrypted++;
+            ++$encrypted;
             $io->text('  ENCRYPTED: ' . $config->getSlug());
         }
 

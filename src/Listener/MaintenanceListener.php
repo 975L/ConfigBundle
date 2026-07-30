@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2026: 975L <contact@975l.com>
  * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
@@ -11,11 +12,11 @@ namespace c975L\ConfigBundle\Listener;
 
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Twig\Environment;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 // Priority 6 = after FirewallListener (8, token/user is set), so isGranted() below is reliable; ManagementAuthenticationListener (7) may already have redirected unauthenticated /management requests to login before we even run.
 #[AsEventListener(event: 'kernel.request', method: 'onKernelRequest', priority: 6)]
@@ -27,7 +28,7 @@ class MaintenanceListener
     public function __construct(
         private readonly ConfigServiceInterface $configService,
         private readonly Security $security,
-        private readonly Environment $twig
+        private readonly Environment $twig,
     ) {
     }
 
@@ -37,8 +38,8 @@ class MaintenanceListener
         $this->configService->loadAll();
 
         // Maintenance mode
-        if (!$event->isMainRequest() || false === $this->configService->get("site-maintenance")) {
-             return;
+        if (!$event->isMainRequest() || false === $this->configService->get('site-maintenance')) {
+            return;
         }
 
         if ($this->isExempt($event->getRequest())) {

@@ -37,7 +37,7 @@ export function highlight(selector) {
     let target = null;
     try {
         target = document.querySelector(selector);
-    } catch (error) {
+    } catch {
         return null;
     }
     if (!target) return null;

@@ -19,7 +19,9 @@ use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationExceptio
 #[AsEventListener(event: 'kernel.request', priority: 7)]
 class ManagementAuthenticationListener
 {
-    public function __construct(private readonly Security $security) {}
+    public function __construct(private readonly Security $security)
+    {
+    }
 
     public function onKernelRequest(RequestEvent $event): void
     {

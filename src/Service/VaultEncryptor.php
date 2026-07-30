@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2026: 975L <contact@975l.com>
  * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
@@ -14,12 +15,13 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 class VaultEncryptor
 {
     private const MARKER = 'C975L:';
-    private const ALGO   = 'aes-256-cbc';
+    private const ALGO = 'aes-256-cbc';
 
     public function __construct(
         #[Autowire(env: 'default::C975L_VAULT_KEY')]
         private readonly ?string $vaultKey,
-    ) {}
+    ) {
+    }
 
     // Encrypts a plain-text value and returns the stored format C975L:<base64(iv+ciphertext)>
     public function encrypt(string $plainValue): string
@@ -29,7 +31,7 @@ class VaultEncryptor
         }
 
         $key = $this->deriveKey();
-        $iv  = random_bytes(16);
+        $iv = random_bytes(16);
 
         $ciphertext = openssl_encrypt($plainValue, self::ALGO, $key, OPENSSL_RAW_DATA, $iv);
         if (false === $ciphertext) {

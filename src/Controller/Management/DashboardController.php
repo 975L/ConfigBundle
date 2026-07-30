@@ -24,8 +24,8 @@ use c975L\UiBundle\Registry\FormThemeRegistry;
 use c975L\UiBundle\Registry\ScriptAdminRegistry;
 use c975L\UiBundle\Registry\StylesheetManagementRegistry;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Asset;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -56,7 +56,8 @@ class DashboardController extends AbstractDashboardController
         private readonly Packages $packages,
         #[Autowire('%kernel.debug%')]
         private readonly bool $debug,
-    ) {}
+    ) {
+    }
 
     public function index(): Response
     {

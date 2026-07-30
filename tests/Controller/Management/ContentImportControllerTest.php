@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2026: 975L <contact@975l.com>
  * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
@@ -232,6 +233,7 @@ class ContentImportControllerTest extends TestCase
             ->method('dispatch')
             ->with('site_page', $items, $this->callback(function (string $filesDir) use (&$capturedFilesDir): bool {
                 $capturedFilesDir = $filesDir;
+
                 // The extracted file must be readable from inside the callback, before cleanup runs
                 return 'binary-content' === file_get_contents($filesDir . '/files/photo.jpg');
             }))

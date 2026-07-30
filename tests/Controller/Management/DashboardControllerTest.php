@@ -41,12 +41,12 @@ class DashboardControllerTest extends TestCase
         // site-role-admin is always set: configureMenuItems() passes it straight to setPermission(), which rejects null
         $configs += ['site-role-admin' => 'ROLE_ADMIN'];
         $configService = $this->createStub(ConfigServiceInterface::class);
-        $configService->method('get')->willReturnCallback(fn(string $key) => $configs[$key] ?? null);
+        $configService->method('get')->willReturnCallback(fn (string $key) => $configs[$key] ?? null);
 
         // Stands in for the real asset packages, which turn a logical path into its digested public URL
         $packages = $this->createStub(Packages::class);
         $packages->method('getUrl')->willReturnCallback(
-            fn(string $path) => str_starts_with($path, 'http') ? $path : '/assets/' . $path . '?digest'
+            fn (string $path) => str_starts_with($path, 'http') ? $path : '/assets/' . $path . '?digest'
         );
 
         return new DashboardController(

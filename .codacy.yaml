@@ -1,0 +1,8 @@
+---
+exclude_paths:
+  - "public/**"
+  - "vendor/**"
+  - "**/*.min.js"
+  - "**/*.min.css"
+  - "**/*.map"
+  - ".phpunit.cache/**"

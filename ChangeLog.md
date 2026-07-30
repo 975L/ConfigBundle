@@ -1,5 +1,30 @@
 # ChangeLog
 
+## v5.13
+
+Require PHP 8.4 and Symfony 8, bound every requirement
+
+- `php` is now required in `>=8.4` instead of `>=8.0` (30/07/2026) [BC-Break]
+- The `symfony/*` requirements are now constrained to `^8.0` instead of `*` (30/07/2026) [BC-Break]
+- The third-party requirements left in `*` are now bounded on their installed version (30/07/2026)
+- The `c975l/*` requirements are now bounded on their major (30/07/2026)
+- Added `Contract\UserInterface`, the application's user entity as the c975L bundles relate to it (30/07/2026)
+- `Config::$user` is now typed `Contract\UserInterface` instead of `App\Entity\User` (30/07/2026) [BC-Break]
+- `c975LConfigBundle::prependExtension()` now maps `Contract\UserInterface` onto `App\Entity\User` through Doctrine's `resolve_target_entities` (30/07/2026)
+- `ConfigCrudController::setUser()` now assigns the logged-in user only when it implements `Contract\UserInterface` (30/07/2026)
+- Added `.codacy.yaml`, `phpcs.xml.dist` and `eslint.config.mjs` (30/07/2026)
+- Applied PSR-12 to the codebase (30/07/2026)
+- Added `.php-cs-fixer.dist.php`, applying the Symfony coding standards (30/07/2026)
+- Added `phpstan.dist.neon`, running the static analysis at level 5 (30/07/2026)
+- Added the `CI` GitHub Actions workflow, running PSR-12, the Symfony coding standards, the static analysis, the tests and the coverage upload (30/07/2026)
+- Added the readme installation note on implementing `Contract\UserInterface` (30/07/2026)
+- Added the `c975LConfigBundleTest` cases covering `prependExtension()` (30/07/2026)
+- Added the `ConfigTest` and `ConfigCrudControllerTest` cases pinning the user relation to `Contract\UserInterface` (30/07/2026)
+- `ContentImportController` no longer lets an unreadable zip entry past its path traversal check (30/07/2026)
+- Added `ConfigRepository::findOneBySlug()`, replacing Doctrine's magic finder (30/07/2026)
+- Fixed `ConfigService`'s `use` of `Config` written `C975L` instead of `c975L` (30/07/2026)
+- The local Codacy CLI now runs `eslint@9.39.5` (30/07/2026)
+
 ## v5.12.1
 
 Fixed the guided settings step highlighting no button

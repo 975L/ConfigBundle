@@ -1,0 +1,19 @@
+parameters:
+    level: 5
+
+    # The ignored patterns below are shared by every c975L bundle, so not all of them apply to each one
+    reportUnmatchedIgnoredErrors: false
+
+    paths:
+        - src
+
+    excludePaths:
+        # The skeleton templates get their variables from the maker at generation time
+        - src/Resources/skeleton/*
+
+    ignoreErrors:
+        # Doctrine assigns the identifier by reflection, which static analysis cannot see
+        - '#Property .*::\$id \(int\|null\) is never assigned int#'
+
+        # EasyAdmin declares its fluent setters on the concrete fields, not on FieldInterface
+        - '#Call to an undefined method EasyCorp\\Bundle\\EasyAdminBundle\\Contracts\\Field\\FieldInterface::#'

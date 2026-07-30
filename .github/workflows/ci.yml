@@ -1,0 +1,49 @@
+name: CI
+
+on:
+    push:
+        branches: [main, dev]
+    pull_request:
+
+jobs:
+    quality:
+        runs-on: ubuntu-latest
+
+        # Au niveau du job et non de l'étape : le contexte `env` d'une étape ne contient pas son propre bloc `env:`
+        env:
+            CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+
+        steps:
+            - uses: actions/checkout@v4
+
+            # pcov mesure la couverture, que la machine de développement n'a pas ; les outils qualité sont installés ici plutôt qu'en require-dev, pour ne pas alourdir le bundle de 17 paquets transitifs
+            - uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.4'
+                  coverage: pcov
+                  tools: phpcs, phpstan, php-cs-fixer
+
+            # update et non install : le composer.lock n'est pas versionné, et les bundles pointent les uns vers les autres
+            - name: Dépendances
+              run: composer update --no-interaction --no-progress
+
+            - name: PSR-12
+              run: phpcs -q
+
+            # --diff pour lire directement dans les logs ce qui s'écarte du standard, plutôt que la seule liste des fichiers
+            - name: Standard Symfony
+              run: php-cs-fixer check --diff
+
+            - name: Analyse statique
+              run: phpstan analyse --no-progress
+
+            - name: Tests
+              run: vendor/bin/phpunit --coverage-clover clover.xml
+
+            # Sans le secret, l'envoi est sauté plutôt que de faire échouer la CI
+            - name: Couverture vers Codacy
+              if: env.CODACY_PROJECT_TOKEN != ''
+              uses: codacy/codacy-coverage-reporter-action@v1
+              with:
+                  project-token: ${{ env.CODACY_PROJECT_TOKEN }}
+                  coverage-reports: clover.xml

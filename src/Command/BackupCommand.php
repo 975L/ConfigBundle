@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2026: 975L <contact@975l.com>
  * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
@@ -6,6 +7,7 @@
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
  */
+
 namespace c975L\ConfigBundle\Command;
 
 use c975L\ConfigBundle\Management\BackupResultRecorder;
@@ -44,6 +46,7 @@ use Symfony\Component\Process\Process;
  * All settings are managed via ConfigBundle (site-backup-* keys).
  * MySQL credentials (host/user/password) are written to a temporary file at runtime
  * and deleted immediately after the backup completes.
+ *
  * @author Laurent Marquet <laurent.marquet@laposte.net>
  * @copyright 2026 975L <contact@975l.com>
  */
@@ -124,12 +127,14 @@ class BackupCommand extends Command
 
         if (empty($this->database)) {
             $io->error('site-backup-database is not configured in ConfigBundle.');
+
             return Command::FAILURE;
         }
 
         $this->startedAt = new \DateTimeImmutable();
         $this->backupFolder = $this->projectDir . '/var/backup';
-        $this->finalFolder = sprintf('%s/%s/%s/%s',
+        $this->finalFolder = sprintf(
+            '%s/%s/%s/%s',
             $this->backupFolder,
             $this->startedAt->format('Y'),
             $this->startedAt->format('Y-m'),
@@ -157,6 +162,7 @@ class BackupCommand extends Command
         if (!empty($this->errors)) {
             $this->sendErrorReport();
             $io->error('Backup completed with errors.');
+
             return Command::FAILURE;
         }
 
@@ -165,6 +171,7 @@ class BackupCommand extends Command
         }
 
         $io->success('Backup completed.');
+
         return Command::SUCCESS;
     }
 
@@ -215,12 +222,13 @@ class BackupCommand extends Command
 
         if (!$process->isSuccessful()) {
             $this->errors[] = 'MySQL table list failed: ' . $process->getErrorOutput();
+
             return [];
         }
 
         return array_values(array_filter(
             array_map('trim', explode("\n", $process->getOutput())),
-            fn($t) => $t && $t !== 'TABLE_NAME'
+            fn ($t) => $t && 'TABLE_NAME' !== $t
         ));
     }
 
@@ -240,6 +248,7 @@ class BackupCommand extends Command
             $this->errors[] = "mysqldump failed for table {$table}: " . $process->getErrorOutput();
             $this->tables['missing'][] = $table;
             $this->report .= "- {$table} FAILED\n";
+
             return;
         }
 
@@ -284,6 +293,7 @@ class BackupCommand extends Command
 
         if (!$process->isSuccessful()) {
             $this->errors[] = 'SQL tar compression failed: ' . $process->getErrorOutput();
+
             return 0;
         }
 
@@ -297,6 +307,7 @@ class BackupCommand extends Command
     {
         if (!is_file($path)) {
             $this->errors[] = 'Archive missing after creation: ' . basename($path);
+
             return 0;
         }
 
@@ -306,6 +317,7 @@ class BackupCommand extends Command
 
         if (!$process->isSuccessful()) {
             $this->errors[] = 'Archive integrity check failed for ' . basename($path) . ': ' . $process->getErrorOutput();
+
             return 0;
         }
 
@@ -389,6 +401,7 @@ class BackupCommand extends Command
         $modifiedFiles = $this->findModifiedFiles($folder, $lastBackupTime);
         if (empty($modifiedFiles)) {
             $this->report .= sprintf("NO FILE to save (%s)\n", basename($folder));
+
             return;
         }
 
@@ -411,7 +424,7 @@ class BackupCommand extends Command
         $this->runFoldersTar(
             array_merge(
                 ['nice', 'tar', '--bzip2', '--create', '-C', $folder, '--file', $archive],
-                array_map(static fn(string $file) => './' . $file, $modifiedFiles)
+                array_map(static fn (string $file) => './' . $file, $modifiedFiles)
             ),
             'Partial folders tar failed: ',
             $archive
@@ -432,10 +445,10 @@ class BackupCommand extends Command
 
                 return !isset($excludedTopLevel[$topLevel]) && !str_starts_with($topLevel, 'sitemap-');
             })
-            ->filter(fn(SplFileInfo $f) => $f->getMTime() > $lastBackupTime);
+            ->filter(fn (SplFileInfo $f) => $f->getMTime() > $lastBackupTime);
 
         return array_map(
-            static fn(SplFileInfo $f) => $f->getRelativePathname(),
+            static fn (SplFileInfo $f) => $f->getRelativePathname(),
             iterator_to_array($finder, false)
         );
     }
@@ -462,6 +475,7 @@ class BackupCommand extends Command
 
         if (!$process->isSuccessful()) {
             $this->errors[] = $errorPrefix . $process->getErrorOutput();
+
             return;
         }
 
@@ -476,7 +490,7 @@ class BackupCommand extends Command
 
         $months = ((int) $to->format('Y') - (int) $from->format('Y')) * 12 + ((int) $to->format('n') - (int) $from->format('n'));
         if ((int) $to->format('j') < (int) $from->format('j')) {
-            $months--;
+            --$months;
         }
 
         return $months;

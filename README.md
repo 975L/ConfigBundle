@@ -49,9 +49,25 @@ See it in action at [975l.com/pages/config-bundle](https://975l.com/pages/config
 
 ## Installation
 
+Requires PHP 8.4 and Symfony 8.
+
 ```bash
 composer require c975l/config-bundle
 ```
+
+Make your user entity implement `Contract\UserInterface` — that's the interface the c975L bundles relate to instead of `App\Entity\User`, which they cannot reference. It extends Symfony's own `UserInterface` and only adds `getId(): int|string|null`, the getter your entity already has:
+
+```php
+// src/Entity/User.php
+use c975L\ConfigBundle\Contract\UserInterface;
+
+class User implements UserInterface
+{
+    // ...
+}
+```
+
+Doctrine resolves the interface to your entity on its own — `c975LConfigBundle::prependExtension()` declares it through `resolve_target_entities`, there is nothing to add to your configuration.
 
 Run the database migration to create the `site_config` table:
 

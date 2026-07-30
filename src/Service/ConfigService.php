@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2026: 975L <contact@975l.com>
  * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
@@ -9,13 +10,13 @@
 
 namespace c975L\ConfigBundle\Service;
 
+use c975L\ConfigBundle\Entity\Config;
 use c975L\ConfigBundle\Repository\ConfigRepository;
-use C975L\ConfigBundle\Entity\Config;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
-use Doctrine\ORM\EntityManagerInterface;
 
 class ConfigService implements ConfigServiceInterface
 {
@@ -38,7 +39,8 @@ class ConfigService implements ConfigServiceInterface
         private readonly ParameterBagInterface $params,
         private readonly EntityManagerInterface $manager,
         private readonly VaultEncryptor $vaultEncryptor,
-    ) {}
+    ) {
+    }
 
     // Returns the value of a config (or null if not found)
     public function get(string $key): mixed
@@ -82,7 +84,7 @@ class ConfigService implements ConfigServiceInterface
     // Loads all configs in cache and returns them as an associative array (slug => value)
     public function loadAll(): array
     {
-        if ($this->configs !== null) {
+        if (null !== $this->configs) {
             return $this->configs;
         }
 
@@ -114,7 +116,7 @@ class ConfigService implements ConfigServiceInterface
     {
         return match ($kind) {
             Config::TYPE_BOOL => $this->getBool($value),
-            Config::TYPE_INT  => (int) $value,
+            Config::TYPE_INT => (int) $value,
             Config::TYPE_JSON => is_string($value) ? (json_decode($value, true) ?? []) : [],
             default => $value,
         };
@@ -242,7 +244,7 @@ class ConfigService implements ConfigServiceInterface
     {
         $metadata = $this->declaredMetadata($configData);
         $isSensitive = $configData['sensitive'] ?? false;
-        $rawValue    = $configData['value'] ?? null;
+        $rawValue = $configData['value'] ?? null;
 
         $config = new Config();
         $config->setLabel($metadata['label']);

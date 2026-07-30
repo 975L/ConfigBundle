@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2026: 975L <contact@975l.com>
  * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
@@ -6,6 +7,7 @@
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
  */
+
 namespace c975L\ConfigBundle\Management;
 
 use Symfony\Component\DependencyInjection\Attribute\When;
@@ -176,7 +178,7 @@ class DevProfileCollector
     }
 
     // The keys the translator had no translation for, in the current locale - getMessages() comes back as a VarDumper Data once the profile has been through storage, getValue(true) turning it back into plain arrays
-    private function readMissingTranslationKeys(array|Data $messages): array
+    private function readMissingTranslationKeys(array | Data $messages): array
     {
         if ($messages instanceof Data) {
             $messages = $messages->getValue(true);

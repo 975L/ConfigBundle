@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+**The bundle now requires PHP 8.4 and Symfony 8.** It used to declare `"php": ">=8.0"` and `"symfony/*": "*"`, which described nothing: the code has needed PHP 8.1 since its first promoted `readonly` property, and an unbound `*` let Composer resolve Symfony against whatever PHP the application ran on - so an application on PHP 8.2 silently got Symfony 7 with a bundle only ever tested against Symfony 8. The requirements now say what is actually built and tested: `"php": ">=8.4"` and `"symfony/*": "^8.0"`.
+
+If your application is still on Symfony 7, stay on the previous release until you migrate - `composer update c975l/config-bundle` will simply refuse to move rather than break anything. Nothing in the bundle's own code changes with it: no new syntax, no removed method.
+
+**Your `App\Entity\User` must now implement `c975L\ConfigBundle\Contract\UserInterface`.** `Config::$user` was typed `App\Entity\User`, a class that lives in app-space and that a standalone bundle checkout cannot reference; it is now typed against this new interface, which `c975LConfigBundle::prependExtension()` maps back onto `App\Entity\User` through Doctrine's `resolve_target_entities` - so there is nothing to declare in your app's configuration, but the PHP property type rejects a user entity that doesn't implement the interface (`TypeError` on hydration, and on saving a config from the back-office):
+
+```php
+// src/Entity/User.php
+use c975L\ConfigBundle\Contract\UserInterface;
+
+class User implements UserInterface
+{
+    // ...
+}
+```
+
+The interface extends `Symfony\Component\Security\Core\User\UserInterface` (which your `User` already implements) and adds `getId(): int|string|null` - satisfied by the getter Doctrine entities carry anyway, whether the identifier is an auto-increment integer or a uuid. Nothing else changes: no migration, the column and the join stay identical.
+
 **`ThemePresetProviderInterface` and `ThemePresetRegistry` are removed**, along with the `c975l.theme_preset_provider` tag. The admin action applying a preset had already been removed (see the note below), leaving the interface with no consumer of its own; a site now carries one theme it owns outright rather than a catalog to switch between. Delete any provider of yours implementing it - nothing needs to replace it: a site's design tokens live in its own `assets/styles/themes/theme.css` (see `c975l/site-bundle`'s readme).
 
 **New required Composer dependency: `symfony/messenger`**, and the **"Run health check now" button no longer runs the check in your request** - it dispatches one `RunCommandMessage` per registered kind (`c975l:health-check:run --kind=…`, the command the scheduler already runs) and returns immediately. A single provider can hold thousands of urls (`c975l/site-bundle`'s `DeclaredUrlsHealthCheckProvider` declares one per photo of a gallery), and a run that times out mid-way persists nothing at all. To actually get the asynchronous behaviour, route the message and consume the transport:

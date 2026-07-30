@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2026: 975L <contact@975l.com>
  * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
@@ -77,7 +78,7 @@ class ConfigSetCommand extends Command
 
         $counts = ['set' => 0, 'skipped' => 0, 'error' => 0];
         foreach ($values as $slug => $value) {
-            $counts[$this->applyValue($slug, $value, $io, $isDryRun, $onlyIfEmpty)]++;
+            ++$counts[$this->applyValue($slug, $value, $io, $isDryRun, $onlyIfEmpty)];
         }
 
         if (!$isDryRun && $counts['set'] > 0) {

@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2026: 975L <contact@975l.com>
  * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
@@ -74,7 +75,7 @@ class ImportmapSpecifierLocator
 
         return array_filter(
             $matches[1],
-            static fn (string $specifier): bool => '' !== $specifier && !str_starts_with($specifier, '.') && !str_starts_with($specifier, '/')
+            static fn (string $specifier): bool => !str_starts_with($specifier, '.') && !str_starts_with($specifier, '/')
         );
     }
 }

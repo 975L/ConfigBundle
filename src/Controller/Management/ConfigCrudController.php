@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2026: 975L <contact@975l.com>
  * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
@@ -9,6 +10,7 @@
 
 namespace c975L\ConfigBundle\Controller\Management;
 
+use c975L\ConfigBundle\Contract\UserInterface;
 use c975L\ConfigBundle\Entity\Config;
 use c975L\ConfigBundle\Form\Type\ReadonlyTextType;
 use c975L\ConfigBundle\Management\AlertBuilder;
@@ -36,8 +38,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\ActionGroup;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
@@ -87,7 +89,7 @@ class ConfigCrudController extends AbstractCrudController
     }
 
     // Without a "group" to scope to, shows the intermediate "pick a group" screen instead of EasyAdmin's own grid - same reasoning/pattern as SiteBundle's CollectionItemCrudController: the flat list became unreadable once enough groups accumulated. A search query typed from that screen bypasses it though: the search box is otherwise displayed but dead (nothing on the "pick a group" screen reads it), so a non-empty query instead falls through to the grid, unscoped by group (createIndexQueryBuilder() only filters by group when currentGroup() is set), searching across every group at once
-    public function index(AdminContext $context): KeyValueStore|Response
+    public function index(AdminContext $context): KeyValueStore | Response
     {
         if ($this->showGroupsScreen()) {
             $showSensitive = $this->requestStack->getCurrentRequest()?->query->getBoolean('showSensitive', false) ?? false;
@@ -172,9 +174,7 @@ class ConfigCrudController extends AbstractCrudController
         $field = TextField::new('label')
             ->setLabel(t('label.label', [], 'config'))
             ->setFormTypeOption('disabled', true)
-            ->formatValue(fn (string $label, Config $rowConfig): string =>
-                $this->translator->trans($rowConfig->getLabelTranslationKey(), [], 'site_config')
-            );
+            ->formatValue(fn (string $label, Config $rowConfig): string => $this->translator->trans($rowConfig->getLabelTranslationKey(), [], 'site_config'));
 
         if ($isEdit && null !== $config) {
             $field->setFormTypeOptions([
@@ -275,9 +275,7 @@ class ConfigCrudController extends AbstractCrudController
         return TextareaField::new('value')
             ->setLabel(t('label.value', [], 'config'))
             // Only an actual secret is masked: an empty sensitive config must read as empty, otherwise the list shows "••••••••" for a setting nobody has filled in yet - and contradicts the dashboard alert telling you to fill it
-            ->formatValue(fn (?string $value, Config $config): string =>
-                $config->getIsSensitive() && null !== $value && '' !== $value ? '••••••••' : ($value ?? '')
-            );
+            ->formatValue(fn (?string $value, Config $config): string => $config->getIsSensitive() && null !== $value && '' !== $value ? '••••••••' : ($value ?? ''));
     }
 
     // Sensitive fields are pre-filled with the decrypted raw string value in edit (must stay the raw string, not configService->get()'s kind-cast value, otherwise a sensitive bool/int/date config like site-maintenance renders as "1"/"" instead of "true"/"false") (no need to mask with a password widget, edit is the only page besides the masked index that ever shows this field). A sensitive json config (e.g. an authorized-tokens map) still needs a multi-line widget - the single-line TextField is fine for a sensitive string/key but unusable for json
@@ -523,7 +521,8 @@ class ConfigCrudController extends AbstractCrudController
             $label = $this->translator->trans((new Config())->setSlug($slug)->getLabelTranslationKey(), [], 'site_config');
             $description = $row['description'] ? $this->translator->trans($row['description'], [], 'site_config') : '';
 
-            if (str_contains(mb_strtolower($slug), $needle)
+            if (
+                str_contains(mb_strtolower($slug), $needle)
                 || str_contains(mb_strtolower($label), $needle)
                 || str_contains(mb_strtolower($description), $needle)
             ) {
@@ -543,7 +542,7 @@ class ConfigCrudController extends AbstractCrudController
         }
     }
 
-    public function edit(AdminContext $context): KeyValueStore|Response
+    public function edit(AdminContext $context): KeyValueStore | Response
     {
         $this->denyAccessToRestrictedConfig($context);
 
@@ -686,11 +685,11 @@ class ConfigCrudController extends AbstractCrudController
             ->setRequired(false);
     }
 
-    // Defines the user for the config
+    // Defines the user for the config - Security only guarantees its own UserInterface, Config relates to the c975L one the application's User entity implements
     private function setUser(Config $config): void
     {
         $user = $this->security->getUser();
-        if (null !== $user) {
+        if ($user instanceof UserInterface) {
             $config->setUser($user);
         }
     }

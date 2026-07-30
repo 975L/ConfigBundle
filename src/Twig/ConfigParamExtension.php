@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2018: 975L <contact@975l.com>
  * (c) 2018: Laurent Marquet <laurent.marquet@laposte.net>
@@ -16,7 +17,7 @@ use Twig\TwigFunction;
 class ConfigParamExtension extends AbstractExtension
 {
     public function __construct(
-        private readonly ParameterBagInterface $params
+        private readonly ParameterBagInterface $params,
     ) {
     }
 

@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2026: 975L <contact@975l.com>
  * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
@@ -6,9 +7,10 @@
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
  */
+
 namespace c975L\ConfigBundle\Entity;
 
-use App\Entity\User;
+use c975L\ConfigBundle\Contract\UserInterface;
 use c975L\ConfigBundle\Repository\ConfigRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -24,8 +26,8 @@ class Config
     public const TYPE_TEXT = 'text';
     public const TYPE_HTML = 'html';
     public const TYPE_BOOL = 'bool';
-    public const TYPE_INT  = 'int';
-    public const TYPE_DATE  = 'date';
+    public const TYPE_INT = 'int';
+    public const TYPE_DATE = 'date';
     public const TYPE_JSON = 'json';
     public const TYPE_FONT = 'font';
 
@@ -132,7 +134,7 @@ class Config
     private ?\DateTimeInterface $modification = null;
 
     #[ORM\ManyToOne]
-    private ?User $user = null;
+    private ?UserInterface $user = null;
 
     public function getId(): ?int
     {
@@ -260,7 +262,7 @@ class Config
 
     public function getCreation(): ?\DateTimeInterface
     {
-        return $this->creation  ;
+        return $this->creation;
     }
 
     public function setCreation(\DateTimeInterface $creation): self
@@ -282,12 +284,12 @@ class Config
         return $this;
     }
 
-    public function getUser(): ?User
+    public function getUser(): ?UserInterface
     {
         return $this->user;
     }
 
-    public function setUser(?User $user): static
+    public function setUser(?UserInterface $user): static
     {
         $this->user = $user;
 
@@ -298,7 +300,8 @@ class Config
     #[Assert\Callback]
     public function validateJsonValue(ExecutionContextInterface $context): void
     {
-        if (self::TYPE_JSON === $this->kind
+        if (
+            self::TYPE_JSON === $this->kind
             && null !== $this->value
             && '' !== $this->value
             && null === json_decode($this->value)
@@ -319,7 +322,8 @@ class Config
     #[Assert\Callback]
     public function validateThemeColorValue(ExecutionContextInterface $context): void
     {
-        if (self::GROUP_THEME === $this->group
+        if (
+            self::GROUP_THEME === $this->group
             && str_starts_with($this->slug, self::THEME_COLOR_SLUG_PREFIX)
             && null !== $this->value
             && '' !== $this->value

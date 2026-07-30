@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2026: 975L <contact@975l.com>
  * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
@@ -18,6 +19,12 @@ class ConfigRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Config::class);
+    }
+
+    // Declared explicitly rather than left to Doctrine's magic finder, which static analysis cannot see and which Doctrine ORM will drop
+    public function findOneBySlug(string $slug): ?Config
+    {
+        return $this->findOneBy(['slug' => $slug]);
     }
 
     // Returns every slug stored in database, to be compared with what the configs*.json files declare

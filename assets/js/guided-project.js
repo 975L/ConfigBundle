@@ -239,7 +239,7 @@ export default class extends Controller {
     readState() {
         try {
             return JSON.parse(localStorage.getItem(this.storageKey())) ?? {};
-        } catch (error) {
+        } catch {
             return {};
         }
     }
@@ -247,7 +247,7 @@ export default class extends Controller {
     writeState(state) {
         try {
             localStorage.setItem(this.storageKey(), JSON.stringify(state));
-        } catch (error) {
+        } catch {
             // Nothing to recover: the panel keeps running on its in-memory position for this page
         }
     }

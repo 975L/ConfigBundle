@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2026: 975L <contact@975l.com>
  * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
@@ -9,6 +10,7 @@
 
 namespace c975L\ConfigBundle\Tests\Controller\Management;
 
+use c975L\ConfigBundle\Contract\UserInterface;
 use c975L\ConfigBundle\Controller\Management\ConfigCrudController;
 use c975L\ConfigBundle\Entity\Config;
 use c975L\ConfigBundle\Management\ConfigAlertProvider;
@@ -49,12 +51,13 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\User\UserInterface as SecurityUserInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ConfigCrudControllerTest extends TestCase
@@ -285,6 +288,48 @@ class ConfigCrudControllerTest extends TestCase
         $this->assertSame('secret', $vaultEncryptor->decrypt($config->getValue()));
         $this->assertNotNull($config->getCreation());
         $this->assertNotNull($config->getModification());
+    }
+
+    public function testPersistEntityStampsTheLoggedInUserOnTheConfig(): void
+    {
+        $user = $this->createStub(UserInterface::class);
+        $security = $this->createStub(Security::class);
+        $security->method('getUser')->willReturn($user);
+
+        $controller = $this->createController(security: $security);
+        $config = (new Config())->setSlug('site-name')->setValue('My Site');
+
+        $controller->persistEntity($this->createStub(EntityManagerInterface::class), $config);
+
+        $this->assertSame($user, $config->getUser());
+    }
+
+    // Security only guarantees its own UserInterface: an application whose User doesn't implement the c975L one would otherwise hit a TypeError on save
+    public function testPersistEntityLeavesTheUserNullWhenItDoesNotImplementTheContractInterface(): void
+    {
+        $security = $this->createStub(Security::class);
+        $security->method('getUser')->willReturn($this->createStub(SecurityUserInterface::class));
+
+        $controller = $this->createController(security: $security);
+        $config = (new Config())->setSlug('site-name')->setValue('My Site');
+
+        $controller->persistEntity($this->createStub(EntityManagerInterface::class), $config);
+
+        $this->assertNull($config->getUser());
+    }
+
+    public function testUpdateEntityStampsTheLoggedInUserOnTheConfig(): void
+    {
+        $user = $this->createStub(UserInterface::class);
+        $security = $this->createStub(Security::class);
+        $security->method('getUser')->willReturn($user);
+
+        $controller = $this->createController(security: $security);
+        $config = (new Config())->setSlug('site-name')->setValue('My Site');
+
+        $controller->updateEntity($this->createStub(EntityManagerInterface::class), $config);
+
+        $this->assertSame($user, $config->getUser());
     }
 
     public function testPersistEntityLeavesNonSensitiveValueUntouched(): void

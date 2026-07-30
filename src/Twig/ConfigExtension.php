@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2026: 975L <contact@975l.com>
  * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
@@ -17,7 +18,8 @@ class ConfigExtension extends AbstractExtension
 {
     public function __construct(
         private readonly ConfigServiceInterface $configService,
-    ) {}
+    ) {
+    }
 
     public function getFunctions(): array
     {

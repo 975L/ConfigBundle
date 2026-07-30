@@ -1,4 +1,5 @@
 <?php
+
 /*
  * (c) 2026: 975L <contact@975l.com>
  * (c) 2026: Laurent Marquet <laurent.marquet@laposte.net>
@@ -6,8 +7,10 @@
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
  */
+
 namespace c975L\ConfigBundle\Tests\Entity;
 
+use c975L\ConfigBundle\Contract\UserInterface;
 use c975L\ConfigBundle\Entity\Config;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -177,5 +180,23 @@ class ConfigTest extends TestCase
         $context->expects($this->never())->method('buildViolation');
 
         $config->validateThemeColorValue($context);
+    }
+
+    // The relation is typed against the c975L interface, not App\Entity\User, Doctrine resolving one onto the other
+    public function testSetUserAcceptsAnyUserImplementingTheContractInterface(): void
+    {
+        $user = $this->createStub(UserInterface::class);
+
+        $config = (new Config())->setUser($user);
+
+        $this->assertSame($user, $config->getUser());
+    }
+
+    public function testUserIsNullOnAFreshConfigAndCanBeClearedBack(): void
+    {
+        $config = new Config();
+
+        $this->assertNull($config->getUser());
+        $this->assertNull($config->setUser($this->createStub(UserInterface::class))->setUser(null)->getUser());
     }
 }
