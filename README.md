@@ -5,6 +5,7 @@ Symfony bundle providing the EasyAdmin dashboard and database-backed configurati
 [![GitHub](https://img.shields.io/github/license/975L/ConfigBundle)](https://github.com/975L/ConfigBundle/blob/master/LICENSE)
 [![Packagist Version](https://img.shields.io/packagist/v/c975l/config-bundle)](https://packagist.org/packages/c975l/config-bundle)
 [![PHP Version](https://img.shields.io/packagist/php-v/c975l/config-bundle)](https://packagist.org/packages/c975l/config-bundle)
+[![Codacy Grade](https://app.codacy.com/project/badge/Grade/42533e7972fc42f980e93048225f3f31)](https://app.codacy.com/gh/975L/ConfigBundle/dashboard)
 
 ## Why ConfigBundle
 

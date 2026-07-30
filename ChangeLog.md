@@ -1,5 +1,11 @@
 # ChangeLog
 
+## v5.13.2
+
+Add the Codacy grade badge to the README
+
+- Added the Codacy grade badge to the README (30/07/2026)
+
 ## v5.13.1
 
 - Added a `.stylelintrc.json`, read by Codacy in place of its default ruleset (30/07/2026)
