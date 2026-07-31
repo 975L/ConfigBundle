@@ -13,7 +13,7 @@ Symfony bundle providing the EasyAdmin dashboard and database-backed configurati
 
 The root of the c975L ecosystem — every other bundle ([UiBundle](https://github.com/975L/UiBundle), [SiteBundle](https://github.com/975L/SiteBundle), [ShopBundle](https://github.com/975L/ShopBundle), [BookBundle](https://github.com/975L/BookBundle), [GalleryBundle](https://github.com/975L/GalleryBundle), [SocialBundle](https://github.com/975L/SocialBundle)...) depends on it, directly or through UiBundle. It's the single place for application configuration: no per-app `.env` for business config, no duplicated dashboard entry mechanism — a satellite bundle just implements `MenuProviderInterface` (or one of its siblings) and gets an EasyAdmin entry for free.
 
-See it in action at [975l.com/pages/config-bundle](https://975l.com/pages/config-bundle).
+See it in action at [bundles.975l.com/pages/config-bundle](https://bundles.975l.com/pages/config-bundle).
 
 ---
 

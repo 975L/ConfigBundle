@@ -1,5 +1,11 @@
 # ChangeLog
 
+## v5.14.1
+
+Point the README's demo link at the ecosystem's dedicated site
+
+- The README's demo link now points at `bundles.975l.com` (31/07/2026)
+
 ## v5.14
 
 Drop the management authentication listener for an access_control rule
