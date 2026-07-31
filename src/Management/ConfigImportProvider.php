@@ -14,7 +14,7 @@ use c975L\ConfigBundle\Entity\Config;
 use c975L\ConfigBundle\Repository\ConfigRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-// Imports a "site_config" content export (see ConfigCrudController::exportContent/ContentExporter) - matches by slug, same rule as ConfigSqlExporter: a non-sensitive row is fully upserted (label/value/kind/group/description/severity synced), a sensitive row already present in this environment is left untouched (its production value is never overwritten by a dev export) and only ever created when missing
+// Imports a "site_config" content export (see ConfigCrudController::exportContent/ContentExporter) - matches by slug, same rule as ConfigSqlExporter: a non-sensitive row is fully upserted (label/value/kind/group/description/severity synced), a sensitive row already holding a value is left untouched (its production value is never overwritten by a dev export), an empty or missing one taking the export's
 class ConfigImportProvider implements ImportProviderInterface
 {
     public const KIND = 'site_config';
@@ -51,12 +51,14 @@ class ConfigImportProvider implements ImportProviderInterface
         return ['created' => $created, 'updated' => $updated];
     }
 
-    // One exported entry written over the row living under its slug - returns whether it had to be created, or null when it's left alone: an existing sensitive entry keeps its own (encrypted, environment-specific) value rather than taking the exporting environment's
+    // One exported entry written over the row living under its slug - returns whether it had to be created, or null when it's left alone: a sensitive entry already holding a value keeps its own (encrypted, environment-specific) one
     private function importConfig(array $item, \DateTime $now): ?bool
     {
         $config = $this->configRepository->findOneBy(['slug' => $item['slug']]);
         $isSensitive = (bool) ($item['isSensitive'] ?? false);
-        if (null !== $config && $isSensitive) {
+
+        // An empty sensitive row takes the export's value, otherwise a config:load-all having created it blank would lock the secret out for good
+        if (null !== $config && $isSensitive && '' !== (string) $config->getValue()) {
             return null;
         }
 

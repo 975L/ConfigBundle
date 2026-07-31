@@ -102,6 +102,46 @@ class ConfigImportProviderTest extends TestCase
         $this->assertSame('prod-secret', $existing->getValue());
     }
 
+    public function testImportFillsAnExistingSensitiveConfigLeftEmpty(): void
+    {
+        $existing = (new Config())->setSlug('api-key')->setLabel('API key')->setKind(Config::TYPE_TEXT)->setValue('');
+
+        $em = $this->createStub(EntityManagerInterface::class);
+
+        $provider = new ConfigImportProvider($em, $this->createConfigRepository($existing));
+
+        $result = $provider->import([[
+            'slug' => 'api-key',
+            'label' => 'API key',
+            'isSensitive' => true,
+            'value' => 'exported-secret',
+            'kind' => Config::TYPE_TEXT,
+        ]]);
+
+        $this->assertSame(['created' => 0, 'updated' => 1], $result);
+        $this->assertSame('exported-secret', $existing->getValue());
+    }
+
+    public function testImportFillsAnExistingSensitiveConfigLeftNull(): void
+    {
+        $existing = (new Config())->setSlug('api-key')->setLabel('API key')->setKind(Config::TYPE_TEXT)->setValue(null);
+
+        $em = $this->createStub(EntityManagerInterface::class);
+
+        $provider = new ConfigImportProvider($em, $this->createConfigRepository($existing));
+
+        $result = $provider->import([[
+            'slug' => 'api-key',
+            'label' => 'API key',
+            'isSensitive' => true,
+            'value' => 'exported-secret',
+            'kind' => Config::TYPE_TEXT,
+        ]]);
+
+        $this->assertSame(['created' => 0, 'updated' => 1], $result);
+        $this->assertSame('exported-secret', $existing->getValue());
+    }
+
     public function testImportCreatesAMissingSensitiveConfigWithItsExportedValue(): void
     {
         $persisted = [];

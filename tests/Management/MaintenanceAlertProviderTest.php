@@ -76,7 +76,7 @@ class MaintenanceAlertProviderTest extends TestCase
 
     public function testAFreshMaintenanceIsOnlyReportedAsAState(): void
     {
-        $alerts = $this->createProvider($this->createConfig(true, '2026-07-29 09:30:00'))->getAlerts();
+        $alerts = $this->createProvider($this->createConfig(true, '-1 hour'))->getAlerts();
 
         $this->assertCount(1, $alerts);
         $this->assertSame(Config::SEVERITY_INFO, $alerts[0]['severity']);

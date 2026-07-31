@@ -1,5 +1,17 @@
 # ChangeLog
 
+## v5.13.3
+
+Keep the back office reachable when site-role-admin is missing
+
+- `ConfigService::loadAll()` now falls back on `ROLE_ADMIN` when `site-role-admin` is missing from the database (31/07/2026)
+- `ConfigImportProvider` now writes an imported sensitive value over an existing empty one (31/07/2026)
+- Added the `ConfigServiceTest` cases covering the `site-role-admin` fallback (31/07/2026)
+- Added the `ConfigImportProviderTest` cases covering the empty sensitive row (31/07/2026)
+- `MaintenanceAlertProviderTest` no longer pins a fixed date ageing into a failure (31/07/2026)
+- Added the readme note on the `site-role-admin` fallback (31/07/2026)
+- Added the readme note on the sensitive rows' rule on a sync import (31/07/2026)
+
 ## v5.13.2
 
 Add the Codacy grade badge to the README

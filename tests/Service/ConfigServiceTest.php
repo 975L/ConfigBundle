@@ -179,6 +179,27 @@ class ConfigServiceTest extends TestCase
         $this->assertSame('secret-api-key', $service->get('api-key'));
     }
 
+    public function testLoadAllFallsBackOnTheDefaultAdminRoleWhenMissingFromDatabase(): void
+    {
+        $callLog = [];
+        $repository = $this->createConfigRepository([], $callLog);
+        $service = $this->createService($repository);
+
+        $this->assertSame('ROLE_ADMIN', $service->get('site-role-admin'));
+    }
+
+    public function testLoadAllKeepsTheAdminRoleStoredInDatabase(): void
+    {
+        $callLog = [];
+        $repository = $this->createConfigRepository(
+            [$this->createConfig('site-role-admin', 'ROLE_MANAGER')],
+            $callLog,
+        );
+        $service = $this->createService($repository);
+
+        $this->assertSame('ROLE_MANAGER', $service->get('site-role-admin'));
+    }
+
     public function testLoadAllIsMemoizedAndDoesNotQueryRepositoryTwice(): void
     {
         $callLog = [];

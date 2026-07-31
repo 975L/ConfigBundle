@@ -1,5 +1,20 @@
 [
     {
+        "date": "2026-07-31",
+        "description": [
+            {
+                "en": "Importing a configuration export now fills in the secrets still left empty on this site, instead of leaving them blank for good",
+                "fr": "L'import d'un export de configuration remplit désormais les secrets encore vides sur ce site, au lieu de les laisser vides définitivement",
+                "es": "La importación de una exportación de configuración rellena ahora los secretos todavía vacíos en este sitio, en lugar de dejarlos vacíos para siempre"
+            },
+            {
+                "en": "A site whose settings have not been loaded yet no longer closes its back office to everyone, yourself included",
+                "fr": "Un site dont les réglages n'ont pas encore été chargés ne ferme plus son back-office à tout le monde, vous compris",
+                "es": "Un sitio cuyos ajustes aún no se han cargado ya no cierra su back office a todo el mundo, usted incluido"
+            }
+        ]
+    },
+    {
         "date": "2026-07-29",
         "description": [
             {

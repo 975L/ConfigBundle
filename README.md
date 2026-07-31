@@ -158,6 +158,8 @@ New entries (new `slug`) are inserted with their `value` from the JSON. For entr
 
 `sensitive` is the one flag whose change also touches the value, because the two can't be separated: an entry that becomes sensitive gets its value encrypted, one that stops being sensitive gets it decrypted. Without that, dropping `"sensitive": true` from a declaration would leave a `C975L:…` string sitting in what is now a plain-text setting. When the conversion can't be done — no `C975L_VAULT_KEY`, or a value encrypted with a different one — the flag is left as it was rather than storing something unusable, and the next run picks it up once the key is in place.
 
+`site-role-admin` is the one entry read before it can exist: every `/management` permission derives from it, so a database missing that row — a fresh install where `load-all` hasn't run yet, an entry deleted by mistake — would deny the dashboard to everyone, including whoever would fix it. `ConfigService::loadAll()` therefore falls back on its declared default, `ROLE_ADMIN`, as long as the row is absent.
+
 ## Pruning entries no longer declared
 
 An entry dropped from a `configs*.json` (a setting replaced by a proper entity, a bundle uninstalled) stays in database forever: `load-all` only ever inserts and syncs metadata, it never deletes — and it says nothing about those leftovers either, being a deployment step whose output nobody reads. Removing them is an explicit step of its own. From the dashboard, the **Obsolete configs** shortcut (`ROLE_SUPER_ADMIN`) lists them with the value each deletion would take with it, and deletes the ones ticked. Or, without a browser:
@@ -287,6 +289,8 @@ CSV and JSON exports are a straight dump of the table (no upsert logic) — usef
 The SQL export is also available as a `/management` dashboard shortcut ("Export (SQL) the configuration", `site-role-admin`), downloading the same file without opening **Config** first.
 
 A fourth **Sync** export produces a zip (`manifest.json` plus any referenced files) instead of a flat table dump — re-upload it on another environment via **Import content** to upsert the same rows there, matched by `slug` rather than by database id. See [Contributing import providers from other bundles](#contributing-import-providers-from-other-bundles) below.
+
+On import, sensitive entries follow the same safeguard as the SQL export: one already holding a value on the target keeps it, since it is encrypted with that environment's own key. One sitting there empty — the blank row `load-all` creates from a declaration — takes the export's value instead, otherwise a secret could never be handed over to an environment that had run `load-all` first.
 
 The `/management` dashboard also has an **Export sync (everything)** shortcut (`site-role-admin`), bundling every registered `ExportProviderInterface`'s whole content (Config plus whatever other bundles contribute, e.g. pages, fonts) into a single zip — the "sync everything to prod in one click" counterpart to the per-bundle **Sync** export above, re-uploaded via **Import content** the same way. See [Contributing export providers from other bundles](#contributing-export-providers-from-other-bundles) below.
 

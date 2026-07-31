@@ -106,6 +106,9 @@ class ConfigService implements ConfigServiceInterface
                 $configs[$configEntry->getSlug()] = $this->castValue($configEntry->getKind(), $value);
             }
 
+            // Missing from the database, site-role-admin would lock the whole back-office out, so it falls back on its configs.json default
+            $configs['site-role-admin'] ??= 'ROLE_ADMIN';
+
             return $configs;
         });
 
