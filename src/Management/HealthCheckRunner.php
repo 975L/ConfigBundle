@@ -10,6 +10,7 @@
 
 namespace c975L\ConfigBundle\Management;
 
+use c975L\ConfigBundle\Attribute\AsHealthCheck;
 use c975L\ConfigBundle\Entity\HealthCheckResult;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -22,14 +23,18 @@ class HealthCheckRunner
     ) {
     }
 
-    // $onlyKinds restricts the run to the given provider kinds (see HealthCheckProviderInterface::getKind()) - lets the scheduler run a costly/paid provider (e.g. "wave") on its own, less frequent cron entry, separate from the free ones, without needing one command per provider. Empty (the default, and what the dashboard's "Run health check now" button always uses) runs every registered provider. Returns the number of rows persisted, per provider kind
-    public function run(array $onlyKinds = []): array
+    // $onlyKinds restricts the run to the given provider kinds (see HealthCheckProviderInterface::getKind()), $frequency to the providers declaring that cadence (see AsHealthCheck) - the latter is what the scheduler asks for, so a cron entry never names kinds and a newly installed bundle is picked up without editing it. Both empty (the default, and what the dashboard's "Run health check now" button always uses) runs every registered provider. Returns the number of rows persisted, per provider kind
+    public function run(array $onlyKinds = [], ?string $frequency = null): array
     {
         $counts = [];
 
         foreach ($this->healthCheckProviders as $provider) {
             $kind = $provider->getKind();
             if ($onlyKinds && !\in_array($kind, $onlyKinds, true)) {
+                continue;
+            }
+
+            if ($frequency && $this->frequencyOf($provider) !== $frequency) {
                 continue;
             }
 
@@ -49,6 +54,18 @@ class HealthCheckRunner
         }
 
         return $counts;
+    }
+
+    // The cadence a provider declares: the instance is asked first, for the rare provider whose class is registered several times over and whose instances differ (see HealthCheckFrequencyAwareInterface), then the class attribute, then weekly. Read by reflection rather than resolved at compile time on purpose - this runs once a week from a cron, and the alternative is a second compiler pass for a string
+    private function frequencyOf(HealthCheckProviderInterface $provider): string
+    {
+        if ($provider instanceof HealthCheckFrequencyAwareInterface) {
+            return $provider->getFrequency();
+        }
+
+        $attributes = (new \ReflectionClass($provider))->getAttributes(AsHealthCheck::class);
+
+        return $attributes ? $attributes[0]->newInstance()->frequency : AsHealthCheck::FREQUENCY_WEEKLY;
     }
 
     // One row as its provider returned it (see HealthCheckProviderInterface::runChecks()), turned into the entity persisted for it - only url/status/summary are required, the rest is what the Health check panel shows when the provider can supply it

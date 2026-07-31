@@ -912,12 +912,15 @@ That page is served with **HTTP 503** and a `Retry-After` header, which is what 
 
 **Reading the table**: the page lists one row per url *and* per kind, its rows grouped by url. The row opening each group carries that page's name and is tinted with the page's own verdict — the worst status among the rows currently listed for it, so a page reads as ok/warning/error at a glance without adding up its rows' own status pills. The verdict follows the table's filters: filtering on a single kind repaints each group with what that kind alone found.
 
-**Refreshing results**: `php bin/console c975l:health-check:run` runs every registered provider and appends their results (never triggers a live check from a page load). It accepts a repeatable `--kind=` option to run only specific providers — e.g. `--kind=wave` on its own, less frequent cron entry for a paid/credit-based provider, separately from the free ones:
+**Refreshing results**: `php bin/console c975l:health-check:run` runs every registered provider and appends their results (never triggers a live check from a page load). Two options narrow a run, and they combine:
 
 ```bash
 php bin/console c975l:health-check:run                                    # every provider
+php bin/console c975l:health-check:run --frequency=weekly                 # every provider of that cadence
 php bin/console c975l:health-check:run --kind=pagespeed --kind=w3c        # only these two
 ```
+
+`--frequency` is **what a cron entry should ask for**: each provider declares its own cadence (see [Scheduling a provider](#scheduling-a-provider) below), so installing or removing a bundle never means editing a schedule. `--kind` pins a run to named providers, which is handy from the command line but brittle in a cron entry — a kind no installed bundle provides is skipped, and the command now says so rather than reporting a silent success.
 
 There's also a **"Run health check now"** button directly on the page. It doesn't run the check in your request: it dispatches one `RunCommandMessage` per registered kind (`c975l:health-check:run --kind=…`, the very command above) and returns immediately. A single provider can hold thousands of urls — a gallery declares one per photo — and a run that times out mid-way persists nothing at all.
 
@@ -1060,6 +1063,38 @@ Make sure your bundle's `services.yaml` includes the `Management/` folder in its
 **Never call a slow/paid API from a controller** — `runChecks()` is only ever invoked from `c975l:health-check:run` (via `HealthCheckRunner`), so a page load never blocks on it. If your check needs an API key, read it via `ConfigServiceInterface` like any other config (see [Defining config entries for your bundle](#defining-config-entries-for-your-bundle) above) and degrade gracefully without one — either skip entirely (return `[]`) or, if the check is otherwise expected to be configured (see `c975l/site-bundle`'s own PageSpeed/WAVE providers), return a single explanatory row instead of one per page.
 
 `editUrl` is optional (omit or `null` for a row with no admin CRUD counterpart, e.g. a site-wide check) — the admin edit screen for the entity behind that row (e.g. SiteBundle's Page edit screen), shown on the Health check table as a pencil link next to the tested url.
+
+### Scheduling a provider
+
+A provider is **weekly** unless it says otherwise, and it says so itself with `#[AsHealthCheck]` — nothing to declare site-side:
+
+```php
+use c975L\ConfigBundle\Attribute\AsHealthCheck;
+
+// A run holding thousands of urls has no business on the same schedule as a handful of pages
+#[AsHealthCheck(frequency: AsHealthCheck::FREQUENCY_MONTHLY)]
+class MyHeavyHealthCheckProvider implements HealthCheckProviderInterface
+```
+
+The attribute is entirely optional: a provider is registered by its interface alone, and one that carries no attribute runs weekly. This is what lets a site's schedule ask for a cadence (`c975l:health-check:run --frequency=weekly`) instead of naming kinds — installing your bundle then puts your provider on the right cron entry with no line of code in the consuming app. `c975l/site-bundle`'s scaffold ships exactly two entries, one per cadence, and they never need editing.
+
+The attribute sits on the **class**, which is enough for a provider registered once. A provider whose class is registered *several times over*, one instance per source — as SiteBundle's `DeclaredUrlsHealthCheckProvider` is, once per `SitemapProviderInterface` — implements `HealthCheckFrequencyAwareInterface` instead, so each instance answers for itself:
+
+```php
+class MyGeneratedHealthCheckProvider implements HealthCheckProviderInterface, HealthCheckFrequencyAwareInterface
+{
+    public function __construct(private readonly string $frequency = AsHealthCheck::FREQUENCY_WEEKLY)
+    {
+    }
+
+    public function getFrequency(): string
+    {
+        return $this->frequency;
+    }
+}
+```
+
+`HealthCheckRunner` asks the instance first, then falls back to the class attribute, then to weekly. Only that rare generated-provider case needs the interface — everything else states its cadence with the attribute and never implements it.
 
 ## Contributing health check advice from other bundles
 

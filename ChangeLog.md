@@ -1,5 +1,20 @@
 # ChangeLog
 
+## v5.15.0
+
+A health check provider declares its own cadence
+
+- Added the `AsHealthCheck` attribute, declaring a provider's cadence, weekly by default (31/07/2026)
+- Added `HealthCheckFrequencyAwareInterface`, declaring that cadence per instance (31/07/2026)
+- `HealthCheckRunner::run()` now takes a `$frequency` filter (31/07/2026)
+- Added the `--frequency` option to `c975l:health-check:run` (31/07/2026)
+- An unknown `--frequency` now fails with `Command::INVALID` (31/07/2026)
+- `c975l:health-check:run` now warns about a `--kind` no registered provider declares (31/07/2026)
+- `c975l:health-check:run` now tells a filter matching nothing from a site having no provider (31/07/2026)
+- Added the readme section on scheduling a provider (31/07/2026)
+- Added the `AsHealthCheckTest` case (31/07/2026)
+- Added the `HealthCheckRunnerTest` and `HealthCheckRunCommandTest` cases covering the cadence (31/07/2026)
+
 ## v5.14.1
 
 Point the README's demo link at the ecosystem's dedicated site

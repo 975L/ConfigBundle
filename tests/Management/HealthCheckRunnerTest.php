@@ -10,7 +10,9 @@
 
 namespace c975L\ConfigBundle\Tests\Management;
 
+use c975L\ConfigBundle\Attribute\AsHealthCheck;
 use c975L\ConfigBundle\Entity\HealthCheckResult;
+use c975L\ConfigBundle\Management\HealthCheckFrequencyAwareInterface;
 use c975L\ConfigBundle\Management\HealthCheckProviderInterface;
 use c975L\ConfigBundle\Management\HealthCheckRunner;
 use Doctrine\ORM\EntityManagerInterface;
@@ -146,5 +148,103 @@ class HealthCheckRunnerTest extends TestCase
         $runner = new HealthCheckRunner([], $this->createStub(EntityManagerInterface::class));
 
         $this->assertSame([], $runner->getKinds());
+    }
+
+    // A provider saying nothing is weekly, which is what keeps AsHealthCheck optional
+    public function testAProviderWithoutTheAttributeIsWeekly(): void
+    {
+        $runner = $this->createFrequencyRunner();
+
+        $this->assertSame(['pages' => 0], $runner->run([], AsHealthCheck::FREQUENCY_WEEKLY));
+    }
+
+    public function testOnlyTheProvidersDeclaringTheAskedCadenceRun(): void
+    {
+        $runner = $this->createFrequencyRunner();
+
+        $this->assertSame(['photos' => 0], $runner->run([], AsHealthCheck::FREQUENCY_MONTHLY));
+    }
+
+    // What the dashboard's "Run health check now" button still does, and what a cron entry naming no cadence would
+    public function testNoFrequencyRunsEveryProviderWhateverItDeclares(): void
+    {
+        $runner = $this->createFrequencyRunner();
+
+        $this->assertSame(['pages' => 0, 'photos' => 0], $runner->run());
+    }
+
+    // Both filters narrow the same run rather than one winning over the other
+    public function testKindAndFrequencyCombine(): void
+    {
+        $runner = $this->createFrequencyRunner();
+
+        $this->assertSame([], $runner->run(['pages'], AsHealthCheck::FREQUENCY_MONTHLY));
+        $this->assertSame(['pages' => 0], $runner->run(['pages'], AsHealthCheck::FREQUENCY_WEEKLY));
+    }
+
+    // One class registered once per source cannot state its cadence on itself, so the instance answers for it (see SiteBundle's DeclaredUrlsHealthCheckProvider)
+    public function testAFrequencyAwareProviderDecidesPerInstance(): void
+    {
+        $runner = new HealthCheckRunner($this->createInstanceAwareProviders(), $this->createStub(EntityManagerInterface::class));
+
+        $this->assertSame(['urls-book' => 0], $runner->run([], AsHealthCheck::FREQUENCY_WEEKLY));
+        $this->assertSame(['urls-gallery' => 0], $runner->run([], AsHealthCheck::FREQUENCY_MONTHLY));
+    }
+
+    // Two instances of the very same class, each with its own cadence - what the attribute alone cannot express
+    private function createInstanceAwareProviders(): array
+    {
+        $provider = new class ('urls-book', AsHealthCheck::FREQUENCY_WEEKLY) implements HealthCheckProviderInterface, HealthCheckFrequencyAwareInterface {
+            public function __construct(private readonly string $kind, private readonly string $frequency)
+            {
+            }
+
+            public function getKind(): string
+            {
+                return $this->kind;
+            }
+
+            public function getFrequency(): string
+            {
+                return $this->frequency;
+            }
+
+            public function runChecks(): array
+            {
+                return [];
+            }
+        };
+
+        return [$provider, new ($provider::class)('urls-gallery', AsHealthCheck::FREQUENCY_MONTHLY)];
+    }
+
+    // One provider of each cadence: the weekly one says nothing, the monthly one carries the attribute
+    private function createFrequencyRunner(): HealthCheckRunner
+    {
+        $weekly = new class implements HealthCheckProviderInterface {
+            public function getKind(): string
+            {
+                return 'pages';
+            }
+
+            public function runChecks(): array
+            {
+                return [];
+            }
+        };
+
+        $monthly = new #[AsHealthCheck(AsHealthCheck::FREQUENCY_MONTHLY)] class implements HealthCheckProviderInterface {
+            public function getKind(): string
+            {
+                return 'photos';
+            }
+
+            public function runChecks(): array
+            {
+                return [];
+            }
+        };
+
+        return new HealthCheckRunner([$weekly, $monthly], $this->createStub(EntityManagerInterface::class));
     }
 }
