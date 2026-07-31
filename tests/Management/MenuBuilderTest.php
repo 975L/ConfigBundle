@@ -170,6 +170,61 @@ class MenuBuilderTest extends TestCase
         $this->assertSame('label.whatsnew', $items[2]->getAsDto()->getLabel()->getMessage());
     }
 
+    // A link can opt into the same collapsed submenu as an advanced CRUD item - and if every link does, the
+    // "Liens" section header is not yielded at all rather than sitting above nothing
+    public function testGetMenuItemsMovesAdvancedLinksIntoTheAdvancedSubmenu(): void
+    {
+        $section = ['label' => 'label.management', 'translation_domain' => 'site'];
+        $provider = $this->createProvider($section, [], [
+            'legal' => [
+                'label' => 'label.legal_models',
+                'name' => 'management_site_legal_models',
+                'translation_domain' => 'site',
+                'icon' => 'fas fa-scale-balanced',
+                'tier' => 'advanced',
+            ],
+            'whatsnew' => [
+                'label' => 'label.whatsnew',
+                'name' => 'management_whatsnew_index',
+                'translation_domain' => 'config',
+                'icon' => 'fa fa-bullhorn',
+            ],
+        ]);
+        $builder = new MenuBuilder([$provider], $this->createConfigService(), $this->createTranslator(), $this->createUrlGenerator());
+
+        $items = iterator_to_array($builder->getMenuItems(), false);
+
+        // Section header, "Avancé" submenu holding the advanced link, then the "Liens" section and its one link
+        $this->assertCount(4, $items);
+        $this->assertSame('label.menu_advanced', $items[1]->getAsDto()->getLabel()->getMessage());
+        $this->assertSame(
+            ['label.legal_models'],
+            array_map(static fn ($sub) => $sub->getLabel()->getMessage(), $items[1]->getAsDto()->getSubItems()),
+        );
+        $this->assertSame('label.links', $items[2]->getAsDto()->getLabel()->getMessage());
+        $this->assertSame('label.whatsnew', $items[3]->getAsDto()->getLabel()->getMessage());
+    }
+
+    public function testGetMenuItemsDropsTheLinksSectionWhenEveryLinkIsAdvanced(): void
+    {
+        $section = ['label' => 'label.management', 'translation_domain' => 'site'];
+        $provider = $this->createProvider($section, [], [
+            'legal' => [
+                'label' => 'label.legal_models',
+                'name' => 'management_site_legal_models',
+                'translation_domain' => 'site',
+                'icon' => 'fas fa-scale-balanced',
+                'tier' => 'advanced',
+            ],
+        ]);
+        $builder = new MenuBuilder([$provider], $this->createConfigService(), $this->createTranslator(), $this->createUrlGenerator());
+
+        $items = iterator_to_array($builder->getMenuItems(), false);
+
+        $this->assertCount(2, $items);
+        $this->assertSame('label.menu_advanced', $items[1]->getAsDto()->getLabel()->getMessage());
+    }
+
     public function testGetMenuItemsAppliesLinkRoleWhenProvidedAndLeavesItUnsetOtherwise(): void
     {
         $section = ['label' => 'label.management', 'translation_domain' => 'site'];

@@ -24,8 +24,10 @@ interface HealthCheckProviderInterface
 
     /**
      * One entry per checked url. "editUrl" is optional, omitted when the row has no admin CRUD counterpart.
+     * "details" is whatever structured payload the check wants to keep alongside its summary - it is stored
+     * as-is in HealthCheckResult::$details, a json column, so an array and never a string.
      *
-     * @return list<array{url: string, label?: ?string, status: HealthCheckResult::STATUS_*, summary: string, details?: ?string, editUrl?: ?string}>
+     * @return list<array{url: string, label?: ?string, status: HealthCheckResult::STATUS_*, summary: string, details?: ?array<string, mixed>, editUrl?: ?string}>
      */
     public function runChecks(): array;
 }

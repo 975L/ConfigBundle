@@ -1,5 +1,19 @@
 # ChangeLog
 
+## v5.14
+
+Drop the management authentication listener for an access_control rule
+
+- Removed `ManagementAuthenticationListener`, see UPGRADE.md (31/07/2026) [BC-Break]
+- Removed `ManagementAuthenticationListenerTest` (31/07/2026)
+- Added the readme note on the `access_control` rule protecting `/management` (31/07/2026)
+- Updated `MaintenanceListener`'s priority comment (31/07/2026)
+- Changed `HealthCheckProviderInterface::runChecks()`' `details` to `?array<string, mixed>` (31/07/2026)
+- Added a `tier` key to `MenuProviderInterface::getLinks()` (31/07/2026)
+- The "Liens" section is no longer yielded when every link is advanced (31/07/2026)
+- Added the readme note on the links' `tier` key (31/07/2026)
+- Added the `MenuBuilderTest` cases covering advanced links (31/07/2026)
+
 ## v5.13.3
 
 Keep the back office reachable when site-role-admin is missing

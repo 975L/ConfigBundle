@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Twig\Environment;
 
-// Priority 6 = after FirewallListener (8, token/user is set), so isGranted() below is reliable; ManagementAuthenticationListener (7) may already have redirected unauthenticated /management requests to login before we even run.
+// Priority 6 = after FirewallListener (8), late enough for isGranted() below to resolve the token itself on a lazy firewall - it is only reached when maintenance is on, so a request never pays for it otherwise
 #[AsEventListener(event: 'kernel.request', method: 'onKernelRequest', priority: 6)]
 class MaintenanceListener
 {

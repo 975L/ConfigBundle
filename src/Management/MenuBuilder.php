@@ -63,11 +63,24 @@ class MenuBuilder
             yield from $essentialItems;
         }
 
+        // Links opting into 'advanced' join the same submenu as the CRUD items, which is why they are resolved
+        // before it is yielded rather than inside getLinkItems() below
+        $essentialLinks = [];
+        foreach ($this->getLinks() as $link) {
+            $item = $this->buildLinkItem($link);
+
+            if ('advanced' === ($link['tier'] ?? 'essential')) {
+                $advancedItems[] = $item;
+            } else {
+                $essentialLinks[] = $item;
+            }
+        }
+
         if ([] !== $advancedItems) {
             yield MenuItem::subMenu(new TranslatableMessage(self::ADVANCED_SUBMENU_LABEL, [], self::ADVANCED_SUBMENU_TRANSLATION_DOMAIN))->setSubItems($advancedItems);
         }
 
-        yield from $this->getLinkItems();
+        yield from $this->getLinkItems($essentialLinks);
     }
 
     // An item's own tier wins over its section's default
@@ -76,19 +89,16 @@ class MenuBuilder
         return $menu['tier'] ?? $section['tier'] ?? 'essential';
     }
 
-    // The "Liens" section, rendered last and only when a provider contributed at least one link
-    private function getLinkItems(): iterable
+    // The "Liens" section, rendered last and only when at least one link stayed out of the "Avancé" submenu
+    private function getLinkItems(array $links): iterable
     {
-        $links = $this->getLinks();
         if ([] === $links) {
             return;
         }
 
         yield MenuItem::section(new TranslatableMessage(self::LINKS_SECTION_LABEL, [], self::LINKS_SECTION_TRANSLATION_DOMAIN));
 
-        foreach ($links as $link) {
-            yield $this->buildLinkItem($link);
-        }
+        yield from $links;
     }
 
     private function buildLinkItem(array $link): MenuItemInterface

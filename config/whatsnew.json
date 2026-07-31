@@ -11,6 +11,11 @@
                 "en": "A site whose settings have not been loaded yet no longer closes its back office to everyone, yourself included",
                 "fr": "Un site dont les réglages n'ont pas encore été chargés ne ferme plus son back-office à tout le monde, vous compris",
                 "es": "Un sitio cuyos ajustes aún no se han cargado ya no cierra su back office a todo el mundo, usted incluido"
+            },
+            {
+                "en": "The back office no longer sends you back to the login page when you are already signed in",
+                "fr": "Le back-office ne vous renvoie plus vers la page de connexion alors que vous êtes déjà connecté",
+                "es": "El back office ya no le devuelve a la página de inicio de sesión cuando ya ha iniciado sesión"
             }
         ]
     },

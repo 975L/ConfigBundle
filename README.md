@@ -77,6 +77,17 @@ php bin/console doctrine:migrations:diff
 php bin/console doctrine:migrations:migrate
 ```
 
+Protect the dashboard in `config/packages/security.yaml`:
+
+```yaml
+access_control:
+    - { path: ^/management, roles: IS_AUTHENTICATED_FULLY }
+```
+
+`IS_AUTHENTICATED_FULLY` rather than an admin role: which role grants the back-office is `site-role-admin`, a config entry editable from the dashboard itself, so it belongs in the controllers' `denyAccessUnlessGranted()` rather than frozen in a yaml file. The rule only states that `/management` is off-limits to anonymous visitors, which is what sends them to your login form instead of a bare 403.
+
+It also matters on the `lazy: true` firewall the Symfony skeleton ships: a lazy firewall defers resolving the token until something actually reads it, and this rule is what makes the firewall authenticate the request up front.
+
 ## Defining config entries for your bundle
 
 Create a `config/configs.json` file in your bundle. Each entry will be inserted into the database on first load (duplicates are skipped):
@@ -517,7 +528,7 @@ Links from every bundle are merged into a single "Links" section, sorted alphabe
 ],
 ```
 
-A few more optional keys: `role` (e.g. `'ROLE_EDITOR'`) hides the link from users lacking it — omit it for links with no access restriction of their own; `target` (e.g. `'_blank'`) is for a link leaving the admin entirely — it gets an external-link glyph automatically, and (for a `name`-based link) resolves to a full absolute URL instead of a relative path; `pinned` (bool) sorts the link after every non-pinned one regardless of its label — ConfigBundle's own "Visit the site" link (using the `site-url`/`site-name` configs) uses it to always stay at the very bottom of the links section; `label_parameters` (array) is passed through to the translator alongside `label`, for a translated label embedding a runtime value (e.g. `['%name%' => $siteName]`) — omit it for a plain translation key with no placeholder, the usual case.
+A few more optional keys: `role` (e.g. `'ROLE_EDITOR'`) hides the link from users lacking it — omit it for links with no access restriction of their own; `target` (e.g. `'_blank'`) is for a link leaving the admin entirely — it gets an external-link glyph automatically, and (for a `name`-based link) resolves to a full absolute URL instead of a relative path; `pinned` (bool) sorts the link after every non-pinned one regardless of its label — ConfigBundle's own "Visit the site" link (using the `site-url`/`site-name` configs) uses it to always stay at the very bottom of the links section; `label_parameters` (array) is passed through to the translator alongside `label`, for a translated label embedding a runtime value (e.g. `['%name%' => $siteName]`) — omit it for a plain translation key with no placeholder, the usual case; `tier` (`'essential'`/`'advanced'`, default `'essential'`) moves the link into the same collapsed "Advanced" submenu as the advanced menu items above, instead of the "Links" section — that section is not rendered at all if every link opted into it.
 
 **Guided tour:** any entry in `getMenus()`/`getLinks()` can add an optional `'description'` key — a one-line "what is this for" sentence, same `translation_domain` — to feed the `/management` dashboard's "Guided tour" button. It highlights every described item in turn with a short explanation, matched against the sidebar's own rendered link (see `OnboardingStepBuilder`), so there's nothing else to wire up. It's entirely optional and can be filled in bundle by bundle: an entry without a `description` is simply skipped, it never breaks anything.
 

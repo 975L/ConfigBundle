@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+**`ManagementAuthenticationListener` is removed — add an `access_control` rule for `/management`.** The listener threw an `InsufficientAuthenticationException` on any `/management` request without an authenticated user, so that visitors landed on the login form rather than on a 403. It read the token from a `kernel.request` listener at priority 7, on the assumption that the firewall (priority 8) had already resolved it — which only holds when the firewall is *not* lazy. On the `lazy: true` firewall the Symfony skeleton ships, the token is resolved only when something first reads it, so `Security::getUser()` returned `null` even for a fully authenticated admin, and every back-office request was redirected to the login page.
+
+Declare the rule instead:
+
+```yaml
+# config/packages/security.yaml
+security:
+    access_control:
+        - { path: ^/management, roles: IS_AUTHENTICATED_FULLY }
+```
+
+Behaviour is unchanged: an anonymous visitor is still redirected to your login form, and an authenticated user without the `site-role-admin` role still gets a 403 from the controllers' `denyAccessUnlessGranted()`. Nothing else to do — no code of yours referenced the listener, which was registered through its own `#[AsEventListener]` attribute.
+
+Note that the redirect survives even without the rule: an anonymous visitor reaching the dashboard gets an `AccessDeniedException` from the controller, and Symfony's security `ExceptionListener` turns it into the same redirect to the login form, since the token isn't fully fledged. The rule is what stops the request before the controller runs, and what keeps a lazy firewall from deferring the token past the point where the back-office needs it.
+
 **The bundle now requires PHP 8.4 and Symfony 8.** It used to declare `"php": ">=8.0"` and `"symfony/*": "*"`, which described nothing: the code has needed PHP 8.1 since its first promoted `readonly` property, and an unbound `*` let Composer resolve Symfony against whatever PHP the application ran on - so an application on PHP 8.2 silently got Symfony 7 with a bundle only ever tested against Symfony 8. The requirements now say what is actually built and tested: `"php": ">=8.4"` and `"symfony/*": "^8.0"`.
 
 If your application is still on Symfony 7, stay on the previous release until you migrate - `composer update c975l/config-bundle` will simply refuse to move rather than break anything. Nothing in the bundle's own code changes with it: no new syntax, no removed method.
