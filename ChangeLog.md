@@ -1,5 +1,14 @@
 # ChangeLog
 
+## v5.17.1
+
+Status colors on the badges alone
+
+- The health check table no longer tints a page's first row with that group's worst status (01/08/2026)
+- A page's rows are now separated by a heavier top border instead (01/08/2026)
+- Removed the `health-check-row-first--*` css classes and `verdictByUrl()` (01/08/2026)
+- Updated the readme's health check section on reading the table (01/08/2026)
+
 ## v5.17.0
 
 A queued health check now shows how far along it is

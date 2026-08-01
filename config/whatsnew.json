@@ -31,6 +31,11 @@
                 "en": "The back office now picks up its own style updates straight after an update, instead of keeping the old ones until a forced reload",
                 "fr": "Le back-office reprend désormais ses mises à jour de style dès la mise à jour, au lieu de conserver les anciennes jusqu'à un rechargement forcé",
                 "es": "El back office ahora aplica sus actualizaciones de estilo justo después de una actualización, en lugar de conservar las antiguas hasta una recarga forzada"
+            },
+            {
+                "en": "On the health check screen, a page's rows are now separated by a plain line instead of a colored background, which could contradict the status shown on the row itself",
+                "fr": "Sur l'écran du bilan de santé, les lignes d'une page sont désormais séparées par un simple trait plutôt que par un fond coloré, qui pouvait contredire le statut affiché sur la ligne elle-même",
+                "es": "En la pantalla del estado de salud, las filas de una página ahora se separan con una simple línea en lugar de un fondo de color, que podía contradecir el estado mostrado en la propia fila"
             }
         ]
     },

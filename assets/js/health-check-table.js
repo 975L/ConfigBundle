@@ -7,9 +7,6 @@
  */
 import { Controller } from "@hotwired/stimulus";
 
-// STATUS_* from mildest to worst: the order a group's verdict is read off its rows
-const STATUSES = ['skipped', 'ok', 'warning', 'error'];
-
 // Hand-rolled sort and filter, no DataTables dependency; rows are hidden, never removed
 export default class extends Controller {
     static targets = ['row', 'filter', 'status', 'kind', 'header', 'label'];
@@ -60,13 +57,12 @@ export default class extends Controller {
         this.updateGrouping();
     }
 
-    // Blanks a repeated page cell and tints the row keeping it, re-run after every sort or filter
+    // Blanks a repeated page cell and marks the row keeping it as its group's first, re-run after every sort or filter. That class only separates one page from the next (see sass/management.scss) - it carries no verdict: a row tinted with its group's worst status contradicted its own status badge, and a sort scattering a page's rows across the table made almost every row read as that page's worst one
     updateGrouping() {
         if (!this.groupValue) {
             return;
         }
 
-        const verdicts = this.verdictByUrl();
         let previousUrl = null;
 
         this.rowTargets.forEach((row, index) => {
@@ -74,32 +70,8 @@ export default class extends Controller {
                 const isFirstOfGroup = row.dataset.url !== previousUrl;
                 this.labelTargets[index].hidden = !isFirstOfGroup;
                 row.classList.toggle('health-check-row-first', isFirstOfGroup);
-                for (const status of STATUSES) {
-                    row.classList.toggle(
-                        `health-check-row-first--${status}`,
-                        isFirstOfGroup && verdicts.get(row.dataset.url) === status,
-                    );
-                }
                 previousUrl = row.dataset.url;
             }
         });
-    }
-
-    // The worst status among every visible row sharing that url, a sort scattering a page's rows
-    verdictByUrl() {
-        const verdicts = new Map();
-
-        for (const row of this.rowTargets) {
-            if (row.hidden) {
-                continue;
-            }
-
-            const current = verdicts.get(row.dataset.url);
-            if (undefined === current || STATUSES.indexOf(row.dataset.status) > STATUSES.indexOf(current)) {
-                verdicts.set(row.dataset.url, row.dataset.status);
-            }
-        }
-
-        return verdicts;
     }
 }

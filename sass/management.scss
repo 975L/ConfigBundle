@@ -55,27 +55,11 @@ ul {
     word-break: break-word;
 }
 
-// Tints the row carrying a group's page name with that page's own verdict, so groups stay separated
-// On the cells, not the <tr>, whose background never renders under border-collapse; !important beats Bootstrap's own tie
+// Separates one page's rows from the next page's, on the row carrying the page name. Deliberately colorless: status is the badges' job alone, and tinting a whole row with its group's worst verdict read as contradicting the badge sitting on it
+// On the cells, not the <tr>, whose own borders never render under border-collapse
 tr.health-check-row-first > td {
-    background-color: var(--bs-info-bg-subtle, #cff4fc) !important;
-}
-
-tr.health-check-row-first--ok > td {
-    background-color: var(--bs-success-bg-subtle, #d1e7dd) !important;
-}
-
-tr.health-check-row-first--warning > td {
-    background-color: var(--bs-warning-bg-subtle, #fff3cd) !important;
-}
-
-tr.health-check-row-first--error > td {
-    background-color: var(--bs-danger-bg-subtle, #f8d7da) !important;
-}
-
-/* The check never ran (eg. the page doesn't resolve yet) - neutral, as its own status pill */
-tr.health-check-row-first--skipped > td {
-    background-color: var(--bs-secondary-bg-subtle, #e2e3e5) !important;
+    border-top: 3px solid var(--bs-border-color, #dee2e6);
+    padding-top: .75rem;
 }
 
 // Same thresholds and colors as Lighthouse; the dash attributes are plain SVG, so no CSP allowance was needed

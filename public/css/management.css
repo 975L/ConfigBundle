@@ -54,24 +54,8 @@ ul {
 }
 
 tr.health-check-row-first > td {
-  background-color: var(--bs-info-bg-subtle, #cff4fc) !important;
-}
-
-tr.health-check-row-first--ok > td {
-  background-color: var(--bs-success-bg-subtle, #d1e7dd) !important;
-}
-
-tr.health-check-row-first--warning > td {
-  background-color: var(--bs-warning-bg-subtle, #fff3cd) !important;
-}
-
-tr.health-check-row-first--error > td {
-  background-color: var(--bs-danger-bg-subtle, #f8d7da) !important;
-}
-
-/* The check never ran (eg. the page doesn't resolve yet) - neutral, as its own status pill */
-tr.health-check-row-first--skipped > td {
-  background-color: var(--bs-secondary-bg-subtle, #e2e3e5) !important;
+  border-top: 3px solid var(--bs-border-color, #dee2e6);
+  padding-top: 0.75rem;
 }
 
 .lh-gauges {

@@ -913,7 +913,7 @@ That page is served with **HTTP 503** and a `Retry-After` header, which is what 
 
 `/management/health-check` gives a per-page technical health snapshot of the site — Lighthouse scores, security headers, W3C markup validation, WCAG accessibility issues (whichever `HealthCheckProviderInterface` implementations are installed; `c975l/site-bundle` contributes eleven, see its own README) — without needing Node/Lighthouse-CLI or any other JS tooling: everything runs server-side over plain HTTP calls.
 
-**Reading the table**: the page lists one row per url *and* per kind, its rows grouped by url. The row opening each group carries that page's name and is tinted with the page's own verdict — the worst status among the rows currently listed for it, so a page reads as ok/warning/error at a glance without adding up its rows' own status pills. The verdict follows the table's filters: filtering on a single kind repaints each group with what that kind alone found.
+**Reading the table**: the page lists one row per url *and* per kind, its rows grouped by url. The row opening each group carries that page's name and a heavier top border, separating one page from the next. Status is read off each row's own pill and nowhere else — a group used to be tinted with its worst status, which contradicted the pill sitting on that very row, and read as plain wrong once a sort had scattered a page's rows across the table.
 
 **Refreshing results**: `php bin/console c975l:health-check:run` runs every registered provider and appends their results (never triggers a live check from a page load). Two options narrow a run, and they combine:
 
