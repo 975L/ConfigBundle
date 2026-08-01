@@ -23,8 +23,8 @@ See it in action at [bundles.975l.com/pages/config-bundle](https://bundles.975l.
 
 - **Config entries** — [declare](#defining-config-entries-for-your-bundle) · [load](#loading-config-entries-into-the-database) · [prune](#pruning-entries-no-longer-declared) · [set from the CLI](#setting-values-from-the-command-line) · [encrypt](#encrypting-sensitive-values) · [read in PHP/Twig](#reading-config-values)
 - **Dashboard** — [EasyAdmin interface](#easyadmin-interface) · [export for deployment](#deploying-to-production--export) · [ROLE_SUPER_ADMIN-only entries](#restricting-configs-to-role_super_admin) · [Export button in another CRUD](#adding-an-export-button-to-another-bundles-crud-controller)
-- **Site maintenance** — [Maintenance mode](#maintenance-mode) · [Health check](#health-check) · [Backup](#backup) · [Dev profile](#dev-profile--automating-what-the-dev-toolbar-shows)
-- **Extension points for other bundles** — [menu items](#contributing-menu-items-from-other-bundles) · [dashboard alerts](#contributing-dashboard-alerts-from-other-bundles) · [shortcuts](#contributing-dashboard-shortcuts-from-other-bundles) · [essential actions](#contributing-essential-actions-from-other-bundles) · [widgets](#contributing-dashboard-widgets-from-other-bundles) · [guided projects](#contributing-guided-projects-from-other-bundles) · [health check providers](#contributing-health-check-providers-from-other-bundles) and [advice](#contributing-health-check-advice-from-other-bundles) · [sitemaps](#contributing-a-sitemap-from-other-bundles) · [importmap entries](#contributing-importmap-entries-from-other-bundles) · [import](#contributing-import-providers-from-other-bundles) and [export providers](#contributing-export-providers-from-other-bundles) · ["What's new" entries](#contributing-whats-new-entries-from-other-bundles) · [linkable routes](#contributing-linkable-routes-for-sitebundle-menus) · [dev profile paths](#contributing-dev-profile-paths-from-other-bundles) · [AI assistant procedures](#contributing-procedures-for-the-dashboard-ai-assistant)
+- **Site maintenance** — [Maintenance mode](#maintenance-mode) · [Health check](#health-check) · [Backup](#backup) · [Spreading scheduled commands](#spreading-scheduled-commands-across-installs) · [Status report](#status-report--telling-another-system-what-this-site-runs) · [Dev profile](#dev-profile--automating-what-the-dev-toolbar-shows)
+- **Extension points for other bundles** — [menu items](#contributing-menu-items-from-other-bundles) · [dashboard alerts](#contributing-dashboard-alerts-from-other-bundles) · [shortcuts](#contributing-dashboard-shortcuts-from-other-bundles) · [essential actions](#contributing-essential-actions-from-other-bundles) · [widgets](#contributing-dashboard-widgets-from-other-bundles) · [guided projects](#contributing-guided-projects-from-other-bundles) · [health check providers](#contributing-health-check-providers-from-other-bundles) and [advice](#contributing-health-check-advice-from-other-bundles) · [maintenance tasks](#contributing-maintenance-tasks-from-other-bundles) · [status data](#contributing-status-data-from-other-bundles) · [sitemaps](#contributing-a-sitemap-from-other-bundles) · [importmap entries](#contributing-importmap-entries-from-other-bundles) · [import](#contributing-import-providers-from-other-bundles) and [export providers](#contributing-export-providers-from-other-bundles) · ["What's new" entries](#contributing-whats-new-entries-from-other-bundles) · [linkable routes](#contributing-linkable-routes-for-sitebundle-menus) · [dev profile paths](#contributing-dev-profile-paths-from-other-bundles) · [AI assistant procedures](#contributing-procedures-for-the-dashboard-ai-assistant)
 
 ## Features
 
@@ -46,6 +46,8 @@ See it in action at [bundles.975l.com/pages/config-bundle](https://bundles.975l.
 - `c975l:config:backup`, dumping the database table by table and archiving `public/`+`private/`, with archive integrity verification, a retention window on the server, a dashboard alert when a backup stops running, and a weekly digest email for the sites whose dashboard you don't open daily
 - Maintenance mode closing the site to its visitors, answering the search-engine-friendly 503 they expect from a temporary outage, with a dashboard alert turning to danger once it has lasted long enough to cost indexing
 - Sitemap generation (one sub-sitemap per bundle plus the sitemap index), extensible via `SitemapProviderInterface`
+- `c975l:status:send`, reporting what a site runs (versions, installed bundles, health check summary) to a url of your choosing — off unless configured, extensible via `StatusProviderInterface`
+- Scheduled maintenance tasks declared by each bundle (`MaintenanceTaskProviderInterface`) rather than listed by the app, and spread over each install's own minutes (`ScheduleSpreader`) so sites sharing a server don't all run them at once
 - `c975l:dev-profile:run`, a dev-only command listing what the Symfony dev toolbar would flag on every page (n+1 queries, deprecations, missing translations...), extensible via `DevProfilePathProviderInterface`
 
 ## Installation
@@ -946,6 +948,21 @@ The table itself can be sorted (click a column) and filtered (free-text search, 
 
 The page also shows the same dashboard-wide alerts as `/management` (e.g. a health check provider's own missing API key, flagged via its config's `severity`), so anything blocking a full check is visible without leaving the page.
 
+### Database load
+
+Every other check looks at the site from the outside, over HTTP. `DatabaseLoadHealthCheckProvider` (kind `database-load`, one site-wide row) instead reads the database server's own counters — `SHOW GLOBAL STATUS` — and watches **transactions**, not queries: a page firing an n+1 is already caught by [dev profile](#dev-profile--automating-what-the-dev-toolbar-shows), while transactions opened around nothing at all are invisible everywhere. They cost no page a millisecond anyone notices, and they are what saturates a database server first, long before its CPU.
+
+It takes two readings, five seconds apart, and subtracts the counters the previous run stored in its own row, which gives two numbers the row shows side by side:
+
+- **the average since the last run** — the load over the days separating them, traffic included
+- **the rate during the run itself** — measured over those five seconds, at 4am when the [weekly cron](#scheduling-a-provider) is what triggered it
+
+The second is the one that answers the question a "transactions per HTTP request" ratio gets wrong: a transaction opened by a Messenger worker polling a Doctrine transport belongs to no request at all, and costs exactly as much at 4am as at noon. When the instant rate holds at 70% or more of the average, the advice under the row says so — the load is a background process, not the visitors, and the fix is that process's polling interval rather than any page's code.
+
+The row warns only when transactions run at more than one per second *and* over half of them hold no write at all (`Com_commit` against the `Com_insert`/`update`/`delete`/`replace` family). That share is a floor, never an overstatement: writes made outside any transaction count against it. Slow queries, InnoDB lock waits and refused connections over the same window each get their own advice line when they're not zero.
+
+Rows are skipped rather than failed when the site runs on another platform, when a managed host refuses the statement to the application user, or when the server restarted since the previous run and its counters went back to zero. The very first run has nothing to subtract and reports its five-second sample as a baseline.
+
 ## Backup
 
 `c975l:config:backup` dumps the database table by table and archives the site's own files, replacing the shell scripts this used to need. It lives here rather than in `c975l/site-bundle`, where it started: backing up is what every install needs whichever satellite bundles it happens to have, and none of ShopBundle, GalleryBundle, BookBundle or CrowdfundingBundle depends on SiteBundle — a shop-only or gallery-only install used to have no backup at all. The former name `c975l:site:backup` is kept as an alias, so schedulers and crontabs already deployed keep working.
@@ -1017,11 +1034,90 @@ The stretch *before* the first run of the window is deliberately not counted: a 
 `c975l:config:backup` is a plain command; schedule it with [Symfony Scheduler](https://symfony.com/doc/current/scheduler.html) alongside `c975l:sitemaps:create`/`c975l:health-check:run`, or from a crontab. `c975l/site-bundle` ships a ready-made `MaintenanceSchedule` in its scaffold; on an install without it:
 
 ```php
-->add(RecurringMessage::cron('7 */6 * * *', new RunCommandMessage('c975l:config:backup')))
-->add(RecurringMessage::cron('7 3 * * 1', new RunCommandMessage('c975l:config:backup:digest')))
+->add($this->spreader->spread('# */6 * * *', new RunCommandMessage('c975l:config:backup')))
+->add($this->spreader->spread('# #(2-5) * * 1', new RunCommandMessage('c975l:config:backup:digest')))
 ```
 
 Keep `site-backup-max-age-hours` comfortably above the interval you pick, so an ordinary late run doesn't alert. The digest is scheduled on its own line rather than as `c975l:config:backup --report` on the Monday run, so the week's summary doesn't depend on that particular run getting through.
+
+The `#` are placeholders `ScheduleSpreader` draws from this install's own identity, so that two sites sharing a server don't dump their databases at the same minute — see below. Writing `'7 */6 * * *'` with a plain `RecurringMessage::cron()` still works, and is what to do when a command has to run at a fixed time.
+
+## Spreading scheduled commands across installs
+
+Every install of these bundles schedules the same commands, from the same scaffolded lines. Written as fixed expressions, they all fire at the same minute — which is fine until several of those sites share a server, where a dozen simultaneous database dumps show up as a nightly memory spike no amount of web server tuning explains.
+
+Symfony answers this with [hashed cron expressions](https://symfony.com/doc/current/scheduler.html): a `#` in an expression is replaced by a value drawn deterministically, rather than by a time you picked. But `RecurringMessage::cron()` draws it from the message alone, so every install computes the *same* minute for `c975l:config:backup` and they pile up exactly as before. `ScheduleSpreader` draws it from the site's own identity as well:
+
+```php
+use c975L\ConfigBundle\Scheduler\ScheduleSpreader;
+
+public function __construct(
+    private readonly ScheduleSpreader $spreader,
+    private readonly CacheInterface $cache,
+) {
+}
+
+public function getSchedule(): Schedule
+{
+    return (new Schedule())
+        ->stateful($this->cache)
+        ->add($this->spreader->spread('# #(0-2) * * *', new RunCommandMessage('c975l:sitemaps:create')))
+        ->add($this->spreader->spread('# */6 * * *', new RunCommandMessage('c975l:config:backup')))
+    ;
+}
+```
+
+| Expression | Reads as |
+| --- | --- |
+| `# */6 * * *` | every 6 hours, at a minute of this site's own |
+| `# #(0-2) * * *` | once a day, between midnight and 2 am |
+| `# #(2-5) * * 1` | every Monday, between 2 and 5 am |
+| `0 3 * * *` | 3 am sharp, spread by nothing — an expression without `#` is used as it stands |
+
+The identity is `site-url`, falling back on the install path for a site not configured yet. Its value is never read back: only its being different from one install to the next matters. The draw is deterministic, so a worker restart or a redeploy never moves a site's schedule around, and `bin/console debug:scheduler` shows the times this site actually ended up with.
+
+In practice the app doesn't call `spread()` for a bundle's commands at all — the bundles declare them, see below.
+
+Two things it deliberately doesn't do. It spreads within the window the expression describes, so a heavy command still has to be given a window wide enough to spread *into* — `# */6 * * *` has 60 slots, `# 3 * * *` has one. And spreading is a draw, not an allocation: on a server hosting many sites, a pair landing on the same minute stays possible, which is a different problem from all of them landing on it.
+
+## Contributing maintenance tasks from other bundles
+
+Any bundle can have its own commands scheduled by implementing `MaintenanceTaskProviderInterface` — no manual service tagging needed, `TaggedInterfacePass` auto-detects any class implementing it, same mechanism as `MenuProviderInterface` and the others:
+
+```php
+namespace c975L\ShopBundle\Scheduler;
+
+use c975L\ConfigBundle\Scheduler\MaintenanceTask;
+use c975L\ConfigBundle\Scheduler\MaintenanceTaskProviderInterface;
+
+class ShopMaintenanceTaskProvider implements MaintenanceTaskProviderInterface
+{
+    public function getMaintenanceTasks(): array
+    {
+        return [
+            // Expired download links, nightly
+            new MaintenanceTask('# #(1-3) * * *', 'c975l:shop:downloads:delete'),
+            // Product affinities, monthly: a full pass over the orders, too long to run nightly for what it changes
+            new MaintenanceTask('# #(2-5) # * *', 'c975l:shop:affinity:calculate'),
+        ];
+    }
+}
+```
+
+`MaintenanceScheduleBuilder` collects them all and adds them to the app's schedule, each spread as above:
+
+```php
+// src/Scheduler/MaintenanceSchedule.php, scaffolded by c975l/site-bundle
+return $this->builder->addTasks((new Schedule())->stateful($this->cache));
+```
+
+**What this buys is a scaffolded schedule that lists no command at all**, and therefore stays the same file on every site: installing a bundle schedules its tasks, removing it stops them, and an upgraded scaffold can be propagated to a dozen sites rather than merged into each. Declare the task where the command lives — `c975l:shop:baskets:delete` belongs to PaymentBundle's provider, not ShopBundle's, baskets being PaymentBundle's own.
+
+Three rules worth knowing:
+
+- **The window is yours to pick**, and a heavy command needs a wide one (see the table above). Nothing stops a fixed expression either, for a command that must run at a set time.
+- **A command declared twice is scheduled once.** `Schedule::add()` throws on a duplicate, which would take down every other task at worker start-up, so the builder drops repeats instead.
+- **The site keeps the last word**: `addTasks($schedule, ['c975l:health-check:run --frequency=monthly'])` drops a declared command the site doesn't want run, without having to remove the bundle, and the app is free to `->add()` entries of its own afterwards.
 
 ## Contributing health check providers from other bundles
 
@@ -1144,9 +1240,89 @@ Each line needs a `text`, and may carry a `url` (rendered as a link next to the 
 
 `HealthCheckAdviceBuilder::build()` merges every registered provider's advice; two providers with something to say about the same result have their lines appended, neither overwrites the other. It's shared by the dashboard "Health check" page and any CRUD's own "Health check" tab (both render through the same `health_check/_table.html.twig`), so advice reads identically everywhere.
 
+## Status report — telling another system what this site runs
+
+A site knows its own PHP and Symfony versions, the packages it was installed with, and what its last health check run found. `php bin/console c975l:status:send` gathers all of it into one JSON report and posts it wherever you want — a dashboard of your own, an automation tool, anything that accepts a POST.
+
+It is meant for whoever maintains **several** sites: one report per site, collected in one place, turns "which of my sites is still on an unsupported PHP" into a query instead of a spreadsheet you update by hand.
+
+**Nothing is sent until you configure a destination.** Installing this bundle never makes a site talk to a third party: with `site-status-url` empty, the command says so and exits successfully — which is also why a scheduled entry on a site that opted out doesn't report an error every week.
+
+```bash
+# See exactly what would leave the site - needs no url, no key, no network
+php bin/console c975l:status:send --dump
+
+# Send it
+php bin/console c975l:status:send
+```
+
+Two config entries drive it, both under the `system` group:
+
+| Config | Role |
+|---|---|
+| `site-status-url` | Where to POST the report. Empty (the default) sends nothing. |
+| `site-status-key` | Shared key, sent in the `X-Status-Key` header. Stored as a sensitive value. |
+
+The key travels in a **header**, never in the query string — an url ends up in the receiver's access log and in the `Referer` of anything it serves, a header does not. Use a different key per site, so one compromised site can't speak for the others. A url set without a key is refused rather than sent unauthenticated.
+
+What the report holds:
+
+```json
+{
+    "version": 1,
+    "site": "https://example.com",
+    "generatedAt": "2026-08-01T14:22:03+02:00",
+    "environment": "prod",
+    "php": "8.4.3",
+    "symfony": "8.0.4",
+    "packages": {"c975l/config-bundle": "1.2.3", "easycorp/easyadmin-bundle": "5.1.0"},
+    "checks": {
+        "counts": {"ok": 42, "warning": 3, "error": 1, "skipped": 0},
+        "lastRunAt": "2026-08-01T03:00:00+02:00",
+        "issues": [{"kind": "ssl", "url": "https://example.com", "summary": "..."}],
+        "issuesTruncated": false
+    },
+    "extra": {}
+}
+```
+
+Three deliberate limits. `packages` lists the installed **bundles** rather than the whole dependency tree, Symfony's own excluded since the `symfony` field already carries their version — whether a bundle is a direct requirement or came along with another one doesn't change what runs. `issues` carries the rows **in error** only, without their `HealthCheckResult::$details`: the receiver learns *where* it hurts and links back to the site to learn *why*, so the payload stays small and holds nothing revealing — a site merely in warning is a site to improve, and its `counts` still say so. And it is capped at 20 rows, `issuesTruncated` saying so — the counts stay exact either way, so a short list is never mistaken for a complete one.
+
+`checks` is `null`, rather than absent or empty, on a site whose migrations haven't run yet: no health check data available is not the same thing as no issue found.
+
+### Contributing status data from other bundles
+
+Any bundle can add a section to the report by implementing `StatusProviderInterface` — no manual service tagging needed, `TaggedInterfacePass` auto-detects any class implementing it, same mechanism as `MenuProviderInterface` above:
+
+```php
+namespace c975L\MyBundle\Management;
+
+use c975L\ConfigBundle\Management\StatusProviderInterface;
+
+class MyStatusProvider implements StatusProviderInterface
+{
+    // The key this provider occupies in the report's "extra" section
+    public function getStatusKey(): string
+    {
+        return 'shop';
+    }
+
+    // Counts and dates, nothing else: it travels over the network, and a receiver has no way to know a key is confidential
+    public function getStatusData(): array
+    {
+        return [
+            'pendingOrders' => $this->orderRepository->countPending(),
+            'lastOrderAt' => $this->orderRepository->findLastDate()?->format(\DateTimeInterface::ATOM),
+        ];
+    }
+}
+```
+
+A provider that throws doesn't cost the whole report — its section carries the error message instead. A site that goes silent reads as a much worse problem than one section that failed, so the report always leaves.
+
 ## Dev profile — automating what the dev toolbar shows
 
-`php bin/console c975l:dev-profile:run` renders every page your bundles declare **through the local kernel**, with the profiler on, and prints the list of what the Symfony dev toolbar would flag on each: n+1 queries, deprecations, missing translations, external HTTP calls made while rendering, and so on. It's the automation of "open every page in dev and look at the toolbar".
+`php bin/console c975l:dev-profile:run` renders every page your bundles declare **through the local kernel**, with the profiler on, and prints the list of what the Symfony dev toolbar would flag on each: n+1 queries, transactions opened around nothing, deprecations, missing translations, external HTTP calls made while rendering, and so on. It's the automation of "open every page in dev and look at the toolbar".
 
 Everything about it is dev-only: the command, the runner, the collector and every path provider are marked `#[When('dev')]`, so none of those services even exist in prod (where the `profiler` service doesn't either). Nothing is persisted — no entity, no dashboard page, no trend chart. The output *is* the deliverable: a list to fix.
 
@@ -1164,7 +1340,7 @@ Sample output:
 
 ```text
 / — Accueil
-  HTTP 200 · 47 requêtes (31.2 ms) · 68 templates (44.1 ms) · 2 dépréciations · cache 12/40 · 240 ms · 14.2 Mo
+  HTTP 200 · 47 requêtes (31.2 ms) · 3 transactions · 68 templates (44.1 ms) · 2 dépréciations · cache 12/40 · 240 ms · 14.2 Mo
   ERREUR Doctrine       31 requêtes identiques répétées (n+1), dont 32 fois : SELECT t0.id FROM site_block t0 WHERE t0.page_id = ?
   ALERTE Dépréciations  2 dépréciation(s) : Since symfony/framework-bundle 7.3: ...
 ```
@@ -1189,6 +1365,7 @@ The command exits non-zero as soon as one page has an **error**-level offence, s
 | Area | Read from | Reported when |
 | --- | --- | --- |
 | Doctrine | `db` collector | more than `MAX_QUERIES` (30) queries — error past 60 — or more than `MAX_DUPLICATE_QUERIES` (2) identical queries repeated, error past 9. The worst offender's SQL is quoted |
+| Doctrine (transactions) | `db` collector | more than `MAX_TRANSACTIONS` (1) transactions opened — error past 5 — or any transaction that wrote nothing at all (warning). Doctrine opens one per `flush()`, so past one something is flushing inside a loop, or a listener is flushing on its own. Counted apart from the queries, and taken back out of the duplicate count: five identical `"START TRANSACTION"` are five flushes, not an n+1 |
 | Deprecations | `logger` collector | any deprecation (warning) — the cheapest way to see what a Symfony major bump will require |
 | Logs | `logger` collector | any error-level log written while rendering |
 | Translations | `translation` collector | any key with no translation (error, the keys are listed) or served from the fallback locale (warning) |

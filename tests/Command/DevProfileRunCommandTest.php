@@ -30,6 +30,7 @@ class DevProfileRunCommandTest extends TestCase
                 'statusCode' => 200,
                 'queries' => 12,
                 'queryTime' => 4.5,
+                'transactions' => 1,
                 'templates' => 30,
                 'twigTime' => 18.0,
                 'deprecations' => 0,

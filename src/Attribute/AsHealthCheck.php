@@ -10,7 +10,11 @@
 
 namespace c975L\ConfigBundle\Attribute;
 
+use Symfony\Component\DependencyInjection\Attribute\Exclude;
+
 // Declares how often a HealthCheckProvider wants to run. Purely optional: a provider is registered by its interface alone (see TaggedInterfacePass), and every provider without this attribute is weekly. Only a provider that is long or costly needs to say so, and it says it itself - so a cron entry asks for a cadence ("--frequency=monthly") instead of naming kinds, and installing a bundle never means editing a site's MaintenanceSchedule again
+// #[Exclude] because services.yaml registers all of src/ as public autowired services, and an attribute class is never one
+#[Exclude]
 #[\Attribute(\Attribute::TARGET_CLASS)]
 final class AsHealthCheck
 {

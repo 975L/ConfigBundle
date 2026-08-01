@@ -610,6 +610,26 @@
                 <source>label.health_check_advice_backup_warnings</source>
                 <target>%count% point(s) to check</target>
             </trans-unit>
+            <trans-unit id="PGeLVGk">
+                <source>label.health_check_advice_database_load_aborted</source>
+                <target>%count% refused or interrupted connection(s) over %days% day(s)</target>
+            </trans-unit>
+            <trans-unit id="oEGMrlr">
+                <source>label.health_check_advice_database_load_background</source>
+                <target>%rate% transactions/s during the %seconds% s of the check, ie. %share% % of the average: this load does not come from visitors but from a background process (Messenger worker polling a Doctrine transport, sessions stored in the database, scheduled tasks)</target>
+            </trans-unit>
+            <trans-unit id="SIVhsrW">
+                <source>label.health_check_advice_database_load_empty</source>
+                <target>%empty% % of the transactions hold no write at all (%rate% transactions/s for %writes% write(s)/s): a transaction opened around a read costs a page nothing, but it is that ratio that saturates a database server long before its cpu</target>
+            </trans-unit>
+            <trans-unit id="9j_RkYU">
+                <source>label.health_check_advice_database_load_locks</source>
+                <target>%count% InnoDB row lock wait(s) over %days% day(s)</target>
+            </trans-unit>
+            <trans-unit id="qINjVhb">
+                <source>label.health_check_advice_database_load_slow</source>
+                <target>%count% slow query(ies) recorded over %days% day(s)</target>
+            </trans-unit>
             <trans-unit id="kUWeqbk">
                 <source>label.health_check_advice_details</source>
                 <target>See the detail (%count%)</target>
@@ -649,6 +669,30 @@
             <trans-unit id="jH91Kr4">
                 <source>label.health_check_backup_warnings</source>
                 <target>%count% point(s) to check</target>
+            </trans-unit>
+            <trans-unit id="hkMfaN_">
+                <source>label.health_check_database_load</source>
+                <target>Database load</target>
+            </trans-unit>
+            <trans-unit id="tYs1_8u">
+                <source>label.health_check_database_load_no_sample</source>
+                <target>The server counters were reset during the measure: rates will be available at the next check</target>
+            </trans-unit>
+            <trans-unit id="YqS3lup">
+                <source>label.health_check_database_load_summary</source>
+                <target>%windowRate% transactions/s on average over %days% day(s) (%rate%/s during the check), %empty% % of them holding no write</target>
+            </trans-unit>
+            <trans-unit id="NMvAShl">
+                <source>label.health_check_database_load_summary_baseline</source>
+                <target>%rate% transactions/s during the check, %empty% % of them holding no write — the average will be available at the next check</target>
+            </trans-unit>
+            <trans-unit id="o2aBneA">
+                <source>label.health_check_database_load_unavailable</source>
+                <target>The server counters cannot be read: %message%</target>
+            </trans-unit>
+            <trans-unit id="PdqEAPY">
+                <source>label.health_check_database_load_unsupported</source>
+                <target>Load counters can only be read on MySQL/MariaDB (%platform%)</target>
             </trans-unit>
             <trans-unit id="EUFNbMU">
                 <source>label.health_check_details</source>

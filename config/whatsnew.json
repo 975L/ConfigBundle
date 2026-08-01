@@ -1,5 +1,25 @@
 [
     {
+        "date": "2026-08-01",
+        "description": [
+            {
+                "en": "Maintenance tasks (backup, sitemaps, health check) no longer all start at the same minute on every site, so sites sharing a server stop competing for it at night",
+                "fr": "Les tâches de maintenance (sauvegarde, sitemaps, bilan de santé) ne démarrent plus toutes à la même minute sur tous les sites, les sites hébergés sur un même serveur cessant ainsi de se le disputer la nuit",
+                "es": "Las tareas de mantenimiento (copia de seguridad, sitemaps, estado de salud) ya no se inician todas en el mismo minuto en todos los sitios, por lo que los sitios que comparten servidor dejan de competir por él durante la noche"
+            },
+            {
+                "en": "The health check now watches the database server itself, and says when its load comes from a background process rather than from your visitors",
+                "fr": "Le bilan de santé surveille désormais le serveur de base de données lui-même, et indique quand sa charge vient d'un processus de fond plutôt que de vos visiteurs",
+                "es": "El estado de salud ahora vigila el propio servidor de base de datos e indica cuándo su carga proviene de un proceso de fondo y no de sus visitantes"
+            },
+            {
+                "en": "Your site can now report what it runs and what its last health check found to a dashboard of your choosing, so several sites can be watched from one place - nothing leaves the site until you fill in the destination in the settings",
+                "fr": "Votre site peut désormais rapporter ce qu'il fait tourner et ce qu'a trouvé son dernier bilan de santé vers un tableau de bord de votre choix, ce qui permet de surveiller plusieurs sites au même endroit - rien ne quitte le site tant que vous n'avez pas renseigné la destination dans les paramètres",
+                "es": "Su sitio ahora puede informar de lo que ejecuta y de lo que encontró su último estado de salud a un panel de su elección, lo que permite vigilar varios sitios desde un mismo lugar - nada sale del sitio hasta que indique el destino en los ajustes"
+            }
+        ]
+    },
+    {
         "date": "2026-07-31",
         "description": [
             {

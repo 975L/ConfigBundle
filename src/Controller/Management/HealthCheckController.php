@@ -14,6 +14,7 @@ use c975L\ConfigBundle\Command\HealthCheckRunCommand;
 use c975L\ConfigBundle\Entity\HealthCheckResult;
 use c975L\ConfigBundle\Management\AlertBuilder;
 use c975L\ConfigBundle\Management\BackupResultRecorder;
+use c975L\ConfigBundle\Management\DatabaseLoadHealthCheckProvider;
 use c975L\ConfigBundle\Management\HealthCheckAdviceBuilder;
 use c975L\ConfigBundle\Management\HealthCheckRunner;
 use c975L\ConfigBundle\Management\HealthCheckTrendChartBuilder;
@@ -35,8 +36,8 @@ class HealthCheckController extends AbstractController
     // EasyAdmin prefixes this with the Dashboard's own route name, giving management_health_check_run
     public const RUN_ROUTE = 'management_health_check_run';
 
-    // Kinds checked once for the whole site (infrastructure-level: TLS cert, security headers, robots.txt/sitemap, redirect chains, http/https + 404 deployment checks, last backup) rather than once per page - shown in their own "Site" section instead of the per-page table, see index()
-    private const SITE_WIDE_KINDS = ['security-headers', 'ssl-certificate', 'seo-files', 'redirect-chains', 'deployment', BackupResultRecorder::KIND];
+    // Kinds checked once for the whole site (infrastructure-level: TLS cert, security headers, robots.txt/sitemap, redirect chains, http/https + 404 deployment checks, database load, last backup) rather than once per page - shown in their own "Site" section instead of the per-page table, see index()
+    private const SITE_WIDE_KINDS = ['security-headers', 'ssl-certificate', 'seo-files', 'redirect-chains', 'deployment', DatabaseLoadHealthCheckProvider::KIND, BackupResultRecorder::KIND];
 
     public function __construct(
         private readonly HealthCheckResultRepository $healthCheckResultRepository,

@@ -14,6 +14,7 @@ use c975L\ConfigBundle\Controller\Management\HealthCheckController;
 use c975L\ConfigBundle\Entity\HealthCheckResult;
 use c975L\ConfigBundle\Management\AlertBuilder;
 use c975L\ConfigBundle\Management\BackupResultRecorder;
+use c975L\ConfigBundle\Management\DatabaseLoadHealthCheckProvider;
 use c975L\ConfigBundle\Management\HealthCheckAdviceBuilder;
 use c975L\ConfigBundle\Management\HealthCheckRunner;
 use c975L\ConfigBundle\Management\HealthCheckTrendChartBuilder;
@@ -142,9 +143,11 @@ class HealthCheckControllerTest extends TestCase
         $sslCertificateResult = (new HealthCheckResult())->setKind('ssl-certificate')->setUrl('https://example.com')->setStatus(HealthCheckResult::STATUS_OK)->setSummary('89 days left')->setCheckedAt(new \DateTime('2026-07-24 10:00:00'));
         // Checked once for the whole site (http/https redirection, 404 page), not once per page
         $deploymentResult = (new HealthCheckResult())->setKind('deployment')->setUrl('https://example.com')->setStatus(HealthCheckResult::STATUS_OK)->setSummary('4/4')->setCheckedAt(new \DateTime('2026-07-24 10:00:00'));
+        // The database server's own counters: one row for the whole site, never one per page
+        $databaseLoadResult = (new HealthCheckResult())->setKind(DatabaseLoadHealthCheckProvider::KIND)->setUrl('https://example.com')->setStatus(HealthCheckResult::STATUS_OK)->setSummary('12 tx/s')->setCheckedAt(new \DateTime('2026-07-24 10:00:00'));
 
         $healthCheckResultRepository = $this->createStub(HealthCheckResultRepository::class);
-        $healthCheckResultRepository->method('findLatestPerUrlAndKind')->willReturn([$pagespeedResult, $securityHeadersResult, $sslCertificateResult, $deploymentResult]);
+        $healthCheckResultRepository->method('findLatestPerUrlAndKind')->willReturn([$pagespeedResult, $securityHeadersResult, $sslCertificateResult, $deploymentResult, $databaseLoadResult]);
 
         $twig = $this->createMock(Environment::class);
         $twig->expects($this->once())
@@ -154,8 +157,8 @@ class HealthCheckControllerTest extends TestCase
                 [
                     'results' => [$pagespeedResult],
                     'kinds' => ['pagespeed'],
-                    'siteResults' => [$securityHeadersResult, $sslCertificateResult, $deploymentResult],
-                    'siteKinds' => ['security-headers', 'ssl-certificate', 'deployment'],
+                    'siteResults' => [$securityHeadersResult, $sslCertificateResult, $deploymentResult, $databaseLoadResult],
+                    'siteKinds' => ['security-headers', 'ssl-certificate', 'deployment', DatabaseLoadHealthCheckProvider::KIND],
                     'alerts' => [],
                     'trendChart' => null,
                     'lastCheckedAt' => $pagespeedResult->getCheckedAt(),

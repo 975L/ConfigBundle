@@ -29,6 +29,13 @@ class DevProfileCollector
     // DataCollectorTranslator::MESSAGE_MISSING, hardcoded so ConfigBundle doesn't require symfony/translation for it
     private const TRANSLATION_MISSING = 1;
 
+    // The doctrine bridge logs a transaction as a query of its own, sql and quotes included (see its Middleware\Debug\Connection) - which is what makes them countable here at all, and what makes them worth taking back out of the duplicate count: a page flushing five times shows five identical "START TRANSACTION" and would be reported as an n+1 it isn't
+    private const TRANSACTION_START = '"START TRANSACTION"';
+    private const TRANSACTION_END = ['"COMMIT"', '"ROLLBACK"'];
+
+    // A transaction holding none of these wrote nothing - it was opened around reads, or around nothing at all
+    private const WRITE_STATEMENTS = ['INSERT', 'UPDATE', 'DELETE', 'REPLACE'];
+
     public function __construct(
         private readonly KernelInterface $kernel,
         private readonly ?Profiler $profiler,
@@ -47,6 +54,8 @@ class DevProfileCollector
             'queries' => 0,
             'duplicateQueries' => 0,
             'worstDuplicateQuery' => null,
+            'transactions' => 0,
+            'emptyTransactions' => 0,
             'queryTime' => 0.0,
             'deprecations' => 0,
             'deprecationMessages' => [],
@@ -124,7 +133,8 @@ class DevProfileCollector
             'httpRequests' => $this->read($profile, 'http_client', 'getRequestCount', 0),
             'duration' => round((float) $this->read($profile, 'time', 'getDuration', 0.0), 1),
             'memory' => $this->read($profile, 'memory', 'getMemory', 0),
-        ] + $this->readDuplicateQueries($this->read($profile, 'db', 'getGroupedQueries', []));
+        ] + $this->readDuplicateQueries($this->read($profile, 'db', 'getGroupedQueries', []))
+          + $this->readTransactions($this->read($profile, 'db', 'getQueries', []));
     }
 
     // Profile::getCollector() only ever promises a DataCollectorInterface, every accessor read above belonging to a concrete collector shipped by an optional package (doctrine-bundle, twig-bridge, symfony/http-client...). Going through method_exists() rather than type-hinting those classes keeps ConfigBundle from requiring any of them, and keeps a version of one of them that renamed an accessor from fataling the whole run
@@ -148,18 +158,73 @@ class DevProfileCollector
         foreach ($groupedQueries as $queries) {
             foreach ($queries as $query) {
                 $count = $query['count'] ?? 1;
-                if ($count < 2) {
+                $sql = (string) ($query['sql'] ?? '');
+                // Transactions are counted on their own (see readTransactions()), and repeating a transaction is not what an n+1 means
+                if ($count < 2 || $this->isTransactionStatement($sql)) {
                     continue;
                 }
 
                 $duplicates += $count - 1;
                 if (null === $worst || $count > $worst['count']) {
-                    $worst = ['sql' => (string) ($query['sql'] ?? ''), 'count' => $count];
+                    $worst = ['sql' => $sql, 'count' => $count];
                 }
             }
         }
 
         return ['duplicateQueries' => $duplicates, 'worstDuplicateQuery' => $worst];
+    }
+
+    // What a query count alone hides entirely: how many transactions the page opened, and how many of them wrote nothing. A page rendering content has no reason to open any (Doctrine only opens one to flush), and one opened around reads costs the page nothing measurable while costing the database server a transaction it has to isolate. Read from getQueries() rather than getGroupedQueries(): the offence is a sequence, and grouping by sql is precisely what loses the order
+    private function readTransactions(array $queriesByConnection): array
+    {
+        $transactions = 0;
+        $empty = 0;
+
+        foreach ($queriesByConnection as $queries) {
+            $open = false;
+            $wrote = false;
+
+            foreach ($queries as $query) {
+                $sql = trim((string) ($query['sql'] ?? ''));
+
+                if (self::TRANSACTION_START === $sql) {
+                    ++$transactions;
+                    $open = true;
+                    $wrote = false;
+                    continue;
+                }
+
+                if (\in_array($sql, self::TRANSACTION_END, true)) {
+                    if ($open && !$wrote) {
+                        ++$empty;
+                    }
+                    $open = false;
+                    continue;
+                }
+
+                $wrote = $wrote || ($open && $this->isWrite($sql));
+            }
+        }
+
+        return ['transactions' => $transactions, 'emptyTransactions' => $empty];
+    }
+
+    private function isTransactionStatement(string $sql): bool
+    {
+        $sql = trim($sql);
+
+        return self::TRANSACTION_START === $sql || \in_array($sql, self::TRANSACTION_END, true);
+    }
+
+    private function isWrite(string $sql): bool
+    {
+        foreach (self::WRITE_STATEMENTS as $statement) {
+            if (str_starts_with(strtoupper(ltrim($sql)), $statement)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // Distinct deprecation messages, the same one usually being triggered on every call site of the deprecated code

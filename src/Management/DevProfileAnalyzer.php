@@ -27,6 +27,10 @@ class DevProfileAnalyzer
     public const MAX_DUPLICATE_QUERIES = 2;
     public const MAX_DUPLICATE_QUERIES_ERROR = 9;
 
+    // Doctrine opens one transaction per flush(), and a request has no reason to flush more than once - past that, something is flushing inside a loop, or a listener is flushing on its own. Counted apart from the queries because it costs the page nothing a developer would ever notice, and the database server a transaction to isolate whatever the page's own timings say
+    public const MAX_TRANSACTIONS = 1;
+    public const MAX_TRANSACTIONS_ERROR = 5;
+
     // Deliberately high: a block-based theme legitimately renders dozens of small templates per page (a real page of a c975L site sits between 45 and 110), so this only catches a genuine runaway - a template rendered per item inside a loop
     public const MAX_TEMPLATES = 150;
 
@@ -54,6 +58,7 @@ class DevProfileAnalyzer
         return array_merge(
             $this->analyzeQueryCount($metrics),
             $this->analyzeDuplicateQueries($metrics),
+            $this->analyzeTransactions($metrics),
             $this->analyzeDeprecations($metrics),
             $this->analyzeTranslations($metrics),
             $this->analyzeRendering($metrics),
@@ -110,6 +115,32 @@ class DevProfileAnalyzer
                 null !== $worst ? sprintf(', dont %d fois : %s', $worst['count'], $this->excerpt($worst['sql'])) : ''
             ),
         ]];
+    }
+
+    // Two offences rather than one: a page can legitimately open a single transaction and still have opened it around nothing, and "one transaction, and it wrote nothing" is a different thing to go and fix than "eight transactions"
+    private function analyzeTransactions(array $metrics): array
+    {
+        $issues = [];
+
+        $transactions = $metrics['transactions'] ?? 0;
+        if ($transactions > self::MAX_TRANSACTIONS) {
+            $issues[] = [
+                'level' => $transactions > self::MAX_TRANSACTIONS_ERROR ? self::LEVEL_ERROR : self::LEVEL_WARNING,
+                'area' => 'Doctrine',
+                'message' => sprintf('%d transactions ouvertes (seuil %d) : un flush() par entité, ou un listener qui flush de son côté', $transactions, self::MAX_TRANSACTIONS),
+            ];
+        }
+
+        $empty = $metrics['emptyTransactions'] ?? 0;
+        if ($empty > 0) {
+            $issues[] = [
+                'level' => self::LEVEL_WARNING,
+                'area' => 'Doctrine',
+                'message' => sprintf('%d transaction(s) ouverte(s) sans aucune écriture', $empty),
+            ];
+        }
+
+        return $issues;
     }
 
     private function analyzeDeprecations(array $metrics): array

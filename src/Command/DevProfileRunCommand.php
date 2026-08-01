@@ -103,10 +103,11 @@ class DevProfileRunCommand extends Command
         }
 
         return sprintf(
-            'HTTP %d · %d requêtes (%s ms) · %d templates (%s ms) · %d dépréciations · cache %d/%d · %s ms · %s Mo',
+            'HTTP %d · %d requêtes (%s ms) · %d transactions · %d templates (%s ms) · %d dépréciations · cache %d/%d · %s ms · %s Mo',
             $metrics['statusCode'],
             $metrics['queries'],
             $metrics['queryTime'],
+            $metrics['transactions'],
             $metrics['templates'],
             $metrics['twigTime'],
             $metrics['deprecations'],

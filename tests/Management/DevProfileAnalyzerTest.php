@@ -33,6 +33,8 @@ class DevProfileAnalyzerTest extends TestCase
             'queries' => 8,
             'duplicateQueries' => 0,
             'worstDuplicateQuery' => null,
+            'transactions' => 0,
+            'emptyTransactions' => 0,
             'queryTime' => 3.2,
             'deprecations' => 0,
             'deprecationMessages' => [],
@@ -119,6 +121,40 @@ class DevProfileAnalyzerTest extends TestCase
     public function testAnalyzeToleratesAFewDuplicateQueries(): void
     {
         $this->assertSame([], $this->analyzer->analyze($this->metrics(['duplicateQueries' => DevProfileAnalyzer::MAX_DUPLICATE_QUERIES])));
+    }
+
+    // Doctrine opens one transaction per flush(), and a request has no reason to flush more than once
+    public function testAnalyzeReportsMoreTransactionsThanOneFlushWouldOpen(): void
+    {
+        $issues = $this->analyzer->analyze($this->metrics(['transactions' => 3]));
+
+        $this->assertCount(1, $issues);
+        $this->assertSame(DevProfileAnalyzer::LEVEL_WARNING, $issues[0]['level']);
+        $this->assertSame('Doctrine', $issues[0]['area']);
+        $this->assertStringContainsString('3 transactions ouvertes', $issues[0]['message']);
+    }
+
+    public function testAnalyzeReportsARunawayTransactionCountAsAnError(): void
+    {
+        $issues = $this->analyzer->analyze($this->metrics(['transactions' => DevProfileAnalyzer::MAX_TRANSACTIONS_ERROR + 1]));
+
+        $this->assertSame(DevProfileAnalyzer::LEVEL_ERROR, $issues[0]['level']);
+    }
+
+    // A page that writes opens exactly one, and that one is not an offence
+    public function testAnalyzeToleratesASingleTransaction(): void
+    {
+        $this->assertSame([], $this->analyzer->analyze($this->metrics(['transactions' => DevProfileAnalyzer::MAX_TRANSACTIONS])));
+    }
+
+    // A page can open a single transaction and still have opened it around nothing, which is its own thing to go and fix
+    public function testAnalyzeReportsATransactionThatWroteNothing(): void
+    {
+        $issues = $this->analyzer->analyze($this->metrics(['transactions' => 1, 'emptyTransactions' => 1]));
+
+        $this->assertCount(1, $issues);
+        $this->assertSame(DevProfileAnalyzer::LEVEL_WARNING, $issues[0]['level']);
+        $this->assertStringContainsString('sans aucune écriture', $issues[0]['message']);
     }
 
     public function testAnalyzeReportsDeprecationsWithTheirMessages(): void

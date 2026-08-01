@@ -1,5 +1,46 @@
 # ChangeLog
 
+## v5.16.0
+
+Bundles declare their scheduled tasks, sites report their status
+
+- Added `DatabaseLoadHealthCheckProvider`, reading `SHOW GLOBAL STATUS` for the transaction rate (01/08/2026)
+- `database-load` now reports the share of transactions holding no write (01/08/2026)
+- Added `DatabaseLoadHealthCheckAdviceProvider`, telling background load from traffic (01/08/2026)
+- `database-load` advice now reports slow queries, lock waits and refused connections (01/08/2026)
+- The `database-load` row now shows in the Health check page's site-wide section (01/08/2026)
+- `DevProfileCollector` now counts the transactions a page opens, and those that wrote nothing (01/08/2026)
+- Transactions no longer count as duplicate queries (01/08/2026)
+- Added the transaction thresholds to `DevProfileAnalyzer`, one per `flush()` (01/08/2026)
+- `c975l:dev-profile:run` now prints the transaction count alongside the query count (01/08/2026)
+- Added `symfony/clock` to the requirements (01/08/2026)
+- Updated the readme's health check and dev profile sections (01/08/2026)
+- Added the `DatabaseLoadHealthCheckProviderTest` and `DatabaseLoadHealthCheckAdviceProviderTest` cases (01/08/2026)
+- `HealthCheckControllerTest` now covers the `database-load` site-wide row (01/08/2026)
+- Added `MaintenanceTaskProviderInterface` and `MaintenanceTask`, letting a bundle declare its scheduled commands (01/08/2026)
+- Added `MaintenanceScheduleBuilder`, collecting them into the app's schedule (01/08/2026)
+- `MaintenanceScheduleBuilder::addTasks()` takes `$except`, dropping a command the site doesn't want run (01/08/2026)
+- A command declared twice is now scheduled once (01/08/2026)
+- Added `ConfigMaintenanceTaskProvider`, declaring this bundle's own sitemaps/backup/digest/health-check commands (01/08/2026)
+- Added `ScheduleSpreader`, resolving Symfony's hashed cron expressions against the site's own identity (01/08/2026)
+- `ScheduleSpreader` now falls back on the message's class when it isn't `Stringable` (01/08/2026)
+- Added `symfony/scheduler` and `dragonmantank/cron-expression` to the requirements (01/08/2026)
+- Added the `branch-alias` extra (01/08/2026)
+- Updated the readme's backup scheduling section, and added the ones on spreading and on contributing maintenance tasks (01/08/2026)
+- Added the `ScheduleSpreaderTest`, `MaintenanceScheduleBuilderTest` and `ConfigMaintenanceTaskProviderTest` cases (01/08/2026)
+- Added `StatusReportBuilder`, gathering the site's versions, installed bundles and last health check run (01/08/2026)
+- Added `StatusProviderInterface`, letting a bundle add its own section to that report (01/08/2026)
+- A status provider that throws is now reported under its own key instead of costing the whole report (01/08/2026)
+- Added `c975l:status:send`, posting the report to the configured url (01/08/2026)
+- Added the `--dump` option to `c975l:status:send`, printing the report instead of sending it (01/08/2026)
+- Added the `site-status-url` and `site-status-key` config entries, both empty by default (01/08/2026)
+- A configured url without a key is now refused rather than sent unauthenticated (01/08/2026)
+- The key travels in the `X-Status-Key` header, never in the query string (01/08/2026)
+- Added `symfony/http-client` to the requirements (01/08/2026)
+- Added the readme sections on the status report and on contributing status data (01/08/2026)
+- Added the `StatusReportBuilderTest` and `StatusSendCommandTest` cases (01/08/2026)
+- Excluded `MaintenanceTask` and `AsHealthCheck` from the container, autowiring them broke compilation (01/08/2026)
+
 ## v5.15.0
 
 A health check provider declares its own cadence

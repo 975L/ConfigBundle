@@ -158,6 +158,69 @@ class DevProfileCollectorTest extends TestCase
         $this->assertNull($metrics['worstDuplicateQuery']);
     }
 
+    // What a query count alone hides entirely, the doctrine bridge logging a transaction as a query of its own
+    public function testCollectCountsTheTransactionsAndTheOnesThatWroteNothing(): void
+    {
+        $metrics = $this->createCollector($this->createProfiler($this->createProfile([
+            new DevProfileCollectorTestCollectorFixture('db', ['queries' => ['default' => [
+                ['sql' => 'SELECT t0.id FROM site_page t0'],
+                ['sql' => '"START TRANSACTION"'],
+                ['sql' => 'UPDATE site_page SET viewed = ? WHERE id = ?'],
+                ['sql' => '"COMMIT"'],
+                ['sql' => '"START TRANSACTION"'],
+                ['sql' => 'SELECT t0.id FROM site_block t0'],
+                ['sql' => '"COMMIT"'],
+            ]]]),
+        ])))->collect('/');
+
+        $this->assertSame(2, $metrics['transactions']);
+        $this->assertSame(1, $metrics['emptyTransactions']);
+    }
+
+    // A transaction the app rolled back is closed just as much as a committed one, and wrote nothing either
+    public function testCollectCountsARolledBackTransactionThatWroteNothingAsEmpty(): void
+    {
+        $metrics = $this->createCollector($this->createProfiler($this->createProfile([
+            new DevProfileCollectorTestCollectorFixture('db', ['queries' => ['default' => [
+                ['sql' => '"START TRANSACTION"'],
+                ['sql' => 'SELECT 1'],
+                ['sql' => '"ROLLBACK"'],
+            ]]]),
+        ])))->collect('/');
+
+        $this->assertSame(1, $metrics['transactions']);
+        $this->assertSame(1, $metrics['emptyTransactions']);
+    }
+
+    // Every connection keeps its own sequence: a write on one must not mark another one's transaction as having written
+    public function testCollectCountsTheTransactionsOfEveryConnectionSeparately(): void
+    {
+        $metrics = $this->createCollector($this->createProfiler($this->createProfile([
+            new DevProfileCollectorTestCollectorFixture('db', ['queries' => [
+                'default' => [['sql' => '"START TRANSACTION"'], ['sql' => 'INSERT INTO site_log (id) VALUES (?)'], ['sql' => '"COMMIT"']],
+                'legacy' => [['sql' => '"START TRANSACTION"'], ['sql' => 'SELECT 1'], ['sql' => '"COMMIT"']],
+            ]]),
+        ])))->collect('/');
+
+        $this->assertSame(2, $metrics['transactions']);
+        $this->assertSame(1, $metrics['emptyTransactions']);
+    }
+
+    // A page flushing five times shows five identical "START TRANSACTION", which is a transaction count, not an n+1
+    public function testCollectKeepsTheTransactionsOutOfTheDuplicateQueryCount(): void
+    {
+        $metrics = $this->createCollector($this->createProfiler($this->createProfile([
+            new DevProfileCollectorTestCollectorFixture('db', ['groupedQueries' => [
+                [['sql' => '"START TRANSACTION"', 'count' => 5]],
+                [['sql' => '"COMMIT"', 'count' => 5]],
+                [['sql' => 'SELECT t0.id FROM site_block t0', 'count' => 4]],
+            ]]),
+        ])))->collect('/');
+
+        $this->assertSame(3, $metrics['duplicateQueries']);
+        $this->assertSame('SELECT t0.id FROM site_block t0', $metrics['worstDuplicateQuery']['sql']);
+    }
+
     // The same deprecation is usually triggered on every call site of the deprecated code
     public function testCollectKeepsOnlyDistinctDeprecationMessages(): void
     {
@@ -301,6 +364,12 @@ class DevProfileCollectorTestCollectorFixture implements DataCollectorInterface
     public function getGroupedQueries(): array
     {
         return $this->values['groupedQueries'] ?? [];
+    }
+
+    // One entry per connection, each holding its queries in the order they ran - transactions included, the doctrine bridge logging them as queries of their own
+    public function getQueries(): array
+    {
+        return $this->values['queries'] ?? [];
     }
 
     // Shared by the db and twig collectors, each reading its own value

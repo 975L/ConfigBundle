@@ -54,6 +54,14 @@
                 <source>description.site_role_editor</source>
                 <target>Role required for editor actions, e.g. ROLE_EDITOR (default)</target>
             </trans-unit>
+            <trans-unit id="vejaRcq">
+                <source>description.site_status_key</source>
+                <target>Shared key sent along with the status report, to be set on the receiver too</target>
+            </trans-unit>
+            <trans-unit id="Irrx453">
+                <source>description.site_status_url</source>
+                <target>URL the site status report is sent to (leave empty to send nothing)</target>
+            </trans-unit>
             <trans-unit id="nInyIwr">
                 <source>description.site_url</source>
                 <target>URL of the website i.e. https://example.com</target>
@@ -109,6 +117,14 @@
             <trans-unit id="OH9i9I8">
                 <source>label.site_role_editor</source>
                 <target>Site Role Editor</target>
+            </trans-unit>
+            <trans-unit id="WEtCUat">
+                <source>label.site_status_key</source>
+                <target>Status report key</target>
+            </trans-unit>
+            <trans-unit id="SvUFbR.">
+                <source>label.site_status_url</source>
+                <target>Status report URL</target>
             </trans-unit>
             <trans-unit id="rDTDQ70">
                 <source>label.site_url</source>

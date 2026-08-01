@@ -610,6 +610,26 @@
                 <source>label.health_check_advice_backup_warnings</source>
                 <target>%count% punto(s) a comprobar</target>
             </trans-unit>
+            <trans-unit id="PGeLVGk">
+                <source>label.health_check_advice_database_load_aborted</source>
+                <target>%count% conexión(es) rechazada(s) o interrumpida(s) en %days% día(s)</target>
+            </trans-unit>
+            <trans-unit id="oEGMrlr">
+                <source>label.health_check_advice_database_load_background</source>
+                <target>%rate% transacciones/s durante los %seconds% s del control, es decir %share% % de la media: esta carga no proviene de los visitantes sino de un proceso de fondo (sondeo del worker Messenger sobre transporte Doctrine, sesiones almacenadas en base de datos, tareas programadas)</target>
+            </trans-unit>
+            <trans-unit id="SIVhsrW">
+                <source>label.health_check_advice_database_load_empty</source>
+                <target>%empty% % de las transacciones no contienen ninguna escritura (%rate% transacciones/s para %writes% escritura(s)/s): una transacción abierta para leer no cuesta nada a una página, pero es esa proporción la que satura un servidor de base de datos antes que su procesador</target>
+            </trans-unit>
+            <trans-unit id="9j_RkYU">
+                <source>label.health_check_advice_database_load_locks</source>
+                <target>%count% espera(s) de bloqueo InnoDB en %days% día(s)</target>
+            </trans-unit>
+            <trans-unit id="qINjVhb">
+                <source>label.health_check_advice_database_load_slow</source>
+                <target>%count% consulta(s) lenta(s) registrada(s) en %days% día(s)</target>
+            </trans-unit>
             <trans-unit id="kUWeqbk">
                 <source>label.health_check_advice_details</source>
                 <target>Ver el detalle (%count%)</target>
@@ -649,6 +669,30 @@
             <trans-unit id="jH91Kr4">
                 <source>label.health_check_backup_warnings</source>
                 <target>%count% punto(s) a comprobar</target>
+            </trans-unit>
+            <trans-unit id="hkMfaN_">
+                <source>label.health_check_database_load</source>
+                <target>Carga de la base de datos</target>
+            </trans-unit>
+            <trans-unit id="tYs1_8u">
+                <source>label.health_check_database_load_no_sample</source>
+                <target>Los contadores del servidor se reiniciaron durante la medición: las tasas estarán disponibles en el próximo control</target>
+            </trans-unit>
+            <trans-unit id="YqS3lup">
+                <source>label.health_check_database_load_summary</source>
+                <target>%windowRate% transacciones/s de media en %days% día(s) (%rate%/s durante el control), de las cuales %empty% % sin escritura</target>
+            </trans-unit>
+            <trans-unit id="NMvAShl">
+                <source>label.health_check_database_load_summary_baseline</source>
+                <target>%rate% transacciones/s durante el control, de las cuales %empty% % sin escritura — la media estará disponible en el próximo control</target>
+            </trans-unit>
+            <trans-unit id="o2aBneA">
+                <source>label.health_check_database_load_unavailable</source>
+                <target>Los contadores del servidor son ilegibles: %message%</target>
+            </trans-unit>
+            <trans-unit id="PdqEAPY">
+                <source>label.health_check_database_load_unsupported</source>
+                <target>Los contadores de carga solo se pueden leer en MySQL/MariaDB (%platform%)</target>
             </trans-unit>
             <trans-unit id="EUFNbMU">
                 <source>label.health_check_details</source>

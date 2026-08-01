@@ -54,6 +54,14 @@
                 <source>description.site_role_editor</source>
                 <target>Rôle requis pour les actions d'éditeur, ex. ROLE_EDITOR (par défaut)</target>
             </trans-unit>
+            <trans-unit id="vejaRcq">
+                <source>description.site_status_key</source>
+                <target>Clé partagée envoyée avec le rapport de statut, à définir aussi chez le destinataire</target>
+            </trans-unit>
+            <trans-unit id="Irrx453">
+                <source>description.site_status_url</source>
+                <target>URL où envoyer le rapport de statut du site (laisser vide pour ne rien envoyer)</target>
+            </trans-unit>
             <trans-unit id="nInyIwr">
                 <source>description.site_url</source>
                 <target>URL du site web, ex. https://example.com</target>
@@ -109,6 +117,14 @@
             <trans-unit id="OH9i9I8">
                 <source>label.site_role_editor</source>
                 <target>Rôle Éditeur du site</target>
+            </trans-unit>
+            <trans-unit id="WEtCUat">
+                <source>label.site_status_key</source>
+                <target>Clé du rapport de statut</target>
+            </trans-unit>
+            <trans-unit id="SvUFbR.">
+                <source>label.site_status_url</source>
+                <target>URL du rapport de statut</target>
             </trans-unit>
             <trans-unit id="rDTDQ70">
                 <source>label.site_url</source>

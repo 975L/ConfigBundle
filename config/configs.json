@@ -152,5 +152,27 @@
         "group": "email",
         "severity": "danger",
         "description": "description.email_from"
+    },
+    {
+        "label": "label.site_status_url",
+        "slug": "site-status-url",
+        "sensitive": false,
+        "restricted": true,
+        "value": null,
+        "kind": "text",
+        "group": "system",
+        "severity": "warning",
+        "description": "description.site_status_url"
+    },
+    {
+        "label": "label.site_status_key",
+        "slug": "site-status-key",
+        "sensitive": true,
+        "restricted": true,
+        "value": null,
+        "kind": "text",
+        "group": "system",
+        "severity": "warning",
+        "description": "description.site_status_key"
     }
 ]

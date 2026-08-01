@@ -26,6 +26,7 @@ use c975L\ConfigBundle\Management\ProcedureProviderInterface;
 use c975L\ConfigBundle\Management\ShortcutProviderInterface;
 use c975L\ConfigBundle\Management\SitemapProviderInterface;
 use c975L\ConfigBundle\Management\WhatsNewProviderInterface;
+use c975L\ConfigBundle\Scheduler\MaintenanceTaskProviderInterface;
 use c975L\ConfigBundle\Service\ConfigService;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -49,6 +50,7 @@ class c975LConfigBundleTest extends TestCase
         $container->register('essential_action_provider', c975LConfigBundleTestEssentialActionProviderFixture::class);
         $container->register('dashboard_widget_provider', c975LConfigBundleTestDashboardWidgetProviderFixture::class);
         $container->register('sitemap_provider', c975LConfigBundleTestSitemapProviderFixture::class);
+        $container->register('maintenance_task_provider', c975LConfigBundleTestMaintenanceTaskProviderFixture::class);
         $container->register('dev_profile_path_provider', c975LConfigBundleTestDevProfilePathProviderFixture::class);
         $container->register('guided_project_provider', c975LConfigBundleTestGuidedProjectProviderFixture::class);
 
@@ -71,6 +73,7 @@ class c975LConfigBundleTest extends TestCase
         $this->assertTrue($container->getDefinition('essential_action_provider')->hasTag('c975l.essential_action_provider'));
         $this->assertTrue($container->getDefinition('dashboard_widget_provider')->hasTag('c975l.dashboard_widget_provider'));
         $this->assertTrue($container->getDefinition('sitemap_provider')->hasTag('c975l.sitemap_provider'));
+        $this->assertTrue($container->getDefinition('maintenance_task_provider')->hasTag('c975l.maintenance_task_provider'));
         // Registered in every environment even though every implementation is #[When('dev')], the pass simply having nothing to tag in prod
         $this->assertTrue($container->getDefinition('dev_profile_path_provider')->hasTag('c975l.dev_profile_path_provider'));
         $this->assertTrue($container->getDefinition('guided_project_provider')->hasTag('c975l.guided_project_provider'));
@@ -252,6 +255,14 @@ class c975LConfigBundleTestSitemapProviderFixture implements SitemapProviderInte
     }
 
     public function getUrls(): array
+    {
+        return [];
+    }
+}
+
+class c975LConfigBundleTestMaintenanceTaskProviderFixture implements MaintenanceTaskProviderInterface
+{
+    public function getMaintenanceTasks(): array
     {
         return [];
     }

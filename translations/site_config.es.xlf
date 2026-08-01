@@ -54,6 +54,14 @@
                 <source>description.site_role_editor</source>
                 <target>Rol requerido para las acciones de editor, ej. ROLE_EDITOR (por defecto)</target>
             </trans-unit>
+            <trans-unit id="vejaRcq">
+                <source>description.site_status_key</source>
+                <target>Clave compartida enviada con el informe de estado, que debe definirse también en el destinatario</target>
+            </trans-unit>
+            <trans-unit id="Irrx453">
+                <source>description.site_status_url</source>
+                <target>URL a la que se envía el informe de estado del sitio (dejar vacío para no enviar nada)</target>
+            </trans-unit>
             <trans-unit id="nInyIwr">
                 <source>description.site_url</source>
                 <target>URL del sitio web, ej. https://example.com</target>
@@ -109,6 +117,14 @@
             <trans-unit id="OH9i9I8">
                 <source>label.site_role_editor</source>
                 <target>Rol de editor del sitio</target>
+            </trans-unit>
+            <trans-unit id="WEtCUat">
+                <source>label.site_status_key</source>
+                <target>Clave del informe de estado</target>
+            </trans-unit>
+            <trans-unit id="SvUFbR.">
+                <source>label.site_status_url</source>
+                <target>URL del informe de estado</target>
             </trans-unit>
             <trans-unit id="rDTDQ70">
                 <source>label.site_url</source>

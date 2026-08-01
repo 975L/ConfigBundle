@@ -21,16 +21,20 @@
         "php": ">=8.4",
         "c975l/ui-bundle": "^1",
         "doctrine/orm": "^3.6",
+        "dragonmantank/cron-expression": "^3.6",
         "easycorp/easyadmin-bundle": "^5.1",
         "sensiolabs/minify-bundle": "^1.2",
         "symfony/asset-mapper": "^8.0",
+        "symfony/clock": "^8.0",
         "symfony/console": "^8.0",
         "symfony/filesystem": "^8.0",
         "symfony/finder": "^8.0",
         "symfony/form": "^8.0",
+        "symfony/http-client": "^8.0",
         "symfony/mailer": "^8.0",
         "symfony/messenger": "^8.0",
         "symfony/process": "^8.0",
+        "symfony/scheduler": "^8.0",
         "symfony/security-bundle": "^8.0",
         "symfony/serializer": "^8.0",
         "symfony/ux-chartjs": "^3.3",
@@ -59,6 +63,11 @@
     },
     "config": {
         "sort-packages": true
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "5.x-dev"
+        }
     },
     "scripts": {
         "test": "phpunit"
