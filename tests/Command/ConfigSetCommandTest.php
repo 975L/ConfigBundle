@@ -143,6 +143,22 @@ class ConfigSetCommandTest extends TestCase
         $this->assertStringContainsString('UNKNOWN: unknown-slug', $tester->getDisplay());
     }
 
+    public function testExecuteSkipsUnknownSlugWithIgnoreUnknown(): void
+    {
+        $config = $this->createConfig('site-name');
+
+        $tester = $this->createTester([$config]);
+        $tester->execute([
+            '--file' => $this->createJsonFile(['unknown-slug' => 'whatever', 'site-name' => 'My Site']),
+            '--ignore-unknown' => true,
+        ]);
+
+        $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
+        $this->assertSame('My Site', $config->getValue());
+        $this->assertStringContainsString('SKIP (unknown, no installed bundle declares it): unknown-slug', $tester->getDisplay());
+        $this->assertStringContainsString('1 set, 1 skipped', $tester->getDisplay());
+    }
+
     public function testExecuteSkipsEmptyValue(): void
     {
         $config = $this->createConfig('site-name', 'My Site');

@@ -213,10 +213,11 @@ Booleans, numbers and arrays are converted to the string stored in database, and
 | --- | --- |
 | `--if-empty` | Only fills entries whose value is still empty, never overwrites one already set |
 | `--dry-run` | Lists what would change without writing anything |
+| `--ignore-unknown` | Skips the slugs no installed bundle declares, instead of failing on them |
 
 The command is meant to be re-run: an empty value is always skipped (an incomplete file never blanks out a live setting), an unchanged value is skipped too (no pointless `modification` date), and `--if-empty` makes a whole file idempotent — which is what a deployment pipeline wants, filling in whatever new entry the last `composer update` brought in while leaving production values alone.
 
-Entries are never created here: an unknown slug is reported and the command exits non-zero, so a typo doesn't pass silently. Sensitive entries are encrypted with `C975L_VAULT_KEY` exactly as the back-office does, are masked in the output so no secret lands in a CI log, and are refused rather than stored in plain text when no key is defined.
+Entries are never created here: an unknown slug is reported and the command exits non-zero, so a typo doesn't pass silently. `--ignore-unknown` turns that failure into a skip, for a file shared by several sites where a slug belongs to a bundle this one doesn't install. Sensitive entries are encrypted with `C975L_VAULT_KEY` exactly as the back-office does, are masked in the output so no secret lands in a CI log, and are refused rather than stored in plain text when no key is defined.
 
 ## Encrypting sensitive values
 

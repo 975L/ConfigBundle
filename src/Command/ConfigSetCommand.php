@@ -46,6 +46,7 @@ class ConfigSetCommand extends Command
             ->addOption('file', null, InputOption::VALUE_REQUIRED, 'JSON file holding a {"slug": "value"} object, to set several entries at once')
             ->addOption('if-empty', null, InputOption::VALUE_NONE, 'Only fill entries whose value is still empty, never overwrite an existing one')
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Show what would be changed without writing anything')
+            ->addOption('ignore-unknown', null, InputOption::VALUE_NONE, 'Skip the slugs no installed bundle declares, instead of failing on them')
             ->setHelp(<<<'HELP'
                 Sets a single entry:
 
@@ -54,6 +55,11 @@ class ConfigSetCommand extends Command
                 Sets every entry of a JSON file, without overwriting what is already filled in:
 
                   <info>php %command.full_name% --file=values.json --if-empty</info>
+
+                Sets every entry of a file shared by several sites, where a slug can belong to a bundle
+                this one doesn't install:
+
+                  <info>php %command.full_name% --file=values.json --if-empty --ignore-unknown</info>
 
                 An empty value is always skipped, so an incomplete file never blanks out a live setting.
                 Sensitive entries are encrypted with C975L_VAULT_KEY, exactly as the back-office does.
@@ -76,9 +82,11 @@ class ConfigSetCommand extends Command
         $isDryRun = (bool) $input->getOption('dry-run');
         $onlyIfEmpty = (bool) $input->getOption('if-empty');
 
+        $ignoreUnknown = (bool) $input->getOption('ignore-unknown');
+
         $counts = ['set' => 0, 'skipped' => 0, 'error' => 0];
         foreach ($values as $slug => $value) {
-            ++$counts[$this->applyValue($slug, $value, $io, $isDryRun, $onlyIfEmpty)];
+            ++$counts[$this->applyValue($slug, $value, $io, $isDryRun, $onlyIfEmpty, $ignoreUnknown)];
         }
 
         if (!$isDryRun && $counts['set'] > 0) {
@@ -92,12 +100,19 @@ class ConfigSetCommand extends Command
     }
 
     // One slug's outcome - 'set', 'skipped' or 'error', each reported to $io as it's decided
-    private function applyValue(string $slug, mixed $value, SymfonyStyle $io, bool $isDryRun, bool $onlyIfEmpty): string
+    private function applyValue(string $slug, mixed $value, SymfonyStyle $io, bool $isDryRun, bool $onlyIfEmpty, bool $ignoreUnknown): string
     {
         $config = $this->configRepository->findOneBy(['slug' => $slug]);
 
-        // Entries are declared by the bundles' configs.json, never created here: an unknown slug is a typo
+        // Entries are declared by the bundles' configs.json, never created here: an unknown slug is a typo,
+        // unless the file is shared by several sites and the bundle declaring it just isn't installed here
         if (null === $config) {
+            if ($ignoreUnknown) {
+                $io->text('  SKIP (unknown, no installed bundle declares it): ' . $slug);
+
+                return 'skipped';
+            }
+
             $io->warning('UNKNOWN: ' . $slug . ' (run c975l:config:load-all first if the bundle was just installed)');
 
             return 'error';

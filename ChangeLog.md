@@ -1,5 +1,13 @@
 # ChangeLog
 
+## v5.16.1
+
+A shared config file no longer fails on the bundles a site doesn't install
+
+- Added `--ignore-unknown` to `c975l:config:set`, skipping the slugs no installed bundle declares (01/08/2026)
+- Added the `--ignore-unknown` case to `ConfigSetCommandTest` (01/08/2026)
+- Updated the readme's `c975l:config:set` section (01/08/2026)
+
 ## v5.16.0
 
 Bundles declare their scheduled tasks, sites report their status
