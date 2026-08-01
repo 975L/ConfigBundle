@@ -17,6 +17,7 @@ use c975L\ConfigBundle\Management\BackupResultRecorder;
 use c975L\ConfigBundle\Management\DatabaseLoadHealthCheckProvider;
 use c975L\ConfigBundle\Management\HealthCheckAdviceBuilder;
 use c975L\ConfigBundle\Management\HealthCheckRunner;
+use c975L\ConfigBundle\Management\HealthCheckRunProgress;
 use c975L\ConfigBundle\Management\HealthCheckTrendChartBuilder;
 use c975L\ConfigBundle\Repository\HealthCheckResultRepository;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
@@ -80,6 +81,14 @@ class HealthCheckControllerTest extends TestCase
         return $messageBus;
     }
 
+    private function createRunProgress(?array $progress = null): HealthCheckRunProgress
+    {
+        $runProgress = $this->createStub(HealthCheckRunProgress::class);
+        $runProgress->method('poll')->willReturn($progress);
+
+        return $runProgress;
+    }
+
     private function createTrendChartBuilder(): HealthCheckTrendChartBuilder
     {
         $builder = $this->createStub(HealthCheckTrendChartBuilder::class);
@@ -110,6 +119,7 @@ class HealthCheckControllerTest extends TestCase
                     'trendChart' => null,
                     'lastCheckedAt' => $resultB->getCheckedAt(),
                     'advice' => [],
+                    'runProgress' => null,
                 ],
             )
             ->willReturn('<html></html>');
@@ -124,6 +134,7 @@ class HealthCheckControllerTest extends TestCase
             $this->createConfigService(),
             $this->createTranslator(),
             $this->createMessageBus(),
+            $this->createRunProgress(),
         );
         $controller->setContainer($this->createContainer([
             'security.authorization_checker' => $this->createAuthorizationChecker(true),
@@ -163,6 +174,7 @@ class HealthCheckControllerTest extends TestCase
                     'trendChart' => null,
                     'lastCheckedAt' => $pagespeedResult->getCheckedAt(),
                     'advice' => [],
+                    'runProgress' => null,
                 ],
             )
             ->willReturn('<html></html>');
@@ -177,6 +189,7 @@ class HealthCheckControllerTest extends TestCase
             $this->createConfigService(),
             $this->createTranslator(),
             $this->createMessageBus(),
+            $this->createRunProgress(),
         );
         $controller->setContainer($this->createContainer([
             'security.authorization_checker' => $this->createAuthorizationChecker(true),
@@ -209,6 +222,7 @@ class HealthCheckControllerTest extends TestCase
                     'trendChart' => null,
                     'lastCheckedAt' => $pagespeedResult->getCheckedAt(),
                     'advice' => [],
+                    'runProgress' => null,
                 ],
             )
             ->willReturn('<html></html>');
@@ -223,6 +237,7 @@ class HealthCheckControllerTest extends TestCase
             $this->createConfigService(),
             $this->createTranslator(),
             $this->createMessageBus(),
+            $this->createRunProgress(),
         );
         $controller->setContainer($this->createContainer([
             'security.authorization_checker' => $this->createAuthorizationChecker(true),
@@ -251,6 +266,7 @@ class HealthCheckControllerTest extends TestCase
                     'trendChart' => null,
                     'lastCheckedAt' => null,
                     'advice' => [],
+                    'runProgress' => null,
                 ],
             )
             ->willReturn('<html></html>');
@@ -265,6 +281,7 @@ class HealthCheckControllerTest extends TestCase
             $this->createConfigService(),
             $this->createTranslator(),
             $this->createMessageBus(),
+            $this->createRunProgress(),
         );
         $controller->setContainer($this->createContainer([
             'security.authorization_checker' => $this->createAuthorizationChecker(true),
@@ -272,6 +289,122 @@ class HealthCheckControllerTest extends TestCase
         ]));
 
         $controller->index();
+    }
+
+    // The banner has to be rendered by the page itself, not by a flash message: it survives the reloads it triggers itself as each check lands
+    public function testIndexPassesTheQueuedRunProgressWhileChecksAreStillLanding(): void
+    {
+        $healthCheckResultRepository = $this->createStub(HealthCheckResultRepository::class);
+        $healthCheckResultRepository->method('findLatestPerUrlAndKind')->willReturn([]);
+
+        $progress = ['done' => 3, 'total' => 12, 'finished' => false, 'timedOut' => false];
+
+        $twig = $this->createMock(Environment::class);
+        $twig->expects($this->once())
+            ->method('render')
+            ->with(
+                '@c975LConfig/management/health_check/index.html.twig',
+                $this->callback(static fn (array $parameters) => $progress === $parameters['runProgress']),
+            )
+            ->willReturn('<html></html>');
+
+        $controller = new HealthCheckController(
+            $healthCheckResultRepository,
+            $this->createStub(HealthCheckRunner::class),
+            $this->createAlertBuilder([]),
+            $this->createAdviceBuilder(),
+            $this->createTableExporter(),
+            $this->createTrendChartBuilder(),
+            $this->createConfigService(),
+            $this->createTranslator(),
+            $this->createMessageBus(),
+            $this->createRunProgress($progress),
+        );
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+            'twig' => $twig,
+        ]));
+
+        $controller->index();
+    }
+
+    // The reload that follows the last job must come back to a page with no banner left on it, and stop polling
+    public function testIndexPassesNoRunProgressOnceTheQueuedRunIsOver(): void
+    {
+        $healthCheckResultRepository = $this->createStub(HealthCheckResultRepository::class);
+        $healthCheckResultRepository->method('findLatestPerUrlAndKind')->willReturn([]);
+
+        $twig = $this->createMock(Environment::class);
+        $twig->expects($this->once())
+            ->method('render')
+            ->with(
+                '@c975LConfig/management/health_check/index.html.twig',
+                $this->callback(static fn (array $parameters) => null === $parameters['runProgress']),
+            )
+            ->willReturn('<html></html>');
+
+        $controller = new HealthCheckController(
+            $healthCheckResultRepository,
+            $this->createStub(HealthCheckRunner::class),
+            $this->createAlertBuilder([]),
+            $this->createAdviceBuilder(),
+            $this->createTableExporter(),
+            $this->createTrendChartBuilder(),
+            $this->createConfigService(),
+            $this->createTranslator(),
+            $this->createMessageBus(),
+            $this->createRunProgress(['done' => 12, 'total' => 12, 'finished' => true, 'timedOut' => false]),
+        );
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+            'twig' => $twig,
+        ]));
+
+        $controller->index();
+    }
+
+    // Polled before the results are read, and not after: a row landing between the two would be missing from the tables while the run had just been seen finishing, leaving a stale page with no banner left to reload it
+    public function testIndexPollsTheQueuedRunBeforeReadingTheResults(): void
+    {
+        $calls = [];
+
+        $healthCheckResultRepository = $this->createStub(HealthCheckResultRepository::class);
+        $healthCheckResultRepository->method('findLatestPerUrlAndKind')->willReturnCallback(static function () use (&$calls): array {
+            $calls[] = 'findLatestPerUrlAndKind';
+
+            return [];
+        });
+
+        $healthCheckRunProgress = $this->createStub(HealthCheckRunProgress::class);
+        $healthCheckRunProgress->method('poll')->willReturnCallback(static function () use (&$calls): ?array {
+            $calls[] = 'poll';
+
+            return null;
+        });
+
+        $twig = $this->createStub(Environment::class);
+        $twig->method('render')->willReturn('<html></html>');
+
+        $controller = new HealthCheckController(
+            $healthCheckResultRepository,
+            $this->createStub(HealthCheckRunner::class),
+            $this->createAlertBuilder(),
+            $this->createAdviceBuilder(),
+            $this->createTableExporter(),
+            $this->createTrendChartBuilder(),
+            $this->createConfigService(),
+            $this->createTranslator(),
+            $this->createMessageBus(),
+            $healthCheckRunProgress,
+        );
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+            'twig' => $twig,
+        ]));
+
+        $controller->index();
+
+        $this->assertSame(['poll', 'findLatestPerUrlAndKind'], $calls);
     }
 
     public function testIndexDeniesAccessWhenNotGranted(): void
@@ -288,6 +421,7 @@ class HealthCheckControllerTest extends TestCase
             $this->createConfigService(),
             $this->createTranslator(),
             $this->createMessageBus(),
+            $this->createRunProgress(),
         );
         $controller->setContainer($this->createContainer([
             'security.authorization_checker' => $this->createAuthorizationChecker(false),
@@ -313,6 +447,10 @@ class HealthCheckControllerTest extends TestCase
                 return new Envelope($message);
             });
 
+        // Followed from the moment the jobs are queued, the page having no other way of telling a run still going from a worker that was never started
+        $healthCheckRunProgress = $this->createMock(HealthCheckRunProgress::class);
+        $healthCheckRunProgress->expects($this->once())->method('start')->with(['pagespeed', 'urls-gallery']);
+
         $controller = new HealthCheckController(
             $this->createStub(HealthCheckResultRepository::class),
             $healthCheckRunner,
@@ -323,6 +461,7 @@ class HealthCheckControllerTest extends TestCase
             $this->createConfigService(),
             $this->createTranslator(),
             $messageBus,
+            $healthCheckRunProgress,
         );
         [$requestStack, $session] = $this->createRequestStackWithSession();
         $controller->setContainer($this->createContainer([
@@ -342,13 +481,24 @@ class HealthCheckControllerTest extends TestCase
         $this->assertSame('/management', $response->getTargetUrl());
     }
 
-    public function testRunAddsAnErrorFlashAndQueuesNothingWhenCsrfTokenIsInvalid(): void
+    // Before the first dispatch, and never after: a sync transport (the readme's fallback) runs every job inside dispatch() itself, and an async worker already listening records its first kind while this loop is still running - started afterwards, the run would be following a moment its own results already predate, and would sit at 0 until it timed out
+    public function testRunStartsFollowingTheRunBeforeQueueingTheFirstJob(): void
     {
-        $healthCheckRunner = $this->createMock(HealthCheckRunner::class);
-        $healthCheckRunner->expects($this->never())->method('run');
+        $healthCheckRunner = $this->createStub(HealthCheckRunner::class);
+        $healthCheckRunner->method('getKinds')->willReturn(['pagespeed', 'w3c']);
 
-        $messageBus = $this->createMock(MessageBusInterface::class);
-        $messageBus->expects($this->never())->method('dispatch');
+        $calls = [];
+        $messageBus = $this->createStub(MessageBusInterface::class);
+        $messageBus->method('dispatch')->willReturnCallback(static function (object $message) use (&$calls): Envelope {
+            $calls[] = 'dispatch';
+
+            return new Envelope($message);
+        });
+
+        $healthCheckRunProgress = $this->createStub(HealthCheckRunProgress::class);
+        $healthCheckRunProgress->method('start')->willReturnCallback(static function () use (&$calls): void {
+            $calls[] = 'start';
+        });
 
         $controller = new HealthCheckController(
             $this->createStub(HealthCheckResultRepository::class),
@@ -360,6 +510,44 @@ class HealthCheckControllerTest extends TestCase
             $this->createConfigService(),
             $this->createTranslator(),
             $messageBus,
+            $healthCheckRunProgress,
+        );
+        [$requestStack] = $this->createRequestStackWithSession();
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+            'security.csrf.token_manager' => $this->createCsrfTokenManager(true),
+            'router' => $this->createRouter(),
+            'request_stack' => $requestStack,
+        ]));
+
+        $controller->run(new Request([], ['_token' => 'valid-token']));
+
+        $this->assertSame(['start', 'dispatch', 'dispatch'], $calls);
+    }
+
+    public function testRunAddsAnErrorFlashAndQueuesNothingWhenCsrfTokenIsInvalid(): void
+    {
+        $healthCheckRunner = $this->createMock(HealthCheckRunner::class);
+        $healthCheckRunner->expects($this->never())->method('run');
+
+        $messageBus = $this->createMock(MessageBusInterface::class);
+        $messageBus->expects($this->never())->method('dispatch');
+
+        // Nothing was queued, so there's nothing to follow: a progress banner here would wait on jobs that never existed
+        $healthCheckRunProgress = $this->createMock(HealthCheckRunProgress::class);
+        $healthCheckRunProgress->expects($this->never())->method('start');
+
+        $controller = new HealthCheckController(
+            $this->createStub(HealthCheckResultRepository::class),
+            $healthCheckRunner,
+            $this->createAlertBuilder(),
+            $this->createAdviceBuilder(),
+            $this->createTableExporter(),
+            $this->createTrendChartBuilder(),
+            $this->createConfigService(),
+            $this->createTranslator(),
+            $messageBus,
+            $healthCheckRunProgress,
         );
         [$requestStack, $session] = $this->createRequestStackWithSession();
         $controller->setContainer($this->createContainer([
@@ -389,12 +577,85 @@ class HealthCheckControllerTest extends TestCase
             $this->createConfigService(),
             $this->createTranslator(),
             $this->createMessageBus(),
+            $this->createRunProgress(),
         );
         $controller->setContainer($this->createContainer([
             'security.authorization_checker' => $this->createAuthorizationChecker(false),
         ]));
 
         $controller->run(new Request([], ['_token' => 'valid-token']));
+    }
+
+    public function testProgressReturnsThePolledRunAsJson(): void
+    {
+        $controller = new HealthCheckController(
+            $this->createStub(HealthCheckResultRepository::class),
+            $this->createStub(HealthCheckRunner::class),
+            $this->createAlertBuilder(),
+            $this->createAdviceBuilder(),
+            $this->createTableExporter(),
+            $this->createTrendChartBuilder(),
+            $this->createConfigService(),
+            $this->createTranslator(),
+            $this->createMessageBus(),
+            $this->createRunProgress(['done' => 3, 'total' => 12, 'finished' => false, 'timedOut' => false]),
+        );
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+        ]));
+
+        $this->assertSame(
+            '{"done":3,"total":12,"finished":false,"timedOut":false}',
+            $controller->progress()->getContent(),
+        );
+    }
+
+    // Nothing being followed reads as a finished run, so the banner stops polling instead of waiting on a run nobody started
+    public function testProgressReturnsAFinishedRunWhenThereIsNothingToFollow(): void
+    {
+        $controller = new HealthCheckController(
+            $this->createStub(HealthCheckResultRepository::class),
+            $this->createStub(HealthCheckRunner::class),
+            $this->createAlertBuilder(),
+            $this->createAdviceBuilder(),
+            $this->createTableExporter(),
+            $this->createTrendChartBuilder(),
+            $this->createConfigService(),
+            $this->createTranslator(),
+            $this->createMessageBus(),
+            $this->createRunProgress(),
+        );
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+        ]));
+
+        $this->assertSame(
+            '{"done":0,"total":0,"finished":true,"timedOut":false}',
+            $controller->progress()->getContent(),
+        );
+    }
+
+    public function testProgressDeniesAccessWhenNotGranted(): void
+    {
+        $this->expectException(AccessDeniedException::class);
+
+        $controller = new HealthCheckController(
+            $this->createStub(HealthCheckResultRepository::class),
+            $this->createStub(HealthCheckRunner::class),
+            $this->createAlertBuilder(),
+            $this->createAdviceBuilder(),
+            $this->createTableExporter(),
+            $this->createTrendChartBuilder(),
+            $this->createConfigService(),
+            $this->createTranslator(),
+            $this->createMessageBus(),
+            $this->createRunProgress(),
+        );
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(false),
+        ]));
+
+        $controller->progress();
     }
 
     public function testExportCsvMapsResultsAndDelegatesToTheTableExporter(): void
@@ -434,6 +695,7 @@ class HealthCheckControllerTest extends TestCase
             $this->createConfigService(),
             $this->createTranslator(),
             $this->createMessageBus(),
+            $this->createRunProgress(),
         );
         $controller->setContainer($this->createContainer([
             'security.authorization_checker' => $this->createAuthorizationChecker(true),
@@ -456,6 +718,7 @@ class HealthCheckControllerTest extends TestCase
             $this->createConfigService(),
             $this->createTranslator(),
             $this->createMessageBus(),
+            $this->createRunProgress(),
         );
         $controller->setContainer($this->createContainer([
             'security.authorization_checker' => $this->createAuthorizationChecker(false),

@@ -91,6 +91,18 @@ class HealthCheckResultRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    // The distinct kinds having recorded at least one row since a given moment - how the Health check page tells how many of a queued run's jobs have landed (see HealthCheckRunProgress), the jobs themselves running in a Messenger worker the web request knows nothing about. A DISTINCT aggregate rather than a hydration: the answer is a handful of strings whatever the number of rows behind them, and this is polled every few seconds
+    // @return string[]
+    public function findKindsCheckedSince(\DateTimeInterface $since): array
+    {
+        return $this->createQueryBuilder('h')
+            ->select('DISTINCT h.kind')
+            ->andWhere('h.checkedAt >= :since')
+            ->setParameter('since', $since)
+            ->getQuery()
+            ->getSingleColumnResult();
+    }
+
     // Status counts (ok/warning/error) grouped by calendar day, across every kind/url - the "is our site's health improving or degrading" trend chart on the Health check page (see HealthCheckController), not a per-page breakdown. Capped to the last $maxDates distinct days so the chart stays readable as history accumulates (see HealthCheckResult's own class comment on why history isn't pruned)
     public function findStatusCountsByDate(int $maxDates = 12): array
     {

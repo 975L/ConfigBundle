@@ -56,6 +56,8 @@ class DashboardController extends AbstractDashboardController
         private readonly Packages $packages,
         #[Autowire('%kernel.debug%')]
         private readonly bool $debug,
+        #[Autowire('%kernel.project_dir%')]
+        private readonly string $projectDir,
     ) {
     }
 
@@ -112,19 +114,34 @@ class DashboardController extends AbstractDashboardController
             $assets->addAssetMapperEntry($script);
         }
 
-        // In dev, keeps each bundle's stylesheet separate for instant reload on every CSS edit; in prod, links to the single file compiled by StylesheetCacheWarmer (c975L/UiBundle) instead
-        if ($this->debug) {
-            foreach ($this->stylesheetManagementRegistry->all() as $stylesheet) {
-                $assets->addCssFile($stylesheet);
-            }
-        } else {
-            $assets->addCssFile('bundles/build/admin.css');
+        foreach ($this->managementStylesheets() as $stylesheet) {
+            $assets->addCssFile($stylesheet);
         }
 
         // The guided-project panel has to survive the page loads a project walks the user through, so its mount element goes on every admin page, not just the dashboard - EasyAdmin renders this on all of them (see its layout.html.twig), which spares an override of that layout
         $assets->addHtmlContentToBody($this->guidedProjectMountBuilder->getHtml());
 
         return $assets;
+    }
+
+    // In dev, keeps each bundle's stylesheet separate for instant reload on every CSS edit; in prod, links to the single file compiled by StylesheetCacheWarmer (c975L/UiBundle) instead. That file is written outside any asset-manifest build step, so asset() has no way to know a later warmup changed it - and it sits under /bundles/build/, which the sites' .htaccess serves "immutable" for a year, so an admin's browser would otherwise keep the stylesheet it first loaded whatever ships afterwards. Its own mtime is appended as a cache-busting query param instead, exactly as UiBundle's StylesheetExtension does for the front-office site.css. Falls back to the per-bundle list when that compiled file doesn't exist yet (the first request after a deploy, before cache:warmup has run) rather than linking a 404 and losing every back-office style at once
+    // @return string[]
+    private function managementStylesheets(): array
+    {
+        $compiledMtime = $this->debug ? false : @filemtime($this->projectDir . '/public/bundles/build/admin.css');
+        if (false !== $compiledMtime) {
+            return ['bundles/build/admin.css?v=' . $compiledMtime];
+        }
+
+        return array_map($this->addCacheBustingParam(...), $this->stylesheetManagementRegistry->all());
+    }
+
+    // Same reasoning for the per-bundle files: assets:install copies them into public/ at a path that never changes either, and the sites serve text/css with a one-year expiry, so a back-office CSS fix stays invisible until a hard reload. An absolute URL (a CDN stylesheet) has no local file and is returned untouched
+    private function addCacheBustingParam(string $stylesheet): string
+    {
+        $mtime = @filemtime($this->projectDir . '/public/' . $stylesheet);
+
+        return false === $mtime ? $stylesheet : $stylesheet . '?v=' . $mtime;
     }
 
     public function configureMenuItems(): iterable

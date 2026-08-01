@@ -220,7 +220,7 @@
             </trans-unit>
             <trans-unit id="VM4hYMi">
                 <source>flash.health_check_queued</source>
-                <target>Chequeo de salud iniciado en segundo plano: %count% comprobación(es) en cola. Los resultados aparecerán aquí a medida que se completen.</target>
+                <target>Chequeo de salud iniciado en segundo plano: %count% comprobación(es) en cola</target>
             </trans-unit>
             <trans-unit id="Adv4I1e">
                 <source>flash.health_check_run_invalid_token</source>
@@ -634,6 +634,10 @@
                 <source>label.health_check_advice_details</source>
                 <target>Ver el detalle (%count%)</target>
             </trans-unit>
+            <trans-unit id="0NB_2s2">
+                <source>label.health_check_advice_fix_link</source>
+                <target>Corregir</target>
+            </trans-unit>
             <trans-unit id="hXk1bLK">
                 <source>label.health_check_advice_link</source>
                 <target>Ver el informe completo</target>
@@ -733,6 +737,14 @@
             <trans-unit id="6XIJPsF">
                 <source>label.health_check_pages_heading</source>
                 <target>Páginas</target>
+            </trans-unit>
+            <trans-unit id="q59PHEf">
+                <source>label.health_check_run_progress</source>
+                <target>Chequeo de salud en curso: %done%/%total% comprobación(es) terminada(s). Esta página se actualiza sola.</target>
+            </trans-unit>
+            <trans-unit id="9jWwVLR">
+                <source>label.health_check_run_timed_out</source>
+                <target>Algunas comprobaciones siguen sin devolver nada: compruebe que el worker Messenger está en marcha (messenger:consume) y vuelva a lanzar el chequeo.</target>
             </trans-unit>
             <trans-unit id="EAt9YJO">
                 <source>label.health_check_site_heading</source>

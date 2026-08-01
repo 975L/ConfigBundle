@@ -220,7 +220,7 @@
             </trans-unit>
             <trans-unit id="VM4hYMi">
                 <source>flash.health_check_queued</source>
-                <target>Bilan de santé lancé en arrière-plan : %count% contrôle(s) mis en file. Les résultats apparaîtront ici au fur et à mesure.</target>
+                <target>Bilan de santé lancé en arrière-plan : %count% contrôle(s) mis en file</target>
             </trans-unit>
             <trans-unit id="Adv4I1e">
                 <source>flash.health_check_run_invalid_token</source>
@@ -634,6 +634,10 @@
                 <source>label.health_check_advice_details</source>
                 <target>Voir le détail (%count%)</target>
             </trans-unit>
+            <trans-unit id="0NB_2s2">
+                <source>label.health_check_advice_fix_link</source>
+                <target>Corriger</target>
+            </trans-unit>
             <trans-unit id="hXk1bLK">
                 <source>label.health_check_advice_link</source>
                 <target>Voir le rapport complet</target>
@@ -733,6 +737,14 @@
             <trans-unit id="6XIJPsF">
                 <source>label.health_check_pages_heading</source>
                 <target>Pages</target>
+            </trans-unit>
+            <trans-unit id="q59PHEf">
+                <source>label.health_check_run_progress</source>
+                <target>Bilan de santé en cours : %done%/%total% contrôle(s) terminé(s). Cette page se met à jour toute seule.</target>
+            </trans-unit>
+            <trans-unit id="9jWwVLR">
+                <source>label.health_check_run_timed_out</source>
+                <target>Des contrôles n'ont toujours rien renvoyé : vérifiez que le worker Messenger tourne (messenger:consume), puis relancez le bilan.</target>
             </trans-unit>
             <trans-unit id="EAt9YJO">
                 <source>label.health_check_site_heading</source>

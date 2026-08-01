@@ -17,6 +17,7 @@ use c975L\ConfigBundle\Management\BackupResultRecorder;
 use c975L\ConfigBundle\Management\DatabaseLoadHealthCheckProvider;
 use c975L\ConfigBundle\Management\HealthCheckAdviceBuilder;
 use c975L\ConfigBundle\Management\HealthCheckRunner;
+use c975L\ConfigBundle\Management\HealthCheckRunProgress;
 use c975L\ConfigBundle\Management\HealthCheckTrendChartBuilder;
 use c975L\ConfigBundle\Repository\HealthCheckResultRepository;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
@@ -25,6 +26,7 @@ use c975L\ConfigBundle\Service\Export\TableExporter;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Messenger\RunCommandMessage;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -49,6 +51,7 @@ class HealthCheckController extends AbstractController
         private readonly ConfigServiceInterface $configService,
         private readonly TranslatorInterface $translator,
         private readonly MessageBusInterface $messageBus,
+        private readonly HealthCheckRunProgress $healthCheckRunProgress,
     ) {
     }
 
@@ -57,6 +60,10 @@ class HealthCheckController extends AbstractController
     public function index(): Response
     {
         $this->denyAccessUnlessGranted($this->configService->get('site-role-admin'));
+
+        // The run this admin queued, while it still has jobs to land - handed to the template so the progress banner survives the reloads it triggers itself (see progress() and the health-check-progress controller), a flash message being shown once and gone. Polled before the results are read, and not after: a row landing between the two would otherwise be missing from the tables while the run had just been seen finishing, leaving a stale page with no banner left to reload it
+        $runProgress = $this->healthCheckRunProgress->poll();
+        $runProgress = $runProgress && !$runProgress['finished'] ? $runProgress : null;
 
         $results = $this->healthCheckResultRepository->findLatestPerUrlAndKind();
 
@@ -89,6 +96,7 @@ class HealthCheckController extends AbstractController
                 )),
                 // Built once across every result (site + page) and handed to both table includes below - the same shared table (health_check/_table.html.twig) any CRUD's own "Health check" tab uses, so advice reads identically everywhere
                 'advice' => $this->healthCheckAdviceBuilder->build($results),
+                'runProgress' => $runProgress,
             ]
         );
     }
@@ -106,6 +114,9 @@ class HealthCheckController extends AbstractController
         if ($this->isCsrfTokenValid(self::RUN_ROUTE, $request->request->get('_token'))) {
             $kinds = $this->healthCheckRunner->getKinds();
 
+            // Before the first dispatch, never after: a worker already listening records its first kind while this loop is still running, and a sync transport runs every job inside dispatch() itself - started afterwards, the run would be following a moment its own results already predate, and could never be seen finishing
+            $this->healthCheckRunProgress->start($kinds);
+
             foreach ($kinds as $kind) {
                 $this->messageBus->dispatch(new RunCommandMessage(HealthCheckRunCommand::NAME . ' --kind=' . $kind));
             }
@@ -120,6 +131,17 @@ class HealthCheckController extends AbstractController
         }
 
         return $this->redirectToRoute('management_health_check_index');
+    }
+
+    // How far along the run this admin queued is, polled by the progress banner (see the health-check-progress Stimulus controller) - the jobs run in a Messenger worker, so the page has no other way of telling a run still going from one whose worker was never started. Returns a finished run when there's nothing being followed, the banner then having nothing left to wait for
+    #[AdminRoute(path: '/health-check/progress', name: 'health_check_progress')]
+    public function progress(): JsonResponse
+    {
+        $this->denyAccessUnlessGranted($this->configService->get('site-role-admin'));
+
+        return $this->json(
+            $this->healthCheckRunProgress->poll() ?? ['done' => 0, 'total' => 0, 'finished' => true, 'timedOut' => false]
+        );
     }
 
     // Dated CSV snapshot of the current results (one row per url/kind, see HealthCheckResultRepository::findLatestPerUrlAndKind()) - the audit-trail artefact for accessibility declarations (RGAA/EAA): each row already carries its own checkedAt, and TableExporter dates the filename itself, so re-exporting weekly/monthly builds a paper trail without any extra bookkeeping here. Unlike index(), site-wide kinds (see SITE_WIDE_KINDS) are deliberately kept in the export rather than split out - completeness matters more than the dashboard's readability concern here, and the 'kind' column already discloses which rows are site-wide

@@ -67,8 +67,13 @@
                                 {% for item in advice[adviceKey] %}
                                     <li>
                                         {{ item.text }}
+                                        {# An absolute url is the external tool's own report for this page (PageSpeed, the W3C validators...), opened in its own tab; a relative one points back into the back office at the very field/screen to fix (see PageHealthCheckAdviceBuilder::fieldFocusUrl()), which belongs in the current tab and reads as an edit link, like the offender lists below #}
                                         {% if item.url %}
-                                            <a href="{{ item.url }}" target="_blank" rel="noopener">{{ 'label.health_check_advice_link'|trans({}, 'config') }}</a>
+                                            {% if item.url starts with 'http' %}
+                                                <a href="{{ item.url }}" target="_blank" rel="noopener">{{ 'label.health_check_advice_link'|trans({}, 'config') }}</a>
+                                            {% else %}
+                                                <a href="{{ item.url }}" class="health-check-edit-link"><i class="fa fa-pencil"></i> {{ 'label.health_check_advice_fix_link'|trans({}, 'config') }}</a>
+                                            {% endif %}
                                         {% endif %}
                                         {# The individual offenders behind a "%count% of them" line (each image without alt text, each broken link...), collapsed: a page with a dozen of them would otherwise push every following row off screen. Each carries its own optional link - for SiteBundle, straight to the block holding it #}
                                         {% if item.items|default([]) is not empty %}

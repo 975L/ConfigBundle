@@ -2,6 +2,7 @@ import { startStimulusApp } from '@symfony/stimulus-bundle';
 import ChartjsController from '@symfony/ux-chartjs';
 import { Chart } from 'chart.js';
 import GuidedProjectController from './js/guided-project.js';
+import HealthCheckProgressController from './js/health-check-progress.js';
 import HealthCheckTableController from './js/health-check-table.js';
 import OnboardingTourController from './js/onboarding-tour.js';
 
@@ -14,6 +15,7 @@ if (!window.__c975lConfigAdminStarted) {
     app.register('onboarding-tour', OnboardingTourController);
     app.register('guided-project', GuidedProjectController);
     app.register('health-check-table', HealthCheckTableController);
+    app.register('health-check-progress', HealthCheckProgressController);
     // render_chart() emits this exact identifier, which this admin app never gets for free from the app's bootstrap
     app.register('symfony--ux-chartjs--chart', ChartjsController);
 

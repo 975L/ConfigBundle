@@ -1,5 +1,25 @@
 # ChangeLog
 
+## v5.17.0
+
+A queued health check now shows how far along it is
+
+- Added `HealthCheckRunProgress`, following the run queued from the Health check page (01/08/2026)
+- Added `HealthCheckResultRepository::findKindsCheckedSince()` (01/08/2026)
+- Added the `management_health_check_progress` route, polled by the banner (01/08/2026)
+- Added the `health-check-progress` Stimulus controller, reloading the page as results land (01/08/2026)
+- Added the progress banner to the Health check page (01/08/2026)
+- A run whose remaining kinds have recorded nothing after 15 minutes is now given up on (01/08/2026)
+- Shortened the `flash.health_check_queued` message (01/08/2026)
+- Added the `label.health_check_run_progress` and `label.health_check_run_timed_out` translations (01/08/2026)
+- Updated the readme's health check section, and added the one on running it at deployment (01/08/2026)
+- Added the `HealthCheckRunProgressTest` case (01/08/2026)
+- `HealthCheckControllerTest` now covers the progress banner, and the order the run follows itself in (01/08/2026)
+- An advice line's relative url now renders as an edit link back into the back office (01/08/2026)
+- Added the `label.health_check_advice_fix_link` translation (01/08/2026)
+- The management stylesheets now carry their own mtime as a cache-busting query param (01/08/2026)
+- `DashboardControllerTest` now covers that cache-busting param (01/08/2026)
+
 ## v5.16.1
 
 A shared config file no longer fails on the bundles a site doesn't install

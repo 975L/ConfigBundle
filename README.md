@@ -925,6 +925,20 @@ php bin/console c975l:health-check:run --kind=pagespeed --kind=w3c        # only
 
 `--frequency` is **what a cron entry should ask for**: each provider declares its own cadence (see [Scheduling a provider](#scheduling-a-provider) below), so installing or removing a bundle never means editing a schedule. `--kind` pins a run to named providers, which is handy from the command line but brittle in a cron entry — a kind no installed bundle provides is skipped, and the command now says so rather than reporting a silent success.
 
+**Run it at the end of a deployment**, as its last step, after the assets are compiled and the cache is warmed:
+
+```bash
+nohup php bin/console c975l:health-check:run --frequency=weekly --env=prod > var/log/health-check.log 2>&1 &
+```
+
+`nohup` and the trailing `&` matter over ssh: the run calls the validators once per page and takes minutes, which no deploy script should wait for, and a plain `&` job is killed with the session that spawned it.
+
+`--frequency=weekly` rather than no filter at all: a provider declaring itself monthly did so because it is heavy — GalleryBundle holds one url per photo — and a deployment is no reason to make it heavy more often. Everything a deployment actually invalidates (markup, stylesheets, headers, redirects) is weekly by default, so the filter costs nothing here and keeps a push to `main` from validating a few thousand photo pages.
+
+A deployment is the one moment the site's markup, stylesheets and headers all change at once, and it's rare — which is exactly what makes it worth a full run. Between two deployments the weekly cadence is enough. Saving a page is *not* such a moment: composing a page means saving it a dozen times to see the rendering, and each save would queue a run for a state nobody has finished editing.
+
+Left to the cadence alone, a page shows the verdict of a run up to a week old, and the "full report" link next to it revalidates *live* — so a defect fixed this morning reads as the validator contradicting the dashboard. `lastCheckedAt`, above the table, is what tells the two apart, and `c975l/site-bundle`'s advice lines list the validator's own messages **as that run recorded them** rather than as they are now.
+
 There's also a **"Run health check now"** button directly on the page. It doesn't run the check in your request: it dispatches one `RunCommandMessage` per registered kind (`c975l:health-check:run --kind=…`, the very command above) and returns immediately. A single provider can hold thousands of urls — a gallery declares one per photo — and a run that times out mid-way persists nothing at all.
 
 This needs `RunCommandMessage` routed to an asynchronous transport, and a worker consuming it:
@@ -941,7 +955,11 @@ framework:
 php bin/console messenger:consume async scheduler_site
 ```
 
-If it isn't routed, Messenger handles the message synchronously — the button then behaves as it did before, blocking the request. Results appear on the page as each job completes, and `HealthCheckAlertProvider` raises what needs attention (errors, then warnings, with the date of the last run) on the dashboard and on this page, which is what tells you a queued run is done.
+A queued run shows a **progress banner** ("3/12 check(s) done") that reloads the page as each job records its results, so the tables fill in under it and the banner disappears on its own once the run is over — the alternative being a page that states the results are coming and never moves again, with no way of telling a run still going from a worker that was never started. Progress is read off the recorded rows themselves (`HealthCheckRunProgress`, polling `/management/health-check/progress` every 5 seconds), the rows being the only thing the web request and the worker share, and the queued run is kept in the session, so it's followed by the admin who started it and by no one else. A run whose remaining kinds have recorded nothing after 15 minutes is given up on, the banner then saying to check the worker: a provider with no url to check at all (a gallery with no photo yet) records nothing to be counted, and would otherwise be waited on forever.
+
+If it isn't routed, Messenger handles the message synchronously — the button then behaves as it did before, blocking the request, and the page comes back with every result already in: there is nothing left for the banner to wait on, so none is shown.
+
+`HealthCheckAlertProvider` raises what needs attention (errors, then warnings, with the date of the last run) on the dashboard and on this page.
 
 **History, not just a snapshot**: every run appends new `HealthCheckResult` rows rather than overwriting — the page itself only shows the latest one per (url, kind), but the full history feeds a trend chart (ok/warning/error counts over time, via `symfony/ux-chartjs` — a regular Composer dependency, Flex wires it up automatically) and an **Export (CSV)** button producing a dated snapshot, useful as an audit-trail artefact (e.g. accessibility declarations). No pruning is done automatically — weekly/monthly runs across a site's pages stay a modest row count for years; add your own cleanup if that assumption stops holding for a particular site.
 
@@ -1237,7 +1255,7 @@ Make sure your bundle's `services.yaml` includes the `Management/` folder in its
 
 Always build the key with `HealthCheckAdviceBuilder::key()` rather than concatenating it yourself — the table looks each row's advice up under that exact key, and a mismatch shows no advice at all rather than raising an error. Keying by `kind` alone isn't enough: the Health check page lists one row per url *and* per kind.
 
-Each line needs a `text`, and may carry a `url` (rendered as a link next to the text) and an `items` list. `items` is for a line that summarizes several offenders ("3 images are missing an alt text") — each entry needs its own `text`, and may carry a `url` plus the `label` for that link (falling back to a pencil icon alone), so a dozen offenders stay collapsed instead of pushing the following rows off screen.
+Each line needs a `text`, and may carry a `url` (rendered as a link next to the text) and an `items` list. An absolute `url` is taken as the external tool's own report for that page (PageSpeed, the W3C validators…) and opens in its own tab as "See full report"; a relative one is taken as pointing back into the back office at the very screen or field to fix, and opens in the current tab as an edit link. Adding `focusField=<property>` to such a url makes the target form open that field's own tab, scroll to it and focus it (`field-focus.js`, c975L/UiBundle) — the same idea as the `focusBlock` param, for a plain form field rather than a block row. `items` is for a line that summarizes several offenders ("3 images are missing an alt text") — each entry needs its own `text`, and may carry a `url` plus the `label` for that link (falling back to a pencil icon alone), so a dozen offenders stay collapsed instead of pushing the following rows off screen.
 
 `HealthCheckAdviceBuilder::build()` merges every registered provider's advice; two providers with something to say about the same result have their lines appended, neither overwrites the other. It's shared by the dashboard "Health check" page and any CRUD's own "Health check" tab (both render through the same `health_check/_table.html.twig`), so advice reads identically everywhere.
 

@@ -30,6 +30,16 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class DashboardControllerTest extends TestCase
 {
+    private ?string $projectDir = null;
+
+    protected function tearDown(): void
+    {
+        if (null !== $this->projectDir) {
+            $this->removeDirectory($this->projectDir);
+            $this->projectDir = null;
+        }
+    }
+
     private function createController(bool $debug, array $managementStylesheets, array $configs = [], string $guidedProjectMount = ''): DashboardController
     {
         $guidedProjectMountBuilder = $this->createStub(GuidedProjectMountBuilder::class);
@@ -66,7 +76,38 @@ class DashboardControllerTest extends TestCase
             $this->createStub(TranslatorInterface::class),
             $packages,
             $debug,
+            $this->projectDir ?? sys_get_temp_dir(),
         );
+    }
+
+    // The controller stamps each stylesheet with its own mtime, so the files have to actually exist somewhere - a throwaway project dir holding just the ones a test cares about
+    private function createProjectDir(array $publicFiles): string
+    {
+        $this->projectDir = sys_get_temp_dir() . '/c975l-dashboard-' . uniqid('', true);
+        foreach ($publicFiles as $path) {
+            $fullPath = $this->projectDir . '/public/' . $path;
+            @mkdir(\dirname($fullPath), 0777, true);
+            file_put_contents($fullPath, '/* css */');
+        }
+
+        return $this->projectDir;
+    }
+
+    private function removeDirectory(string $directory): void
+    {
+        if (!is_dir($directory)) {
+            return;
+        }
+
+        foreach (scandir($directory) as $entry) {
+            if ('.' === $entry || '..' === $entry) {
+                continue;
+            }
+            $path = $directory . '/' . $entry;
+            is_dir($path) ? $this->removeDirectory($path) : unlink($path);
+        }
+
+        rmdir($directory);
     }
 
     private function getMadeByLogoSrc(DashboardController $controller): ?string
@@ -84,23 +125,60 @@ class DashboardControllerTest extends TestCase
     // In dev, each bundle-contributed management stylesheet is added separately, for instant reload on every CSS edit
     public function testConfigureAssetsAddsEachManagementStylesheetSeparatelyInDebug(): void
     {
+        $this->createProjectDir(['bundles/c975lconfig/css/management.min.css']);
         $controller = $this->createController(true, ['bundles/c975lconfig/css/management.min.css']);
 
         $cssPaths = array_keys($controller->configureAssets()->getAsDto()->getCssAssets());
 
-        $this->assertContains('bundles/c975lconfig/css/management.min.css', $cssPaths);
-        $this->assertNotContains('bundles/build/admin.css', $cssPaths);
+        $this->assertNotEmpty(preg_grep('#^bundles/c975lconfig/css/management\.min\.css\?v=#', $cssPaths));
+        $this->assertEmpty(preg_grep('#^bundles/build/admin\.css#', $cssPaths));
     }
 
     // Outside debug, links to the single file compiled by StylesheetCacheWarmer (c975L/UiBundle) instead of the per-bundle list
     public function testConfigureAssetsAddsCompiledAdminStylesheetWhenNotDebug(): void
     {
+        $projectDir = $this->createProjectDir(['bundles/build/admin.css']);
         $controller = $this->createController(false, ['bundles/c975lconfig/css/management.min.css']);
 
         $cssPaths = array_keys($controller->configureAssets()->getAsDto()->getCssAssets());
 
-        $this->assertContains('bundles/build/admin.css', $cssPaths);
-        $this->assertNotContains('bundles/c975lconfig/css/management.min.css', $cssPaths);
+        $this->assertContains('bundles/build/admin.css?v=' . filemtime($projectDir . '/public/bundles/build/admin.css'), $cssPaths);
+        $this->assertEmpty(preg_grep('#^bundles/c975lconfig#', $cssPaths));
+    }
+
+    // /bundles/build/ is served "immutable" for a year by the sites' .htaccess and the compiled file is written outside any asset-manifest build step - without its mtime on the url, an admin's browser keeps the stylesheet it first loaded whatever ships afterwards
+    public function testCompiledAdminStylesheetCarriesItsOwnMtimeAsCacheBuster(): void
+    {
+        $projectDir = $this->createProjectDir(['bundles/build/admin.css']);
+        $compiledPath = $projectDir . '/public/bundles/build/admin.css';
+        touch($compiledPath, 1750000000);
+
+        $cssPaths = array_keys($this->createController(false, [])->configureAssets()->getAsDto()->getCssAssets());
+
+        $this->assertContains('bundles/build/admin.css?v=1750000000', $cssPaths);
+    }
+
+    // The first request after a deploy, before cache:warmup has written the compiled file - linking it anyway would 404 and lose every back-office style at once
+    public function testConfigureAssetsFallsBackToThePerBundleListWhenTheCompiledFileIsMissing(): void
+    {
+        $this->createProjectDir(['bundles/c975lconfig/css/management.min.css']);
+        $controller = $this->createController(false, ['bundles/c975lconfig/css/management.min.css']);
+
+        $cssPaths = array_keys($controller->configureAssets()->getAsDto()->getCssAssets());
+
+        $this->assertNotEmpty(preg_grep('#^bundles/c975lconfig/css/management\.min\.css\?v=#', $cssPaths));
+        $this->assertEmpty(preg_grep('#^bundles/build/admin\.css#', $cssPaths));
+    }
+
+    // A CDN stylesheet has no local file to stat - returned untouched rather than dropped or stamped with a bogus version
+    public function testAnAbsoluteStylesheetUrlIsLeftUntouched(): void
+    {
+        $this->createProjectDir([]);
+        $controller = $this->createController(true, ['https://cdn.example.com/cookieconsent.min.css']);
+
+        $cssPaths = array_keys($controller->configureAssets()->getAsDto()->getCssAssets());
+
+        $this->assertContains('https://cdn.example.com/cookieconsent.min.css', $cssPaths);
     }
 
     // The guided-project panel has to survive the page loads a project walks the user through, so its mount element goes into the body of every admin page rather than into the dashboard template alone - EasyAdmin renders these on all of them, which spares an override of its layout

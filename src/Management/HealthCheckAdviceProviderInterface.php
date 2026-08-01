@@ -20,6 +20,9 @@ interface HealthCheckAdviceProviderInterface
     /**
      * Keyed by HealthCheckAdviceBuilder::key(), a same-kind result existing per checked url.
      * Optional "items": the individual offenders behind a "%count% of them" line, each with its own link.
+     * A line's "url" is rendered either way round: an absolute one is the external tool's own report
+     * for that page (PageSpeed, the W3C validators...) and opens in its own tab, a relative one points
+     * back into the back office at the screen/field to fix and opens in the current one, as an edit link.
      *
      * @param HealthCheckResult[] $results
      *

@@ -16,6 +16,21 @@
                 "en": "Your site can now report what it runs and what its last health check found to a dashboard of your choosing, so several sites can be watched from one place - nothing leaves the site until you fill in the destination in the settings",
                 "fr": "Votre site peut désormais rapporter ce qu'il fait tourner et ce qu'a trouvé son dernier bilan de santé vers un tableau de bord de votre choix, ce qui permet de surveiller plusieurs sites au même endroit - rien ne quitte le site tant que vous n'avez pas renseigné la destination dans les paramètres",
                 "es": "Su sitio ahora puede informar de lo que ejecuta y de lo que encontró su último estado de salud a un panel de su elección, lo que permite vigilar varios sitios desde un mismo lugar - nada sale del sitio hasta que indique el destino en los ajustes"
+            },
+            {
+                "en": "Starting a health check now shows how far along it is, the page filling in the results on its own as they arrive",
+                "fr": "Lancer un bilan de santé affiche désormais son avancement, la page se complétant d'elle-même au fur et à mesure des résultats",
+                "es": "Iniciar un estado de salud ahora muestra su avance, y la página se va completando sola a medida que llegan los resultados"
+            },
+            {
+                "en": "Health check advice now links straight to the screen and field to correct, rather than only to the external report",
+                "fr": "Les conseils du bilan de santé renvoient désormais directement à l'écran et au champ à corriger, et plus seulement au rapport externe",
+                "es": "Los consejos del estado de salud ahora enlazan directamente con la pantalla y el campo que hay que corregir, y no solo con el informe externo"
+            },
+            {
+                "en": "The back office now picks up its own style updates straight after an update, instead of keeping the old ones until a forced reload",
+                "fr": "Le back-office reprend désormais ses mises à jour de style dès la mise à jour, au lieu de conserver les anciennes jusqu'à un rechargement forcé",
+                "es": "El back office ahora aplica sus actualizaciones de estilo justo después de una actualización, en lugar de conservar las antiguas hasta una recarga forzada"
             }
         ]
     },
