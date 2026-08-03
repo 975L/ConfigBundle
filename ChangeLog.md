@@ -1,6 +1,9 @@
 # ChangeLog
 
-## v6.0.0
+> This bundle's own versioning stopped at `v5.17.1`. It now ships inside `c975l/core-bundle`, whose
+> version numbers apply from here on — the entries below were never published as a `v6.0.0`.
+
+## Unreleased
 
 Accounts, scaffolding and shared plumbing move to the ecosystem root
 

@@ -1,5 +1,15 @@
 # c975L ConfigBundle
 
+> ### ⚠️ This package has moved
+>
+> ConfigBundle now ships inside **[c975l/core-bundle](https://github.com/975L/CoreBundle)**, together with UiBundle — two bundles, one package. **The bundle itself is unchanged**: same `c975L\ConfigBundle\` namespace, same services, same templates, same `bundles.php` entry.
+>
+> ```bash
+> composer require c975l/core-bundle
+> ```
+>
+> Versions up to `v5.17.1` remain installable from this package, forever. This repository is kept for reference only and receives no further releases.
+
 Symfony bundle providing the EasyAdmin dashboard and database-backed configuration at the root of the c975L ecosystem — the shared hub every satellite bundle plugs into for menus, exports/imports, alerts, and other cross-bundle dashboard contributions.
 
 [![GitHub](https://img.shields.io/github/license/975L/ConfigBundle)](https://github.com/975L/ConfigBundle/blob/master/LICENSE)
