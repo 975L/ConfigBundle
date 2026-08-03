@@ -63,14 +63,14 @@ class StatusSendCommand extends Command
 
         // Nothing configured is the default state and a legitimate one: installing the bundle must never make a site talk to a third party. Success rather than failure, so a scheduled entry on a site that opted out doesn't report an error every week
         if ('' === $url) {
-            $io->note('Aucune url de destination configurée ("site-status-url") - rien n\'a été envoyé.');
+            $io->note('No destination url configured ("site-status-url") - nothing was sent.');
 
             return Command::SUCCESS;
         }
 
         // A configured url with no key, on the other hand, is a half-finished setup: sending unauthenticated would either be rejected or, worse, accepted by a receiver that doesn't check
         if ('' === $key) {
-            $io->error('Une url de destination est configurée mais pas de clé ("site-status-key") - envoi annulé.');
+            $io->error('A destination url is configured but no key ("site-status-key") - sending cancelled.');
 
             return Command::INVALID;
         }
@@ -90,12 +90,12 @@ class StatusSendCommand extends Command
         }
 
         if ($statusCode >= 300) {
-            $io->error(sprintf('Le destinataire a répondu %d.', $statusCode));
+            $io->error(sprintf('The recipient answered %d.', $statusCode));
 
             return Command::FAILURE;
         }
 
-        $io->success(sprintf('Rapport envoyé (%d octets, réponse %d).', \strlen(json_encode($report)), $statusCode));
+        $io->success(sprintf('Report sent (%d bytes, answer %d).', \strlen(json_encode($report)), $statusCode));
 
         return Command::SUCCESS;
     }

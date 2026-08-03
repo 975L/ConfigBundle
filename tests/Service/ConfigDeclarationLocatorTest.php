@@ -60,7 +60,7 @@ class ConfigDeclarationLocatorTest extends TestCase
     public function testFindFilesReturnsBundleAndApplicationFiles(): void
     {
         $bundle = $this->dumpBundleFile('site-bundle', [['slug' => 'site-name']]);
-        $theme = $this->dumpBundleFile('site-bundle', [['slug' => 'theme-mode']], 'configs-css.json');
+        $theme = $this->dumpBundleFile('site-bundle', [['slug' => 'theme-mode']], 'configs-extra.json');
         $app = $this->dumpAppFile([['slug' => 'app-own-setting']]);
 
         $files = $this->createLocator()->findFiles();

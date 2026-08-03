@@ -6,6 +6,30 @@
                 <source>description.email_from</source>
                 <target>Correo usado para enviar los correos, ej. contact@example.com</target>
             </trans-unit>
+            <trans-unit id="EZglulM">
+                <source>description.email_from_name</source>
+                <target>Nombre utilizado para enviar las notificaciones desde el sitio.</target>
+            </trans-unit>
+            <trans-unit id="GUWhAGu">
+                <source>description.email_reply_to</source>
+                <target>Dirección de correo para las respuestas (opcional, si no se usa la de envío)</target>
+            </trans-unit>
+            <trans-unit id="3.LDrKO">
+                <source>description.email_reply_to_name</source>
+                <target>Nombre asociado a la dirección de correo de respuesta</target>
+            </trans-unit>
+            <trans-unit id="l3kJ2yN">
+                <source>description.email_to</source>
+                <target>Dirección de correo utilizada para recibir las notificaciones (contacto, pedidos...), ej. contact@example.com</target>
+            </trans-unit>
+            <trans-unit id="O9EjzMB">
+                <source>description.email_to_name</source>
+                <target>Nombre utilizado para recibir las notificaciones desde el sitio.</target>
+            </trans-unit>
+            <trans-unit id="ZDgy5oO">
+                <source>description.site_author</source>
+                <target>El autor que se indicará en los metadatos</target>
+            </trans-unit>
             <trans-unit id="PZrDv2T">
                 <source>description.site_backup_database</source>
                 <target>Nombre de la base de datos MySQL a respaldar</target>
@@ -38,6 +62,42 @@
                 <source>description.site_backup_retention_days</source>
                 <target>Número de días de copias de seguridad conservadas en el servidor. La copia externa debe guardar más, de lo contrario vuelve a descargar lo que acaba de purgar</target>
             </trans-unit>
+            <trans-unit id="maeSbQ2">
+                <source>description.site_contact_email</source>
+                <target>Dirección de correo de contacto pública mostrada en las páginas legales</target>
+            </trans-unit>
+            <trans-unit id="jr97cJF">
+                <source>description.site_contact_phone</source>
+                <target>Número de teléfono de contacto público mostrado en las páginas legales</target>
+            </trans-unit>
+            <trans-unit id="dMwwmjY">
+                <source>description.site_director</source>
+                <target>Nombre del director de publicación (requerido para el aviso legal)</target>
+            </trans-unit>
+            <trans-unit id="_WmaPgG">
+                <source>description.site_director_location</source>
+                <target>Ciudad o departamento de residencia del director de publicación</target>
+            </trans-unit>
+            <trans-unit id="knIwtDt">
+                <source>description.site_dpo</source>
+                <target>Nombre completo del DPO, requerido para la política de privacidad</target>
+            </trans-unit>
+            <trans-unit id="CnwQ.g0">
+                <source>description.site_first_online_date</source>
+                <target>Fecha en que el sitio se puso en línea (AAAA-MM-JJ)</target>
+            </trans-unit>
+            <trans-unit id="8hKkN.f">
+                <source>description.site_hosting_provider</source>
+                <target>Proveedor de alojamiento, mostrado en el aviso legal (HTML permitido)</target>
+            </trans-unit>
+            <trans-unit id="FoJZsKG">
+                <source>description.site_made_by_logo</source>
+                <target>Ruta o URL del logotipo del desarrollador/agencia</target>
+            </trans-unit>
+            <trans-unit id="0vWLzrI">
+                <source>description.site_made_by_url</source>
+                <target>URL del desarrollador/agencia, ej. https://example.com</target>
+            </trans-unit>
             <trans-unit id="wjC9u3K">
                 <source>description.site_maintenance</source>
                 <target>Activa (true) o desactiva (false) el modo mantenimiento</target>
@@ -45,6 +105,26 @@
             <trans-unit id="bFzwYOs">
                 <source>description.site_maintenance_hash</source>
                 <target>Hash utilizado para acceder al sitio en modo mantenimiento (?t=Hash)</target>
+            </trans-unit>
+            <trans-unit id="BIUof2v">
+                <source>description.site_messenger_cleanup_mailto</source>
+                <target>Correo alertado de fallos importantes de envío de Messenger (opcional)</target>
+            </trans-unit>
+            <trans-unit id="2PLJgPq">
+                <source>description.site_messenger_cleanup_retention_days</source>
+                <target>Días de conservación de mensajes Messenger fallidos antes de purgar</target>
+            </trans-unit>
+            <trans-unit id="Sg8q_Ks">
+                <source>description.site_name</source>
+                <target>Nombre del sitio web: ej. Example.com</target>
+            </trans-unit>
+            <trans-unit id="._1mRZ4">
+                <source>description.site_owner</source>
+                <target>Propietario del sitio, mostrado en el aviso legal (HTML permitido)</target>
+            </trans-unit>
+            <trans-unit id="U7Pnm8y">
+                <source>description.site_producer</source>
+                <target>Productor/desarrollador del sitio, mostrado en el aviso legal (HTML permitido)</target>
             </trans-unit>
             <trans-unit id="b8NL53A">
                 <source>description.site_role_admin</source>
@@ -66,9 +146,41 @@
                 <source>description.site_url</source>
                 <target>URL del sitio web, ej. https://example.com</target>
             </trans-unit>
+            <trans-unit id="UfelsWV">
+                <source>description.url_terms_of_use</source>
+                <target>URL de condiciones de uso, ej. https://example.com/pages/terms-of-use</target>
+            </trans-unit>
+            <trans-unit id="hDOR3CX">
+                <source>description.user_roles_available</source>
+                <target>Roles adicionales seleccionables (además de ROLE_USER), array JSON, ej. ["ROLE_ADMIN","ROLE_EDITOR"]</target>
+            </trans-unit>
             <trans-unit id="meevaqA">
                 <source>label.email_from</source>
                 <target>Correo (remitente)</target>
+            </trans-unit>
+            <trans-unit id="uDAy209">
+                <source>label.email_from_name</source>
+                <target>Nombre del correo (remitente)</target>
+            </trans-unit>
+            <trans-unit id="6X_FiKP">
+                <source>label.email_reply_to</source>
+                <target>Correo (responder a)</target>
+            </trans-unit>
+            <trans-unit id="80ersMx">
+                <source>label.email_reply_to_name</source>
+                <target>Nombre del correo (responder a)</target>
+            </trans-unit>
+            <trans-unit id="Tg9g5sJ">
+                <source>label.email_to</source>
+                <target>Correo (destinatario)</target>
+            </trans-unit>
+            <trans-unit id="Tbwp4sB">
+                <source>label.email_to_name</source>
+                <target>Nombre del correo (destinatario)</target>
+            </trans-unit>
+            <trans-unit id="rP1GyPO">
+                <source>label.site_author</source>
+                <target>Autor del sitio</target>
             </trans-unit>
             <trans-unit id="Y1PJ4Y0">
                 <source>label.site_backup_database</source>
@@ -102,6 +214,42 @@
                 <source>label.site_backup_retention_days</source>
                 <target>Retención de copias (días)</target>
             </trans-unit>
+            <trans-unit id="P.LxD.a">
+                <source>label.site_contact_email</source>
+                <target>Correo de contacto</target>
+            </trans-unit>
+            <trans-unit id="lhSx53d">
+                <source>label.site_contact_phone</source>
+                <target>Teléfono de contacto</target>
+            </trans-unit>
+            <trans-unit id="ajJox7S">
+                <source>label.site_director</source>
+                <target>Director de la publicación</target>
+            </trans-unit>
+            <trans-unit id="_7GCpj.">
+                <source>label.site_director_location</source>
+                <target>Ubicación del director</target>
+            </trans-unit>
+            <trans-unit id="neSsMO1">
+                <source>label.site_dpo</source>
+                <target>Delegado de Protección de Datos (DPO)</target>
+            </trans-unit>
+            <trans-unit id="svwpoO7">
+                <source>label.site_first_online_date</source>
+                <target>Fecha de puesta en línea del sitio</target>
+            </trans-unit>
+            <trans-unit id="aCpqS8A">
+                <source>label.site_hosting_provider</source>
+                <target>Proveedor de alojamiento del sitio</target>
+            </trans-unit>
+            <trans-unit id="dw.E02A">
+                <source>label.site_made_by_logo</source>
+                <target>Logotipo del desarrollador</target>
+            </trans-unit>
+            <trans-unit id="E1ZJDYD">
+                <source>label.site_made_by_url</source>
+                <target>URL del desarrollador</target>
+            </trans-unit>
             <trans-unit id="LXzR.TR">
                 <source>label.site_maintenance</source>
                 <target>Mantenimiento del sitio</target>
@@ -109,6 +257,26 @@
             <trans-unit id="xqSakcb">
                 <source>label.site_maintenance_hash</source>
                 <target>Hash de mantenimiento del sitio</target>
+            </trans-unit>
+            <trans-unit id="uU8a068">
+                <source>label.site_messenger_cleanup_mailto</source>
+                <target>Email de alerta de Messenger</target>
+            </trans-unit>
+            <trans-unit id="mLhc7yZ">
+                <source>label.site_messenger_cleanup_retention_days</source>
+                <target>Retención de fallos de Messenger (días)</target>
+            </trans-unit>
+            <trans-unit id="rK0YMvt">
+                <source>label.site_name</source>
+                <target>Nombre del sitio</target>
+            </trans-unit>
+            <trans-unit id="hbt28u1">
+                <source>label.site_owner</source>
+                <target>Propietario del sitio</target>
+            </trans-unit>
+            <trans-unit id="5YTsC_J">
+                <source>label.site_producer</source>
+                <target>Productor del sitio</target>
             </trans-unit>
             <trans-unit id="z_rPP2B">
                 <source>label.site_role_admin</source>
@@ -129,6 +297,14 @@
             <trans-unit id="rDTDQ70">
                 <source>label.site_url</source>
                 <target>URL del sitio</target>
+            </trans-unit>
+            <trans-unit id="jkiAkco">
+                <source>label.url_terms_of_use</source>
+                <target>URL de las condiciones de uso</target>
+            </trans-unit>
+            <trans-unit id="CPUCRXd">
+                <source>label.user_roles_available</source>
+                <target>Roles de usuario disponibles</target>
             </trans-unit>
         </body>
     </file>

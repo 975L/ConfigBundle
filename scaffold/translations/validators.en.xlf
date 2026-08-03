@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" target-language="en" datatype="plaintext" original="validators.en.xlf">
+        <body>
+            <trans-unit id="UhNkXBh">
+                <source>text.agree_terms</source>
+                <target>You should agree to our terms.</target>
+            </trans-unit>
+            <trans-unit id="8bvxYic">
+                <source>text.email_not_valid</source>
+                <target>Please enter a valid email address</target>
+            </trans-unit>
+            <trans-unit id="DIc4dyr">
+                <source>text.email_required</source>
+                <target>Please enter your email</target>
+            </trans-unit>
+            <trans-unit id="yP67Xj6">
+                <source>text.email_taken</source>
+                <target>There is already an account with this email</target>
+            </trans-unit>
+            <trans-unit id="DY8kkID">
+                <source>text.password_complexity</source>
+                <target>Your password must be at least 8 characters long and include one lowercase letter, one uppercase letter, one digit and one special character</target>
+            </trans-unit>
+            <trans-unit id="TaG4lmE">
+                <source>text.password_max_length</source>
+                <target>Your password should be at most {{ limit }} characters</target>
+            </trans-unit>
+            <trans-unit id="epDiKHK">
+                <source>text.password_min_length</source>
+                <target>Your password should be at least {{ limit }} characters</target>
+            </trans-unit>
+            <trans-unit id="G1fcoic">
+                <source>text.password_mismatch</source>
+                <target>The password fields must match.</target>
+            </trans-unit>
+            <trans-unit id="aK3FX9r">
+                <source>text.password_required</source>
+                <target>Please enter a password</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

@@ -1,0 +1,28 @@
+[
+    {
+        "slug": "creer-redirection",
+        "title": {
+            "fr": "Créer une redirection",
+            "en": "Create a redirect",
+            "es": "Crear una redirección"
+        },
+        "body": {
+            "fr": "Menu **Gestion → Redirections**, bouton de création. Renseigner le **Chemin source** (ex. /ancienne-page) et l'**URL de destination** (absolue ou chemin relatif), puis cocher **Permanent (301)** pour une redirection SEO permanente (décoché = temporaire 302). Enregistrer.\nQuand une Page existante est renommée (changement de slug), une redirection 301 de l'ancien slug vers le nouveau est créée automatiquement - inutile de la créer à la main dans ce cas. En revanche, supprimer une Page ne crée aucune redirection automatique.",
+            "en": "Menu **Management → Redirects**, create button. Fill in the **Source path** (e.g. /old-page) and the **Destination URL** (absolute or relative path), then check **Permanent (301)** for a permanent SEO redirect (unchecked = temporary 302). Save.\nWhen an existing Page is renamed (slug change), a 301 redirect from the old slug to the new one is created automatically - no need to create it by hand in that case. Deleting a Page, however, doesn't create any redirect automatically.",
+            "es": "Menú **Gestión → Redirecciones**, botón de creación. Rellenar la **Ruta de origen** (p. ej. /pagina-antigua) y la **URL de destino** (absoluta o ruta relativa), y marcar **Permanente (301)** para una redirección SEO permanente (sin marcar = temporal 302). Guardar.\nCuando se renombra una Página existente (cambio de slug), se crea automáticamente una redirección 301 del slug antiguo al nuevo - no hace falta crearla a mano en ese caso. En cambio, eliminar una Página no crea ninguna redirección automática."
+        }
+    },
+    {
+        "slug": "gerer-utilisateur",
+        "title": {
+            "fr": "Gérer un utilisateur (rôles, activation)",
+            "en": "Manage a user (roles, enabling)",
+            "es": "Gestionar un usuario (roles, activación)"
+        },
+        "body": {
+            "fr": "Menu **Gestion → Utilisateurs**. Cet écran ne permet pas de créer un compte (l'inscription se fait côté public, avec vérification d'email) : il sert uniquement à modifier ou supprimer un compte existant. Cliquer sur **Modifier** pour changer les **Rôles** (ROLE_EDITOR, ROLE_ADMIN, et ROLE_SUPER_ADMIN si vous êtes vous-même Super Admin) ou décocher **Is enabled** pour bloquer la connexion d'un compte sans le supprimer. Le mot de passe n'est jamais visible ni modifiable depuis cet écran.",
+            "en": "Menu **Management → Users**. This screen doesn't let you create an account (registration happens on the public side, with email verification): it only lets you edit or delete an existing account. Click **Edit** to change the **Roles** (ROLE_EDITOR, ROLE_ADMIN, and ROLE_SUPER_ADMIN if you're a Super Admin yourself) or uncheck **Is enabled** to block an account's login without deleting it. The password is never visible or editable from this screen.",
+            "es": "Menú **Gestión → Usuarios**. Esta pantalla no permite crear una cuenta (el registro se hace en el lado público, con verificación de email): solo sirve para editar o eliminar una cuenta ya existente. Hacer clic en **Editar** para cambiar los **Roles** (ROLE_EDITOR, ROLE_ADMIN, y ROLE_SUPER_ADMIN si usted mismo es Super Admin) o desmarcar **Is enabled** para bloquear el inicio de sesión de una cuenta sin eliminarla. La contraseña nunca es visible ni editable desde esta pantalla."
+        }
+    }
+]

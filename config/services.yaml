@@ -6,7 +6,10 @@ services:
 
     c975L\ConfigBundle\:
         resource: '../src/'
-        exclude: '../src/{DependencyInjection,Entity}'
+        # Security/SessionNonceGenerator excluded: it implements a NelmioSecurityBundle interface, so its class isn't even autoloadable without that optional bundle - registered separately in services_nelmio.yaml (see c975LConfigBundle::loadExtension)
+        # Management/DeclaredUrlsHealthCheckProvider excluded: it takes one SitemapProviderInterface, which has no single implementation to autowire - DeclaredUrlsHealthCheckPass registers one instance per sitemap provider found in the container
+        # Test excluded: those classes extend PHPUnit's TestCase, a require-dev dependency absent in production - the resource scan reflects on every class it finds, so leaving them in would fail the container compilation of every consuming app
+        exclude: '../src/{DependencyInjection,Entity,Messenger,Test,Management/DeclaredUrlsHealthCheckProvider.php,Security/SessionNonceGenerator.php}'
 
     c975L\ConfigBundle\Management\MenuBuilder:
         arguments:
@@ -64,6 +67,10 @@ services:
         arguments:
             $dashboardWidgetProviders: !tagged_iterator c975l.dashboard_widget_provider
 
+    c975L\ConfigBundle\Management\ContentOffenceLocatorRegistry:
+        arguments:
+            $locators: !tagged_iterator c975l.content_offence_locator
+
     c975L\ConfigBundle\Management\HealthCheckRunner:
         arguments:
             $healthCheckProviders: !tagged_iterator c975l.health_check_provider
@@ -75,6 +82,11 @@ services:
     c975L\ConfigBundle\Management\ImportmapRegistry:
         arguments:
             $providers: !tagged_iterator c975l.importmap_provider
+
+    # An app without framework.messenger.failure_transport has no "messenger.transport.failed" service at all, and a hard reference would break its container compilation - "@?" leaves the receiver null there, which only disables retrying a failed message, everything else going through the Doctrine connection
+    c975L\ConfigBundle\Service\MessengerFailedMessageService:
+        arguments:
+            $failureReceiver: '@?messenger.transport.failed'
 
     c975L\ConfigBundle\Controller\Management\DashboardController:
         tags: ['controller.service_arguments']

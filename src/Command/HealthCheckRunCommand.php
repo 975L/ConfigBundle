@@ -48,7 +48,7 @@ class HealthCheckRunCommand extends Command
 
         $frequency = $input->getOption('frequency');
         if (null !== $frequency && !\in_array($frequency, AsHealthCheck::FREQUENCIES, true)) {
-            $io->error(sprintf('Fréquence "%s" inconnue - attendu : %s.', $frequency, implode(', ', AsHealthCheck::FREQUENCIES)));
+            $io->error(sprintf('Unknown frequency "%s" - expected: %s.', $frequency, implode(', ', AsHealthCheck::FREQUENCIES)));
 
             return Command::INVALID;
         }
@@ -58,28 +58,28 @@ class HealthCheckRunCommand extends Command
         // A kind nobody provides used to be skipped without a word, so a cron entry naming a bundle that is not installed (or a provider since renamed) ran for nothing, week after week, and said "success"
         if ($unknown = array_diff($kinds, $this->healthCheckRunner->getKinds())) {
             $io->warning(sprintf(
-                'Kind(s) sans provider enregistré, donc ignoré(s) : %s. Disponibles : %s.',
+                'Kind(s) with no registered provider, hence skipped: %s. Available: %s.',
                 implode(', ', $unknown),
-                implode(', ', $this->healthCheckRunner->getKinds()) ?: 'aucun',
+                implode(', ', $this->healthCheckRunner->getKinds()) ?: 'none',
             ));
         }
 
         $counts = $this->healthCheckRunner->run($kinds, $frequency);
 
-        // Nothing ran: tells apart a site with no provider at all from a filter that matched none of them, which otherwise both read as "rien à exécuter"
+        // Nothing ran: tells apart a site with no provider at all from a filter that matched none of them, which otherwise both read as "nothing to run"
         if (!$counts) {
             $io->warning($this->healthCheckRunner->getKinds()
-                ? 'Aucun provider ne correspond au filtre demandé - rien à exécuter.'
-                : 'Aucun HealthCheckProvider enregistré - rien à exécuter.');
+                ? 'No provider matches the given filter - nothing to run.'
+                : 'No HealthCheckProvider registered - nothing to run.');
 
             return Command::SUCCESS;
         }
 
         foreach ($counts as $kind => $count) {
-            $io->writeln(sprintf('%s : %d résultat(s) enregistré(s)', $kind, $count));
+            $io->writeln(sprintf('%s: %d result(s) recorded', $kind, $count));
         }
 
-        $io->success('Health check terminé.');
+        $io->success('Health check completed.');
 
         return Command::SUCCESS;
     }

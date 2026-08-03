@@ -2,7 +2,11 @@
     "name": "c975l/config-bundle",
     "type": "symfony-bundle",
     "description": "Symfony bundle providing the EasyAdmin dashboard and database-backed configuration at the root of the c975L ecosystem — the shared hub every satellite bundle plugs into for menus, exports/imports, alerts, and other cross-bundle dashboard contributions.",
-    "keywords": ["symfony", "bundle", "config"],
+    "keywords": [
+        "symfony",
+        "bundle",
+        "config"
+    ],
     "homepage": "https://github.com/975L/ConfigBundle",
     "license": "MIT",
     "authors": [
@@ -19,7 +23,7 @@
     ],
     "require": {
         "php": ">=8.4",
-        "c975l/ui-bundle": "^1",
+        "c975l/ui-bundle": "^1.9.6",
         "doctrine/orm": "^3.6",
         "dragonmantank/cron-expression": "^3.6",
         "easycorp/easyadmin-bundle": "^5.1",
@@ -33,20 +37,27 @@
         "symfony/http-client": "^8.0",
         "symfony/mailer": "^8.0",
         "symfony/messenger": "^8.0",
+        "symfony/password-hasher": "^8.0",
         "symfony/process": "^8.0",
         "symfony/scheduler": "^8.0",
         "symfony/security-bundle": "^8.0",
         "symfony/serializer": "^8.0",
         "symfony/ux-chartjs": "^3.3",
-        "symfony/yaml": "^8.0"
+        "symfony/yaml": "^8.0",
+        "symfonycasts/reset-password-bundle": "^1.25",
+        "symfonycasts/verify-email-bundle": "^1.18"
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^4.3",
+        "nelmio/security-bundle": "^3.9",
         "phpunit/phpunit": "^13.2",
         "symfony/browser-kit": "^8.0",
         "symfony/css-selector": "^8.0",
         "symfony/phpunit-bridge": "^8.0",
         "symfony/var-dumper": "^8.0"
+    },
+    "suggest": {
+        "nelmio/security-bundle": "Enables the CSP nonce a layout can print, and a Turbo-safe session-based nonce generator instead of Nelmio's default per-request one"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -58,7 +69,9 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "c975L\\ConfigBundle\\Tests\\": "tests/"
+            "c975L\\ConfigBundle\\Tests\\": "tests/",
+            "App\\": "scaffold/src/",
+            "App\\Tests\\": "scaffold/tests/"
         }
     },
     "config": {

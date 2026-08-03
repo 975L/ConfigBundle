@@ -22,6 +22,17 @@
         "description": "description.site_role_editor"
     },
     {
+        "label": "label.user_roles_available",
+        "slug": "user-roles-available",
+        "sensitive": false,
+        "restricted": true,
+        "value": "[\"ROLE_ADMIN\", \"ROLE_EDITOR\"]",
+        "kind": "json",
+        "group": "security",
+        "severity": null,
+        "description": "description.user_roles_available"
+    },
+    {
         "label": "label.site_maintenance",
         "slug": "site-maintenance",
         "sensitive": false,
@@ -174,5 +185,236 @@
         "group": "system",
         "severity": "warning",
         "description": "description.site_status_key"
+    },
+    {
+        "label": "label.site_messenger_cleanup_mailto",
+        "slug": "site-messenger-cleanup-mailto",
+        "sensitive": true,
+        "restricted": true,
+        "value": null,
+        "kind": "text",
+        "group": "messenger",
+        "severity": null,
+        "description": "description.site_messenger_cleanup_mailto"
+    },
+    {
+        "label": "label.site_messenger_cleanup_retention_days",
+        "slug": "site-messenger-cleanup-retention-days",
+        "sensitive": false,
+        "restricted": true,
+        "value": "30",
+        "kind": "text",
+        "group": "messenger",
+        "severity": null,
+        "description": "description.site_messenger_cleanup_retention_days"
+    },
+    {
+        "label": "label.email_from_name",
+        "slug": "email-from-name",
+        "sensitive": false,
+        "restricted": false,
+        "value": null,
+        "kind": "text",
+        "group": "email",
+        "severity": null,
+        "description": "description.email_from_name"
+    },
+    {
+        "label": "label.email_to",
+        "slug": "email-to",
+        "sensitive": false,
+        "restricted": false,
+        "value": null,
+        "kind": "text",
+        "group": "email",
+        "severity": "danger",
+        "description": "description.email_to"
+    },
+    {
+        "label": "label.email_to_name",
+        "slug": "email-to-name",
+        "sensitive": false,
+        "restricted": false,
+        "value": null,
+        "kind": "text",
+        "group": "email",
+        "severity": null,
+        "description": "description.email_to_name"
+    },
+    {
+        "label": "label.email_reply_to",
+        "slug": "email-reply-to",
+        "sensitive": false,
+        "restricted": false,
+        "value": null,
+        "kind": "text",
+        "group": "email",
+        "severity": null,
+        "description": "description.email_reply_to"
+    },
+    {
+        "label": "label.email_reply_to_name",
+        "slug": "email-reply-to-name",
+        "sensitive": false,
+        "restricted": false,
+        "value": null,
+        "kind": "text",
+        "group": "email",
+        "severity": null,
+        "description": "description.email_reply_to_name"
+    },
+    {
+        "label": "label.site_name",
+        "slug": "site-name",
+        "sensitive": false,
+        "restricted": false,
+        "value": null,
+        "kind": "text",
+        "group": "general",
+        "severity": "warning",
+        "description": "description.site_name"
+    },
+    {
+        "label": "label.site_contact_email",
+        "slug": "site-contact-email",
+        "sensitive": false,
+        "restricted": false,
+        "value": null,
+        "kind": "text",
+        "group": "legal",
+        "severity": "warning",
+        "description": "description.site_contact_email"
+    },
+    {
+        "label": "label.site_director",
+        "slug": "site-director",
+        "sensitive": false,
+        "restricted": false,
+        "value": null,
+        "kind": "text",
+        "group": "legal",
+        "severity": "warning",
+        "description": "description.site_director"
+    },
+    {
+        "label": "label.site_made_by_logo",
+        "slug": "site-made-by-logo",
+        "sensitive": false,
+        "restricted": true,
+        "value": null,
+        "kind": "text",
+        "group": "credits",
+        "severity": "info",
+        "description": "description.site_made_by_logo"
+    },
+    {
+        "label": "label.site_made_by_url",
+        "slug": "site-made-by-url",
+        "sensitive": false,
+        "restricted": true,
+        "value": null,
+        "kind": "text",
+        "group": "credits",
+        "severity": "info",
+        "description": "description.site_made_by_url"
+    },
+    {
+        "label": "label.url_terms_of_use",
+        "slug": "url-terms-of-use",
+        "sensitive": false,
+        "restricted": false,
+        "value": null,
+        "kind": "text",
+        "group": "legal",
+        "severity": "warning",
+        "description": "description.url_terms_of_use"
+    },
+    {
+        "label": "label.site_contact_phone",
+        "slug": "site-contact-phone",
+        "sensitive": false,
+        "restricted": false,
+        "value": null,
+        "kind": "text",
+        "group": "legal",
+        "severity": null,
+        "description": "description.site_contact_phone"
+    },
+    {
+        "label": "label.site_director_location",
+        "slug": "site-director-location",
+        "sensitive": false,
+        "restricted": false,
+        "value": null,
+        "kind": "text",
+        "group": "legal",
+        "severity": "warning",
+        "description": "description.site_director_location"
+    },
+    {
+        "label": "label.site_owner",
+        "slug": "site-owner",
+        "sensitive": false,
+        "restricted": false,
+        "value": null,
+        "kind": "html",
+        "group": "legal",
+        "severity": "warning",
+        "description": "description.site_owner"
+    },
+    {
+        "label": "label.site_producer",
+        "slug": "site-producer",
+        "sensitive": false,
+        "restricted": true,
+        "value": null,
+        "kind": "text",
+        "group": "legal",
+        "severity": "info",
+        "description": "description.site_producer"
+    },
+    {
+        "label": "label.site_hosting_provider",
+        "slug": "site-hosting-provider",
+        "sensitive": false,
+        "restricted": true,
+        "value": null,
+        "kind": "html",
+        "group": "legal",
+        "severity": "info",
+        "description": "description.site_hosting_provider"
+    },
+    {
+        "label": "label.site_dpo",
+        "slug": "site-dpo",
+        "sensitive": false,
+        "restricted": false,
+        "value": null,
+        "kind": "text",
+        "group": "legal",
+        "severity": "warning",
+        "description": "description.site_dpo"
+    },
+    {
+        "label": "label.site_author",
+        "slug": "site-author",
+        "sensitive": false,
+        "restricted": false,
+        "value": null,
+        "kind": "text",
+        "group": "general",
+        "severity": "info",
+        "description": "description.site_author"
+    },
+    {
+        "label": "label.site_first_online_date",
+        "slug": "site-first-online-date",
+        "sensitive": false,
+        "restricted": false,
+        "value": null,
+        "kind": "text",
+        "group": "general",
+        "severity": "info",
+        "description": "description.site_first_online_date"
     }
 ]

@@ -64,14 +64,14 @@ class CheckImportmapCommand extends Command
         $added = array_merge($added, $this->addMissingBareSpecifiers($entries, $io));
 
         if (!$added) {
-            $io->success('importmap.php est déjà à jour.');
+            $io->success('importmap.php is already up to date.');
 
             return Command::SUCCESS;
         }
 
         $this->configReader->writeEntries($entries);
 
-        $io->success(sprintf('%d entrée(s) ajoutée(s) à importmap.php :', count($added)));
+        $io->success(sprintf('%d entry(ies) added to importmap.php:', count($added)));
         $io->listing($added);
 
         return Command::SUCCESS;
@@ -101,7 +101,7 @@ class CheckImportmapCommand extends Command
 
         if ($unresolved) {
             $io->warning(sprintf(
-                "Importé(s) par le JS d'un bundle c975L mais absent(s) d'importmap.php, et introuvable(s) dans vendor/ : %s.\nLe navigateur ne pourra pas résoudre ce specifier et tout le module qui l'importe échouera. Installez le paquet, ou ajoutez l'entrée à la main.",
+                "Imported by a c975L bundle's JS but missing from importmap.php, and not found in vendor/: %s.\nThe browser won't be able to resolve that specifier and the whole module importing it will fail. Install the package, or add the entry by hand.",
                 implode(', ', $unresolved)
             ));
         }
@@ -122,6 +122,6 @@ class CheckImportmapCommand extends Command
             return;
         }
 
-        $io->warning('assets/controllers.json active "@symfony/ux-chartjs" : chart.js est chargé sur toutes les pages du site et enregistré plusieurs fois sur le dashboard. Passez "enabled" à false - ConfigBundle enregistre lui-même ce contrôleur (voir readme).');
+        $io->warning('assets/controllers.json enables "@symfony/ux-chartjs": chart.js is loaded on every page of the site and registered several times on the dashboard. Set "enabled" to false - ConfigBundle registers that controller itself (see readme).');
     }
 }

@@ -6,6 +6,30 @@
                 <source>description.email_from</source>
                 <target>Email address used to send emails, e.g. contact@example.com</target>
             </trans-unit>
+            <trans-unit id="EZglulM">
+                <source>description.email_from_name</source>
+                <target>Name used to send the notifications from the site.</target>
+            </trans-unit>
+            <trans-unit id="GUWhAGu">
+                <source>description.email_reply_to</source>
+                <target>Email address for replies (optional, falls back to the sending address)</target>
+            </trans-unit>
+            <trans-unit id="3.LDrKO">
+                <source>description.email_reply_to_name</source>
+                <target>Name associated with the reply-to email address</target>
+            </trans-unit>
+            <trans-unit id="l3kJ2yN">
+                <source>description.email_to</source>
+                <target>Email address used to receive the notifications (contact, orders...), i.e. contact@example.com</target>
+            </trans-unit>
+            <trans-unit id="O9EjzMB">
+                <source>description.email_to_name</source>
+                <target>Name used to receive the notifications from the site.</target>
+            </trans-unit>
+            <trans-unit id="ZDgy5oO">
+                <source>description.site_author</source>
+                <target>The author that will be set in the meta data</target>
+            </trans-unit>
             <trans-unit id="PZrDv2T">
                 <source>description.site_backup_database</source>
                 <target>Name of the MySQL database to back up</target>
@@ -38,6 +62,42 @@
                 <source>description.site_backup_retention_days</source>
                 <target>Number of days of backups kept on the server. Whoever copies them offsite must keep more than this, otherwise the next copy downloads again what it has just purged</target>
             </trans-unit>
+            <trans-unit id="maeSbQ2">
+                <source>description.site_contact_email</source>
+                <target>Public contact email address displayed on legal pages</target>
+            </trans-unit>
+            <trans-unit id="jr97cJF">
+                <source>description.site_contact_phone</source>
+                <target>Public contact phone number displayed on legal pages</target>
+            </trans-unit>
+            <trans-unit id="dMwwmjY">
+                <source>description.site_director</source>
+                <target>Director of publication's full name (required for legal notice)</target>
+            </trans-unit>
+            <trans-unit id="_WmaPgG">
+                <source>description.site_director_location</source>
+                <target>City or department where the director of publication resides</target>
+            </trans-unit>
+            <trans-unit id="knIwtDt">
+                <source>description.site_dpo</source>
+                <target>DPO's full name, required for the privacy policy</target>
+            </trans-unit>
+            <trans-unit id="CnwQ.g0">
+                <source>description.site_first_online_date</source>
+                <target>Date when the site went online (YYYY-MM-DD)</target>
+            </trans-unit>
+            <trans-unit id="8hKkN.f">
+                <source>description.site_hosting_provider</source>
+                <target>Hosting provider, shown in the legal notice (HTML allowed)</target>
+            </trans-unit>
+            <trans-unit id="FoJZsKG">
+                <source>description.site_made_by_logo</source>
+                <target>Path or URL of the developer/agency logo</target>
+            </trans-unit>
+            <trans-unit id="0vWLzrI">
+                <source>description.site_made_by_url</source>
+                <target>URL of the developer/agency i.e. https://example.com</target>
+            </trans-unit>
             <trans-unit id="wjC9u3K">
                 <source>description.site_maintenance</source>
                 <target>Enable (true) or disable (false) maintenance mode</target>
@@ -45,6 +105,26 @@
             <trans-unit id="bFzwYOs">
                 <source>description.site_maintenance_hash</source>
                 <target>Hash used to access maintenance mode (?t=Hash)</target>
+            </trans-unit>
+            <trans-unit id="BIUof2v">
+                <source>description.site_messenger_cleanup_mailto</source>
+                <target>Email address alerted of important Messenger send failures (optional)</target>
+            </trans-unit>
+            <trans-unit id="2PLJgPq">
+                <source>description.site_messenger_cleanup_retention_days</source>
+                <target>Days failed Messenger messages are kept before purge</target>
+            </trans-unit>
+            <trans-unit id="Sg8q_Ks">
+                <source>description.site_name</source>
+                <target>Name of the web site: i.e. Example.com</target>
+            </trans-unit>
+            <trans-unit id="._1mRZ4">
+                <source>description.site_owner</source>
+                <target>Website owner, shown in the legal notice (HTML allowed)</target>
+            </trans-unit>
+            <trans-unit id="U7Pnm8y">
+                <source>description.site_producer</source>
+                <target>Producer/developer of the site, shown in the legal notice (HTML allowed)</target>
             </trans-unit>
             <trans-unit id="b8NL53A">
                 <source>description.site_role_admin</source>
@@ -66,9 +146,41 @@
                 <source>description.site_url</source>
                 <target>URL of the website i.e. https://example.com</target>
             </trans-unit>
+            <trans-unit id="UfelsWV">
+                <source>description.url_terms_of_use</source>
+                <target>Terms of use page URL, e.g. https://example.com/pages/terms-of-use</target>
+            </trans-unit>
+            <trans-unit id="hDOR3CX">
+                <source>description.user_roles_available</source>
+                <target>Extra selectable roles (besides ROLE_USER), JSON array, e.g. ["ROLE_ADMIN","ROLE_EDITOR"]</target>
+            </trans-unit>
             <trans-unit id="meevaqA">
                 <source>label.email_from</source>
                 <target>Email (from)</target>
+            </trans-unit>
+            <trans-unit id="uDAy209">
+                <source>label.email_from_name</source>
+                <target>Email (from) Name</target>
+            </trans-unit>
+            <trans-unit id="6X_FiKP">
+                <source>label.email_reply_to</source>
+                <target>Email (reply-to)</target>
+            </trans-unit>
+            <trans-unit id="80ersMx">
+                <source>label.email_reply_to_name</source>
+                <target>Email (reply-to) Name</target>
+            </trans-unit>
+            <trans-unit id="Tg9g5sJ">
+                <source>label.email_to</source>
+                <target>Email (to)</target>
+            </trans-unit>
+            <trans-unit id="Tbwp4sB">
+                <source>label.email_to_name</source>
+                <target>Email (to) Name</target>
+            </trans-unit>
+            <trans-unit id="rP1GyPO">
+                <source>label.site_author</source>
+                <target>Site Author</target>
             </trans-unit>
             <trans-unit id="Y1PJ4Y0">
                 <source>label.site_backup_database</source>
@@ -102,6 +214,42 @@
                 <source>label.site_backup_retention_days</source>
                 <target>Backup Retention (days)</target>
             </trans-unit>
+            <trans-unit id="P.LxD.a">
+                <source>label.site_contact_email</source>
+                <target>Contact Email</target>
+            </trans-unit>
+            <trans-unit id="lhSx53d">
+                <source>label.site_contact_phone</source>
+                <target>Contact Phone</target>
+            </trans-unit>
+            <trans-unit id="ajJox7S">
+                <source>label.site_director</source>
+                <target>Director of Publication</target>
+            </trans-unit>
+            <trans-unit id="_7GCpj.">
+                <source>label.site_director_location</source>
+                <target>Director Location</target>
+            </trans-unit>
+            <trans-unit id="neSsMO1">
+                <source>label.site_dpo</source>
+                <target>Data Protection Officer (DPO)</target>
+            </trans-unit>
+            <trans-unit id="svwpoO7">
+                <source>label.site_first_online_date</source>
+                <target>Site first online date</target>
+            </trans-unit>
+            <trans-unit id="aCpqS8A">
+                <source>label.site_hosting_provider</source>
+                <target>Site Hosting provider</target>
+            </trans-unit>
+            <trans-unit id="dw.E02A">
+                <source>label.site_made_by_logo</source>
+                <target>Made By Logo</target>
+            </trans-unit>
+            <trans-unit id="E1ZJDYD">
+                <source>label.site_made_by_url</source>
+                <target>Made By URL</target>
+            </trans-unit>
             <trans-unit id="LXzR.TR">
                 <source>label.site_maintenance</source>
                 <target>Site Maintenance</target>
@@ -109,6 +257,26 @@
             <trans-unit id="xqSakcb">
                 <source>label.site_maintenance_hash</source>
                 <target>Site Maintenance Hash</target>
+            </trans-unit>
+            <trans-unit id="uU8a068">
+                <source>label.site_messenger_cleanup_mailto</source>
+                <target>Messenger alert email</target>
+            </trans-unit>
+            <trans-unit id="mLhc7yZ">
+                <source>label.site_messenger_cleanup_retention_days</source>
+                <target>Messenger failure retention (days)</target>
+            </trans-unit>
+            <trans-unit id="rK0YMvt">
+                <source>label.site_name</source>
+                <target>Site Name</target>
+            </trans-unit>
+            <trans-unit id="hbt28u1">
+                <source>label.site_owner</source>
+                <target>Site Owner</target>
+            </trans-unit>
+            <trans-unit id="5YTsC_J">
+                <source>label.site_producer</source>
+                <target>Site Producer</target>
             </trans-unit>
             <trans-unit id="z_rPP2B">
                 <source>label.site_role_admin</source>
@@ -129,6 +297,14 @@
             <trans-unit id="rDTDQ70">
                 <source>label.site_url</source>
                 <target>Site URL</target>
+            </trans-unit>
+            <trans-unit id="jkiAkco">
+                <source>label.url_terms_of_use</source>
+                <target>URL Terms of use</target>
+            </trans-unit>
+            <trans-unit id="CPUCRXd">
+                <source>label.user_roles_available</source>
+                <target>User Roles Available</target>
             </trans-unit>
         </body>
     </file>

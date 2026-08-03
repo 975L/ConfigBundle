@@ -1,3 +1,7 @@
+includes:
+    # Errors already there when PHPStan was introduced, to be emptied out over time
+    - phpstan-baseline.neon
+
 parameters:
     level: 5
 
@@ -6,10 +10,15 @@ parameters:
 
     paths:
         - src
+        - scaffold/src
+        - scaffold/tests
 
     excludePaths:
         # The skeleton templates get their variables from the maker at generation time
         - src/Resources/skeleton/*
+
+        # These need an application kernel and a browser-kit the bundle does not install, which is why phpunit.xml.dist skips them too
+        - scaffold/tests/Controller/*
 
     ignoreErrors:
         # Doctrine assigns the identifier by reflection, which static analysis cannot see

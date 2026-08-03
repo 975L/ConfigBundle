@@ -1,0 +1,7 @@
+services:
+    # Decorates NelmioSecurityBundle's nonce generator - see SessionNonceGenerator for why. Imported by c975LConfigBundle::loadExtension only when the app installed that bundle (ConfigBundle does not require it), because SessionNonceGenerator implements one of its interfaces and isn't even loadable without it: keeping the definition here would make ResolveClassPass fail on its FQCN id long before decoration_on_invalid could drop it
+    # decoration_on_invalid: ignore still needed once installed, as nelmio_security.nonce_generator only exists when a csp section is configured
+    c975L\ConfigBundle\Security\SessionNonceGenerator:
+        autowire: true
+        decorates: nelmio_security.nonce_generator
+        decoration_on_invalid: ignore

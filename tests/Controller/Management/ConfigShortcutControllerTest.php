@@ -10,11 +10,15 @@
 
 namespace c975L\ConfigBundle\Tests\Controller\Management;
 
+use c975L\ConfigBundle\Command\ExportTablesCommand;
 use c975L\ConfigBundle\Controller\Management\ConfigShortcutController;
 use c975L\ConfigBundle\Management\SitemapWriter;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\ConfigBundle\Service\Export\ConfigSqlExporter;
 use c975L\ConfigBundle\Service\Export\SyncAllExporter;
+use c975L\UiBundle\Entity\Form;
+use c975L\UiBundle\Repository\FormRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -32,6 +36,9 @@ class ConfigShortcutControllerTest extends TestCase
         ?ConfigSqlExporter $configSqlExporter = null,
         ?SyncAllExporter $syncAllExporter = null,
         ?SitemapWriter $sitemapWriter = null,
+        ?ExportTablesCommand $exportTablesCommand = null,
+        ?FormRepository $formRepository = null,
+        ?EntityManagerInterface $entityManager = null,
     ): ConfigShortcutController {
         $translator = $this->createStub(TranslatorInterface::class);
         $translator->method('trans')->willReturnArgument(0);
@@ -41,6 +48,9 @@ class ConfigShortcutControllerTest extends TestCase
             $configSqlExporter ?? $this->createStub(ConfigSqlExporter::class),
             $syncAllExporter ?? $this->createStub(SyncAllExporter::class),
             $sitemapWriter ?? $this->createStub(SitemapWriter::class),
+            $exportTablesCommand ?? $this->createStub(ExportTablesCommand::class),
+            $formRepository ?? $this->createStub(FormRepository::class),
+            $entityManager ?? $this->createStub(EntityManagerInterface::class),
             $translator,
         );
     }
@@ -254,5 +264,87 @@ class ConfigShortcutControllerTest extends TestCase
         ]));
 
         $controller->createSitemaps(new Request());
+    }
+
+    // Streamed back directly rather than written to var/export - moved here from SiteBundle alongside the command it runs
+    public function testExportTablesStreamsTheDumpBackWhenTokenIsValid(): void
+    {
+        $exportTablesCommand = $this->createMock(ExportTablesCommand::class);
+        $exportTablesCommand->expects($this->once())->method('exportTables')->with('site_', null, false)->willReturn([
+            'error' => null,
+            'message' => '',
+            'tables' => ['site_page'],
+            'content' => 'INSERT INTO site_page ...',
+        ]);
+
+        $controller = $this->createController($this->createStub(ConfigServiceInterface::class), exportTablesCommand: $exportTablesCommand);
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+            'security.csrf.token_manager' => $this->createCsrfTokenManager(true),
+        ]));
+
+        $response = $controller->exportTables(new Request([], ['_token' => 'valid-token']));
+
+        $this->assertSame('INSERT INTO site_page ...', $response->getContent());
+        $this->assertStringContainsString('attachment; filename="site_', (string) $response->headers->get('Content-Disposition'));
+    }
+
+    // No table matched the prefix: a warning rather than an empty download the admin would take for a real dump
+    public function testExportTablesWarnsAndRedirectsWhenNoTableMatched(): void
+    {
+        $exportTablesCommand = $this->createStub(ExportTablesCommand::class);
+        $exportTablesCommand->method('exportTables')->willReturn(['error' => null, 'message' => 'no table', 'tables' => [], 'content' => '']);
+
+        $controller = $this->createController($this->createStub(ConfigServiceInterface::class), exportTablesCommand: $exportTablesCommand);
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+            'security.csrf.token_manager' => $this->createCsrfTokenManager(true),
+            'request_stack' => $this->createRequestStackWithSession()[0],
+            'router' => $this->createRouter(),
+        ]));
+
+        $this->assertSame(302, $controller->exportTables(new Request([], ['_token' => 'valid-token']))->getStatusCode());
+    }
+
+    // Flips the "register" Form's own $enabled flag, the same lever FormController checks before building the form
+    public function testRegistrationEnabledToggleFlipsTheRegisterFormAndFlushes(): void
+    {
+        $form = (new Form())->setName('register')->setEnabled(false);
+        $formRepository = $this->createStub(FormRepository::class);
+        $formRepository->method('findOneBy')->willReturn($form);
+
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager->expects($this->once())->method('flush');
+
+        $controller = $this->createController($this->createStub(ConfigServiceInterface::class), formRepository: $formRepository, entityManager: $entityManager);
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+            'security.csrf.token_manager' => $this->createCsrfTokenManager(true),
+            'request_stack' => $this->createRequestStackWithSession()[0],
+            'router' => $this->createRouter(),
+        ]));
+
+        $controller->registrationEnabledToggle(new Request([], ['_token' => 'valid-token']));
+
+        $this->assertTrue($form->isEnabled());
+    }
+
+    // Nothing seeded yet: no Form to flip, and nothing flushed either
+    public function testRegistrationEnabledToggleDoesNothingWithoutARegisterForm(): void
+    {
+        $formRepository = $this->createStub(FormRepository::class);
+        $formRepository->method('findOneBy')->willReturn(null);
+
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager->expects($this->never())->method('flush');
+
+        $controller = $this->createController($this->createStub(ConfigServiceInterface::class), formRepository: $formRepository, entityManager: $entityManager);
+        $controller->setContainer($this->createContainer([
+            'security.authorization_checker' => $this->createAuthorizationChecker(true),
+            'security.csrf.token_manager' => $this->createCsrfTokenManager(true),
+            'router' => $this->createRouter(),
+        ]));
+
+        $this->assertSame(302, $controller->registrationEnabledToggle(new Request([], ['_token' => 'valid-token']))->getStatusCode());
     }
 }

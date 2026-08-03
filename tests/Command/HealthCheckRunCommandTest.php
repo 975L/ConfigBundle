@@ -27,7 +27,7 @@ class HealthCheckRunCommandTest extends TestCase
         $tester->execute([]);
 
         $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
-        $this->assertStringContainsString('pagespeed : 3 résultat(s) enregistré(s)', $tester->getDisplay());
+        $this->assertStringContainsString('pagespeed: 3 result(s) recorded', $tester->getDisplay());
     }
 
     public function testExecutePassesTheKindOptionThrough(): void
@@ -51,7 +51,7 @@ class HealthCheckRunCommandTest extends TestCase
         $tester->execute([]);
 
         $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
-        $this->assertStringContainsString('Aucun HealthCheckProvider enregistré', $tester->getDisplay());
+        $this->assertStringContainsString('No HealthCheckProvider registered', $tester->getDisplay());
     }
 
     // What the scheduler asks for, so a cron entry never names kinds
@@ -76,7 +76,7 @@ class HealthCheckRunCommandTest extends TestCase
         $tester->execute(['--frequency' => 'daily']);
 
         $this->assertSame(Command::INVALID, $tester->getStatusCode());
-        $this->assertStringContainsString('Fréquence "daily" inconnue', $tester->getDisplay());
+        $this->assertStringContainsString('Unknown frequency "daily"', $tester->getDisplay());
     }
 
     // A kind no installed bundle provides used to be skipped without a word
@@ -92,7 +92,7 @@ class HealthCheckRunCommandTest extends TestCase
         $display = $tester->getDisplay();
         $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
         $this->assertStringContainsString('urls-gallery', $display);
-        $this->assertStringContainsString('Disponibles : pagespeed', $display);
+        $this->assertStringContainsString('Available: pagespeed', $display);
     }
 
     // Nothing ran because the filter matched nothing, which is not the same as a site with no provider at all
@@ -105,6 +105,6 @@ class HealthCheckRunCommandTest extends TestCase
         $tester = new CommandTester(new HealthCheckRunCommand($healthCheckRunner));
         $tester->execute(['--frequency' => 'monthly']);
 
-        $this->assertStringContainsString('Aucun provider ne correspond au filtre', $tester->getDisplay());
+        $this->assertStringContainsString('No provider matches the given filter', $tester->getDisplay());
     }
 }

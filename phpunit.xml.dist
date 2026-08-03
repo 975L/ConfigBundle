@@ -10,6 +10,12 @@
         <testsuite name="c975LConfigBundle Test Suite">
             <directory>tests</directory>
         </testsuite>
+
+        <!-- Runs the scaffold's own unit-style tests (Entity/Form/Repository/Security/Service) against the scaffold's own src, so a scaffold edit that drifts src/tests apart fails here immediately instead of only surfacing later in a consuming app after c975l:scaffold:install. Controller/ needs a real app kernel + DB and can't run standalone here - see scaffold/tests/Controller/FunctionalTestCase.php. -->
+        <testsuite name="Scaffold Test Suite">
+            <directory>scaffold/tests</directory>
+            <exclude>scaffold/tests/Controller</exclude>
+        </testsuite>
     </testsuites>
 
     <source ignoreSuppressionOfDeprecations="true">

@@ -178,7 +178,7 @@ class MenuBuilderTest extends TestCase
         $provider = $this->createProvider($section, [], [
             'legal' => [
                 'label' => 'label.legal_models',
-                'name' => 'management_site_legal_models',
+                'name' => 'management_ui_legal_models',
                 'translation_domain' => 'site',
                 'icon' => 'fas fa-scale-balanced',
                 'tier' => 'advanced',
@@ -211,7 +211,7 @@ class MenuBuilderTest extends TestCase
         $provider = $this->createProvider($section, [], [
             'legal' => [
                 'label' => 'label.legal_models',
-                'name' => 'management_site_legal_models',
+                'name' => 'management_ui_legal_models',
                 'translation_domain' => 'site',
                 'icon' => 'fas fa-scale-balanced',
                 'tier' => 'advanced',

@@ -46,7 +46,7 @@ class DevProfileAnalyzer
             return [[
                 'level' => self::LEVEL_ERROR,
                 'area' => 'Kernel',
-                'message' => sprintf('La requête a échoué : %s', $metrics['error']),
+                'message' => sprintf('The request failed: %s', $metrics['error']),
             ]];
         }
 
@@ -71,15 +71,15 @@ class DevProfileAnalyzer
         if ($statusCode >= 300 && $statusCode < 400) {
             return [
                 'level' => self::LEVEL_WARNING,
-                'area' => 'Réponse',
-                'message' => sprintf('Redirection (%d), page non analysée', $statusCode),
+                'area' => 'Response',
+                'message' => sprintf('Redirect (%d), page not analysed', $statusCode),
             ];
         }
 
         return [
             'level' => self::LEVEL_ERROR,
-            'area' => 'Réponse',
-            'message' => sprintf('La page répond %d', $statusCode),
+            'area' => 'Response',
+            'message' => sprintf('The page answers %d', $statusCode),
         ];
     }
 
@@ -93,7 +93,7 @@ class DevProfileAnalyzer
         return [[
             'level' => $queries > self::MAX_QUERIES_ERROR ? self::LEVEL_ERROR : self::LEVEL_WARNING,
             'area' => 'Doctrine',
-            'message' => sprintf('%d requêtes SQL (seuil %d) en %s ms', $queries, self::MAX_QUERIES, $metrics['queryTime'] ?? 0),
+            'message' => sprintf('%d SQL queries (threshold %d) in %s ms', $queries, self::MAX_QUERIES, $metrics['queryTime'] ?? 0),
         ]];
     }
 
@@ -110,9 +110,9 @@ class DevProfileAnalyzer
             'level' => $duplicates > self::MAX_DUPLICATE_QUERIES_ERROR ? self::LEVEL_ERROR : self::LEVEL_WARNING,
             'area' => 'Doctrine',
             'message' => sprintf(
-                '%d requêtes identiques répétées (n+1)%s',
+                '%d identical queries repeated (n+1)%s',
                 $duplicates,
-                null !== $worst ? sprintf(', dont %d fois : %s', $worst['count'], $this->excerpt($worst['sql'])) : ''
+                null !== $worst ? sprintf(', including %d times: %s', $worst['count'], $this->excerpt($worst['sql'])) : ''
             ),
         ]];
     }
@@ -127,7 +127,7 @@ class DevProfileAnalyzer
             $issues[] = [
                 'level' => $transactions > self::MAX_TRANSACTIONS_ERROR ? self::LEVEL_ERROR : self::LEVEL_WARNING,
                 'area' => 'Doctrine',
-                'message' => sprintf('%d transactions ouvertes (seuil %d) : un flush() par entité, ou un listener qui flush de son côté', $transactions, self::MAX_TRANSACTIONS),
+                'message' => sprintf('%d transactions opened (threshold %d): one flush() per entity, or a listener flushing on its own', $transactions, self::MAX_TRANSACTIONS),
             ];
         }
 
@@ -136,7 +136,7 @@ class DevProfileAnalyzer
             $issues[] = [
                 'level' => self::LEVEL_WARNING,
                 'area' => 'Doctrine',
-                'message' => sprintf('%d transaction(s) ouverte(s) sans aucune écriture', $empty),
+                'message' => sprintf('%d transaction(s) opened without a single write', $empty),
             ];
         }
 
@@ -151,8 +151,8 @@ class DevProfileAnalyzer
         if ($deprecations > 0) {
             $issues[] = [
                 'level' => self::LEVEL_WARNING,
-                'area' => 'Dépréciations',
-                'message' => sprintf('%d dépréciation(s)%s', $deprecations, $this->listed($metrics['deprecationMessages'] ?? [])),
+                'area' => 'Deprecations',
+                'message' => sprintf('%d deprecation(s)%s', $deprecations, $this->listed($metrics['deprecationMessages'] ?? [])),
             ];
         }
 
@@ -161,7 +161,7 @@ class DevProfileAnalyzer
             $issues[] = [
                 'level' => self::LEVEL_ERROR,
                 'area' => 'Logs',
-                'message' => sprintf('%d erreur(s) loggée(s) pendant le rendu', $logErrors),
+                'message' => sprintf('%d error(s) logged while rendering', $logErrors),
             ];
         }
 
@@ -176,8 +176,8 @@ class DevProfileAnalyzer
         if ($missing > 0) {
             $issues[] = [
                 'level' => self::LEVEL_ERROR,
-                'area' => 'Traductions',
-                'message' => sprintf('%d clé(s) sans traduction%s', $missing, $this->listed($metrics['missingTranslationKeys'] ?? [])),
+                'area' => 'Translations',
+                'message' => sprintf('%d key(s) with no translation%s', $missing, $this->listed($metrics['missingTranslationKeys'] ?? [])),
             ];
         }
 
@@ -185,8 +185,8 @@ class DevProfileAnalyzer
         if ($fallbacks > 0) {
             $issues[] = [
                 'level' => self::LEVEL_WARNING,
-                'area' => 'Traductions',
-                'message' => sprintf('%d clé(s) servie(s) depuis la locale de repli', $fallbacks),
+                'area' => 'Translations',
+                'message' => sprintf('%d key(s) served from the fallback locale', $fallbacks),
             ];
         }
 
@@ -203,7 +203,7 @@ class DevProfileAnalyzer
             $issues[] = [
                 'level' => self::LEVEL_ERROR,
                 'area' => 'HttpClient',
-                'message' => sprintf('%d appel(s) HTTP externe(s) pendant le rendu', $httpRequests),
+                'message' => sprintf('%d external HTTP call(s) while rendering', $httpRequests),
             ];
         }
 
@@ -212,7 +212,7 @@ class DevProfileAnalyzer
             $issues[] = [
                 'level' => self::LEVEL_WARNING,
                 'area' => 'Twig',
-                'message' => sprintf('%d templates rendus (seuil %d) en %s ms', $templates, self::MAX_TEMPLATES, $metrics['twigTime'] ?? 0),
+                'message' => sprintf('%d templates rendered (threshold %d) in %s ms', $templates, self::MAX_TEMPLATES, $metrics['twigTime'] ?? 0),
             ];
         }
 
@@ -229,7 +229,7 @@ class DevProfileAnalyzer
         $shown = \array_slice($items, 0, self::MAX_LISTED_ITEMS);
         $remaining = \count($items) - \count($shown);
 
-        return sprintf(' : %s%s', implode(', ', array_map([$this, 'excerpt'], $shown)), $remaining > 0 ? sprintf(' (+%d)', $remaining) : '');
+        return sprintf(': %s%s', implode(', ', array_map([$this, 'excerpt'], $shown)), $remaining > 0 ? sprintf(' (+%d)', $remaining) : '');
     }
 
     private function excerpt(string $text): string

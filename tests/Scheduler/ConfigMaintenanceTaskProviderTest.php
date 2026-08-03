@@ -36,6 +36,7 @@ class ConfigMaintenanceTaskProviderTest extends TestCase
         $this->assertContains('c975l:sitemaps:create', $commands);
         $this->assertContains('c975l:config:backup', $commands);
         $this->assertContains('c975l:config:backup:digest', $commands);
+        $this->assertContains('c975l:config:messenger-cleanup', $commands);
     }
 
     // A cadence, never a list of kinds: every provider declares its own with AsHealthCheck, so these two account for whatever bundles the site installs later

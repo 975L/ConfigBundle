@@ -1,0 +1,15 @@
+{% extends '@EasyAdmin/crud/index.html.twig' %}
+
+{% block main %}
+    <p>{{ ('label.info_user'|trans({}, 'config')) }}</p>
+    <p>{{ 'label.info_user_roles'|trans({
+        '%link_open%': '<a href="' ~ config_edit_url('user-roles-available') ~ '">',
+        '%link_close%': '</a>',
+    }, 'config')|raw }}</p>
+    <p>{{ 'label.info_user_registration'|trans({
+        '%link_open%': '<a href="' ~ path('management') ~ '">',
+        '%link_close%': '</a>',
+    }, 'config')|raw }}</p>
+
+    {{ parent() }}
+{% endblock main %}

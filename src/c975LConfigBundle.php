@@ -11,8 +11,10 @@
 namespace c975L\ConfigBundle;
 
 use c975L\ConfigBundle\Contract\UserInterface;
+use c975L\ConfigBundle\DependencyInjection\Compiler\DeclaredUrlsHealthCheckPass;
 use c975L\ConfigBundle\DependencyInjection\Compiler\TaggedInterfacePass;
 use c975L\ConfigBundle\Management\AlertProviderInterface;
+use c975L\ConfigBundle\Management\ContentOffenceLocatorInterface;
 use c975L\ConfigBundle\Management\DashboardWidgetProviderInterface;
 use c975L\ConfigBundle\Management\DevProfilePathProviderInterface;
 use c975L\ConfigBundle\Management\EssentialActionProviderInterface;
@@ -30,6 +32,7 @@ use c975L\ConfigBundle\Management\SitemapProviderInterface;
 use c975L\ConfigBundle\Management\StatusProviderInterface;
 use c975L\ConfigBundle\Management\WhatsNewProviderInterface;
 use c975L\ConfigBundle\Scheduler\MaintenanceTaskProviderInterface;
+use Nelmio\SecurityBundle\ContentSecurityPolicy\NonceGeneratorInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
@@ -76,15 +79,24 @@ class c975LConfigBundle extends AbstractBundle
         $container->addCompilerPass(new TaggedInterfacePass(HealthCheckAdviceProviderInterface::class, 'c975l.health_check_advice_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(ImportmapProviderInterface::class, 'c975l.importmap_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(SitemapProviderInterface::class, 'c975l.sitemap_provider'));
+        $container->addCompilerPass(new TaggedInterfacePass(ContentOffenceLocatorInterface::class, 'c975l.content_offence_locator'));
         $container->addCompilerPass(new TaggedInterfacePass(StatusProviderInterface::class, 'c975l.status_provider'));
         $container->addCompilerPass(new TaggedInterfacePass(MaintenanceTaskProviderInterface::class, 'c975l.maintenance_task_provider'));
         // Only ever has anything to collect in dev, every implementation being marked #[When('dev')] - the pass itself stays registered in every environment, it simply tags nothing in prod
         $container->addCompilerPass(new TaggedInterfacePass(DevProfilePathProviderInterface::class, 'c975l.dev_profile_path_provider'));
+
+        // Not a TaggedInterfacePass: this one builds one health-check service per sitemap provider found, rather than tagging services that already exist
+        $container->addCompilerPass(new DeclaredUrlsHealthCheckPass());
     }
 
     public function loadExtension(array $config, ContainerConfigurator $containerConfigurator, ContainerBuilder $containerBuilder): void
     {
         $containerConfigurator->import('../config/services.yaml');
+
+        // SessionNonceGenerator implements a NelmioSecurityBundle interface, so its class isn't loadable without that (optional) bundle - importing its definition unconditionally would break the container compilation of any app that doesn't use it
+        if (interface_exists(NonceGeneratorInterface::class)) {
+            $containerConfigurator->import('../config/services_nelmio.yaml');
+        }
     }
 
     public function getPath(): string

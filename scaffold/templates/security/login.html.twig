@@ -1,0 +1,38 @@
+{% extends 'layout.html.twig' %}
+
+{% set title = 'label.please_sign_in'|trans({}, 'config') %}
+
+{% block content %}
+    {% if app.user %}
+        <div class="alert alert-info text text-center">
+            {{ 'text.logged_in_as'|trans({'%user%': app.user.userIdentifier}, 'config') }} <a href="{{ logout_path() }}">{{ 'label.signout'|trans({}, 'config') }}</a>
+        </div>
+    {% else %}
+        <form method="post">
+            {% if error %}
+                <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+            {% endif %}
+
+            <div>
+                <label for="username" class="required">{{ 'label.email'|trans({}, 'config') }}</label>
+                <input type="email" value="{{ last_username }}" name="_username" id="username" autocomplete="email" required autofocus>
+            </div>
+            <div>
+                <label for="password" class="required">{{ 'label.password'|trans({}, 'config') }}</label>
+                <input type="password" name="_password" id="password" autocomplete="current-password" required>
+            </div>
+            <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+
+            <button class="btn btn-large btn-primary" type="submit">
+                {{ 'label.sign_in'|trans({}, 'config') }}
+            </button>
+
+            {# form_url() resolves whatever really displays each Form: the SiteBundle Page carrying its "form" Block (an admin-editable, per-locale slug) when one exists, else UiBundle's own bare-form route - so this page works with or without a site foundation installed #}
+            <div class="text text-center">
+                <a href="{{ form_url('reset_password_request') }}">{{ 'label.forgot_password'|trans({}, 'config') }}</a>
+                -
+                <a href="{{ form_url('register') }}">{{ 'label.create_account'|trans({}, 'config') }}</a>
+            </div>
+        </form>
+    {% endif %}
+{% endblock %}

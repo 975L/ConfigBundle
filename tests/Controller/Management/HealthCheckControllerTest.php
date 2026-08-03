@@ -156,9 +156,11 @@ class HealthCheckControllerTest extends TestCase
         $deploymentResult = (new HealthCheckResult())->setKind('deployment')->setUrl('https://example.com')->setStatus(HealthCheckResult::STATUS_OK)->setSummary('4/4')->setCheckedAt(new \DateTime('2026-07-24 10:00:00'));
         // The database server's own counters: one row for the whole site, never one per page
         $databaseLoadResult = (new HealthCheckResult())->setKind(DatabaseLoadHealthCheckProvider::KIND)->setUrl('https://example.com')->setStatus(HealthCheckResult::STATUS_OK)->setSummary('12 tx/s')->setCheckedAt(new \DateTime('2026-07-24 10:00:00'));
+        // Contributed by SiteBundle, and site-wide all the same: the uploaded svg files, not the pages serving them
+        $svgFontsResult = (new HealthCheckResult())->setKind('svg-fonts')->setUrl('https://example.com')->setStatus(HealthCheckResult::STATUS_OK)->setSummary('3 files')->setCheckedAt(new \DateTime('2026-07-24 10:00:00'));
 
         $healthCheckResultRepository = $this->createStub(HealthCheckResultRepository::class);
-        $healthCheckResultRepository->method('findLatestPerUrlAndKind')->willReturn([$pagespeedResult, $securityHeadersResult, $sslCertificateResult, $deploymentResult, $databaseLoadResult]);
+        $healthCheckResultRepository->method('findLatestPerUrlAndKind')->willReturn([$pagespeedResult, $securityHeadersResult, $sslCertificateResult, $deploymentResult, $databaseLoadResult, $svgFontsResult]);
 
         $twig = $this->createMock(Environment::class);
         $twig->expects($this->once())
@@ -168,8 +170,8 @@ class HealthCheckControllerTest extends TestCase
                 [
                     'results' => [$pagespeedResult],
                     'kinds' => ['pagespeed'],
-                    'siteResults' => [$securityHeadersResult, $sslCertificateResult, $deploymentResult, $databaseLoadResult],
-                    'siteKinds' => ['security-headers', 'ssl-certificate', 'deployment', DatabaseLoadHealthCheckProvider::KIND],
+                    'siteResults' => [$securityHeadersResult, $sslCertificateResult, $deploymentResult, $databaseLoadResult, $svgFontsResult],
+                    'siteKinds' => ['security-headers', 'ssl-certificate', 'deployment', DatabaseLoadHealthCheckProvider::KIND, 'svg-fonts'],
                     'alerts' => [],
                     'trendChart' => null,
                     'lastCheckedAt' => $pagespeedResult->getCheckedAt(),

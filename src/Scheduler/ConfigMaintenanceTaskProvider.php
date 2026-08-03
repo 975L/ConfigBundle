@@ -18,6 +18,8 @@ class ConfigMaintenanceTaskProvider implements MaintenanceTaskProviderInterface
         return [
             // Sitemaps: nightly, once the day's content is in
             new MaintenanceTask('# #(0-2) * * *', 'c975l:sitemaps:create'),
+            // Failed messenger rows past their retention, nightly, once the backups have had their window
+            new MaintenanceTask('# #(2-4) * * *', 'c975l:config:messenger-cleanup'),
             // Backup: every 6 hours (DB dumped table by table; files complete on the first run and every site-backup-full-interval-months after that, modified-since-last-run in between)
             new MaintenanceTask('# */6 * * *', 'c975l:config:backup'),
             // Digest of the week's backups, on its own entry rather than as --report on a backup run: a summary riding on a backup only exists if that run reaches its last line, and no mail at all is what nobody notices

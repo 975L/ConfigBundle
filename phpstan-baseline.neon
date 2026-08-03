@@ -1,0 +1,37 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Cannot call method setFormTypeOption\(\) on EasyCorp\\Bundle\\EasyAdminBundle\\Contracts\\Field\\FieldInterface\|string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Controller/Management/UserCrudController.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\Security\\Core\\User\\PasswordAuthenticatedUserInterface\:\:setPassword\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Service/PasswordResetter.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\Security\\Core\\User\\PasswordAuthenticatedUserInterface&Symfony\\Component\\Security\\Core\\User\\UserInterface\:\:setPassword\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Service/UserRegistrar.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Management/DeclaredUrlsHealthCheckProvider.php
+
+		-
+			message: '#^Offset ''loc'' on array\{loc\: string, lastmod\?\: string, changefreq\?\: string, priority\?\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Management/DeclaredUrlsHealthCheckProvider.php
+
+		-
+			message: '#^Call to an undefined method DOMNameSpaceNode\|DOMNode\:\:getAttribute\(\)\.$#'
+			identifier: method.notFound
+			count: 5
+			path: src/Service/ContentQualityClient.php

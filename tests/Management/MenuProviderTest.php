@@ -11,6 +11,8 @@
 namespace c975L\ConfigBundle\Tests\Management;
 
 use c975L\ConfigBundle\Controller\Management\ConfigCrudController;
+use c975L\ConfigBundle\Controller\Management\RedirectCrudController;
+use c975L\ConfigBundle\Controller\Management\UserCrudController;
 use c975L\ConfigBundle\Management\MenuProvider;
 use c975L\ConfigBundle\Management\MenuProviderInterface;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
@@ -44,6 +46,34 @@ class MenuProviderTest extends TestCase
         $this->assertSame(ConfigCrudController::class, $menus['config']['controller']);
         $this->assertSame('label.config', $menus['config']['label']);
         $this->assertSame('config', $menus['config']['translation_domain']);
+    }
+
+    // Declared here rather than by SiteBundle as it used to be: an app running Config+Ui plus a satellite bundle but no site foundation still has accounts to manage
+    public function testGetMenusExposesTheUserCrudControllerEntry(): void
+    {
+        $menus = (new MenuProvider($this->createConfigService()))->getMenus();
+
+        $this->assertSame(UserCrudController::class, $menus['user']['controller']);
+        $this->assertSame('label.users', $menus['user']['label']);
+        $this->assertSame('config', $menus['user']['translation_domain']);
+        // Day-to-day screen, so it stays at the top level rather than in MenuBuilder's collapsed "Advanced" submenu
+        $this->assertArrayNotHasKey('tier', $menus['user']);
+        // Same key as user_crud_index.html.twig's own explanatory text - one text, not a separate onboarding-only string
+        $this->assertSame('label.info_user', $menus['user']['description']);
+    }
+
+    // Also declared here rather than by SiteBundle: the rows answer before the router, so they never depended on page management - a shop-only site needs them just as much
+    public function testGetMenusExposesTheRedirectCrudControllerEntry(): void
+    {
+        $menus = (new MenuProvider($this->createConfigService()))->getMenus();
+
+        $this->assertSame(RedirectCrudController::class, $menus['redirect']['controller']);
+        $this->assertSame('label.redirects', $menus['redirect']['label']);
+        $this->assertSame('config', $menus['redirect']['translation_domain']);
+        // Set up when a url changes, revisited rarely - MenuBuilder's collapsed "Advanced" submenu
+        $this->assertSame('advanced', $menus['redirect']['tier']);
+        // Same key as redirect_crud_index.html.twig's own explanatory text
+        $this->assertSame('label.info_redirect', $menus['redirect']['description']);
     }
 
     // Theme configs are edited via Config's own "theme" group (its picker screen) since ThemeCrudController was removed - no separate menu entry

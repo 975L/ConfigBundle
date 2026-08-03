@@ -46,8 +46,8 @@ class CheckDeprecationsCommand extends Command
 
         if (!is_file($logFile)) {
             $io->warning([
-                'Fichier introuvable : ' . $logFile,
-                'Vérifiez que config/packages/monolog.yaml isole le canal "deprecation" dans son propre handler, et qu\'au moins une requête a été faite en env ' . $env . '.',
+                'File not found: ' . $logFile,
+                'Check that config/packages/monolog.yaml isolates the "deprecation" channel in its own handler, and that at least one request was made in env ' . $env . '.',
             ]);
 
             return Command::SUCCESS;
@@ -55,7 +55,7 @@ class CheckDeprecationsCommand extends Command
 
         $messages = $this->countMessages($logFile);
         if (!$messages) {
-            $io->success('Aucune dépréciation trouvée dans ' . $logFile . '.');
+            $io->success('No deprecation found in ' . $logFile . '.');
 
             return Command::SUCCESS;
         }
@@ -67,7 +67,7 @@ class CheckDeprecationsCommand extends Command
         ));
 
         if (!$report) {
-            $io->success('Aucune dépréciation actionnable trouvée dans ' . $logFile . ' - elles viennent toutes de packages tiers.');
+            $io->success('No actionable deprecation found in ' . $logFile . ' - they all come from third-party packages.');
 
             return Command::SUCCESS;
         }
@@ -75,7 +75,7 @@ class CheckDeprecationsCommand extends Command
         $this->renderReport($io, $report);
 
         $io->success(sprintf(
-            '%d dépréciation(s) actionnable(s), %d occurrence(s) au total.',
+            '%d actionable deprecation(s), %d occurrence(s) in total.',
             count($report),
             array_sum(array_column($report, 'count'))
         ));
@@ -115,11 +115,11 @@ class CheckDeprecationsCommand extends Command
         foreach ($report as $entry) {
             $io->section(sprintf('[%dx] %s', $entry['count'], $entry['message']));
             if ($entry['hits']) {
-                $io->warning('ACTIONNABLE - trouvé dans votre code (app ou bundle c975L) :');
+                $io->warning('ACTIONABLE - found in your own code (app or c975L bundle):');
                 $io->listing($entry['hits']);
             }
             if ($entry['possibleHits']) {
-                $io->note('À vérifier - namespace de la classe dépréciée retrouvé, sans certitude que ce soit elle qui est utilisée :');
+                $io->note('To be checked - the deprecated class\' namespace was found, with no certainty that it is the one being used:');
                 $io->listing($entry['possibleHits']);
             }
         }

@@ -23,7 +23,8 @@ See it in action at [bundles.975l.com/pages/config-bundle](https://bundles.975l.
 
 - **Config entries** — [declare](#defining-config-entries-for-your-bundle) · [load](#loading-config-entries-into-the-database) · [prune](#pruning-entries-no-longer-declared) · [set from the CLI](#setting-values-from-the-command-line) · [encrypt](#encrypting-sensitive-values) · [read in PHP/Twig](#reading-config-values)
 - **Dashboard** — [EasyAdmin interface](#easyadmin-interface) · [export for deployment](#deploying-to-production--export) · [ROLE_SUPER_ADMIN-only entries](#restricting-configs-to-role_super_admin) · [Export button in another CRUD](#adding-an-export-button-to-another-bundles-crud-controller)
-- **Site maintenance** — [Maintenance mode](#maintenance-mode) · [Health check](#health-check) · [Backup](#backup) · [Spreading scheduled commands](#spreading-scheduled-commands-across-installs) · [Status report](#status-report--telling-another-system-what-this-site-runs) · [Dev profile](#dev-profile--automating-what-the-dev-toolbar-shows)
+- **Users & access** — [scaffold and first account](#installing-the-scaffold-and-the-first-account) · [users and roles](#users) · [ROLE_SUPER_ADMIN configs](#restricting-configs-to-role_super_admin) · [disabling registration](#disabling-registration) · [registration anti-spam](#registration-anti-spam-protections) · [login throttling](#login-throttling) · [back-office access control](#back-office-access-control) · [account activation](#account-activation-isenabled)
+- **Site maintenance** — [Maintenance mode](#maintenance-mode) · [Messenger cleanup](#messenger-cleanup) · [Health check](#health-check) · [Backup](#backup) · [Spreading scheduled commands](#spreading-scheduled-commands-across-installs) · [Status report](#status-report--telling-another-system-what-this-site-runs) · [Dev profile](#dev-profile--automating-what-the-dev-toolbar-shows)
 - **Extension points for other bundles** — [menu items](#contributing-menu-items-from-other-bundles) · [dashboard alerts](#contributing-dashboard-alerts-from-other-bundles) · [shortcuts](#contributing-dashboard-shortcuts-from-other-bundles) · [essential actions](#contributing-essential-actions-from-other-bundles) · [widgets](#contributing-dashboard-widgets-from-other-bundles) · [guided projects](#contributing-guided-projects-from-other-bundles) · [health check providers](#contributing-health-check-providers-from-other-bundles) and [advice](#contributing-health-check-advice-from-other-bundles) · [maintenance tasks](#contributing-maintenance-tasks-from-other-bundles) · [status data](#contributing-status-data-from-other-bundles) · [sitemaps](#contributing-a-sitemap-from-other-bundles) · [importmap entries](#contributing-importmap-entries-from-other-bundles) · [import](#contributing-import-providers-from-other-bundles) and [export providers](#contributing-export-providers-from-other-bundles) · ["What's new" entries](#contributing-whats-new-entries-from-other-bundles) · [linkable routes](#contributing-linkable-routes-for-sitebundle-menus) · [dev profile paths](#contributing-dev-profile-paths-from-other-bundles) · [AI assistant procedures](#contributing-procedures-for-the-dashboard-ai-assistant)
 
 ## Features
@@ -44,11 +45,17 @@ See it in action at [bundles.975l.com/pages/config-bundle](https://bundles.975l.
 - Dashboard "Guided projects" walking through a whole task across the admin screens it spans, extensible via `GuidedProjectProviderInterface`
 - "Health check" dashboard page (Lighthouse scores, security headers, W3C/accessibility checks...) with history, a trend chart, and CSV export, extensible via `HealthCheckProviderInterface`/`HealthCheckAdviceProviderInterface`
 - `c975l:config:backup`, dumping the database table by table and archiving `public/`+`private/`, with archive integrity verification, a retention window on the server, a dashboard alert when a backup stops running, and a weekly digest email for the sites whose dashboard you don't open daily
+- `c975l:config:messenger-cleanup`, purging failed Messenger messages past their retention and emailing a digest of the ones worth an admin's attention, with a dashboard screen to read, replay or delete them
 - Maintenance mode closing the site to its visitors, answering the search-engine-friendly 503 they expect from a temporary outage, with a dashboard alert turning to danger once it has lasted long enough to cost indexing
 - Sitemap generation (one sub-sitemap per bundle plus the sitemap index), extensible via `SitemapProviderInterface`
+- Url redirects and `410 Gone` rows (`site_redirect` table, EasyAdmin CRUD, export/import, chain/loop check), answering before the router
+- The site-wide half of the health check: TLS certificate, security headers, `robots.txt`/sitemaps, redirect chains, deployment, and the content quality of every url any bundle declares
+- A Turbo-safe CSP nonce generator, and the `site_copyright()` Twig function
 - `c975l:status:send`, reporting what a site runs (versions, installed bundles, health check summary) to a url of your choosing — off unless configured, extensible via `StatusProviderInterface`
 - Scheduled maintenance tasks declared by each bundle (`MaintenanceTaskProviderInterface`) rather than listed by the app, and spread over each install's own minutes (`ScheduleSpreader`) so sites sharing a server don't all run them at once
 - `c975l:dev-profile:run`, a dev-only command listing what the Symfony dev toolbar would flag on every page (n+1 queries, deprecations, missing translations...), extensible via `DevProfilePathProviderInterface`
+- The ecosystem's account layer: `User` CRUD, registration, email confirmation and password reset, on forms and emails seeded once and editable from the back-office afterwards
+- `c975l:scaffold:install`, installing every installed c975L bundle's scaffold files into the app and backing up whatever it would replace, and `c975l:config:user-create` to bootstrap the first admin on an app with no site foundation
 
 ## Installation
 
@@ -89,6 +96,20 @@ access_control:
 `IS_AUTHENTICATED_FULLY` rather than an admin role: which role grants the back-office is `site-role-admin`, a config entry editable from the dashboard itself, so it belongs in the controllers' `denyAccessUnlessGranted()` rather than frozen in a yaml file. The rule only states that `/management` is off-limits to anonymous visitors, which is what sends them to your login form instead of a bare 403.
 
 It also matters on the `lazy: true` firewall the Symfony skeleton ships: a lazy firewall defers resolving the token until something actually reads it, and this rule is what makes the firewall authenticate the request up front.
+
+### Installing the scaffold and the first account
+
+`c975l:site:create` is SiteBundle's wizard, and an app running Config + Ui plus a satellite bundle doesn't have it. Two commands cover the same ground here:
+
+```bash
+php bin/console c975l:scaffold:install --dry-run
+php bin/console c975l:scaffold:install
+php bin/console c975l:config:user-create
+```
+
+The first copies every installed c975L bundle's `scaffold/` into the app — `App\Entity\User` and its repository, `App\Security\UserChecker`, the security/registration/reset-password controllers and their templates, `App\Scheduler\MaintenanceSchedule`, the `validators` catalog — backing up anything it would overwrite to `existingFiles/<same path>.old` rather than erasing it. A target already identical to the source is left untouched, so re-running it is a no-op; `--path=src/Scheduler` restricts a run to one path when propagating a single upgraded file across sites.
+
+The second creates an admin account (`--email`/`--password`, asked interactively when omitted) and seeds the `register`/`reset_password_request` Forms and their emails around it, so the account lands in a working login and password-reset flow. An email that already exists is reported and left alone.
 
 ## Defining config entries for your bundle
 
@@ -245,7 +266,7 @@ The bundle registers a management dashboard at `/management`. Navigate to **Conf
 
 **Config** opens on a "pick a group" screen (one row per distinct `group`, with its entry count) rather than one flat table of every entry — picking a group filters the familiar EasyAdmin grid down to just that group's entries, with a "← Config" action to go back. This keeps the list readable as more bundles/groups accumulate; the entry count shown per group respects both the current sensitive/non-sensitive view and, below `ROLE_SUPER_ADMIN`, excludes restricted entries the viewer wouldn't see anyway.
 
-Theme CSS variables (colors, fonts, light/dark mode, fixed by a bundle's `configs-css.json`) are entries like any other, under the `theme` group — reachable the same way, via **Config**'s "pick a group" screen, at the same `site-role-admin` permission as every other group (no dedicated page, no separate permission tier).
+Theme CSS variables (colors, fonts, light/dark mode, declared by a bundle like any other entry) sit under the `theme` group — reachable the same way, via **Config**'s "pick a group" screen, at the same `site-role-admin` permission as every other group (no dedicated page, no separate permission tier).
 
 Any entry with a `severity` and an empty `value` shows up as a colored alert (danger/warning/info) right on the `/management` home page, each linking directly to its edit form.
 
@@ -307,6 +328,136 @@ A fourth **Sync** export produces a zip (`manifest.json` plus any referenced fil
 On import, sensitive entries follow the same safeguard as the SQL export: one already holding a value on the target keeps it, since it is encrypted with that environment's own key. One sitting there empty — the blank row `load-all` creates from a declaration — takes the export's value instead, otherwise a secret could never be handed over to an environment that had run `load-all` first.
 
 The `/management` dashboard also has an **Export sync (everything)** shortcut (`site-role-admin`), bundling every registered `ExportProviderInterface`'s whole content (Config plus whatever other bundles contribute, e.g. pages, fonts) into a single zip — the "sync everything to prod in one click" counterpart to the per-bundle **Sync** export above, re-uploaded via **Import content** the same way. See [Contributing export providers from other bundles](#contributing-export-providers-from-other-bundles) below.
+
+## Users
+
+`App\Entity\User` is managed in the EasyAdmin dashboard via `UserCrudController`. The menu entry is registered automatically through `MenuProvider`. Access is controlled by `UserManagementVoter` (`setEntityPermission()`), which grants the `site-role-admin` key, same as pages — except on a `ROLE_SUPER_ADMIN`'s own account, which only another super admin may act on (see [ROLE_SUPER_ADMIN and restricted configs](#role_super_admin-and-restricted-configs)).
+
+The controller relies on EasyAdmin's auto-discovery of the app's own `User` fields (which vary per app), except for:
+
+- The hashed password field, excluded so it's never displayed or overwritten from the backoffice
+- The `roles` field, added explicitly as a multiple-choice field, since JSON columns are never auto-discovered by EasyAdmin
+- The `creation` / `modification` fields, made readonly since they're set automatically
+- The `isVerified` field, made readonly since it must only be set by `EmailVerifier` upon email confirmation, never edited by hand from the backoffice
+
+`ROLE_USER` is always excluded from the choices (every user already has it by default, see `User::getRoles()`). The other selectable roles come from the `user-roles-available` ConfigBundle key (`json` kind, e.g. `["ROLE_ADMIN","ROLE_EDITOR"]`) — add roles for your app there, no code change needed.
+
+A role the edited account already holds is kept in its choices even when the config no longer lists it: Symfony's `ChoiceType` drops a value missing from the choices, so the account would come back from the next save without it. That doesn't make the role grantable — it is only ever offered on the edit page of a user who already has it.
+
+The detail page is disabled (not useful on top of the index and edit pages).
+
+### ROLE_SUPER_ADMIN and restricted configs
+
+Requires `c975l/config-bundle` >= v5.4.
+
+Some configs are shared server-level secrets rather than per-site application settings — for
+example `site-backup-db-user`/`site-backup-db-password`, used by ConfigBundle's `c975l:config:backup`: a single privileged MySQL user reused to back up the database, not
+something a client's own site admin should ever be able to read or overwrite. ConfigBundle flags
+these with `"restricted": true` in
+`configs.json`; any config so flagged is hidden entirely (index, edit, and export) from
+every user except one holding `ROLE_SUPER_ADMIN`, regardless of `site-role-admin`.
+
+`c975l:site:create` grants `ROLE_SUPER_ADMIN` (together with `ROLE_EDITOR` and `ROLE_ADMIN`) to the
+bootstrap user automatically, since whoever runs it owns the site. No `role_hierarchy` is shipped, so
+each role is granted explicitly: `ROLE_ADMIN` never implies `ROLE_EDITOR`, and an account holding only
+the former would fail every `site-role-editor` gated action. When you (the producer) deploy a client's site,
+run `site:create` yourself to become its super-admin, then create the client's own users with plain
+`ROLE_ADMIN` via the User CRUD — they get full access to pages, menus, general configs, etc., but
+the `backup` config group stays out of their reach. A standalone install where you're the only user
+is never affected, since your own bootstrap account already holds both roles.
+
+To make your own bundle's configs restricted the same way, just add `"restricted": true` next to
+`"sensitive"` in its `configs.json` entry. `site-role-admin` and `user-roles-available` are
+restricted too: they gate the whole admin and decide which roles exist, so a plain `ROLE_ADMIN`
+must never be able to touch them.
+
+That last point matters for the role picker itself: `ROLE_SUPER_ADMIN` is decided by
+`UserCrudController`, not read from the config. It's stripped from whatever `user-roles-available`
+holds — which no longer declares it at all, it being the owner's role, granted once by
+`c975l:site:create` — and put back, first in the list, only for an acting user who already holds it.
+Server-side, not just visually: out of the choices means out of the submitted form's allowed values
+too, so Symfony's `ChoiceType` rejects a crafted submission trying to sneak it in anyway. Without
+this, a site that listed `ROLE_SUPER_ADMIN` in `user-roles-available` would let any `ROLE_ADMIN`
+grant it to themselves through the User CRUD and bypass every restricted config in one step.
+
+The reverse move is blocked too. `UserManagementVoter` (handed to EasyAdmin as the entity permission,
+so it's evaluated per row: on the index, where an inaccessible row keeps its place minus its actions,
+and again before the edit/delete page is built at all) keeps a plain `ROLE_ADMIN` off a super admin's
+account entirely — not just off their roles, but off their email, their password reset and their
+deletion. `ROLE_SUPER_ADMIN` is granted before the `site-role-admin` check, not after: with no
+`role_hierarchy` shipped it doesn't imply that role on its own, and an account holding only the
+highest role would otherwise be refused every row of the very screen that could grant it the one it's
+missing. On top of that, the `roles` field itself is rendered disabled whenever a lesser admin opens a
+super admin's record — Symfony's `ChoiceType` *displays* a value missing from the choices by silently
+dropping it (where it rejects it on submit), so saving the record would otherwise have posted a set
+without `ROLE_SUPER_ADMIN` and demoted them, with neither of them seeing it.
+
+### Disabling registration
+
+Registration/reset-password-request are plain `c975L\UiBundle\Entity\Form` rows ("register"/"reset_password_request"), processed by UiBundle's generic `c975L\UiBundle\Controller\FormController` exactly like "contact" - no dedicated `RegistrationController`/`ResetPasswordController` action builds or displays them anymore. To turn registration off without a deployment, uncheck the "register" Form's `enabled` field from the admin's Forms screen (or toggle it from the dashboard shortcut) - `FormController` then shows a generic "not available" notice instead of the form, on both the standalone `/form/register` route and the "form" Block wherever it's embedded.
+
+### Registration anti-spam protections
+
+Registration/reset-password-request reject bots at several layers, so a public form doesn't turn into a way to farm confirmation emails towards throwaway domains. Their fields ("email"/"plainPassword"/"cgu" for registration, "email" for the reset request) are the `register`/`reset_password_request` rows of `c975L\UiBundle\Entity\Form` (`site_form`/`site_form_field`) - the same mechanism as "contact", editable (label/placeholder/order) from the admin's Forms screen, with `type` and deletion locked on these core fields - built into a plain Symfony form by `c975L\UiBundle\Form\FormSubmissionType`, which is what actually adds the protections below. Processing itself (password hashing, verification email, reset token) is scaffold's `App\Service\RegisterFormAction`/`ResetPasswordRequestFormAction` (a `c975L\UiBundle\Contract\FormActionInterface` each, auto-registered - see UiBundle's own README for the mechanism), not a controller.
+
+- **`Assert\Email` + `c975L\UiBundle\Validator\Constraints\DnsEmail`** on every email-typed field — format check, then a live MX/A DNS lookup (via `egulias/email-validator`) rejecting domains that can't receive mail at all (e.g. `something@dominatingkeywords.com`). Applies to any generic Form's email field (contact/register/reset-password-request alike), plus `User::$email` itself on every entity validation (including the User CRUD in the backoffice, which still carries its own `#[DnsEmail]`).
+- **Honeypot + minimum submit delay** — an invisible rotating-name field (hidden inline, no CSS dependency), and a minimum delay between displaying the form and submitting it, tracked in session. Either one failing silently redirects back (same "form_submitted" flash as a real submission) without creating an account or sending any email, giving no signal back to the bot. The delay is the shared `site-form-delay` ConfigBundle key (seconds, default `3`) - one setting for every public form (contact, register, reset-password-request) instead of one per bundle.
+- **GDPR consent checkbox** - shown on both forms (unmapped `gdpr` field, using the bundle's own `text.gdpr` translation) when the shared `site-form-gdpr` ConfigBundle key (bool, default `true`) is enabled. The registration form also carries a `cgu` field (terms-of-use acceptance), enforced the same way.
+- **Duplicate email** - `RegisterFormAction` silently succeeds (same flash, no account created, no email sent) when the submitted email already has an account, same non-revealing stance `ResetPasswordRequestFormAction` already has for "no such account".
+- **Rate limiting by IP** — shared with every other generic Form (`limiter.ui_form`, optional), not a dedicated `registration`/`reset_password` limiter anymore:
+
+```yaml
+# config/packages/rate_limiter.yaml
+framework:
+    rate_limiter:
+        ui_form:
+            policy: sliding_window
+            limit: 5
+            interval: '10 minutes'
+```
+
+Without this config, rate limiting is simply skipped (fails open) rather than erroring - see `c975L\UiBundle\Service\RateLimiterGuard`.
+
+### Login throttling
+
+`c975l:site:create` also inserts `login_throttling: { max_attempts: 5 }` onto the `main` firewall in `config/packages/security.yaml` (same step as `user_checker` above), using Symfony's built-in rate limiter for `/login` - no custom code involved. If your site predates this or uses a differently-named firewall, add it yourself:
+
+```yaml
+security:
+    firewalls:
+        main:
+            login_throttling:
+                max_attempts: 5
+```
+
+### Back-office access control
+
+`c975l:site:create` also declares `- { path: ^/management, roles: IS_AUTHENTICATED_FULLY }` under `access_control` in `config/packages/security.yaml` (same step again), so an anonymous visitor gets the login form instead of a bare 403. On the skeleton's `lazy: true` firewall it also makes the token resolve up front, without which `c975l/config-bundle`'s dashboard runs before the firewall has restored it. `IS_AUTHENTICATED_FULLY` rather than an admin role, on purpose: which role grants the back-office is `site-role-admin`, editable from the dashboard, so the controllers check it themselves. If your site predates this, add it yourself:
+
+```yaml
+security:
+    access_control:
+        - { path: ^/management, roles: IS_AUTHENTICATED_FULLY }
+```
+
+### Account activation (`isEnabled`)
+
+`App\Entity\User::isEnabled` gates login independently from `isVerified`. `c975L\ConfigBundle\Service\EmailVerifier::handleEmailConfirmation` (a bundle service, called from the scaffolded `RegistrationController`) sets both `isVerified` and `isEnabled` to `true` once the user confirms their email — `c975l:site:create` does the same for the bootstrap admin account, since there's no email to confirm. Registration itself (hashing the password, persisting the user, sending the confirmation email) goes through the bundle's `UserRegistrar` service, called from the scaffolded `App\Service\RegisterFormAction` (see [Registration anti-spam protections](#registration-anti-spam-protections)); `PasswordResetter` is its equivalent for the reset-password flow.
+
+The scaffold ships `App\Security\UserChecker`, which refuses login with Symfony's built-in `DisabledException` ("Account is disabled.", already translated in `security.*.xlf` for en/fr/es, and rendered for free by the scaffolded `login.html.twig`) as soon as `isEnabled` is `false` — before the password is even checked. `c975l:site:create` registers it on the `main` firewall automatically (step 1, right after the scaffold install), by inserting `user_checker: App\Security\UserChecker` into `config/packages/security.yaml` if it isn't already there. If your site predates this or uses a differently-named firewall, add it yourself:
+
+```yaml
+security:
+    firewalls:
+        main:
+            user_checker: App\Security\UserChecker
+```
+
+This lets you disable a user from the backoffice (`isEnabled` isn't readonly, unlike `isVerified`) to lock them out without deleting their account — a verified user with `isEnabled = false` still can't log in.
+
+---
+
+---
 
 ## Restricting configs to ROLE_SUPER_ADMIN
 
@@ -618,7 +769,7 @@ If your bundle has public urls of its own (a book catalogue, a shop, a gallery�
 `SitemapWriter` then writes one `public/sitemap-<getSitemapName()>.xml` per provider **and** the `public/sitemap-index.xml` declaring them all, so a bundle never renders or writes a sitemap itself, and the consuming app has nothing to list by hand. It runs from the `c975l:sitemaps:create` command (schedule it, see `c975l/site-bundle`'s scheduler section) and from the "Create sitemaps" dashboard shortcut. Both the writer and the two Twig templates live here rather than in SiteBundle, so any combination of bundles gets its sitemaps and its index, SiteBundle installed or not.
 
 > [!TIP]
-> Implementing this interface also gets your urls **health-checked**, at no extra cost: with `c975l/site-bundle` installed, its `DeclaredUrlsHealthCheckPass` registers one health check provider per `SitemapProviderInterface`, under its own `urls-<getSitemapName()>` kind (see [Health check](#health-check) and SiteBundle's own README). Nothing else to implement, and each bundle's urls stay schedulable on their own.
+> Implementing this interface also gets your urls **health-checked**, at no extra cost: `DeclaredUrlsHealthCheckPass` registers one health check provider per `SitemapProviderInterface`, under its own `urls-<getSitemapName()>` kind (see [Health check](#health-check)). Nothing else to implement, and each bundle's urls stay schedulable on their own. A sitemap whose urls already have a check of their own opts out by implementing `SelfCheckedSitemapProviderInterface` instead — SiteBundle's pages do, `content-quality` reporting them in more detail.
 
 ```php
 namespace c975L\MyBundle\Management;
@@ -897,6 +1048,42 @@ Make sure your bundle's `services.yaml` includes the `Management/` folder in its
 
 The dashboard template only loops and includes each widget's own `template` with its own `context` — it never contains business logic about what a widget is. Return `[]` when there's nothing to show (e.g. an unconfigured feature) so it stays entirely absent rather than showing a disabled placeholder.
 
+## Testing your contributions to the management interface
+
+Every provider above names a target nothing else verifies: a menu entry names a CRUD controller class, a link, a shortcut, a guided step or a linkable route names a route. Rename that route or move that controller and everything still compiles — the failure only surfaces when an admin clicks the entry, and a broken sidebar link takes the whole back office down rather than just its own entry.
+
+`ManagementTargetsTestCase` checks all of it, with no kernel and no database: route names are read off the `#[AdminRoute]`/`#[Route]` attributes your controllers already carry. Extend it in your bundle and hand it your providers:
+
+```php
+namespace c975L\MyBundle\Tests\Management;
+
+use c975L\ConfigBundle\Test\ManagementTargetsTestCase;
+use c975L\MyBundle\Management\MenuProvider;
+use c975L\MyBundle\Management\MyGuidedProjectProvider;
+
+class ManagementTargetsTest extends ManagementTargetsTestCase
+{
+    protected function managementProviders(): iterable
+    {
+        return [
+            new MenuProvider($this->createStub(ConfigServiceInterface::class)),
+            // A provider generating urls takes these two recorders, so the targets behind its urls can be read back
+            new MyGuidedProjectProvider($this->adminUrlGenerator(), $this->urlGenerator()),
+        ];
+    }
+
+    // ConfigBundle's own controllers are watched by default (every bundle links to its screens); add yours
+    protected function controllerDirectories(): array
+    {
+        return [...parent::controllerDirectories(), __DIR__ . '/../../src/Controller'];
+    }
+}
+```
+
+That's the whole file — the case then checks your menu entries, links, shortcuts, essential actions, guided steps and linkable routes, and refuses to pass on an empty list should a stub end up too tight to make a provider return anything.
+
+It lives in `src/` rather than `tests/` because a bundle can't autoload another bundle's test files. If your bundle's `services.yaml` scans `src/` as a resource, exclude your `Tests` helpers the same way ConfigBundle excludes its `Test` folder — the scan reflects on every class it finds, and PHPUnit isn't installed in production.
+
 ## Maintenance mode
 
 Setting the `site-maintenance` config to `true` — from the config list, or from the dashboard's own toggle tile — closes the site to its visitors: `MaintenanceListener` answers every public request with the `@c975LConfig/maintenance/index.html.twig` page. `/management` and `/login` stay reachable so an admin can always get back in and lift it, as does anyone already authenticated with the `site-role-admin` role, or holding the `site-maintenance-hash` token (`?t=…`, which opens a 6-hour session).
@@ -909,9 +1096,38 @@ That page is served with **HTTP 503** and a `Retry-After` header, which is what 
 
 **Don't leave it on for more than a day or two.** Past that, search engines stop reading the 503 as temporary and start dropping the pages from their index. `MaintenanceAlertProvider` puts that on the dashboard: an `info` alert while the site is closed, turning to `danger` past two days, both dated from the moment the mode was switched on. For a closure that has to last, publishing a real home page answering `200` ("closed until…", contact details) keeps the site indexed where maintenance mode wouldn't.
 
+## Redirects
+
+A url that changed needs a redirect whether it was a page's or a product's, and the rows answer **before the router** — so they live here rather than in whichever bundle happens to serve the content.
+
+`Entity\Redirect` (table `site_redirect`) carries `fromPath`, `toUrl`, `permanent` and `gone`; `EventSubscriber\RedirectSubscriber` resolves it on `kernel.request` at priority 33, just above `RouterListener`. Managed from *Management → Advanced → Redirects*, exported/imported through the **Export sync (everything)** shortcut and the **Import content** screen (matched by `fromPath`, its own unique constraint).
+
+- **`gone`** answers `410 Gone` instead of redirecting — for content removed with no equivalent to send anyone to. Search engines drop a 410 far faster than the plain 404 the same url would otherwise return. `toUrl` is required on every other row, a conditional constraint on the entity rather than a form-level one.
+- **`fromPath` accepts a trailing `*`**: `/apidoc/*` covers every url below it, however deep. An exact row always wins over a prefix covering it, and among prefixes the longest one wins — so `/apidoc/c975L/*` still beats a broader `/apidoc/*`. A convention resolved in `RedirectSubscriber`, not a SQL wildcard.
+- **The site root is left alone** by design.
+
+`RedirectChainHealthCheckProvider` walks the rows for chains and loops, from the database alone.
+
+---
+
 ## Health check
 
-`/management/health-check` gives a per-page technical health snapshot of the site — Lighthouse scores, security headers, W3C markup validation, WCAG accessibility issues (whichever `HealthCheckProviderInterface` implementations are installed; `c975l/site-bundle` contributes eleven, see its own README) — without needing Node/Lighthouse-CLI or any other JS tooling: everything runs server-side over plain HTTP calls.
+`/management/health-check` gives a technical health snapshot of the site — TLS certificate, security headers, `robots.txt`/sitemaps, redirect chains, deployment, and the content quality (title, meta description, `<h1>`, `alt` text, share tags, broken links) of every url any installed bundle declares — without needing Node/Lighthouse-CLI or any other JS tooling: everything runs server-side over plain HTTP calls. `c975l/site-bundle` adds six page-level providers on top (Lighthouse scores, W3C markup validation, mixed content), see its own README.
+
+This bundle's own providers:
+
+| Provider | `getKind()` | Checks |
+| --- | --- | --- |
+| `SslCertificateHealthCheckProvider` | `ssl-certificate` | TLS certificate expiry (warns at 30 days left, errors at 7) — one check for the whole site, the certificate being issued for the host. Recorded under the site root as `SiteUrlResolver::siteRoot()` spells it, so it shares a dashboard row with anything else checking that url. Skipped if `site-url` isn't `https://` |
+| `SecurityHeadersHealthCheckProvider` | `security-headers` | HSTS, CSP (or its `frame-ancestors` in place of X-Frame-Options), X-Content-Type-Options, Referrer-Policy, Permissions-Policy, wildcard CORS — reimplemented directly (securityheaders.com has no public API for automated use). Set once for the whole site, so only the site root is fetched |
+| `SeoFilesHealthCheckProvider` | `seo-files` | `robots.txt` and `sitemap-site.xml` reachable, well-formed, not empty, not stale, and `robots.txt` not accidentally blocking every crawler |
+| `RedirectChainHealthCheckProvider` | `redirect-chains` | Chains and loops among your own `Redirect` rows, walked from the database alone (no HTTP call) |
+| `DeploymentHealthCheckProvider` | `deployment` | http→https redirect, and that an unknown url actually answers 404 |
+| `DeclaredUrlsHealthCheckProvider` | `urls-<bundle>` | The content-quality checks over the urls each bundle declares for its sitemap — one kind per bundle, each schedulable at its own cadence |
+| `DatabaseLoadHealthCheckProvider` | `database-load` | Table sizes and row counts against the host's own limits |
+| `BackupHealthCheckAdviceProvider` | — | Advice lines for the backup alerts |
+
+`ContentQualityAnalyzer` is what does the content work behind `urls-<bundle>` **and** behind SiteBundle's own `content-quality`. It reports each offence with a link to the screen that fixes it whenever a `ContentOffenceLocatorInterface` recognizes the entry's source — SiteBundle registers one tracing a page's image or link back to the block holding it. Without any locator the offence is still reported, just unlinked.
 
 **Reading the table**: the page lists one row per url *and* per kind, its rows grouped by url. The row opening each group carries that page's name and a heavier top border, separating one page from the next. Status is read off each row's own pill and nowhere else — a group used to be tinted with its worst status, which contradicted the pill sitting on that very row, and read as plain wrong once a sort had scattered a page's rows across the table.
 
@@ -1060,6 +1276,22 @@ The stretch *before* the first run of the window is deliberately not counted: a 
 Keep `site-backup-max-age-hours` comfortably above the interval you pick, so an ordinary late run doesn't alert. The digest is scheduled on its own line rather than as `c975l:config:backup --report` on the Monday run, so the week's summary doesn't depend on that particular run getting through.
 
 The `#` are placeholders `ScheduleSpreader` draws from this install's own identity, so that two sites sharing a server don't dump their databases at the same minute — see below. Writing `'7 */6 * * *'` with a plain `RecurringMessage::cron()` still works, and is what to do when a command has to run at a fixed time.
+
+## Messenger cleanup
+
+Purges failed `messenger_messages` rows (`queue_name = 'failed'`) older than `site-messenger-cleanup-retention-days` days (default 30). Each failure is classified minor (spam/blacklist-related, matched against the exception message) or important; new important failures since the last alert trigger a single digest email to `site-messenger-cleanup-mailto` (both configs `restricted`, the mailto also `sensitive`, same pattern as the backup mailto — see [ROLE_SUPER_ADMIN and restricted configs](#role_super_admin-and-restricted-configs)), never more than once per new batch.
+
+A dashboard alert (ConfigBundle's `AlertProviderInterface`) also surfaces important failures — full detail (recipient, subject, error) to `ROLE_SUPER_ADMIN`, a plain "already reported" message to `ROLE_ADMIN` — linking to a management page listing them, with a "Purge now" button (`ROLE_SUPER_ADMIN` only) that runs the same cleanup immediately.
+
+The whole stack lives here rather than in SiteBundle, where it started: any bundle queueing a message needs it, whether or not the app has a site foundation. `c975l:config:messenger-cleanup` is declared by `ConfigMaintenanceTaskProvider`, so it runs nightly without anything to add to a schedule.
+
+Everything above reads and purges the `messenger_messages` table through Doctrine, so it works with no Messenger configuration at all. Only **replaying** a failed message goes through the transport itself: without a `framework.messenger.failure_transport: failed` (the Symfony recipe default), the "Retry" button reports the message as no longer there — nothing else changes, and the container still compiles.
+
+**Exporting a set of tables.** `c975l:config:export-tables` dumps the data (no `CREATE TABLE`) of every table matching a prefix into one SQL file, meant to be replayed one-shot into an environment where the schema already exists — building content in dev then pushing it to prod after the migrations ran there. The file truncates each table and disables FK checks around the inserts, so it can be replayed as-is over existing data; `site_config` is always excluded, this bundle having its own non-destructive export. It uses the same DB credentials as `c975l:config:backup` (the `site-backup-db-*` keys), so it works even when the DB user your GUI tool uses lacks export privileges. The same dump is one click away as the **Export tables** dashboard shortcut, streamed back rather than written to `var/export`.
+
+`--prefix` (default `site_`) and `site-backup-database` must both be plain identifiers — letters, digits and underscores only. Neither can be bound as a query parameter, and a `%` or `_` in the prefix would silently widen the list of tables the dump truncates on replay.
+
+---
 
 ## Spreading scheduled commands across installs
 

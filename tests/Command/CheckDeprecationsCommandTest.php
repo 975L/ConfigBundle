@@ -54,7 +54,7 @@ class CheckDeprecationsCommandTest extends TestCase
         $tester->execute([]);
 
         $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
-        $this->assertStringContainsString('Fichier introuvable', $tester->getDisplay());
+        $this->assertStringContainsString('File not found', $tester->getDisplay());
     }
 
     public function testExecuteSucceedsWhenLogFileIsEmpty(): void
@@ -65,7 +65,7 @@ class CheckDeprecationsCommandTest extends TestCase
         $tester->execute([]);
 
         $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
-        $this->assertStringContainsString('Aucune dépréciation trouvée', $tester->getDisplay());
+        $this->assertStringContainsString('No deprecation found', $tester->getDisplay());
     }
 
     public function testExecuteReportsExactFqcnMatchAsActionnable(): void
@@ -81,9 +81,9 @@ class CheckDeprecationsCommandTest extends TestCase
         $tester->execute([]);
 
         $display = $tester->getDisplay();
-        $this->assertStringContainsString('ACTIONNABLE', $display);
+        $this->assertStringContainsString('ACTIONABLE', $display);
         $this->assertStringContainsString('app -> src/Foo.php', $display);
-        $this->assertStringNotContainsString('À vérifier', $display);
+        $this->assertStringNotContainsString('To be checked', $display);
     }
 
     public function testExecuteReportsNamespaceOnlyMatchAsPossibleHit(): void
@@ -99,8 +99,8 @@ class CheckDeprecationsCommandTest extends TestCase
         $tester->execute([]);
 
         $display = $tester->getDisplay();
-        $this->assertStringNotContainsString('ACTIONNABLE', $display);
-        $this->assertStringContainsString('À vérifier', $display);
+        $this->assertStringNotContainsString('ACTIONABLE', $display);
+        $this->assertStringContainsString('To be checked', $display);
         $this->assertStringContainsString('app -> src/Foo.php', $display);
     }
 
@@ -117,8 +117,8 @@ class CheckDeprecationsCommandTest extends TestCase
         $tester->execute([]);
 
         $display = $tester->getDisplay();
-        $this->assertStringContainsString('ACTIONNABLE', $display);
-        $this->assertStringNotContainsString('À vérifier', $display);
+        $this->assertStringContainsString('ACTIONABLE', $display);
+        $this->assertStringNotContainsString('To be checked', $display);
     }
 
     // Nothing traces back to app/c975L source - it's surely the sole concern of the third-party package that logged it, so it's dropped from the report entirely instead of just being noted
@@ -130,9 +130,9 @@ class CheckDeprecationsCommandTest extends TestCase
         $tester->execute([]);
 
         $display = $tester->getDisplay();
-        $this->assertStringNotContainsString('ACTIONNABLE', $display);
-        $this->assertStringNotContainsString('À vérifier', $display);
-        $this->assertStringContainsString('Aucune dépréciation actionnable trouvée', $display);
+        $this->assertStringNotContainsString('ACTIONABLE', $display);
+        $this->assertStringNotContainsString('To be checked', $display);
+        $this->assertStringContainsString('No actionable deprecation found', $display);
     }
 
     public function testExecuteOmitsThirdPartyMessageWhileKeepingActionableOne(): void
@@ -153,7 +153,7 @@ class CheckDeprecationsCommandTest extends TestCase
         $display = $tester->getDisplay();
         $this->assertStringContainsString('ThingDoer', $display);
         $this->assertStringNotContainsString('Some\Vendor\Thing', $display);
-        $this->assertStringContainsString('1 dépréciation(s) actionnable(s), 1 occurrence(s) au total.', $display);
+        $this->assertStringContainsString('1 actionable deprecation(s), 1 occurrence(s) in total.', $display);
     }
 
     public function testExecuteReadsLogFromGivenEnvironmentArgument(): void
@@ -169,6 +169,6 @@ class CheckDeprecationsCommandTest extends TestCase
         $tester->execute(['env' => 'test']);
 
         $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
-        $this->assertStringContainsString('1 dépréciation(s) actionnable(s), 1 occurrence(s) au total.', $tester->getDisplay());
+        $this->assertStringContainsString('1 actionable deprecation(s), 1 occurrence(s) in total.', $tester->getDisplay());
     }
 }

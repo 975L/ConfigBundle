@@ -36,12 +36,12 @@ class SitemapCreateCommand extends Command
         $names = $this->sitemapWriter->write();
 
         if ([] === $names) {
-            $io->warning('Aucun SitemapProvider n\'a d\'url à déclarer - rien à écrire.');
+            $io->warning('No SitemapProvider has any url to declare - nothing to write.');
 
             return Command::SUCCESS;
         }
 
-        $io->success('Sitemaps créés : ' . implode(', ', $names) . ', plus l\'index.');
+        $io->success('Sitemaps created: ' . implode(', ', $names) . ', plus the index.');
 
         return Command::SUCCESS;
     }

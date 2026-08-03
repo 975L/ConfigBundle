@@ -1,5 +1,70 @@
 [
     {
+        "date": "2026-08-03",
+        "description": [
+            {
+                "en": "The dates of failed messages are shown at the right time again, and the alert email is no longer skipped for the failures right after one was sent",
+                "fr": "Les dates des messages échoués s'affichent de nouveau à la bonne heure, et l'email d'alerte n'est plus sauté pour les échecs survenant juste après un envoi",
+                "es": "Las fechas de los mensajes fallidos vuelven a mostrarse a la hora correcta, y el correo de alerta ya no se omite para los fallos ocurridos justo después de un envío"
+            },
+            {
+                "en": "The checks on your robots.txt and sitemap no longer report them as missing when your site address was saved with a slash at the end",
+                "fr": "Les contrôles de votre robots.txt et de votre sitemap ne les signalent plus comme manquants lorsque l'adresse de votre site a été enregistrée avec une barre oblique à la fin",
+                "es": "Las comprobaciones de su robots.txt y de su sitemap ya no los señalan como ausentes cuando la dirección de su sitio se guardó con una barra al final"
+            },
+            {
+                "en": "A redirection saved without a destination address no longer takes down the pages it covers",
+                "fr": "Une redirection enregistrée sans adresse de destination ne met plus en panne les pages qu'elle couvre",
+                "es": "Una redirección guardada sin dirección de destino ya no deja fuera de servicio las páginas que cubre"
+            },
+            {
+                "en": "Exporting your tables no longer reports a failure when the export actually went through, and says what went wrong when it really failed",
+                "fr": "L'export de vos tables ne signale plus un échec alors que l'export s'est bien déroulé, et indique ce qui a échoué quand c'est réellement le cas",
+                "es": "La exportación de sus tablas ya no informa de un fallo cuando la exportación se realizó correctamente, e indica qué ha fallado cuando realmente ocurre"
+            },
+            {
+                "en": "The copyright at the bottom of your pages no longer shows 1970 when the date your site went online was typed in an unrecognized format",
+                "fr": "Le copyright en bas de vos pages n'affiche plus 1970 lorsque la date de mise en ligne de votre site a été saisie dans un format non reconnu",
+                "es": "El copyright al pie de sus páginas ya no muestra 1970 cuando la fecha de puesta en línea de su sitio se escribió en un formato no reconocido"
+            }
+        ]
+    },
+    {
+        "date": "2026-08-02",
+        "description": [
+            {
+                "en": "Redirections are now available whichever modules you have installed: an address that changed is redirected whether it was a page's or a product's",
+                "fr": "Les redirections sont désormais disponibles quels que soient les modules installés : une adresse qui change est redirigée qu'il s'agisse d'une page ou d'un produit",
+                "es": "Las redirecciones ya están disponibles sean cuales sean los módulos instalados: una dirección que cambia se redirige tanto si era de una página como de un producto"
+            },
+            {
+                "en": "The certificate, security headers, robots.txt and content-quality checks now run on a site with no pages at all",
+                "fr": "Les contrôles du certificat, des en-têtes de sécurité, du robots.txt et de la qualité du contenu s'exécutent désormais sur un site sans aucune page",
+                "es": "Las comprobaciones del certificado, de las cabeceras de seguridad, del robots.txt y de la calidad del contenido se ejecutan ahora en un sitio sin ninguna página"
+            },
+            {
+                "en": "The account-confirmation and password-reset emails are now written from a template you can edit in the back office, instead of being fixed in the code",
+                "fr": "Les emails de confirmation de compte et de réinitialisation de mot de passe s'écrivent désormais à partir d'un modèle modifiable dans le back-office, au lieu d'être figés dans le code",
+                "es": "Los correos de confirmación de cuenta y de restablecimiento de contraseña se redactan ahora a partir de una plantilla editable en el back office, en lugar de estar fijados en el código"
+            },
+            {
+                "en": "A role held by an account is no longer taken away without warning when it stops being one of the roles offered on your site",
+                "fr": "Un rôle attribué à un compte ne lui est plus retiré sans prévenir lorsqu'il ne fait plus partie des rôles proposés sur votre site",
+                "es": "Un rol asignado a una cuenta ya no se le retira sin avisar cuando deja de figurar entre los roles ofrecidos en su sitio"
+            },
+            {
+                "en": "The fields of the new-password form are shown in your language rather than as raw labels",
+                "fr": "Les champs du formulaire de nouveau mot de passe s'affichent dans votre langue plutôt que sous forme de libellés bruts",
+                "es": "Los campos del formulario de nueva contraseña se muestran en su idioma en lugar de como etiquetas sin traducir"
+            },
+            {
+                "en": "Cleaning up failed messages now runs even when no sender address has been filled in, where it used to stop before purging anything",
+                "fr": "Le nettoyage des messages échoués s'exécute désormais même si aucune adresse d'expéditeur n'est renseignée, alors qu'il s'arrêtait avant d'avoir purgé quoi que ce soit",
+                "es": "La limpieza de los mensajes fallidos se ejecuta ahora aunque no se haya indicado ninguna dirección de remitente, cuando antes se detenía sin purgar nada"
+            }
+        ]
+    },
+    {
         "date": "2026-08-01",
         "description": [
             {

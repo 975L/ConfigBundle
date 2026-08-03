@@ -12,8 +12,10 @@ namespace c975L\ConfigBundle\Tests;
 
 use c975L\ConfigBundle\c975LConfigBundle;
 use c975L\ConfigBundle\Contract\UserInterface;
+use c975L\ConfigBundle\DependencyInjection\Compiler\DeclaredUrlsHealthCheckPass;
 use c975L\ConfigBundle\DependencyInjection\Compiler\TaggedInterfacePass;
 use c975L\ConfigBundle\Management\AlertProviderInterface;
+use c975L\ConfigBundle\Management\ContentOffenceLocatorInterface;
 use c975L\ConfigBundle\Management\DashboardWidgetProviderInterface;
 use c975L\ConfigBundle\Management\DevProfilePathProviderInterface;
 use c975L\ConfigBundle\Management\EssentialActionProviderInterface;
@@ -53,6 +55,7 @@ class c975LConfigBundleTest extends TestCase
         $container->register('maintenance_task_provider', c975LConfigBundleTestMaintenanceTaskProviderFixture::class);
         $container->register('dev_profile_path_provider', c975LConfigBundleTestDevProfilePathProviderFixture::class);
         $container->register('guided_project_provider', c975LConfigBundleTestGuidedProjectProviderFixture::class);
+        $container->register('content_offence_locator', c975LConfigBundleTestContentOffenceLocatorFixture::class);
 
         (new c975LConfigBundle())->build($container);
 
@@ -77,6 +80,23 @@ class c975LConfigBundleTest extends TestCase
         // Registered in every environment even though every implementation is #[When('dev')], the pass simply having nothing to tag in prod
         $this->assertTrue($container->getDefinition('dev_profile_path_provider')->hasTag('c975l.dev_profile_path_provider'));
         $this->assertTrue($container->getDefinition('guided_project_provider')->hasTag('c975l.guided_project_provider'));
+        // Tagged like every other provider, ContentOffenceLocatorRegistry receiving whatever the installed bundles contribute
+        $this->assertTrue($container->getDefinition('content_offence_locator')->hasTag('c975l.content_offence_locator'));
+    }
+
+    // Not a TaggedInterfacePass: it builds one health-check service per sitemap provider found, so it has to be registered on its own
+    public function testBuildRegistersTheDeclaredUrlsHealthCheckPass(): void
+    {
+        $container = new ContainerBuilder();
+
+        (new c975LConfigBundle())->build($container);
+
+        $passes = array_filter(
+            $container->getCompilerPassConfig()->getBeforeOptimizationPasses(),
+            static fn (object $pass) => $pass instanceof DeclaredUrlsHealthCheckPass
+        );
+
+        $this->assertCount(1, $passes);
     }
 
     // Mirrors how Symfony's own kernel invokes it (BundleExtension::load() builds the ContainerConfigurator and calls loadExtension() for us), so this also validates that config/services.yaml itself parses and wires without error
@@ -281,5 +301,23 @@ class c975LConfigBundleTestGuidedProjectProviderFixture implements GuidedProject
     public function getGuidedProjects(): array
     {
         return [];
+    }
+}
+
+class c975LConfigBundleTestContentOffenceLocatorFixture implements ContentOffenceLocatorInterface
+{
+    public function supports(object $source): bool
+    {
+        return false;
+    }
+
+    public function locateImage(object $source, string $src): ?array
+    {
+        return null;
+    }
+
+    public function locateLink(object $source, string $href): ?array
+    {
+        return null;
     }
 }

@@ -45,7 +45,7 @@ class DevProfileRunCommand extends Command
 
         $report = $this->devProfileRunner->run($input->getOption('path'));
         if (!$report) {
-            $io->warning('Aucun chemin à profiler - aucun DevProfilePathProvider enregistré ?');
+            $io->warning('No path to profile - is any DevProfilePathProvider registered?');
 
             return Command::SUCCESS;
         }
@@ -82,7 +82,7 @@ class DevProfileRunCommand extends Command
             $io->newLine();
         }
 
-        $summary = sprintf('%d page(s) profilée(s), %d propre(s), %d erreur(s), %d alerte(s).', \count($report), $clean, $errors, $warnings);
+        $summary = sprintf('%d page(s) profiled, %d clean, %d error(s), %d warning(s).', \count($report), $clean, $errors, $warnings);
         if ($errors > 0) {
             $io->error($summary);
 
@@ -99,11 +99,11 @@ class DevProfileRunCommand extends Command
     private function formatMetrics(array $metrics): string
     {
         if (null !== ($metrics['error'] ?? null)) {
-            return 'aucune mesure';
+            return 'no measurement';
         }
 
         return sprintf(
-            'HTTP %d · %d requêtes (%s ms) · %d transactions · %d templates (%s ms) · %d dépréciations · cache %d/%d · %s ms · %s Mo',
+            'HTTP %d · %d queries (%s ms) · %d transactions · %d templates (%s ms) · %d deprecations · cache %d/%d · %s ms · %s MB',
             $metrics['statusCode'],
             $metrics['queries'],
             $metrics['queryTime'],

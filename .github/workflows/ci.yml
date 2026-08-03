@@ -40,6 +40,10 @@ jobs:
             - name: Analyse statique
               run: phpstan analyse --no-progress
 
+            # Seconde passe en level 6 sur le seul scaffold : il est recopié tel quel dans les applications, qui l'analysent à ce niveau-là
+            - name: Analyse statique du scaffold
+              run: phpstan analyse -c phpstan-scaffold.dist.neon --no-progress
+
             - name: Tests
               run: vendor/bin/phpunit --coverage-clover clover.xml
 

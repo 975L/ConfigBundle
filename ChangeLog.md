@@ -1,5 +1,72 @@
 # ChangeLog
 
+## v6.0.0
+
+Accounts, scaffolding and shared plumbing move to the ecosystem root
+
+- Failed Messenger dates are read as UTC, the digest no longer staying silent after an alert (03/08/2026)
+- `ContentQualityAnalyzer` releases each batch's responses instead of holding them for the whole run (03/08/2026)
+- `seo-files`, `deployment` and `redirect-chains` read the site root through `SiteUrlResolver` (03/08/2026)
+- A `Redirect` row without a destination is skipped instead of erroring the whole path (03/08/2026)
+- `RedirectImportProvider` no longer imports such a row (03/08/2026)
+- `c975l:config:export-tables` judges mysqldump on its exit code rather than on stderr (03/08/2026)
+- Its `--prefix` and `site-backup-database` must be plain identifiers (03/08/2026)
+- `site_copyright()` ignores a `site-first-online-date` it cannot read (03/08/2026)
+- `svg-fonts` added to the health check's site-wide kinds (02/08/2026)
+- `Redirect` moved here from SiteBundle: entity, `RedirectSubscriber`, CRUD, export/import and the `redirect-chains` check (02/08/2026) [BC-Break]
+- The `ssl-certificate`, `security-headers` and `seo-files` checks moved here too, none of them needing a Page (02/08/2026) [BC-Break]
+- Added `SiteUrlResolver`, the one spelling of the site root every site-wide check groups on (02/08/2026)
+- `security-headers` reads that root instead of resolving the home Page (02/08/2026)
+- The content-quality machinery moved here: `ContentQualityAnalyzer`, `ContentQualityClient`, the `urls-<bundle>` check and its pass (02/08/2026) [BC-Break]
+- Added `ContentOffenceLocatorInterface`/`ContentOffenceLocatorRegistry`, tracing an offence back to the screen holding it (02/08/2026)
+- Added `SelfCheckedSitemapProviderInterface`, opting a sitemap out of the generic urls check (02/08/2026)
+- SiteBundle's `PageExistenceChecker` landed here as `UrlStatusChecker` (02/08/2026) [BC-Break]
+- `SessionNonceGenerator` moved here from SiteBundle, with its conditional Nelmio wiring (02/08/2026) [BC-Break]
+- `site_copyright()` moved here too, with `site-author` and `site-first-online-date` (02/08/2026) [BC-Break]
+- `MenuProvider` contributes the "Redirects" entry (02/08/2026)
+- Added `ProcedureProvider` and its `procedures.json`, holding the redirect and account procedures (02/08/2026)
+- The six legal identity configs moved here from SiteBundle: `site-owner`, `site-producer`, `site-hosting-provider`, `site-dpo`, `site-director-location`, `site-contact-phone` (02/08/2026)
+- The account layer moved here from SiteBundle: `UserCrudController`, `UserManagementVoter`, `UserRegistrar`, `EmailVerifier`, `PasswordResetter` (02/08/2026) [BC-Break]
+- The account half of SiteBundle's scaffold moved here too, `App\Entity\User` included (02/08/2026) [BC-Break]
+- `MenuProvider` contributes the "Users" entry, and `configs.json` the `user-roles-available` key (02/08/2026)
+- `EmailVerifier::sendEmailConfirmation()` and `UserRegistrar::register()` lost their `$template` argument (02/08/2026) [BC-Break]
+- Both compose their email from the `account_validation` EmailTemplate (02/08/2026)
+- Both return `false` without sending when that template has been renamed or deleted (02/08/2026)
+- The scaffolded `RegistrationController`/`ResetPasswordController` redirect to `app_login` instead of a SiteBundle Page (02/08/2026) [BC-Break]
+- The scaffolded `login.html.twig` calls UiBundle's `form_url()` (02/08/2026) [BC-Break]
+- It and the scaffolded `reset.html.twig` extend `layout.html.twig` (02/08/2026) [BC-Break]
+- The scaffolded `layout.html.twig` is shipped here now instead of by SiteBundle, and resolves to whichever layout is installed (02/08/2026) [BC-Break]
+- Added `UserFormSeeder`, seeding the `register`/`reset_password_request` Forms and their two emails (02/08/2026)
+- Added `AdminUserCreator`, shared by `c975l:site:create` and the new command below (02/08/2026)
+- Added `c975l:config:user-create`, bootstrapping an admin on an app without a site foundation (02/08/2026)
+- `ScaffoldInstaller` and `c975l:scaffold:install` moved here from SiteBundle (02/08/2026) [BC-Break]
+- The failed-Messenger stack moved here: service, alert provider, controller, receiver, cleanup command (02/08/2026) [BC-Break]
+- `c975l:site:messenger-cleanup` is now `c975l:config:messenger-cleanup`, and its routes `management_config_messenger_failed*` (02/08/2026) [BC-Break]
+- `ExportTablesCommand` moved here, `c975l:site:export-tables` becoming `c975l:config:export-tables` (02/08/2026) [BC-Break]
+- `ConfigShortcutProvider` gained the "Export tables" and "Enable/disable registration" tiles (02/08/2026)
+- The `deployment` health check and `DeploymentClient` moved here (02/08/2026) [BC-Break]
+- `ConfigMaintenanceTaskProvider` declares the messenger cleanup, `SiteMaintenanceTaskProvider` being removed (02/08/2026)
+- The scaffolded `App\Scheduler\MaintenanceSchedule` is shipped by this bundle now (02/08/2026)
+- Added `Management\ArchiveFileRegistrar`, replacing SiteBundle's `ArchiveFileTrait` (02/08/2026) [BC-Break]
+- Added a `phpstan-baseline.neon` and a second PHPStan pass on the scaffold (02/08/2026)
+- Added `symfonycasts/{reset-password,verify-email}-bundle` and `symfony/password-hasher` to the requirements (02/08/2026)
+- Added `UserFormSeederTest`, `AdminUserCreatorTest` and the moved services' own tests (02/08/2026)
+- The address configs `EmailService` resolves moved here: `email-to`, `email-to-name`, `email-reply-to`, `email-reply-to-name`, `email-from-name` (02/08/2026) [BC-Break]
+- `email-from` is no longer declared twice, SiteBundle's identical copy being dropped (02/08/2026)
+- `site-name`, `site-contact-email`, `site-director`, `site-made-by-logo`, `site-made-by-url` moved here (02/08/2026) [BC-Break]
+- `url-terms-of-use` is declared here, its copies in Site/Shop/Payment being dropped (02/08/2026) [BC-Break]
+- Added `ConfigsJsonTest`, guarding slug uniqueness and the translation of every label/description (02/08/2026)
+- Added `Management\HealthCheckErrorRow`, replacing SiteBundle's trait (02/08/2026) [BC-Break]
+- Its translation domain is a parameter, no longer hardcoded to `site` (02/08/2026) [BC-Break]
+- `Twig\CanonicalUrlExtension` moved here from SiteBundle (02/08/2026) [BC-Break]
+- The Messenger failure transport is optional, an app declaring none still compiling its container (02/08/2026)
+- The failed-messages screen tolerates a `messenger_messages` table the transport hasn't created yet (02/08/2026)
+- A role the edited user holds but `user-roles-available` no longer lists stays in `UserCrudController`'s choices (02/08/2026)
+- `c975l:config:export-tables` writes no dump at all rather than a partial one (02/08/2026)
+- Added the failed-Messenger stack's tests, plus `c975l:config:user-create`'s and `HealthCheckErrorRow`'s (02/08/2026)
+- Every command's console output is in English, the eight that still spoke French included (02/08/2026)
+- Documented the whole move in the readme and in UPGRADE.md (02/08/2026)
+
 ## v5.17.1
 
 Status colors on the badges alone

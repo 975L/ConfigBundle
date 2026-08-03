@@ -79,7 +79,7 @@ class DevProfileRunCommandTest extends TestCase
         $tester->execute([]);
 
         $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
-        $this->assertStringContainsString('Aucun chemin à profiler', $tester->getDisplay());
+        $this->assertStringContainsString('No path to profile', $tester->getDisplay());
     }
 
     // A clean page is silent by default, the output being the list of what's left to fix
@@ -90,7 +90,7 @@ class DevProfileRunCommandTest extends TestCase
 
         $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
         $this->assertStringNotContainsString('Accueil', $tester->getDisplay());
-        $this->assertStringContainsString('1 propre(s)', $tester->getDisplay());
+        $this->assertStringContainsString('1 clean', $tester->getDisplay());
     }
 
     public function testExecuteListsACleanPageAndItsNumbersWithTheAllOption(): void
@@ -101,21 +101,21 @@ class DevProfileRunCommandTest extends TestCase
         $display = $tester->getDisplay();
         $this->assertStringContainsString('/ — Accueil', $display);
         $this->assertStringContainsString('HTTP 200', $display);
-        $this->assertStringContainsString('12 requêtes (4.5 ms)', $display);
-        $this->assertStringContainsString('14 Mo', $display);
+        $this->assertStringContainsString('12 queries (4.5 ms)', $display);
+        $this->assertStringContainsString('14 MB', $display);
     }
 
     public function testExecuteShowsAWarningAndStillSucceeds(): void
     {
         $tester = $this->createTester([$this->entry('/', 'Accueil', [
-            ['level' => DevProfileAnalyzer::LEVEL_WARNING, 'area' => 'Dépréciations', 'message' => '2 dépréciation(s)'],
+            ['level' => DevProfileAnalyzer::LEVEL_WARNING, 'area' => 'Deprecations', 'message' => '2 deprecation(s)'],
         ])]);
         $tester->execute([]);
 
         $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
         $this->assertStringContainsString('ALERTE', $tester->getDisplay());
-        $this->assertStringContainsString('2 dépréciation(s)', $tester->getDisplay());
-        $this->assertStringContainsString('1 alerte(s)', $tester->getDisplay());
+        $this->assertStringContainsString('2 deprecation(s)', $tester->getDisplay());
+        $this->assertStringContainsString('1 warning(s)', $tester->getDisplay());
     }
 
     // Non-zero so the command can gate a pre-push hook
@@ -124,33 +124,33 @@ class DevProfileRunCommandTest extends TestCase
         $tester = $this->createTester([
             $this->entry('/', 'Accueil'),
             $this->entry('/pages/contact', 'Contact', [
-                ['level' => DevProfileAnalyzer::LEVEL_ERROR, 'area' => 'Doctrine', 'message' => '31 requêtes identiques répétées (n+1)'],
+                ['level' => DevProfileAnalyzer::LEVEL_ERROR, 'area' => 'Doctrine', 'message' => '31 identical queries repeated (n+1)'],
             ]),
         ]);
         $tester->execute([]);
 
         $this->assertSame(Command::FAILURE, $tester->getStatusCode());
         $this->assertStringContainsString('ERREUR', $tester->getDisplay());
-        $this->assertStringContainsString('1 erreur(s)', $tester->getDisplay());
+        $this->assertStringContainsString('1 error(s)', $tester->getDisplay());
     }
 
     // A path the kernel couldn't answer at all has no numbers to show, and must not print a line of zeros reading like a measurement
     public function testExecuteSaysNothingWasMeasuredOnAKernelError(): void
     {
         $tester = $this->createTester([$this->entry('/', 'Accueil', [
-            ['level' => DevProfileAnalyzer::LEVEL_ERROR, 'area' => 'Kernel', 'message' => 'La requête a échoué : Service introuvable'],
+            ['level' => DevProfileAnalyzer::LEVEL_ERROR, 'area' => 'Kernel', 'message' => 'The request failed: Service not found'],
         ], ['error' => 'Service introuvable'])]);
         $tester->execute([]);
 
         $this->assertSame(Command::FAILURE, $tester->getStatusCode());
-        $this->assertStringContainsString('aucune mesure', $tester->getDisplay());
+        $this->assertStringContainsString('no measurement', $tester->getDisplay());
         $this->assertStringNotContainsString('HTTP', $tester->getDisplay());
     }
 
     public function testExecuteShowsAPathWithoutALabelOnItsOwn(): void
     {
         $tester = $this->createTester([$this->entry('/admin', null, [
-            ['level' => DevProfileAnalyzer::LEVEL_WARNING, 'area' => 'Réponse', 'message' => 'Redirection (302), page non analysée'],
+            ['level' => DevProfileAnalyzer::LEVEL_WARNING, 'area' => 'Response', 'message' => 'Redirect (302), page not analysed'],
         ])]);
         $tester->execute([]);
 

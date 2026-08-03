@@ -88,7 +88,7 @@ class DevProfileAnalyzerTest extends TestCase
 
         $this->assertCount(1, $issues);
         $this->assertSame(DevProfileAnalyzer::LEVEL_ERROR, $issues[0]['level']);
-        $this->assertSame('Réponse', $issues[0]['area']);
+        $this->assertSame('Response', $issues[0]['area']);
     }
 
     public function testAnalyzeWarnsThenErrorsOnTheQueryCount(): void
@@ -113,8 +113,8 @@ class DevProfileAnalyzerTest extends TestCase
 
         $this->assertCount(1, $issues);
         $this->assertSame(DevProfileAnalyzer::LEVEL_ERROR, $issues[0]['level']);
-        $this->assertStringContainsString('31 requêtes identiques', $issues[0]['message']);
-        $this->assertStringContainsString('32 fois', $issues[0]['message']);
+        $this->assertStringContainsString('31 identical queries', $issues[0]['message']);
+        $this->assertStringContainsString('32 times', $issues[0]['message']);
         $this->assertStringContainsString('site_block', $issues[0]['message']);
     }
 
@@ -131,7 +131,7 @@ class DevProfileAnalyzerTest extends TestCase
         $this->assertCount(1, $issues);
         $this->assertSame(DevProfileAnalyzer::LEVEL_WARNING, $issues[0]['level']);
         $this->assertSame('Doctrine', $issues[0]['area']);
-        $this->assertStringContainsString('3 transactions ouvertes', $issues[0]['message']);
+        $this->assertStringContainsString('3 transactions opened', $issues[0]['message']);
     }
 
     public function testAnalyzeReportsARunawayTransactionCountAsAnError(): void
@@ -154,7 +154,7 @@ class DevProfileAnalyzerTest extends TestCase
 
         $this->assertCount(1, $issues);
         $this->assertSame(DevProfileAnalyzer::LEVEL_WARNING, $issues[0]['level']);
-        $this->assertStringContainsString('sans aucune écriture', $issues[0]['message']);
+        $this->assertStringContainsString('without a single write', $issues[0]['message']);
     }
 
     public function testAnalyzeReportsDeprecationsWithTheirMessages(): void
@@ -166,7 +166,7 @@ class DevProfileAnalyzerTest extends TestCase
 
         $this->assertCount(1, $issues);
         $this->assertSame(DevProfileAnalyzer::LEVEL_WARNING, $issues[0]['level']);
-        $this->assertSame('Dépréciations', $issues[0]['area']);
+        $this->assertSame('Deprecations', $issues[0]['area']);
         $this->assertStringContainsString('not doing that anymore', $issues[0]['message']);
     }
 

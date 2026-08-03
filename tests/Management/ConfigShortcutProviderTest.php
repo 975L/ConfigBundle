@@ -16,6 +16,8 @@ use c975L\ConfigBundle\Controller\Management\MaintenanceShortcutController;
 use c975L\ConfigBundle\Management\ConfigShortcutProvider;
 use c975L\ConfigBundle\Management\ShortcutProviderInterface;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
+use c975L\UiBundle\Entity\Form;
+use c975L\UiBundle\Repository\FormRepository;
 use PHPUnit\Framework\TestCase;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -39,13 +41,24 @@ class ConfigShortcutProviderTest extends TestCase
         return $translator;
     }
 
+    // The "register" Form's own $enabled flag drives the registration toggle - a Form not seeded yet counts as disabled
+    private function createFormRepository(?bool $registerEnabled = false): FormRepository
+    {
+        $repository = $this->createStub(FormRepository::class);
+        $repository->method('findOneBy')->willReturn(
+            null === $registerEnabled ? null : (new Form())->setName('register')->setEnabled($registerEnabled)
+        );
+
+        return $repository;
+    }
+
     public function testGetShortcutsReflectsMaintenanceDisabledState(): void
     {
         $configService = $this->createConfigService([
             'site-maintenance' => false,
             'site-role-admin' => 'ROLE_ADMIN',
         ]);
-        $provider = new ConfigShortcutProvider($this->createTranslator(), $configService);
+        $provider = new ConfigShortcutProvider($this->createTranslator(), $configService, $this->createFormRepository());
 
         $shortcuts = $provider->getShortcuts();
 
@@ -70,17 +83,44 @@ class ConfigShortcutProviderTest extends TestCase
         $this->assertFalse($shortcuts[4]['active']);
         $this->assertSame('ROLE_SUPER_ADMIN', $shortcuts[4]['role']);
         $this->assertSame(ShortcutProviderInterface::CATEGORY_SITE, $shortcuts[4]['category']);
-        $this->assertSame(MaintenanceShortcutController::TOGGLE_ROUTE_MAINTENANCE, $shortcuts[5]['route']);
+        // Moved here from SiteBundle alongside the command it runs: a site without a site foundation exports its tables the same way
+        $this->assertSame(ConfigShortcutController::EXPORT_TABLES_ROUTE, $shortcuts[5]['route']);
         $this->assertFalse($shortcuts[5]['active']);
-        $this->assertSame('label.maintenance_enable', $shortcuts[5]['label']);
-        $this->assertSame('ROLE_ADMIN', $shortcuts[5]['role']);
-        $this->assertSame(ShortcutProviderInterface::CATEGORY_MAINTENANCE, $shortcuts[5]['category']);
+        $this->assertSame('ROLE_SUPER_ADMIN', $shortcuts[5]['role']);
+        $this->assertSame(ShortcutProviderInterface::CATEGORY_EXPORT, $shortcuts[5]['category']);
+        // Moved here alongside the "register" Form it flips, which this bundle now seeds
+        $this->assertSame(ConfigShortcutController::REGISTRATION_ENABLED_TOGGLE_ROUTE, $shortcuts[6]['route']);
+        $this->assertSame('label.user_registration_enable', $shortcuts[6]['label']);
+        $this->assertFalse($shortcuts[6]['active']);
+        $this->assertSame(ShortcutProviderInterface::CATEGORY_SITE, $shortcuts[6]['category']);
+        $this->assertSame(MaintenanceShortcutController::TOGGLE_ROUTE_MAINTENANCE, $shortcuts[7]['route']);
+        $this->assertFalse($shortcuts[7]['active']);
+        $this->assertSame('label.maintenance_enable', $shortcuts[7]['label']);
+        $this->assertSame('ROLE_ADMIN', $shortcuts[7]['role']);
+        $this->assertSame(ShortcutProviderInterface::CATEGORY_MAINTENANCE, $shortcuts[7]['category']);
+    }
+
+    // When registration is already enabled, the tile offers to disable it and is marked active
+    public function testGetShortcutsOffersToDisableRegistrationWhenEnabled(): void
+    {
+        $provider = new ConfigShortcutProvider($this->createTranslator(), $this->createConfigService([]), $this->createFormRepository(true));
+
+        $this->assertSame('label.user_registration_disable', $provider->getShortcuts()[6]['label']);
+        $this->assertTrue($provider->getShortcuts()[6]['active']);
+    }
+
+    // No "register" Form seeded yet counts as disabled, same as an explicit false
+    public function testGetShortcutsTreatsAMissingRegisterFormAsDisabled(): void
+    {
+        $provider = new ConfigShortcutProvider($this->createTranslator(), $this->createConfigService([]), $this->createFormRepository(null));
+
+        $this->assertFalse($provider->getShortcuts()[6]['active']);
     }
 
     // Every other shortcut stays a POST form, the template defaulting to it when 'method' is absent
     public function testEveryOtherShortcutOmitsTheMethodKey(): void
     {
-        $provider = new ConfigShortcutProvider($this->createTranslator(), $this->createConfigService([]));
+        $provider = new ConfigShortcutProvider($this->createTranslator(), $this->createConfigService([]), $this->createFormRepository());
 
         foreach ($provider->getShortcuts() as $shortcut) {
             if (ConfigPruneController::INDEX_ROUTE !== $shortcut['route']) {
@@ -95,11 +135,11 @@ class ConfigShortcutProviderTest extends TestCase
             'site-maintenance' => true,
             'site-role-admin' => 'ROLE_ADMIN',
         ]);
-        $provider = new ConfigShortcutProvider($this->createTranslator(), $configService);
+        $provider = new ConfigShortcutProvider($this->createTranslator(), $configService, $this->createFormRepository());
 
         $shortcuts = $provider->getShortcuts();
 
-        $this->assertTrue($shortcuts[5]['active']);
-        $this->assertSame('label.maintenance_disable', $shortcuts[5]['label']);
+        $this->assertTrue($shortcuts[7]['active']);
+        $this->assertSame('label.maintenance_disable', $shortcuts[7]['label']);
     }
 }

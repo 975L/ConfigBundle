@@ -1,0 +1,12 @@
+{% extends 'layout.html.twig' %}
+
+{% set title = 'label.reset_password'|trans({}, 'config') %}
+
+{% block content %}
+    <h1>{{ 'label.reset_password'|trans({}, 'config') }}</h1>
+
+    {{ form_start(resetForm) }}
+        {{ form_row(resetForm.plainPassword) }}
+        <button class="btn btn-large btn-primary" type="submit">{{ 'label.reset_password'|trans({}, 'config') }}</button>
+    {{ form_end(resetForm) }}
+{% endblock %}

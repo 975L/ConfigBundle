@@ -43,6 +43,6 @@ class SitemapCreateCommandTest extends TestCase
         $commandTester = $this->createCommandTester([]);
 
         $this->assertSame(Command::SUCCESS, $commandTester->execute([]));
-        $this->assertStringContainsString('Aucun SitemapProvider', $commandTester->getDisplay());
+        $this->assertStringContainsString('No SitemapProvider', $commandTester->getDisplay());
     }
 }

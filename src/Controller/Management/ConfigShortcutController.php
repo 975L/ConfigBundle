@@ -10,10 +10,13 @@
 
 namespace c975L\ConfigBundle\Controller\Management;
 
+use c975L\ConfigBundle\Command\ExportTablesCommand;
 use c975L\ConfigBundle\Management\SitemapWriter;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 use c975L\ConfigBundle\Service\Export\ConfigSqlExporter;
 use c975L\ConfigBundle\Service\Export\SyncAllExporter;
+use c975L\UiBundle\Repository\FormRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
@@ -29,14 +32,79 @@ class ConfigShortcutController extends AbstractController
     public const EXPORT_SQL_ROUTE = 'management_config_export_sql_shortcut';
     public const EXPORT_SYNC_ALL_ROUTE = 'management_config_export_sync_all_shortcut';
     public const SITEMAPS_CREATE_ROUTE = 'management_config_sitemaps_create';
+    public const EXPORT_TABLES_ROUTE = 'management_config_export_tables';
+    public const REGISTRATION_ENABLED_TOGGLE_ROUTE = 'management_config_user_registration_enabled_toggle';
 
     public function __construct(
         private readonly ConfigServiceInterface $configService,
         private readonly ConfigSqlExporter $configSqlExporter,
         private readonly SyncAllExporter $syncAllExporter,
         private readonly SitemapWriter $sitemapWriter,
+        private readonly ExportTablesCommand $exportTablesCommand,
+        private readonly FormRepository $formRepository,
+        private readonly EntityManagerInterface $entityManager,
         private readonly TranslatorInterface $translator,
     ) {
+    }
+
+    // Streamed back directly, writeFile being false so nothing lingers in var/export
+    #[AdminRoute(
+        path: '/config/export-tables',
+        name: 'config_export_tables',
+        options: ['methods' => ['POST']]
+    )]
+    public function exportTables(Request $request): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
+
+        if (!$this->isCsrfTokenValid(self::EXPORT_TABLES_ROUTE, $request->request->get('_token'))) {
+            return $this->redirectToRoute('management');
+        }
+
+        $result = $this->exportTablesCommand->exportTables(writeFile: false);
+
+        if (null !== $result['error']) {
+            $this->addFlash('danger', $result['error']);
+
+            return $this->redirectToRoute('management');
+        }
+
+        if (empty($result['tables'])) {
+            $this->addFlash('warning', $result['message']);
+
+            return $this->redirectToRoute('management');
+        }
+
+        return new Response($result['content'], Response::HTTP_OK, [
+            'Content-Type' => 'application/octet-stream',
+            'Content-Disposition' => 'attachment; filename="site_' . date('Ymd_His') . '.sql"',
+        ]);
+    }
+
+    // Flips the "register" c975L\UiBundle\Entity\Form's $enabled flag - same lever the scaffolded RegisterFormAction's Form is checked against by FormController before building/submitting it
+    #[AdminRoute(
+        path: '/config/user-registration-enabled-toggle',
+        name: 'config_user_registration_enabled_toggle',
+        options: ['methods' => ['POST']]
+    )]
+    public function registrationEnabledToggle(Request $request): RedirectResponse
+    {
+        $this->denyAccessUnlessGranted($this->configService->get('site-role-admin'));
+
+        $form = $this->formRepository->findOneBy(['name' => 'register']);
+        if (null !== $form && $this->isCsrfTokenValid(self::REGISTRATION_ENABLED_TOGGLE_ROUTE, $request->request->get('_token'))) {
+            $enabled = !$form->isEnabled();
+            $form->setEnabled($enabled);
+            $this->entityManager->flush();
+
+            $this->addFlash('success', $this->translator->trans(
+                $enabled ? 'flash.user_registration_enabled' : 'flash.user_registration_disabled',
+                [],
+                'config',
+            ));
+        }
+
+        return $this->redirectToRoute('management');
     }
 
     #[AdminRoute(

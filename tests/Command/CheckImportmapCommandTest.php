@@ -81,7 +81,7 @@ class CheckImportmapCommandTest extends TestCase
         $tester->execute([]);
 
         $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
-        $this->assertStringContainsString('1 entrée(s) ajoutée(s)', $tester->getDisplay());
+        $this->assertStringContainsString('1 entry(ies) added', $tester->getDisplay());
 
         $written = require $this->importmapFile;
         $this->assertSame('./vendor/c975l/config-bundle/assets/controllers-admin.js', $written['@c975l/config-bundle/controllers-admin.js']['path']);
@@ -106,7 +106,7 @@ class CheckImportmapCommandTest extends TestCase
         $tester->execute([]);
 
         $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
-        $this->assertStringContainsString('déjà à jour', $tester->getDisplay());
+        $this->assertStringContainsString('already up to date', $tester->getDisplay());
 
         $written = require $this->importmapFile;
         $this->assertSame('./a-custom-override-path.js', $written['@c975l/config-bundle/controllers-admin.js']['path']);
@@ -124,7 +124,7 @@ class CheckImportmapCommandTest extends TestCase
         $secondTester = $this->createTester([$provider]);
         $secondTester->execute([]);
 
-        $this->assertStringContainsString('déjà à jour', $secondTester->getDisplay());
+        $this->assertStringContainsString('already up to date', $secondTester->getDisplay());
     }
 
     public function testExecuteWarnsWhenControllersJsonEnablesChartjs(): void
@@ -229,7 +229,7 @@ class CheckImportmapCommandTest extends TestCase
         $tester = $this->createTester([]);
         $tester->execute([]);
 
-        $this->assertStringContainsString('déjà à jour', $tester->getDisplay());
+        $this->assertStringContainsString('already up to date', $tester->getDisplay());
     }
 
     // An entry an app deliberately points elsewhere (a fork, a CDN version) must survive untouched
@@ -249,7 +249,7 @@ class CheckImportmapCommandTest extends TestCase
         $tester = $this->createTester([]);
         $tester->execute([]);
 
-        $this->assertStringContainsString('déjà à jour', $tester->getDisplay());
+        $this->assertStringContainsString('already up to date', $tester->getDisplay());
         $written = require $this->importmapFile;
         $this->assertSame('./assets/my-own-fork.js', $written['@symfony/ux-chartjs']['path']);
     }

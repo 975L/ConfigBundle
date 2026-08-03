@@ -11,6 +11,8 @@
 namespace c975L\ConfigBundle\Management;
 
 use c975L\ConfigBundle\Controller\Management\ConfigCrudController;
+use c975L\ConfigBundle\Controller\Management\RedirectCrudController;
+use c975L\ConfigBundle\Controller\Management\UserCrudController;
 use c975L\ConfigBundle\Service\ConfigServiceInterface;
 
 // To add a MenuProvider, you need to: add the Management Folder in the src/ folder of your bundle; create a MenuProvider.php file in it with a class that implements MenuProviderInterface, providing getMenuSection(), getMenus() and getLinks() methods; getLinks() can return [] if your bundle has no links to routes to expose (all bundles' links are merged into a single alphabetically-sorted section); add the declaration of the Management folder in the services.yaml file of your bundle; ConfigBundle will automatically detect the MenuProvider and add it to the menu of EasyAdmin
@@ -39,6 +41,24 @@ class MenuProvider implements MenuProviderInterface
                 'translation_domain' => 'config',
                 'icon' => 'fa fa-cog',
                 'description' => 'description.config',
+            ],
+            // Declared here rather than by SiteBundle as it used to be: an app running Config+Ui plus a satellite bundle but no site foundation still has accounts to manage
+            'user' => [
+                'controller' => UserCrudController::class,
+                'label' => 'label.users',
+                'translation_domain' => 'config',
+                'icon' => 'fas fa-users',
+                // Same key as user_crud_index.html.twig/user_crud_edit.html.twig's own explanatory text - one text, reused, not a separate onboarding-only string (see MenuProviderInterface::getMenus())
+                'description' => 'label.info_user',
+            ],
+            // Also declared here rather than by SiteBundle: a url that changed needs a redirect whether it was a Page's or a product's, and the rows answer before the router, so they never depended on page management
+            'redirect' => [
+                'controller' => RedirectCrudController::class,
+                'label' => 'label.redirects',
+                'translation_domain' => 'config',
+                'icon' => 'fas fa-arrow-right',
+                'tier' => 'advanced',
+                'description' => 'label.info_redirect',
             ],
         ];
     }

@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" target-language="es" datatype="plaintext" original="validators.en.xlf">
+        <body>
+            <trans-unit id="UhNkXBh">
+                <source>text.agree_terms</source>
+                <target>Debe aceptar nuestras condiciones.</target>
+            </trans-unit>
+            <trans-unit id="8bvxYic">
+                <source>text.email_not_valid</source>
+                <target>Introduzca una dirección de correo electrónico válida</target>
+            </trans-unit>
+            <trans-unit id="DIc4dyr">
+                <source>text.email_required</source>
+                <target>Por favor, introduzca su correo electrónico</target>
+            </trans-unit>
+            <trans-unit id="yP67Xj6">
+                <source>text.email_taken</source>
+                <target>Ya existe una cuenta con este correo electrónico</target>
+            </trans-unit>
+            <trans-unit id="DY8kkID">
+                <source>text.password_complexity</source>
+                <target>Su contraseña debe tener al menos 8 caracteres e incluir una minúscula, una mayúscula, un dígito y un carácter especial</target>
+            </trans-unit>
+            <trans-unit id="TaG4lmE">
+                <source>text.password_max_length</source>
+                <target>Su contraseña no debe exceder de {{ limit }} caracteres</target>
+            </trans-unit>
+            <trans-unit id="epDiKHK">
+                <source>text.password_min_length</source>
+                <target>Su contraseña debe tener al menos {{ limit }} caracteres</target>
+            </trans-unit>
+            <trans-unit id="G1fcoic">
+                <source>text.password_mismatch</source>
+                <target>Las contraseñas deben coincidir.</target>
+            </trans-unit>
+            <trans-unit id="aK3FX9r">
+                <source>text.password_required</source>
+                <target>Por favor, introduzca una contraseña</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
